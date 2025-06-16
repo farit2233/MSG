@@ -1,0 +1,152 @@
+<?php if ($_settings->chk_flashdata('success')): ?>
+	<script>
+		alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
+	</script>
+<?php endif; ?>
+<?php
+$status = isset($_GET['status']) ? $_GET['status'] : '';
+$stat_arr = ['Pending Orders', 'Packed Orders', 'Our for Delivery', 'Completed Order']
+?>
+<div class="card card-outline rounded-0 card-dark">
+	<div class="card-header">
+		<h3 class="card-title">List of <?= isset($stat_arr[$status]) ? $stat_arr[$status] : 'All Orders' ?></h3>
+	</div>
+	<div class="card-body">
+		<div class="container-fluid">
+			<table class="table table-hover table-striped table-bordered" id="list">
+				<colgroup>
+					<col width="5%">
+					<col width="15%">
+					<col width="15%">
+					<col width="20%">
+					<col width="15%">
+					<col width="10%"> <!-- ชำระ -->
+					<col width="10%"> <!-- จัดส่ง -->
+					<col width="10%">
+				</colgroup>
+				<thead>
+					<tr>
+						<th class="p-1 text-center">#</th>
+						<th class="p-1 text-center">Date Ordered</th>
+						<th class="p-1 text-center">Code</th>
+						<th class="p-1 text-center">Customer</th>
+						<th class="p-1 text-center">Total Amount</th>
+						<th class="p-1 text-center">ชำระเงิน</th>
+						<th class="p-1 text-center">จัดส่ง</th>
+						<th class="p-1 text-center">ดูรายการ</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php
+					$i = 1;
+					$where = "";
+					switch ($status) {
+						case 0:
+							$where = " where o.`status` = 0 ";
+							break;
+						case 1:
+							$where = " where o.`status` = 1 ";
+							break;
+						case 2:
+							$where = " where o.`status` = 2 ";
+							break;
+						case 3:
+							$where = " where o.`status` = 3 ";
+							break;
+					}
+					$qry = $conn->query("SELECT o.*, 
+						CONCAT(c.firstname, ' ', COALESCE(CONCAT(c.middlename, ' '), ''), c.lastname) as customer 
+					FROM `order_list` o 
+					INNER JOIN customer_list c ON o.customer_id = c.id 
+					{$where} 
+					ORDER BY abs(unix_timestamp(o.date_created)) DESC");
+					while ($row = $qry->fetch_assoc()):
+					?>
+						<tr>
+							<td class="p-1 align-middle text-center"><?= $i++ ?></td>
+							<td class="p-1 align-middle"><?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+							<td class="p-1 align-middle"><?= $row['code'] ?></td>
+							<td class="p-1 align-middle"><?= $row['customer'] ?></td>
+							<td class="p-1 align-middle text-right"><?= format_num($row['total_amount'], 2) ?></td>
+							<td class="p-1 align-middle text-center">
+								<?php
+								switch ((int)$row['payment_status']) {
+									case 0:
+										echo '<span class="badge bg-secondary">ยังไม่ชำระ</span>';
+										break;
+									case 1:
+										echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
+										break;
+									case 2:
+										echo '<span class="badge bg-success">ชำระแล้ว</span>';
+										break;
+									case 3:
+										echo '<span class="badge bg-danger">ล้มเหลว</span>';
+										break;
+									case 4:
+										echo '<span class="badge bg-dark">คืนเงินแล้ว</span>';
+										break;
+									default:
+										echo '<span class="badge bg-light">N/A</span>';
+										break;
+								}
+								?>
+							</td>
+							<td class="p-1 align-middle text-center">
+								<?php
+								switch ((int)$row['delivery_status']) {
+									case 0:
+										echo '<span class="badge bg-secondary">ตรวจสอบ</span>';
+										break;
+									case 1:
+										echo '<span class="badge bg-info">เตรียมของ</span>';
+										break;
+									case 2:
+										echo '<span class="badge bg-primary">แพ็คของ</span>';
+										break;
+									case 3:
+										echo '<span class="badge bg-warning text-dark">กำลังส่ง</span>';
+										break;
+									case 4:
+										echo '<span class="badge bg-success">ส่งสำเร็จ</span>';
+										break;
+									case 5:
+										echo '<span class="badge bg-danger">ส่งไม่สำเร็จ</span>';
+										break;
+									case 6:
+										echo '<span class="badge bg-dark">คืนระหว่างทาง</span>';
+										break;
+									case 7:
+										echo '<span class="badge bg-secondary">คืนของแล้ว</span>';
+										break;
+									default:
+										echo '<span class="badge bg-light">N/A</span>';
+										break;
+								}
+								?>
+							</td>
+							<td class="p-1 align-middle text-center">
+								<a class="btn btn-flat btn-sm btn-light border-gradient-light border view-order" href="./?page=orders/view_order&id=<?= $row['id'] ?>"><i class="fa fa-eye text-dark"></i> View</a>
+							</td>
+						</tr>
+					<?php endwhile; ?>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+<script>
+	$(document).ready(function() {
+		$('.delete_data').click(function() {
+			_conf("Are you sure to delete this request permanently?", "delete_request", [$(this).attr('data-id')])
+		})
+		$('.table').dataTable({
+			columnDefs: [{
+				orderable: false,
+				targets: [6]
+			}],
+			order: [0, 'asc']
+		});
+		$('.dataTable td,.dataTable th').addClass('py-1 px-2 align-middle')
+	})
+</script>
