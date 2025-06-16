@@ -1,0 +1,176 @@
+  <script>
+    $(document).ready(function() {
+      $('#p_use').click(function() {
+        uni_modal("Privacy Policy", "policy.php", "mid-large")
+      })
+      window.viewer_modal = function($src = '') {
+        start_loader()
+        var t = $src.split('.')
+        t = t[1]
+        if (t == 'mp4') {
+          var view = $("<video src='" + $src + "' controls autoplay></video>")
+        } else {
+          var view = $("<img src='" + $src + "' />")
+        }
+        $('#viewer_modal .modal-content video,#viewer_modal .modal-content img').remove()
+        $('#viewer_modal .modal-content').append(view)
+        $('#viewer_modal').modal({
+          show: true,
+          backdrop: 'static',
+          keyboard: false,
+          focus: true
+        })
+        end_loader()
+
+      }
+      window.uni_modal = function($title = '', $url = '', $size = "") {
+        start_loader()
+        $.ajax({
+          url: $url,
+          error: err => {
+            console.log()
+            alert("An error occured")
+          },
+          success: function(resp) {
+            if (resp) {
+              $('#uni_modal .modal-title').html($title)
+              $('#uni_modal .modal-body').html(resp)
+              if ($size != '') {
+                $('#uni_modal .modal-dialog').addClass($size + '  modal-dialog-centered')
+              } else {
+                $('#uni_modal .modal-dialog').removeAttr("class").addClass("modal-dialog modal-md modal-dialog-centered")
+              }
+              $('#uni_modal').modal({
+                show: true,
+                backdrop: 'static',
+                keyboard: false,
+                focus: true
+              })
+              end_loader()
+            }
+          }
+        })
+      }
+      window._conf = function($msg = '', $func = '', $params = []) {
+        $('#confirm_modal #confirm').attr('onclick', $func + "(" + $params.join(',') + ")")
+        $('#confirm_modal .modal-body').html($msg)
+        $('#confirm_modal').modal('show')
+      }
+    })
+  </script>
+  <style>
+    footer a {
+      text-decoration: none;
+      /* ซ่อนเส้นใต้โดยค่าเริ่มต้น */
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+      /* แสดงเส้นใต้เมื่อเมาส์ชี้ */
+    }
+
+    .btn-login {
+      background: #f57421;
+      color: white;
+      padding: 5px 85px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .btn-login:hover {
+      color: white;
+      filter: brightness(90%);
+    }
+  </style>
+  <!-- Footer-->
+  <?php if ($_settings->userdata('id') == '' && $_settings->userdata('login_type') != 2): ?>
+    <hr class="my-4" style="border-top: 1px solid #ccc; margin: 2rem 0;">
+    <div class="text-center">
+      <div class="mb-2">
+        <a href="./login.php" class="btn btn-login rounded-pill">เข้าสู่ระบบ</a>
+      </div>
+      <div class="mb-2">
+        <p>ยังไม่มีบัญชี? <a href="./register.php" class="text-decoration-underline">สมัครสมาชิกที่นี่</a></p>
+      </div>
+    <?php endif; ?>
+    </div>
+    <footer class="py-5 text-white bg-foot-msg">
+      <div class="container">
+        <div class="row">
+          <!-- เกี่ยวกับเรา -->
+          <div class="col-md-3 mb-4">
+            <h5><?php echo $_settings->info('name') ?></h5>
+            <p>เราคัดสรรของเล่นเสริมพัฒนาการ <br>เพื่อให้ทุกวันของลูกคุณเปี่ยมไปด้วยคุณค่า</p>
+          </div>
+
+          <!-- บริการลูกค้า -->
+          <div class="col-md-3 mb-4">
+            <h6>บริการลูกค้า</h6>
+            <ul class="list-unstyled">
+              <li><a href="./?p=help" class="text-white">คำถามที่พบบ่อย</a></li>
+              <li><a href="./?p=help" class="text-white">การจัดส่ง</a></li>
+              <li><a href="./?p=help" class="text-white">การคืนสินค้า</a></li>
+              <li><a href="./?p=contact" class="text-white">ติดต่อเรา</a></li>
+            </ul>
+          </div>
+
+          <!-- นโยบายและข้อกำหนด -->
+          <div class="col-md-3 mb-4">
+            <h6>นโยบายและข้อกำหนด</h6>
+            <ul class="list-unstyled">
+              <li><a href="./?p=about" class="text-white">เกี่ยวกับบริษัท</a></li>
+              <li><a href="./?p=about" class="text-white">โครงสร้างบริษัท</a></li>
+              <li><a href="#" class="text-white">ร่วมงานกับเรา</a></li>
+              <li><a href="./?p=about" class="text-white">ข้อตกลงการใช้งาน</a></li>
+              <li><a href="./?p=about" class="text-white">นโยบายความเป็นส่วนตัว</a></li>
+            </ul>
+          </div>
+
+          <!-- ช่องทางการติดต่อ -->
+          <div class="col-md-3 mb-4">
+            <h6>ติดตามเรา</h6>
+            <p class="mb-1"><i class="fab fa-line text-white"></i><a href="<?php echo $_settings->info('Line') ?>" target="_blank" class="text-white"> Line </a></p>
+            <p class="mb-0"><i class="fab fa-facebook text-white"></i><a href="<?php echo $_settings->info('Facebook') ?>" target="_blank" class="text-white"> Facebook </a></p>
+            <p class="mb-0"><i class="fab fa-tiktok text-white"></i><a href="<?php echo $_settings->info('TikTok') ?>" target="_blank" class="text-white"> TikTok </a></p>
+          </div>
+        </div>
+
+        <hr class="bg-light">
+        <p class="text-center mb-0">&copy; <?php echo date('Y') ?> <?php echo $_settings->info('name') ?>. สงวนลิขสิทธิ์.</p>
+      </div>
+    </footer>
+
+
+
+
+    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <script>
+      $.widget.bridge('uibutton', $.ui.button)
+    </script>
+    <!-- Bootstrap 4 -->
+    <script src="<?php echo base_url ?>plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- ChartJS -->
+    <script src="<?php echo base_url ?>plugins/chart.js/Chart.min.js"></script>
+    <!-- Sparkline -->
+    <script src="<?php echo base_url ?>plugins/sparklines/sparkline.js"></script>
+    <!-- Select2 -->
+    <script src="<?php echo base_url ?>plugins/select2/js/select2.full.min.js"></script>
+    <!-- JQVMap -->
+    <script src="<?php echo base_url ?>plugins/jqvmap/jquery.vmap.min.js"></script>
+    <script src="<?php echo base_url ?>plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+    <!-- jQuery Knob Chart -->
+    <script src="<?php echo base_url ?>plugins/jquery-knob/jquery.knob.min.js"></script>
+    <!-- daterangepicker -->
+    <script src="<?php echo base_url ?>plugins/moment/moment.min.js"></script>
+    <script src="<?php echo base_url ?>plugins/daterangepicker/daterangepicker.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="<?php echo base_url ?>plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+    <!-- Summernote -->
+    <script src="<?php echo base_url ?>plugins/summernote/summernote-bs4.min.js"></script>
+    <script src="<?php echo base_url ?>plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="<?php echo base_url ?>plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="<?php echo base_url ?>plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="<?php echo base_url ?>plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <!-- overlayScrollbars -->
+    <!-- <script src="<?php echo base_url ?>plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script> -->
+    <!-- AdminLTE App -->
+    <script src="<?php echo base_url ?>dist/js/adminlte.js"></script>
