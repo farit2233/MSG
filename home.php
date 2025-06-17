@@ -196,7 +196,7 @@
 
         <div class="container py-5">
             <h2 class="text-center mb-4"> ของเล่นหมวดหมู่ <span class="text-primary">ตามอายุ</span></h2>
-            <p class="text-center mb-5">Toys for kids of every age, stage, and ability!</p>
+            <p class="text-center mb-5">"เลือกของเล่นที่ใช่ ตามวัยของลูก"</p>
 
             <div class="row text-center justify-content-center">
                 <div class="col-6 col-md-2  mb-4">

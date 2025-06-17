@@ -385,7 +385,7 @@ class Master extends DBConnection
 		}
 
 		if ($resp['status'] == 'success') {
-			$this->settings->set_flashdata('success', 'เพิ่มสินค้าในตะกร้าเรียบร้อยแล้ว');
+			$this->settings->set_flashdata('success', 'เพิ่มสินค้าในตะกร้าแล้ว');
 		}
 
 		echo json_encode($resp);
@@ -402,7 +402,7 @@ class Master extends DBConnection
 			$resp['error'] = $this->conn->error;
 		}
 		if ($resp['status'] == 'success') {
-			$this->settings->set_flashdata('success', 'Cart Item has been updated.');
+			$this->settings->set_flashdata('success', 'ปรับจำนวนสินค้าในตะกร้าแล้ว');
 		}
 		return json_encode($resp);
 	}
@@ -443,7 +443,7 @@ class Master extends DBConnection
 			}
 
 			$selected_ids = !empty($selected_items) ? array_filter(array_map('intval', explode(',', $selected_items))) : [];
-			if (empty($selected_ids)) throw new Exception('No items selected for checkout.');
+			if (empty($selected_ids)) throw new Exception('ไม่มีรายการสินค้าสำหรับชำระสินค้า');
 			$ids_str = implode(',', $selected_ids);
 
 			$cart = $this->conn->query("
@@ -511,7 +511,7 @@ class Master extends DBConnection
 			$this->conn->query("DELETE FROM `cart_list` WHERE customer_id = '{$customer_id}' AND id IN ($ids_str)");
 
 			$this->conn->query("COMMIT");
-			$this->settings->set_flashdata('success', 'Order has been placed successfully.');
+			$this->settings->set_flashdata('success', 'ชำระสินค้าสำเร็จ');
 			$resp = ['status' => 'success'];
 		} catch (Exception $e) {
 			$this->conn->query("ROLLBACK");
@@ -525,7 +525,6 @@ class Master extends DBConnection
 	{
 		extract($_POST);
 
-		// ✅ ดึงค่าจาก POST โดยตรง (ไม่ใช้ switch เก่าแล้ว)
 		$payment_status = isset($_POST['payment_status']) ? (int)$_POST['payment_status'] : 0;
 		$delivery_status = isset($_POST['delivery_status']) ? (int)$_POST['delivery_status'] : 0;
 

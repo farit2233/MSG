@@ -31,7 +31,7 @@
 				$qry = $this->conn->query("INSERT INTO users set {$data}");
 				if ($qry) {
 					$id = $this->conn->insert_id;
-					$this->settings->set_flashdata('success', 'User Details successfully saved.');
+					$this->settings->set_flashdata('success', 'แก้ไขข้อมูลส่วนตัวเรียบร้อย');
 					foreach ($_POST as $k => $v) {
 						if ($k != 'id') {
 							if (!empty($data)) $data .= " , ";
@@ -74,7 +74,7 @@
 			} else {
 				$qry = $this->conn->query("UPDATE users set $data where id = {$id}");
 				if ($qry) {
-					$this->settings->set_flashdata('success', 'User Details successfully updated.');
+					$this->settings->set_flashdata('success', 'แก้ไขข้อมูลส่วนตัวเรียบร้อย');
 					foreach ($_POST as $k => $v) {
 						if ($k != 'id') {
 							if (!empty($data)) $data .= " , ";
@@ -122,7 +122,7 @@
 			extract($_POST);
 			$qry = $this->conn->query("DELETE FROM users where id = $id");
 			if ($qry) {
-				$this->settings->set_flashdata('success', 'User Details successfully deleted.');
+				$this->settings->set_flashdata('success', 'แก้ไขข้อมูลส่วนตัวเรียบร้อย');
 				if (is_file(base_app . "uploads/avatars/$id.png"))
 					unlink(base_app . "uploads/avatars/$id.png");
 				return 1;
@@ -178,9 +178,9 @@
 				$resp['status'] = 'success';
 				$resp['uid'] = $uid;
 				if (!empty($id))
-					$resp['msg'] = 'User Details has been updated successfully';
+					$resp['msg'] = 'แก้ไขข้อมูลส่วนตัวเรียบร้อย';
 				else
-					$resp['msg'] = 'Your Account has been created successfully';
+					$resp['msg'] = 'สร้างบัญชีเรียบร้อยแล้ว';
 
 				if (!empty($_FILES['img']['tmp_name'])) {
 					if (!is_dir(base_app . "uploads/customers"))
