@@ -5,6 +5,12 @@
      padding-bottom: 0.3rem;
    }
 
+   .sbr {
+     font-size: 14px;
+     border-radius: 13px;
+     max-width: 13rem;
+   }
+
    .fos {
      font-size: 18px;
    }
@@ -150,6 +156,8 @@
 
      .sbr {
        font-size: 14px;
+       border-radius: 13px;
+       max-width: 12rem;
      }
 
      .container-wide {
@@ -232,7 +240,7 @@
        <ul class="navbar-nav ml-auto mb-2 mb-lg-0 ms-lg-4">
          <li class="nav-item d-flex align-items-center gap-2 flex-wrap flex-md-nowrap">
            <form class="form-inline d-flex align-items-center" method="get" action="./" style="gap: 0.5rem;">
-             <input class="form-control sbr mr-sm-2" type="search" placeholder="ค้นหาสินค้า..." name="search" required style="max-width: 13rem;">
+             <input class="form-control sbr mr-sm-2" type="search" placeholder="ค้นหาสินค้า..." name="search" required>
              <button class="btn button1 searchcolor" title="ค้นหาสินค้า" type="submit"><i class="fas fa-search"></i></button>
            </form>
 
