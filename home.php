@@ -259,7 +259,7 @@
                                                 <div style="line-height:1em">
                                                     <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
                                                     <div class="d-flex justify-content-between w-100 mb-3">
-                                                        <div class=""><small class="text-muted"><?= $row['brand'] ?></small></div>
+                                                        <div><small class="text-muted"><?= $row['brand'] ?></small></div>
                                                     </div>
                                                     <div class="d-flex justify-content-end">
                                                         <?php if (!is_null($row['discounted_price']) && $row['discounted_price'] < $row['price']): ?>
