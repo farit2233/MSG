@@ -316,6 +316,11 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		.product-description-mobile-1 {
 			display: none;
 		}
+
+		.product-box {
+			width: 8rem;
+			margin: 5px;
+		}
 	}
 </style>
 <section class="py-3">
@@ -570,7 +575,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 						<h1 align="center">สินค้าที่เกี่ยวข้อง</h1>
 						<div class="row gy-3 gx-3">
 							<?php while ($rel = $related->fetch_assoc()): ?>
-								<div class="col">
+								<div class="col product-box">
 									<a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= ($rel['available'] <= 0 ? 'out-of-stock' : '') ?>" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
 										<div class="position-relative">
 											<div class="img-top position-relative product-img-holder">
