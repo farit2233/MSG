@@ -14,10 +14,10 @@ if (isset($_GET['sort'])) {
             $order_by = "`date_created` ASC";
             break;
         case 'price_asc':
-            $order_by = "`price` ASC";
+            $order_by = "IF(discounted_price IS NOT NULL AND discounted_price < price, discounted_price, price) ASC";
             break;
         case 'price_desc':
-            $order_by = "`price` DESC";
+            $order_by = "IF(discounted_price IS NOT NULL AND discounted_price < price, discounted_price, price) DESC";
             break;
         case 'name_asc':
             $order_by = "`name` ASC";
