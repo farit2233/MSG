@@ -43,7 +43,7 @@ $(document).ready(function() {
                             location.replace(_base_url_ + 'admin');
                         } else if (resp.status == 'incorrect') {
                             var _frm = $('#login-frm')
-                            var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> Incorrect username or password</div>"
+                            var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> บัญชี หรือหรัสผ่านไม่ถูกต้อง</div>"
                             _frm.prepend(_msg)
                             _frm.find('input').addClass('is-invalid')
                             $('[name="username"]').focus()
@@ -74,7 +74,7 @@ $(document).ready(function() {
                         location.replace(_base_url_ + 'faculty');
                     } else if (resp.status == 'incorrect') {
                         var _frm = $('#flogin-frm')
-                        var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> Incorrect username or password</div>"
+                        var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> บัญชี หรือรหัสผ่านไม่ถูกต้อง</div>"
                         _frm.prepend(_msg)
                         _frm.find('input').addClass('is-invalid')
                         $('[name="username"]').focus()
@@ -106,7 +106,7 @@ $(document).ready(function() {
                             location.replace(_base_url_ + 'student');
                         } else if (resp.status == 'incorrect') {
                             var _frm = $('#slogin-frm')
-                            var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> Incorrect username or password</div>"
+                            var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> บัญชี หรือรหัสผ่านไม่ถูกต้อง</div>"
                             _frm.prepend(_msg)
                             _frm.find('input').addClass('is-invalid')
                             $('[name="username"]').focus()
