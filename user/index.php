@@ -244,11 +244,11 @@
                 e.preventDefault()
                 var _this = $(this)
                 var el = $('<div>')
-                el.addClass('alert alert-dark err_msg')
+                el.addClass('alert alert-danger err_msg')
                 el.hide()
                 $('.err_msg').remove()
                 if ($('#password').val() != $('#cpassword').val()) {
-                    el.text('Password does not match')
+                    el.text('รหัสผ่านไม่ถูกต้อง')
                     _this.prepend(el)
                     el.show('slow')
                     $('html, body').scrollTop(0)
