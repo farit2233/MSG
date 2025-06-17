@@ -166,7 +166,7 @@ class Master extends DBConnection
 			$this->save_product_link($product_id);
 			// จัดการรูปภาพ
 			if (!empty($_FILES['img']['tmp_name'])) {
-				$img_path = "uploads/medicines/";
+				$img_path = "uploads/products/";
 				if (!is_dir(base_app . $img_path)) {
 					mkdir(base_app . $img_path);
 				}
