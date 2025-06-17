@@ -1,0 +1,331 @@
+<?php
+$upload_path = "uploads/banner";
+if (is_dir(base_app . $upload_path)):
+    $file = scandir(base_app . $upload_path);
+    $_i = 0;
+    foreach ($file as $img):
+        if (in_array($img, array('.', '..')))
+            continue;
+        $_i++;
+
+?>
+        <div class="carousel-item w-100 h-100 <?php echo $_i == 1 ? "active" : '' ?>">
+            <img src="<?php echo validate_image($upload_path . '/' . $img) ?>" class="d-block w-100  h-100" alt="<?php echo $img ?>">
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+
+<style>
+    .user-img {
+        position: absolute;
+        height: 27px;
+        width: 27px;
+        object-fit: cover;
+        left: -7%;
+        top: -12%;
+    }
+
+    .user-dd:hover {
+        color: #fff !important
+    }
+
+    .bg-gradient-dark-FIXNAV {
+        background: #16542b;
+    }
+
+    .bg-foot-msg {
+        background: #16542b !important;
+    }
+
+    .searchcolor {
+        color: #f57421;
+    }
+
+    .searchcolor:hover {
+        color: white;
+    }
+
+    .button1 {
+        background-color: none;
+        border: 2px solid #f57421;
+        border-radius: 13px;
+    }
+
+    .button1:hover {
+        background-color: #f57421;
+        color: white;
+    }
+
+    .sbr {
+        border-radius: 13px;
+        width: 300px;
+        max-width: 100%;
+    }
+
+    .fos {
+        font-size: 18px;
+    }
+
+    .fos:hover {
+        text-shadow: 0 0 3px white;
+    }
+
+    .dfs {
+        font-size: 14px
+    }
+
+    .acs {
+        font-size: 16px;
+    }
+
+    .icon-size {
+        font-size: 22px;
+    }
+
+    .icon-acc-size {
+        font-size: 26px;
+    }
+
+    .no-bold a {
+        font-weight: 400 !important;
+    }
+
+    .my-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        /* ระยะห่างแนวนอน+แนวตั้ง */
+    }
+
+    .ndc {
+        left: 0;
+        right: 0;
+        top: 100%;
+        border-radius: 13px;
+        padding: 1rem 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        width: 50vw;
+        background: white;
+        z-index: 10;
+    }
+
+    .ndi {
+        white-space: normal;
+        width: 33.33%;
+        margin-bottom: 0.75rem;
+    }
+
+    /* ใน custom.css หรือ <style> ของคุณ */
+    .nav-link-custom-dd {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem 4rem;
+        padding: 2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        min-width: 950px;
+        /* <<< เพิ่มตรงนี้ เพื่อบังคับให้กว้าง */
+        max-width: 90vw;
+        z-index: 1000;
+    }
+
+    /* ป้องกันไม่ให้แต่ละไอเท็มถูกแบ่งขาดครึ่งคอลัมน์ */
+    .nav-link-custom-dd-item {
+        break-inside: avoid;
+        margin-bottom: 0.75rem;
+        /* เว้นช่องว่างล่างนิดหน่อย */
+    }
+
+    #toTopBtn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 999;
+        background-color: #f57421;
+        color: white;
+        border: none;
+        outline: none;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: opacity 0.3s ease-in-out;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    #toTopBtn.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    #toTopBtn:hover {
+        background-color: #d85f1a;
+    }
+</style>
+<nav class="navbar navbar-expand-lg navbar-dark bg-gradient-dark-FIXNAV">
+    <div class="container px-4 px-lg-5 ">
+        <button class="navbar-toggler btn btn-sm" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <a class="navbar-brand" href="./">
+            <img src="<?php echo validate_image($_settings->info('logo')) ?>" width="80" height="80" class="d-inline-block align-top" alt="" loading="lazy">
+            <?php echo $_settings->info('short_name') ?>
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                <li class="nav-item"><a class="nav-link text-white fos" aria-current="page" href="./">หน้าหลัก</a></li>
+                <li class="nav-item position-relative">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white fos dropdown-toggle dropdown-icon" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">หมวดหมู่</a>
+                    <div class="nav-link-custom-dd position-absolute dropdown-menu" tabindex="-1" aria-labelledby="navbarDropdown">
+                        <div class="container-fluid">
+                            <?php
+                            $category_qry = $conn->query("SELECT * FROM `category_list` where `status` = 1 and `delete_flag` = 0 order by `name` asc");
+                            while ($row = $category_qry->fetch_assoc()):
+                            ?>
+                                <div class="nav-link-custom-dd-item dfs"><a href="<?= base_url . "?p=products&cid={$row['id']}" ?>"><?= $row['name'] ?></a></div>
+                            <?php endwhile; ?>
+                        </div>
+                    </div>
+                </li>
+                <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li -->
+                <li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li>
+                <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
+                <li class="nav-item"><a class="nav-link text-white fos" href="./?p=contact">ติดต่อเรา</a></li>
+            </ul>
+            <ul class="navbar-nav ml-auto mb-2 mb-lg-0 ms-lg-4">
+                <!-- ฟอร์มค้นหา -->
+                <form class="form-inline my-2 my-lg-0" method="get" action="search.php">
+                    <input class="form-control sbr mr-sm-2" type="search" placeholder="ค้นหาสินค้า..." name="search" required>
+                    <button class="btn button1 searchcolor my-2 my-sm-0" title="ค้นหาสินค้า" type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <!--CART-->
+                <?php
+                if ($_settings->userdata('id') != '' && $_settings->userdata('id') != 2):
+                    $cart = $conn->query("SELECT SUM(quantity) FROM `cart_list` where customer_id = '{$_settings->userdata('id')}' ")->fetch_array()[0];
+                endif;
+                $cart = isset($cart) && $cart > 0 ? $cart : '';
+                ?>
+                <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2):
+                    $cart = $conn->query("SELECT SUM(quantity) FROM `cart_list` where customer_id = '{$_settings->userdata('id')}' ")->fetch_array()[0]
+                    //________________ = isset($cart) && $cart > 0 ? $cart : '';
+                ?>
+                    <li class="nav-item" title="ตะกร้าสินค้า"><a class="nav-link text-white" href="./?p=cart_list"><i class="fas fa-shopping-cart icon-size"></i> <span class="ml-2 badge badge-primary"><?= $cart > 0 ? format_num($cart) : '' ?></span></a></li>
+                <?php endif; ?>
+            </ul>
+
+            <div class="d-flex align-items-center">
+                <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
+                    <div class="btn-group nav-link">
+                        <button type="button" class="btn btn-rounded badge badge-light dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                            <span><img src="<?php echo validate_image($_settings->userdata('avatar')) ?>" class="img-circle elevation-2 user-img" alt="User Image"></span>
+                            <span class="ml-3 acs"><?php echo ucwords($_settings->userdata('firstname') . ' ' . $_settings->userdata('lastname')) ?></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <a class="dropdown-item" href="<?php echo base_url . '?p=user' ?>"><span class="fa fa-user"></span> My Account</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="<?php echo base_url . '?p=orders' ?>"><span class="fa fa-table"></span> My Orders</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="<?php echo base_url . '/classes/Login.php?f=logout_customer' ?>"><span class="fas fa-sign-out-alt"></span> Logout</a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="btn-group nav-link">
+                        <button type="button" class="btn btn-rounded badge badge-light dropdown-toggle dropdown-icon text-white" data-toggle="dropdown">
+                            <i class="fas fa-user-circle icon-acc-size text-white" title="แอคเคานท์"></i>
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <a class="dropdown-item" href="./login.php">Login</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="./register.php">Register</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="./admin">Admin Panel</a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    <button id="toTopBtn" title="กลับขึ้นบน">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+</nav>
+<script>
+    $(function() {
+        $('#search_report').click(function() {
+            uni_modal("Search Request Report", "report/search.php")
+        })
+        $('#navbarResponsive').on('show.bs.collapse', function() {
+            $('#mainNav').addClass('navbar-shrink')
+        })
+        $('#navbarResponsive').on('hidden.bs.collapse', function() {
+            if ($('body').offset.top == 0)
+                $('#mainNav').removeClass('navbar-shrink')
+        })
+    })
+
+    $('#search-form').submit(function(e) {
+        e.preventDefault()
+        var sTxt = $('[name="search"]').val()
+        if (sTxt != '')
+            location.href = './?p=products&search=' + sTxt;
+    })
+
+    // เมื่อ scroll เกิน 100px ให้แสดงปุ่ม
+    window.addEventListener("scroll", function() {
+        const btn = document.getElementById("toTopBtn");
+        if (window.scrollY > 100) {
+            btn.classList.add("show");
+        } else {
+            btn.classList.remove("show");
+        }
+    });
+
+    // เมื่อกดปุ่ม ให้เลื่อนขึ้นแบบลื่น
+    document.getElementById("toTopBtn").addEventListener("click", function() {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    });
+</script>
+
+/* กล่อง Dropdown */
+.nav-link-custom-dd {
+position: absolute;
+top: 100%; /* ให้โชว์ใต้เมนู */
+left: 50%;
+transform: translateX(-50%); /* จัดให้อยู่ตรงกลางครึ่งจอ */
+width: 50vw; /* ครึ่งจอ */
+background: #fff;
+padding: 2rem;
+display: none;
+grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+gap: 1.5rem;
+box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+border-radius: 0 0 1rem 1rem;
+z-index: 1000;
+}
+
+/*.nav-link-custom-dd {
+display: none;
+}*/
+.nav-link-custom-dd.show {
+display: grid;
+}
+/* item แต่ละอัน */
+.nav-link-custom-dd-item a {
+text-decoration: none;
+font-weight: 600;
+color: #333;
+transition: all 0.2s ease-in-out;
+}
+.nav-link-custom-dd-item a:hover {
+color: #f57421;
+text-shadow: 0 0 2px #aaa;
+}

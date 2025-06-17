@@ -1,0 +1,445 @@
+    <?php
+    if ($_settings->userdata('id') == '' || $_settings->userdata('login_type') != 2) {
+        echo "<script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'คุณยังไม่ได้เข้าสู่ระบบ',
+                text: 'โปรดเข้าสู่ระบบก่อนใช้งาน',
+                confirmButtonText: 'เข้าสู่ระบบ',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.replace('./login.php');
+                }
+            });
+        </script>";
+        exit;
+    }
+    ?>
+    <style>
+        /* ปรับให้ทันสมัย */
+        .product-logo {
+            width: 7em;
+            height: 7em;
+            object-fit: cover;
+            object-position: center center;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header bar */
+        .cart-header-bar {
+            border-left: 4px solid #ff6600;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ข้อความสินค้า */
+        .cart-item h4 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .cart-item .text-muted {
+            font-size: 14px;
+        }
+
+        /* Grand total */
+        .cart-total {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            text-align: center !important;
+            margin-top: 1.5rem;
+        }
+
+        /* ปรับขนาดและสี checkbox ให้เห็นชัด */
+        .cart-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 6px;
+        }
+
+        .addcart-plus {
+            background: none;
+            color: #f57421;
+            border: 2px solid #f57421;
+            padding: 5px 15px;
+            margin-right: 1rem;
+        }
+
+        .addcart {
+            background: none;
+            color: #f57421;
+            border: 2px solid #f57421;
+            padding: 10px 50px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .addcart:hover,
+        .addcart-plus:hover {
+            background-color: #f57421;
+            color: white;
+            display: inline-block;
+        }
+
+
+        @media (max-width: 576px) {
+            .cart-item {
+                display: flex;
+                flex-direction: column;
+                width: 100% !important;
+                margin: 0 auto;
+                border-radius: 10px;
+            }
+
+            .cart-item .d-flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cart-item .col-2,
+            .cart-item .col-auto {
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+                text-align: left !important;
+                padding: 0 !important;
+                margin-bottom: 10px;
+            }
+
+            .cart-item .col-auto.pr-2 {
+                padding-left: 10px !important;
+            }
+
+            .cart-item .input-group {
+                width: auto !important;
+                flex-wrap: wrap;
+            }
+
+            .cart-item .input-group input {
+                width: 10rem !important;
+                text-align: center;
+                padding: 6px;
+            }
+
+            .cart-item img.product-logo {
+                width: 100% !important;
+                max-width: 100%;
+                height: auto !important;
+                margin-bottom: 0.75rem;
+            }
+
+            .cart-item .btn {
+                margin-bottom: 0.5rem;
+            }
+
+            .cart-item .text-muted,
+            .cart-item h4 {
+                text-align: left !important;
+            }
+
+            .cart-item .col-auto.text-right {
+                margin-left: auto;
+                text-align: right;
+            }
+        }
+
+        .cart-item.out-of-stock {
+            background-color: #f8d7da;
+            /* แดงอ่อน */
+            border: 1px solid #f5c6cb;
+            position: relative;
+            opacity: 0.8;
+        }
+
+        .cart-item.out-of-stock::before {
+            content: "สินค้าหมด";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            font-weight: bold;
+            z-index: 2;
+        }
+    </style>
+    <section class="py-3">
+        <div class="container">
+            <div class="row mt-n4  justify-content-center align-items-center flex-column">
+                <div class="col-lg-10 col-md-11 col-sm-12 col-xs-12">
+                    <div class="card rounded-0 shadow" style="margin-top: 3rem;">
+                        <div class="card-body">
+                            <div class=" container-fluid">
+                                <div class="cart-header-bar">
+                                    <i class="fa fa-basket-shopping mr-2" style="font-size: 30px;"></i>
+                                    <h3 class="d-inline mb-0">ตะกร้าของฉัน</h3>
+                                </div>
+                                <div id="item_list" class="list-group">
+                                    <?php
+                                    $gt = 0;
+                                    $cart = $conn->query("SELECT 
+                                        c.*, 
+                                        p.name as product, 
+                                        p.brand as brand, 
+                                        p.price, 
+                                        p.discounted_price, 
+                                        p.discount_type,
+                                        cc.name as category, 
+                                        p.image_path,
+                                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
+                                        - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
+                                    FROM `cart_list` c 
+                                    INNER JOIN product_list p ON c.product_id = p.id 
+                                    INNER JOIN category_list cc ON p.category_id = cc.id 
+                                    WHERE customer_id = '{$_settings->userdata('id')}'");
+
+                                    while ($row = $cart->fetch_assoc()):
+                                        $show_discount = !empty($row['discounted_price']) && $row['discounted_price'] < $row['price'];
+                                        $price_to_use = $show_discount ? $row['discounted_price'] : $row['price'];
+                                        $gt += $price_to_use * $row['quantity'];
+                                    ?>
+                                        <label class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
+                                            data-id='<?= $row['id'] ?>'
+                                            data-max='<?= format_num($row['available'], 0) ?>'
+                                            style="cursor: pointer;">
+                                            <div class="col-auto pr-2">
+                                                <input type="checkbox"
+                                                    class="form-check-input cart-check"
+                                                    name="selected_cart[]"
+                                                    value="<?= $row['id'] ?>"
+                                                    id="cart_check_<?= $row['id'] ?>"
+                                                    data-price="<?= $price_to_use * $row['quantity'] ?>"
+                                                    <?= $row['available'] <= 0 ? 'disabled' : '' ?>>
+                                            </div>
+
+                                            <div class="d-flex w-100 align-items-center">
+                                                <div class="col-2 text-center">
+                                                    <img src="<?= validate_image($row['image_path']) ?>"
+                                                        alt=""
+                                                        class="img-thumbnail border p-0 product-logo">
+                                                </div>
+
+                                                <div class="col-auto flex-shrink-1 flex-grow-1">
+                                                    <div style="line-height:1em">
+                                                        <h4 class='mb-0'><?= $row['product'] ?></h4>
+                                                        <div class="text-muted mb-1">แบรนด์: <?= $row['brand'] ?></div>
+                                                        <div class="text-muted">หมวดหมู่: <?= $row['category'] ?></div>
+                                                        <div class="text-muted d-flex w-100">
+                                                            <div class="input-group" style="width: 20rem;">
+                                                                <button class="btn addcart-plus minus-qty" type="button">-</button>
+                                                                <input type="number" class="form-control text-center qty" value="<?= $row['quantity'] ?>" min="1" max="<?= $row['available'] ?>" required>
+                                                                <button class="btn addcart-plus add-qty" type="button">+</button>
+                                                                <button class="btn btn-danger ms-2 del-item" type="button">
+                                                                    <i class="fa-solid fa-trash-can"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-auto text-right">
+                                                    <?php if ($show_discount): ?>
+                                                        <h5 class="text-muted mb-0">
+                                                            <del><?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</del>
+                                                        </h5>
+                                                        <h4><b class="text-danger">ลดเหลือ: <?= format_num($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
+                                                    <?php else: ?>
+                                                        <h4><b>ราคา: <?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    <?php endwhile; ?>
+
+                                </div>
+                                <?php if ($cart->num_rows <= 0): ?>
+                                    <h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>
+                                <?php endif; ?>
+                                <div class="d-flex justify-content-end py-3">
+                                    <div class="col-auto">
+                                        <h3><b>รวมรายการที่เลือก: <span id="selected-total">0.00</span></b> บาท</h3>
+                                    </div>
+                                </div>
+                                <?php if ($gt > 0): ?>
+                                    <div class="py-1 text-center">
+                                        <form id="checkout-form" method="post" action="./?p=checkout">
+                                            <input type="hidden" name="selected_items" id="selected_items">
+                                            <button type="submit" class="btn addcart rounded-pill">
+                                                ชำระรายการที่เลือก
+                                            </button>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        function update_item(cart_id = '', qty = 0) {
+            start_loader()
+            $.ajax({
+                url: _base_url_ + 'classes/Master.php?f=update_cart',
+                method: 'POST',
+                data: {
+                    cart_id: cart_id,
+                    qty: qty
+                },
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    alert_toast("An error occurred.", 'error')
+                    end_loader()
+                },
+                success: function(resp) {
+                    if (resp.status == 'success') {
+                        location.reload()
+                    } else {
+                        alert_toast("An error occurred.", 'error')
+                    }
+                    end_loader()
+                }
+            })
+        }
+        $(function() {
+            $('.add-qty').click(function() {
+                var item = $(this).closest('.cart-item')
+                var qty = parseFloat(item.find('.qty').val())
+                var id = item.attr('data-id')
+                var max = item.attr('data-max')
+                if (qty == max)
+                    qty = max;
+                else
+                    qty += 1;
+                item.find('.qty').val(qty)
+                update_item(id, qty)
+            })
+            $('.minus-qty').click(function() {
+                var item = $(this).closest('.cart-item')
+                var qty = parseFloat(item.find('.qty').val())
+                var id = item.attr('data-id')
+                if (qty == 1)
+                    qty = 1;
+                else
+                    qty -= 1;
+                item.find('.qty').val(qty)
+                update_item(id, qty)
+            })
+            $('.del-item').click(function() {
+                var item = $(this).closest('.cart-item')
+                var id = item.attr('data-id')
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'คุณแน่ใจไหม?',
+                    text: "ลบสินค้าออกจากตะกร้า?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74c3c', // สีแดงปุ่มยืนยัน
+                    cancelButtonColor: '#95a5a6', // สีเทาปุ่มยกเลิก
+                    confirmButtonText: 'ใช่ ลบเลย!',
+                    cancelButtonText: 'ยกเลิก'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        delete_cart(id); // ฟังก์ชันลบจริง
+                    }
+                })
+            })
+        })
+
+        function delete_cart($id) {
+            start_loader();
+            $.ajax({
+                url: _base_url_ + "classes/Master.php?f=delete_cart",
+                method: "POST",
+                data: {
+                    id: $id
+                },
+                dataType: "json",
+                error: err => {
+                    console.log(err)
+                    alert_toast("An error occured.", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        location.reload();
+                    } else {
+                        alert_toast("An error occured.", 'error');
+                        end_loader();
+                    }
+                }
+            })
+        }
+        $('#checkout-form').submit(function(e) {
+            var selected = [];
+            var valid = true;
+            var errorMessage = '';
+
+            $('.cart-check:checked').each(function() {
+                var item = $(this).closest('.cart-item');
+                var qty = parseInt(item.find('.qty').val());
+                var max = parseInt(item.attr('data-max'));
+                var productName = item.find('h4').text();
+
+                if (qty > max) {
+                    valid = false;
+                    errorMessage += '• ' + productName + ' มีในสต๊อกแค่ ' + max + ' ชิ้น\n';
+                }
+
+                selected.push($(this).val());
+            });
+
+            $('#selected_items').val(selected.join(','));
+
+            if (selected.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ยังไม่ได้เลือกสินค้า',
+                    text: 'กรุณาเลือกสินค้าที่ต้องการชำระก่อน'
+                });
+                return false;
+            }
+
+            if (!valid) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่สามารถชำระได้',
+                    html: 'เนื่องจาก:<br>' + errorMessage
+                });
+                return false;
+            }
+
+            return true; // ให้ submit ได้ถ้าทุกอย่างถูกต้อง
+        });
+
+        function calculateSelectedTotal() {
+            let total = 0;
+            $('.cart-check:checked').each(function() {
+                total += parseFloat($(this).data('price'));
+            });
+            $('#selected-total').text(total.toLocaleString('th-TH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }));
+
+        }
+
+        $(function() {
+            // เรียกเมื่อมีการเปลี่ยนสถานะ checkbox
+            $('.cart-check').on('change', function() {
+                calculateSelectedTotal();
+            });
+
+            // เรียกตอนโหลดหน้า (กรณีมีติ๊กไว้แล้ว)
+            calculateSelectedTotal();
+        });
+    </script>
