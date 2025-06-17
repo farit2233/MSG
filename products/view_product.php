@@ -363,13 +363,14 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									if (!empty($discounted_price) && $discounted_price < $price) {
 										$percent_off = round((($price - $discounted_price) / $price) * 100);
 
-										if ($percent_off > 49) {
+										if ($percent_off >= 50) {
 											$discount_type_label = 'hot';  // 🔥 ลดราคาร้อน
-										} elseif ($percent_off < 50) {
+										} else {
 											$discount_type_label = 'normal'; // ลดราคาธรรมดา
 										}
 									}
 									?>
+
 
 									<?php if ($discount_type_label === 'hot'): ?>
 										<!-- 🔥 ลดราคาร้อน -->

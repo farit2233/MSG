@@ -228,7 +228,19 @@
                             <h1 align="center">สินค้าแนะนำ</h1>
                             <div class="d-flex justify-content-center flex-wrap gap-2">
                                 <?php
-                                $qry = $conn->query("SELECT *, (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = product_list.id), 0) - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = product_list.id), 0)) as `available` FROM `product_list` where (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = product_list.id), 0) - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = product_list.id), 0)) > 0 order by RAND() limit 4");
+                                $qry = $conn->query("
+                                    SELECT *, 
+                                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                        COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+                                    FROM `product_list` 
+                                    WHERE 
+                                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                        COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
+                                    ORDER BY 
+                                        IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
+                                        RAND() 
+                                    LIMIT 4
+                                ");
                                 while ($row = $qry->fetch_assoc()):
                                 ?>
                                     <div class="col">
