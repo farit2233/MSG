@@ -532,7 +532,8 @@ class Master extends DBConnection
 		$update = $this->conn->query("UPDATE `order_list` 
         SET 
             `payment_status` = '{$payment_status}',
-            `delivery_status` = '{$delivery_status}' 
+            `delivery_status` = '{$delivery_status}',
+			`is_seen` = 0  
         WHERE id = '{$id}'");
 
 		if ($update) {

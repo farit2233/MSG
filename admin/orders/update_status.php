@@ -37,14 +37,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 <option value="7" <?= isset($delivery_status) && $delivery_status == 7 ? 'selected' : '' ?>>คืนของสำเร็จ</option>
             </select>
         </div>
-        <div class="form-group mt-3 d-flex justify-content-between">
-            <button type="button" class="btn btn-secondary btn-sm rounded-0" data-dismiss="modal">
-                <i class="fa fa-times"></i> ยกเลิก
-            </button>
-            <button type="submit" class="btn btn-primary btn-sm rounded-0">
-                <i class="fa fa-save"></i> บันทึกสถานะ
-            </button>
-        </div>
     </form>
 </div>
 <script>

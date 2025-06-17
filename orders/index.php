@@ -202,8 +202,8 @@ $filter_options = [
                                         </div>
                                         <div class="d-flex flex-wrap gap-3">
                                             <div><strong>ยอดรวม:</strong> <?= format_num($row['total_amount'], 2) ?> บาท</div>
-                                            <div><strong> สถานะชำระเงิน:</strong> <?= $badge_payment ?></div>
-                                            <div><strong> สถานะจัดส่ง:</strong> <?= $badge_delivery ?></div>
+                                            <div><strong> สถานะการชำระเงิน:</strong> <?= $badge_payment ?></div>
+                                            <div><strong> สถานะการจัดส่ง:</strong> <?= $badge_delivery ?></div>
                                         </div>
                                     </div>
                                 <?php endwhile;

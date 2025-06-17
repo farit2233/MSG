@@ -53,7 +53,7 @@
         <div class="row mb-3">
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="mb-3">
-                    <label for="" class="control-label">รหัสอ้างอิงการสั่งซื้อ:</label>
+                    <label for="" class="control-label">เลขที่คำสั่งซื้อ: </label>
                     <div class="pl-4"><?= isset($code) ? $code : '' ?></div>
                 </div>
                 <div class="mb-3">
