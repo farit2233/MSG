@@ -317,10 +317,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 			display: none;
 		}
 
-		.product-box {
-			width: 8rem;
-			margin: 5px;
-		}
 	}
 </style>
 <section class="py-3">
@@ -575,7 +571,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 						<h1 align="center">สินค้าที่เกี่ยวข้อง</h1>
 						<div class="row gy-3 gx-3">
 							<?php while ($rel = $related->fetch_assoc()): ?>
-								<div class="col product-box">
+								<div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
 									<a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= ($rel['available'] <= 0 ? 'out-of-stock' : '') ?>" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
 										<div class="position-relative">
 											<div class="img-top position-relative product-img-holder">

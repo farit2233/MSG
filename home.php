@@ -159,11 +159,6 @@
         .btn-product {
             padding: 10px 80px;
         }
-
-        .product-box {
-            width: 8rem;
-            margin: 5px;
-        }
     }
 </style>
 <section class="py-3">
@@ -248,7 +243,7 @@
                                 ");
                                 while ($row = $qry->fetch_assoc()):
                                 ?>
-                                    <div class="col product-box">
+                                    <div class="col-6 col-md-4 col-lg-3 d-flex product-box" style="margin-top: 1rem;">
                                         <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
                                             <div class="position-relative">
                                                 <div class="img-top position-relative product-img-holder">
