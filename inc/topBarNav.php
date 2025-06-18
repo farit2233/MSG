@@ -85,7 +85,9 @@
 
 
    .navbar-msg {
-     background: #16542b;
+     background: linear-gradient(135deg, #16542b 0%, #2f6828 40%, #3f7b25 60%, #f57421 95%);
+     color: white;
+     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
    }
 
    .bg-foot-msg {
