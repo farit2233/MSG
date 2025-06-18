@@ -153,7 +153,7 @@ CREATE TABLE `order_list` (
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `payment_status` tinyint DEFAULT '0' COMMENT '0=ยังไม่ชำระเงิน, 1=รอตรวจสอบ, 2=ชำระเงินแล้ว, 3=ล้มเหลว, 4=คืนเงินแล้ว',
-  `delivery_status` tinyint DEFAULT '0' COMMENT '0=ตรวจสอบคำสั่งซื้อ, 1=กำลังเตรียมของ, 2=แพ็คของแล้ว, 3=พัสดุกำลังจัดส่ง, 4=พัสดุจัดส่งสำเร็จ, 5=พัสดุจัดส่งไม่สำเร็จ, 6=คืนของระหว่างทาง, 7=คืนของสำเร็จ',
+  `delivery_status` tinyint DEFAULT '0' COMMENT '0=ตรวจสอบคำสั่งซื้อ, 1=กำลังเตรียมของ, 2=แพ๊กของแล้ว, 3=พัสดุกำลังจัดส่ง, 4=พัสดุจัดส่งสำเร็จ, 5=พัสดุจัดส่งไม่สำเร็จ, 6=คืนของระหว่างทาง, 7=คืนของสำเร็จ',
   `order_status` tinyint DEFAULT '0' COMMENT '0=ใหม่, 1=กำลังดำเนินการ, 2=เสร็จ, 3=ยกเลิก, 4=ระบบยกเลิก, 5=คืนของ',
   `is_seen` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

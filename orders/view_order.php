@@ -72,7 +72,7 @@
                         <?php
                         switch ((int)$payment_status) {
                             case 0:
-                                echo '<span class="badge bg-secondary">ยังไม่ชำระ</span>';
+                                echo '<span class="badge bg-secondary">ยังไม่ชำระเงิน</span>';
                                 break;
                             case 1:
                                 echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
@@ -105,7 +105,7 @@
                                 echo '<span class="badge bg-info">เตรียมของ</span>';
                                 break;
                             case 2:
-                                echo '<span class="badge bg-primary">แพ็คของแล้ว</span>';
+                                echo '<span class="badge bg-primary">แพ๊กของแล้ว</span>';
                                 break;
                             case 3:
                                 echo '<span class="badge bg-warning text-dark">กำลังจัดส่ง</span>';

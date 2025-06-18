@@ -179,7 +179,7 @@ $filter_options = [
                                     $badge_delivery = match ($delivery_status) {
                                         0 => '<span class="badge bg-secondary">ตรวจสอบคำสั่งซื้อ</span>',
                                         1 => '<span class="badge bg-info">กำลังเตรียมของ</span>',
-                                        2 => '<span class="badge bg-primary">แพ็คของแล้ว</span>',
+                                        2 => '<span class="badge bg-primary">แพ๊กของแล้ว</span>',
                                         3 => '<span class="badge bg-warning text-dark">พัสดุกำลังจัดส่ง</span>',
                                         4 => '<span class="badge bg-success">พัสดุจัดส่งสำเร็จ</span>',
                                         5 => '<span class="badge bg-danger">พัสดุจัดส่งไม่สำเร็จ</span>',

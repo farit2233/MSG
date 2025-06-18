@@ -4,12 +4,13 @@
 	</script>
 <?php endif; ?>
 <?php
-$status = isset($_GET['status']) ? $_GET['status'] : '';
-$stat_arr = ['Pending Orders', 'Packed Orders', 'Our for Delivery', 'Completed Order']
+$payment_status = isset($_GET['payment_status']) ? $_GET['payment_status'] : '';
+$delivery_status = isset($_GET['delivery_status']) ? $_GET['delivery_status'] : '';
+$stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจสอบ', 'ชำระเงินแล้ว', 'ชำระล้มเหลว', 'คืนเงินแล้ว']
 ?>
 <div class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
-		<h3 class="card-title">List of <?= isset($stat_arr[$status]) ? $stat_arr[$status] : 'All Orders' ?></h3>
+		<h3 class="card-title">List of <?= isset($stat_arr[$payment_status]) ? $stat_arr[$payment_status] : 'All Orders' ?></h3>
 	</div>
 	<div class="card-body">
 		<div class="container-fluid">
@@ -40,18 +41,47 @@ $stat_arr = ['Pending Orders', 'Packed Orders', 'Our for Delivery', 'Completed O
 					<?php
 					$i = 1;
 					$where = "";
-					switch ($status) {
+					switch ($payment_status) {
 						case 0:
-							$where = " where o.`status` = 0 ";
+							$where = " where o.`payment_status` = 0 ";
 							break;
 						case 1:
-							$where = " where o.`status` = 1 ";
+							$where = " where o.`payment_status` = 1 ";
 							break;
 						case 2:
-							$where = " where o.`status` = 2 ";
+							$where = " where o.`payment_status` = 2 ";
 							break;
 						case 3:
-							$where = " where o.`status` = 3 ";
+							$where = " where o.`payment_status` = 3 ";
+							break;
+						case 4:
+							$where = " where o.`payment_status` = 4 ";
+							break;
+					}
+					switch ($delivery_status) {
+						case 0:
+							$where = " where o.`delivery_status` = 0 ";
+							break;
+						case 1:
+							$where = " where o.`delivery_status` = 1 ";
+							break;
+						case 2:
+							$where = " where o.`delivery_status` = 2 ";
+							break;
+						case 3:
+							$where = " where o.`delivery_status` = 3 ";
+							break;
+						case 4:
+							$where = " where o.`delivery_status` = 4 ";
+							break;
+						case 5:
+							$where = " where o.`delivery_status` = 5 ";
+							break;
+						case 6:
+							$where = " where o.`delivery_status` = 6 ";
+							break;
+						case 7:
+							$where = " where o.`delivery_status` = 7 ";
 							break;
 					}
 					$qry = $conn->query("SELECT o.*, 
@@ -72,7 +102,7 @@ $stat_arr = ['Pending Orders', 'Packed Orders', 'Our for Delivery', 'Completed O
 								<?php
 								switch ((int)$row['payment_status']) {
 									case 0:
-										echo '<span class="badge bg-secondary">ยังไม่ชำระ</span>';
+										echo '<span class="badge bg-secondary">ยังไม่ชำระเงิน</span>';
 										break;
 									case 1:
 										echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
@@ -102,7 +132,7 @@ $stat_arr = ['Pending Orders', 'Packed Orders', 'Our for Delivery', 'Completed O
 										echo '<span class="badge bg-info">เตรียมของ</span>';
 										break;
 									case 2:
-										echo '<span class="badge bg-primary">แพ็คของ</span>';
+										echo '<span class="badge bg-primary">แพ๊กของแล้ว</span>';
 										break;
 									case 3:
 										echo '<span class="badge bg-warning text-dark">กำลังส่ง</span>';

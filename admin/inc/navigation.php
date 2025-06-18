@@ -32,7 +32,7 @@
                 <a href="./" class="nav-link nav-home">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
                   <p>
-                    Dashboard
+                    หน้าแดชบอร์ด
                   </p>
                 </a>
               </li>
@@ -40,7 +40,7 @@
                 <a href="./?page=categories" class="nav-link nav-categories">
                   <i class="nav-icon fas fa-th-list"></i>
                   <p>
-                    Category List
+                    หมวดหมู่สินค้าทั้งหมด
                   </p>
                 </a>
               </li>
@@ -48,7 +48,7 @@
                 <a href="./?page=products" class="nav-link nav-products">
                   <i class="nav-icon fas fa-glasses"></i>
                   <p>
-                    Product List
+                    สินค้าทั้งหมด
                   </p>
                 </a>
               </li>
@@ -56,7 +56,7 @@
                 <a href="./?page=inventory" class="nav-link nav-inventory">
                   <i class="nav-icon fas fa-clipboard"></i>
                   <p>
-                    Inventory
+                    สต๊อกสินค้า
                   </p>
                 </a>
               </li>
@@ -64,7 +64,7 @@
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-table"></i>
                   <p>
-                    Orders
+                    รายการคำสั่งซื้อ
                     <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
@@ -72,31 +72,89 @@
                   <li class="nav-item">
                     <a href="./?page=orders" class="nav-link tree-item nav-orders">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>List All</p>
+                      <p>รายการคำสั่งซื้อทั้งหมด</p>
+                    </a>
+                  </li>
+                  <li class="nav-header text-xs pl-3 pt-2 text-muted">สถานะการชำระเงิน</li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&payment_status=0" class="nav-link tree-item nav-payment_status_0">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>ยังไม่ชำระเงิน</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./?page=orders&status=0" class="nav-link tree-item nav-orders_0">
+                    <a href="./?page=orders&payment_status=1" class="nav-link tree-item nav-payment_status_1">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Pending</p>
+                      <p>รอตรวจสอบ</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./?page=orders&status=1" class="nav-link tree-item nav-orders_1">
+                    <a href="./?page=orders&payment_status=2" class="nav-link tree-item nav-payment_status_2">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Packed</p>
+                      <p>ชำระเงินแล้ว</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./?page=orders&status=2" class="nav-link tree-item nav-orders_2">
+                    <a href="./?page=orders&payment_status=3" class="nav-link tree-item nav-payment_status_3">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Out for Delivery</p>
+                      <p>ชำระล้มเหลว</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./?page=orders&status=3" class="nav-link tree-item nav-orders_3">
+                    <a href="./?page=orders&payment_status=4" class="nav-link tree-item nav-payment_status_4">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Done</p>
+                      <p>คืนเงินแล้ว</p>
+                    </a>
+                  </li>
+                </ul>
+                <ul class="nav nav-treeview" style="display: none;">
+                  <li class="nav-header text-xs pl-3 pt-2 text-muted">สถานะการจัดส่ง</li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=0" class="nav-link tree-item nav-delivery_status_0">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>ตรวจสอบคำสั่งซื้อ</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=1" class="nav-link tree-item nav-delivery_status_1">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>กำลังเตรียมของ</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=2" class="nav-link tree-item nav-delivery_status_2">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>แพ็กของแล้ว</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=3" class="nav-link tree-item nav-delivery_status_3">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>กำลังจัดส่ง</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=4" class="nav-link tree-item nav-delivery_status_4">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>จัดส่งสำเร็จ</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=5" class="nav-link tree-item nav-delivery_status_5">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>จัดส่งไม่สำเร็จ</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=6" class="nav-link tree-item nav-delivery_status_6">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>คืนของระหว่างทาง</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=7" class="nav-link tree-item nav-delivery_status_7">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>คืนของสำเร็จ</p>
                     </a>
                   </li>
                 </ul>
@@ -105,7 +163,7 @@
                 <a href="./?page=customers" class="nav-link nav-customers">
                   <i class="nav-icon fas fa-user-friends"></i>
                   <p>
-                    Customer List
+                    รายชื่อลูกค้า
                   </p>
                 </a>
               </li>
@@ -115,7 +173,7 @@
                   <a href="<?php echo base_url ?>admin/?page=reports" class="nav-link nav-reports">
                     <i class="nav-icon far fa-circle"></i>
                     <p>
-                      Daily Report
+                      รายงานยอดขายประจำวัน
                     </p>
                   </a>
                 </li>
@@ -124,7 +182,7 @@
                   <a href="<?php echo base_url ?>admin/?page=user/list" class="nav-link nav-user_list">
                     <i class="nav-icon fas fa-users-cog"></i>
                     <p>
-                      User List
+                      รายชื่อผู้ดูแลระบบ
                     </p>
                   </a>
                 </li>
@@ -132,7 +190,7 @@
                   <a href="<?php echo base_url ?>admin/?page=system_info/help_info" class="nav-link nav-system_info_help_info">
                     <i class="nav-icon fas fa-question"></i>
                     <p>
-                      Help Info
+                      หน้าช่วยเหลือ
                     </p>
                   </a>
                 </li>
@@ -140,7 +198,7 @@
                   <a href="<?php echo base_url ?>admin/?page=system_info/contact_info" class="nav-link nav-system_info_contact_info">
                     <i class="nav-icon fas fa-phone-square-alt"></i>
                     <p>
-                      Contact Info
+                      หน้าติดต่อ
                     </p>
                   </a>
                 </li>
@@ -148,7 +206,7 @@
                   <a href="<?php echo base_url ?>admin/?page=system_info" class="nav-link nav-system_info">
                     <i class="nav-icon fas fa-tools"></i>
                     <p>
-                      Settings
+                      ตั้งค่าหน้าเว็บ
                     </p>
                   </a>
                 </li>
@@ -176,21 +234,31 @@
 <script>
   $(document).ready(function() {
     var page = '<?php echo isset($_GET['page']) ? $_GET['page'] : 'home' ?>';
-    var status = '<?php echo isset($_GET['status']) ? $_GET['status'] : '' ?>';
-    page = page.replace(/\//g, '_');
-    page = status != '' ? page + "_" + status : page;
-    console.log($('.nav-link.nav-' + page)[0])
-    if ($('.nav-link.nav-' + page).length > 0) {
-      $('.nav-link.nav-' + page).addClass('active')
-      if ($('.nav-link.nav-' + page).hasClass('tree-item') == true) {
-        $('.nav-link.nav-' + page).addClass('active')
-        $('.nav-link.nav-' + page).closest('.nav-treeview').parent().addClass('menu-open')
-      }
-      if ($('.nav-link.nav-' + page).hasClass('nav-is-tree') == true) {
-        $('.nav-link.nav-' + page).parent().addClass('menu-open')
-      }
+    var status = '';
+    var statusType = '';
 
+    <?php if (isset($_GET['payment_status'])): ?>
+      status = '<?php echo $_GET['payment_status'] ?>';
+      statusType = 'payment_status';
+    <?php elseif (isset($_GET['delivery_status'])): ?>
+      status = '<?php echo $_GET['delivery_status'] ?>';
+      statusType = 'delivery_status';
+    <?php endif; ?>
+
+    page = page.replace(/\//g, '_');
+    page = (status != '' && statusType != '') ? statusType + "_" + status : page;
+
+    var selector = '.nav-link.nav-' + page;
+    if ($(selector).length > 0) {
+      $(selector).addClass('active');
+      if ($(selector).hasClass('tree-item')) {
+        $(selector).closest('.nav-treeview').parent().addClass('menu-open');
+      }
+      if ($(selector).hasClass('nav-is-tree')) {
+        $(selector).parent().addClass('menu-open');
+      }
     }
-    $('.nav-link.active').addClass('bg-dark')
-  })
+
+    $('.nav-link.active').addClass('bg-dark');
+  });
 </script>

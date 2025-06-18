@@ -30,7 +30,7 @@ $qry = $conn->query("SELECT * FROM order_list WHERE customer_id = '{$customer_id
                             echo '<span class="badge bg-secondary">รอดำเนินการ</span>';
                             break;
                         case 1:
-                            echo '<span class="badge bg-primary">แพ็คของแล้ว</span>';
+                            echo '<span class="badge bg-primary">แพ๊กของแล้ว</span>';
                             break;
                         case 2:
                             echo '<span class="badge bg-warning">กำลังจัดส่ง</span>';

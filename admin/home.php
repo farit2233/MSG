@@ -24,10 +24,15 @@
 <h4 class="mt-4">สรุปข้อมูลระบบ</h4>
 <div class="row">
   <?php
+  //$boxes = [
+  //  ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-primary', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
+  //  ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-info', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
+  //  ['link' => '?page=inventory', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-secondary', 'icon' => 'fas fa-warehouse'],
+  //];
   $boxes = [
-    ['link' => '?page=categories', 'icon' => 'fas fa-th-list', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'query' => "SELECT * FROM category_list where delete_flag = 0", 'bg' => 'bg-primary'],
-    ['link' => '?page=products', 'icon' => 'fas fa-boxes', 'label' => 'สินค้าทั้งหมด', 'query' => "SELECT id FROM product_list where `status` = 1", 'bg' => 'bg-info'],
-    ['link' => '?page=inventory', 'icon' => 'fas fa-warehouse', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-secondary'],
+    ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
+    ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
+    ['link' => '?page=inventory', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-white', 'icon' => 'fas fa-warehouse'],
   ];
 
   foreach ($boxes as $box):
@@ -52,15 +57,24 @@
 </div>
 
 <?php
-$payment_statuses = [
-  0 => ['label' => 'ยังไม่ชำระเงิน', 'bg' => 'bg-secondary', 'icon' => 'fas fa-wallet'],
-  1 => ['label' => 'รอตรวจสอบ', 'bg' => 'bg-warning text-dark', 'icon' => 'fas fa-search-dollar'],
-  2 => ['label' => 'ชำระเงินแล้ว', 'bg' => 'bg-success', 'icon' => 'fas fa-check-circle'],
+//$payment_status = [
+//  0 => ['label' => 'ยังไม่ชำระเงิน', 'bg' => 'bg-secondary', 'icon' => 'fas fa-wallet'],
+//  1 => ['label' => 'รอตรวจสอบ', 'bg' => 'bg-warning text-dark', 'icon' => 'fas fa-search-dollar'],
+//  2 => ['label' => 'ชำระเงินแล้ว', 'bg' => 'bg-success', 'icon' => 'fas fa-check-circle'],
+//  3 => ['label' => 'ชำระเงินล้มเหลว', 'bg' => 'bg-danger', 'icon' => 'fa fa-exclamation'],
+//  4 => ['label' => 'คืนเงินแล้ว', 'bg' => 'bg-info', 'icon' => 'fas fa-undo-alt'],
+//];
+$payment_status = [
+  0 => ['label' => 'ยังไม่ชำระเงิน', 'bg' => 'bg-white', 'icon' => 'fas fa-wallet'],
+  1 => ['label' => 'รอตรวจสอบ', 'bg' => 'bg-white', 'icon' => 'fas fa-search-dollar'],
+  2 => ['label' => 'ชำระเงินแล้ว', 'bg' => 'bg-white', 'icon' => 'fas fa-check-circle'],
+  3 => ['label' => 'ชำระเงินล้มเหลว', 'bg' => 'bg-white', 'icon' => 'fa fa-exclamation'],
+  4 => ['label' => 'คืนเงินแล้ว', 'bg' => 'bg-white', 'icon' => 'fas fa-undo-alt'],
 ];
 ?>
 <h4 class="mt-4">สถานะการชำระเงิน</h4>
 <div class="row">
-  <?php foreach ($payment_statuses as $status => $data):
+  <?php foreach ($payment_status as $status => $data):
     $count = $conn->query("SELECT id FROM order_list WHERE payment_status = $status")->num_rows;
   ?>
     <div class="col-12 col-sm-6 col-md-4 mb-3">
@@ -78,16 +92,30 @@ $payment_statuses = [
 </div>
 
 <?php
-$delivery_statuses = [
-  1 => ['label' => 'กำลังเตรียมของ', 'bg' => 'bg-info', 'icon' => 'fas fa-box'],
-  2 => ['label' => 'แพ็คของแล้ว', 'bg' => 'bg-primary', 'icon' => 'fas fa-truck-loading'],
-  3 => ['label' => 'กำลังจัดส่ง', 'bg' => 'bg-warning text-dark', 'icon' => 'fas fa-truck'],
-  4 => ['label' => 'จัดส่งสำเร็จ', 'bg' => 'bg-success', 'icon' => 'fas fa-check'],
+//$delivery_status = [
+//  0 => ['label' => 'ตรวจสอบคำสั่งซื้อ', 'bg' => 'bg-secondary', 'icon' => 'fas fa-file-invoice'],
+//  1 => ['label' => 'กำลังเตรียมของ', 'bg' => 'bg-info', 'icon' => 'fas fa-box'],
+//  2 => ['label' => 'แพ๊กของแล้ว', 'bg' => 'bg-primary', 'icon' => 'fas fa-truck-loading'],
+//  3 => ['label' => 'กำลังจัดส่ง', 'bg' => 'bg-info', 'icon' => 'fas fa-truck'],
+//  4 => ['label' => 'จัดส่งสำเร็จ', 'bg' => 'bg-success', 'icon' => 'fas fa-check-circle'],
+//  5 => ['label' => 'จัดส่งไม่สำเร็จ', 'bg' => 'bg-danger', 'icon' => 'fas fa-exclamation-triangle'],
+//  6 => ['label' => 'คืนของระหว่างทาง', 'bg' => 'bg-warning text-dark', 'icon' => 'fas fa-undo-alt'],
+//  7 => ['label' => 'คืนของสำเร็จ', 'bg' => 'bg-success', 'icon' => 'fas fa-box-open'],
+//];
+$delivery_status = [
+  0 => ['label' => 'ตรวจสอบคำสั่งซื้อ', 'bg' => 'bg-white', 'icon' => 'fas fa-file-invoice'],
+  1 => ['label' => 'กำลังเตรียมของ', 'bg' => 'bg-white', 'icon' => 'fas fa-box'],
+  2 => ['label' => 'แพ๊กของแล้ว', 'bg' => 'bg-white', 'icon' => 'fas fa-truck-loading'],
+  3 => ['label' => 'กำลังจัดส่ง', 'bg' => 'bg-white', 'icon' => 'fas fa-truck'],
+  4 => ['label' => 'จัดส่งสำเร็จ', 'bg' => 'bg-white', 'icon' => 'fas fa-check-circle'],
+  5 => ['label' => 'จัดส่งไม่สำเร็จ', 'bg' => 'bg-white', 'icon' => 'fas fa-exclamation-triangle'],
+  6 => ['label' => 'คืนของระหว่างทาง', 'bg' => 'bg-white', 'icon' => 'fas fa-undo-alt'],
+  7 => ['label' => 'คืนของสำเร็จ', 'bg' => 'bg-white', 'icon' => 'fas fa-box-open'],
 ];
 ?>
 <h4 class="mt-4">สถานะการจัดส่ง</h4>
 <div class="row">
-  <?php foreach ($delivery_statuses as $status => $data):
+  <?php foreach ($delivery_status as $status => $data):
     $count = $conn->query("SELECT id FROM order_list WHERE delivery_status = $status")->num_rows;
   ?>
     <div class="col-12 col-sm-6 col-md-4 mb-3">
