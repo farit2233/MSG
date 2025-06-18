@@ -15,7 +15,7 @@
 	<div class="card-header">
 		<h3 class="card-title text-bold">สินค้าทั้งหมด</h3>
 		<div class="card-tools">
-			<a href="./?page=products/manage_product" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> Create New</a>
+			<a href="./?page=products/manage_product" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> สร้างสินค้าใหม่</a>
 		</div>
 	</div>
 	<div class="card-body">
