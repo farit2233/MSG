@@ -74,7 +74,10 @@ if ($qry->num_rows > 0):
             $extra_cats[] = $c['name'];
         }
 ?>
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
+        <style>
+            @media only screen and (max-width: 768px) {}
+        </style>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
             <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= $stock_class ?>"
                 href="./?p=products/view_product&id=<?= $row['id'] ?>">
                 <div class="position-relative">
