@@ -28,7 +28,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 	}
 </style>
 <div class="content py-5 px-3 bg-gradient-dark">
-	<h2><b>Product Details</b></h2>
+	<h2><b>รายละเอียดสินค้า</b></h2>
 </div>
 <div class="row mt-lg-n4 mt-md-n4 justify-content-center">
 	<div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
@@ -39,15 +39,15 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 						<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>" alt="<?= isset($name) ? $name : '' ?>" class="img-thumbnail p-0 border" id="product-img">
 					</center>
 					<dl>
-						<dt class="text-muted">Brand</dt>
+						<dt class="text-muted">แบรนด์</dt>
 						<dd class="pl-4"><?= isset($brand) ? $brand : "" ?></dd>
-						<dt class="text-muted">Name</dt>
+						<dt class="text-muted">ชื่อสินค้า</dt>
 						<dd class="pl-4"><?= isset($name) ? $name : "" ?></dd>
-						<dt class="text-muted">Category</dt>
+						<dt class="text-muted">หมวดหมู่สินค้า</dt>
 						<dd class="pl-4"><?= isset($category) ? $category : "" ?></dd>
-						<dt class="text-muted">Description</dt>
+						<dt class="text-muted">รายละเอียดสินค้า</dt>
 						<dd class="pl-4"><?= isset($description) ? str_replace(["\n\r", "\n", "\r"], "<br>", $description) : '' ?></dd>
-						<dt class="text-muted">Price</dt>
+						<dt class="text-muted">ราคา</dt>
 						<dd class="pl-4">
 							<?php if (!empty($discounted_price) && $discounted_price < $price): ?>
 								<span class="text-muted" style="text-decoration: line-through;">
@@ -67,21 +67,21 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 							<?php endif; ?>
 
 						</dd>
-						<dt class="text-muted">Status</dt>
+						<dt class="text-muted">สถานะ</dt>
 						<dd class="pl-4">
 							<?php if ($status == 1): ?>
-								<span class="badge badge-success px-3 rounded-pill">Active</span>
+								<span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
 							<?php else: ?>
-								<span class="badge badge-danger px-3 rounded-pill">Inactive</span>
+								<span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>
 							<?php endif; ?>
 						</dd>
 					</dl>
 				</div>
 			</div>
 			<div class="card-footer py-1 text-center">
-				<button class="btn btn-danger btn-sm bg-gradient-danger rounded-0" type="button" id="delete_data"><i class="fa fa-trash"></i> Delete</button>
-				<a class="btn btn-dark btn-sm bg-gradient-dark rounded-0" href="./?page=products/manage_product&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Edit</a>
-				<a class="btn btn-light btn-sm bg-gradient-light border rounded-0" href="./?page=products"><i class="fa fa-angle-left"></i> Back to List</a>
+				<button class="btn btn-danger btn-sm bg-gradient-danger rounded-0" type="button" id="delete_data"><i class="fa fa-trash"></i> ลบสินค้า</button>
+				<a class="btn btn-dark btn-sm bg-gradient-dark rounded-0" href="./?page=products/manage_product&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> แก้ไขสินค้า</a>
+				<a class="btn btn-light btn-sm bg-gradient-light border rounded-0" href="./?page=products"><i class="fa fa-angle-left"></i> กลับ</a>
 			</div>
 		</div>
 	</div>

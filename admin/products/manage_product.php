@@ -39,7 +39,7 @@ function get_platform_link($conn, $product_id, $platform)
 	}
 </style>
 <div class="content py-5 px-3 bg-gradient-dark">
-	<h2><b><?= isset($id) ? "Update Product Details" : "New Product Entry" ?></b></h2>
+	<h2><b><?= isset($id) ? "แก้ไขสินค้า" : "สร้างสินค้าใหม่" ?></b></h2>
 </div>
 <div class="row mt-lg-n4 mt-md-n4 justify-content-center">
 	<div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
@@ -50,11 +50,11 @@ function get_platform_link($conn, $product_id, $platform)
 					<form action="" id="product-form" method="POST" enctype="multipart/form-data">
 						<input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-							<label for="brand" class="control-label">Brand</label>
+							<label for="brand" class="control-label">แบรนด์</label>
 							<input type="text" name="brand" id="brand" class="form-control form-control-sm rounded-0" value="<?php echo isset($brand) ? $brand : ''; ?>" required />
 						</div>
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-							<label for="name" class="control-label">Name</label>
+							<label for="name" class="control-label">ชื่อสินค้า</label>
 							<input type="text" name="name" id="name" class="form-control form-control-sm rounded-0" value="<?php echo isset($name) ? $name : ''; ?>" required />
 						</div>
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
@@ -112,11 +112,11 @@ function get_platform_link($conn, $product_id, $platform)
 
 
 						<div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
-							<label for="description" class="control-label">Description</label>
+							<label for="description" class="control-label">รายละเอียดสินค้า</label>
 							<textarea rows="3" name="description" id="description" class="form-control form-control-sm rounded-0" required><?php echo isset($description) ? $description : ''; ?></textarea>
 						</div>
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-							<label for="price" class="control-label">Price</label>
+							<label for="price" class="control-label">ราคา</label>
 							<input type="number" step="any" name="price" id="price" class="form-control form-control-sm rounded-0 text-right" value="<?php echo isset($price) ? $price : ''; ?>" required />
 						</div>
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
@@ -140,17 +140,17 @@ function get_platform_link($conn, $product_id, $platform)
 						</div>
 
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-							<label for="status" class="control-label">Status</label>
+							<label for="status" class="control-label">สถานะ</label>
 							<select name="status" id="status" class="form-control form-control-sm rounded-0" required="required">
-								<option value="1" <?= isset($status) && $status == 1 ? 'selected' : '' ?>>Active</option>
-								<option value="0" <?= isset($status) && $status == 0 ? 'selected' : '' ?>>Inactive</option>
+								<option value="1" <?= isset($status) && $status == 1 ? 'selected' : '' ?>>กำลังใช้งาน</option>
+								<option value="0" <?= isset($status) && $status == 0 ? 'selected' : '' ?>>ไม่ได้ใช้งาน</option>
 							</select>
 						</div>
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-							<label for="status" class="control-label">Thumbnail</label>
+							<label for="status" class="control-label">รูปภาพสินค้า</label>
 							<div class="custom-file custom-file-sm">
 								<input type="file" class="custom-file-input rounded-0" id="customFile1" name="img" onchange="displayImg(this)">
-								<label class="custom-file-label" for="customFile1">Choose file</label>
+								<label class="custom-file-label" for="customFile1">เลือกไฟล์จากในเครื่อง</label>
 							</div>
 						</div>
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
@@ -160,8 +160,8 @@ function get_platform_link($conn, $product_id, $platform)
 				</div>
 			</div>
 			<div class="card-footer py-1 text-center">
-				<button class="btn btn-dark btn-sm bg-gradient-dark btn-flat" form="product-form"><i class="fa fa-save"></i> Save</button>
-				<a class="btn btn-light btn-sm bg-gradient-light border btn-flat" href="./?page=products"><i class="fa fa-times"></i> Cancel</a>
+				<button class="btn btn-success btn-sm btn-flat" form="product-form"><i class="fa fa-save"></i> บันทึก</button>
+				<a class="btn btn-danger btn-sm border btn-flat" href="./?page=products"><i class="fa fa-times"></i> ยกเลิก</a>
 			</div>
 		</div>
 	</div>

@@ -13,7 +13,7 @@
 </style>
 <div class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
-		<h3 class="card-title">List of Products</h3>
+		<h3 class="card-title text-bold">สินค้าทั้งหมด</h3>
 		<div class="card-tools">
 			<a href="./?page=products/manage_product" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> Create New</a>
 		</div>
@@ -31,16 +31,16 @@
 					<col width="10%">
 					<col width="10%">
 				</colgroup>
-				<thead>
+				<thead class="text-center">
 					<tr>
-						<th>#</th>
-						<th>Date Created</th>
-						<th>Image</th>
-						<th>Brand</th>
-						<th>Name</th>
-						<th>Price</th>
-						<th>Status</th>
-						<th>Action</th>
+						<th>ที่</th>
+						<th>วันที่สร้าง</th>
+						<th>รูปภาพสินค้า</th>
+						<th>แบรนด์</th>
+						<th>ชื่อสินค้า</th>
+						<th>ราคา</th>
+						<th>สถานะ</th>
+						<th>จัดการ</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -92,22 +92,22 @@
 
 							<td class="text-center">
 								<?php if ($row['status'] == 1): ?>
-									<span class="badge badge-success px-3 rounded-pill">Active</span>
+									<span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
 								<?php else: ?>
-									<span class="badge badge-danger px-3 rounded-pill">Inactive</span>
+									<span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>
 								<?php endif; ?>
 							</td>
-							<td align="center">
+							<td class="text-center">
 								<button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
-									Action
+									จัดการ
 									<span class="sr-only">Toggle Dropdown</span>
 								</button>
 								<div class="dropdown-menu" role="menu">
-									<a class="dropdown-item" href="./?page=products/view_product&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> View</a>
+									<a class="dropdown-item" href="./?page=products/view_product&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> ดู</a>
 									<div class="dropdown-divider"></div>
-									<a class="dropdown-item" href="./?page=products/manage_product&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> Edit</a>
+									<a class="dropdown-item" href="./?page=products/manage_product&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> แก้ไขสินค้า</a>
 									<div class="dropdown-divider"></div>
-									<a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> Delete</a>
+									<a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบสินค้า</a>
 								</div>
 							</td>
 						</tr>
