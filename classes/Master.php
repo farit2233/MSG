@@ -2,6 +2,12 @@
 header('Content-Type: application/json');
 ob_start();
 error_reporting(0);
+
+require_once(__DIR__ . '/../vendor/autoload.php');
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 require_once('../config.php');
 class Master extends DBConnection
 {
@@ -511,6 +517,67 @@ class Master extends DBConnection
 			$this->conn->query("DELETE FROM `cart_list` WHERE customer_id = '{$customer_id}' AND id IN ($ids_str)");
 
 			$this->conn->query("COMMIT");
+			// ดึงรายการสินค้าที่สั่งไป เพื่อแสดงในอีเมล
+			$items = $this->conn->query("SELECT oi.*, p.name 
+				FROM order_items oi 
+				INNER JOIN product_list p ON oi.product_id = p.id 
+				WHERE oi.order_id = {$oid}");
+
+			$mail = new PHPMailer(true);
+			try {
+				$mail->isSMTP();
+				$mail->Host = 'localhost'; // ถ้าใช้ Mailpit/Mailhog
+				$mail->Port = 1025;
+				$mail->SMTPAuth = false;
+				$mail->CharSet = 'UTF-8';
+
+				$mail->setFrom('shop@example.com', 'ร้านของเรา');
+				$mail->addAddress($customer['email'], $customer_name);
+
+				$mail->isHTML(true);
+				$mail->Subject = "📦 ยืนยันคำสั่งซื้อ #$code";
+
+				// สร้างข้อความอีเมล HTML
+				$body = "
+				<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
+				<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
+				<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
+				<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
+				<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
+				<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
+					<thead style='background:#16542b; color:white;'>
+					<tr>
+						<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
+						<th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
+						<th style='padding:8px; border:1px solid #ddd;'>ราคาต่อชิ้น</th>
+						<th style='padding:8px; border:1px solid #ddd;'>รวม</th>
+					</tr>
+					</thead>
+					<tbody>";
+
+				while ($row = $items->fetch_assoc()) {
+					$subtotal = $row['price'] * $row['quantity'];
+					$body .= "
+					<tr>
+					<td style='padding:8px; border:1px solid #ddd;'>{$row['name']}</td>
+					<td style='padding:8px; border:1px solid #ddd; text-align:center;'>{$row['quantity']}</td>
+					<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($row['price'], 2) . "</td>
+					<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($subtotal, 2) . "</td>
+					</tr>";
+				}
+
+				$body .= "</tbody></table>
+				<h3 style='text-align:right;'>รวมทั้งสิ้น: " . number_format($backend_total, 2) . " บาท</h3>
+				<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$delivery_address}</div></p>
+				<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:support@example.com'>support@example.com</a></p>
+				</div>";
+
+				$mail->Body = $body;
+				$mail->send();
+			} catch (Exception $e) {
+				error_log("❌ ส่งอีเมลไม่สำเร็จ: " . $mail->ErrorInfo);
+			}
+
 			$this->settings->set_flashdata('success', 'ชำระสินค้าสำเร็จ');
 			$resp = ['status' => 'success'];
 		} catch (Exception $e) {

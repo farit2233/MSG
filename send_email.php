@@ -6,7 +6,7 @@ use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php';
 require_once('config.php');  // <- อย่าลืมเชื่อม DB
 
-$order_id = 33;
+$order_id = 42;
 
 // 1. ดึงข้อมูลคำสั่งซื้อ
 $order = $conn->query("SELECT o.*, c.firstname, c.lastname, c.email
@@ -27,36 +27,51 @@ $items = $conn->query("SELECT oi.*, p.name
 
 // 3. สร้าง HTML สำหรับอีเมล
 $body = "
-<h3>ยืนยันคำสั่งซื้อ #{$code}</h3>
-<p>เรียนคุณ {$fullname},</p>
-<p>คำสั่งซื้อของคุณได้รับการชำระเรียบร้อยแล้ว มีรายละเอียดมีดังนี้</p>
-<table border='1' cellspacing='0' cellpadding='8' style='border-collapse: collapse; width:100%'>
-    <thead>
-        <tr>
-            <th>สินค้า</th>
-            <th>จำนวน</th>
-            <th>ราคาต่อหน่วย</th>
-            <th>รวม</th>
-        </tr>
+<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
+  <h2 style='color: #16542b; border-bottom: 2px solid #16542b; padding-bottom: 10px;'>🧾 คำสั่งซื้อของคุณ$code</h2>
+  
+  <p>เรียนคุณ <strong>$fullname</strong>,</p>
+  <p>ขอบคุณที่สั่งซื้อสินค้ากับร้านของเรา 🙏</p>
+  
+  <table style='width: 100%; border-collapse: collapse; margin-top: 20px;'>
+    <thead style='background-color: #16542b; color: white;'>
+      <tr>
+        <th style='padding: 8px; border: 1px solid #ddd;'>สินค้า</th>
+        <th style='padding: 8px; border: 1px solid #ddd;'>จำนวน</th>
+        <th style='padding: 8px; border: 1px solid #ddd;'>ราคาต่อชิ้น</th>
+        <th style='padding: 8px; border: 1px solid #ddd;'>รวม</th>
+      </tr>
     </thead>
-    <tbody>
-";
+    <tbody>";
+
 
 while ($row = $items->fetch_assoc()) {
     $subtotal = $row['price'] * $row['quantity'];
     $body .= "
-        <tr>
-            <td>{$row['name']}</td>
-            <td>{$row['quantity']}</td>
-            <td>" . number_format($row['price'], 2) . "</td>
-            <td>" . number_format($subtotal, 2) . "</td>
-        </tr>
-    ";
+      <tr>
+        <td style='padding: 8px; border: 1px solid #ddd;'>{$row['name']}</td>
+        <td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>{$row['quantity']}</td>
+        <td style='padding: 8px; border: 1px solid #ddd; text-align: right;'>" . number_format($row['price'], 2) . "</td>
+        <td style='padding: 8px; border: 1px solid #ddd; text-align: right;'>" . number_format($subtotal, 2) . "</td>
+      </tr>";
 }
 
-$body .= "</tbody></table>";
-$body .= "<p><strong>ยอดรวมทั้งหมด: {$total} บาท</strong></p>";
-$body .= "<p>เราจะดำเนินการจัดส่งโดยเร็วที่สุด 🙏 ขอบคุณครับ/ค่ะ</p>";
+$body .= "
+    </tbody>
+  </table>
+
+  <h3 style='text-align: right; color: #16542b;'>ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</h3>
+
+  <p style='margin-top: 30px;'>📦 ระบบกำลังดำเนินการจัดส่งไปยัง</p>
+  <div style='padding: 10px; background-color: #f9f9f9; border: 1px dashed #ccc;'>
+    {$order['delivery_address']}
+  </div>
+
+  <p style='margin-top: 30px;'>หากคุณมีคำถาม สามารถติดต่อเราได้ที่ <a href='mailto:support@example.com'>support@example.com</a></p>
+
+  <p style='color: #888;'>ขอขอบคุณอีกครั้งที่ไว้วางใจร้านของเรา 🙏 ขอบคุณครับ/ค่ะ</p>
+</div>
+";
 
 // 4. ส่งอีเมลด้วย PHPMailer
 $mail = new PHPMailer(true);

@@ -163,12 +163,27 @@ if ($customer) {
                                             <?= htmlentities($customer['postal_code']) ?>
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <th>บริการขนส่ง</th>
+                                        <td>
+                                            <?php
+                                            $shipping_qry = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1");
+                                            while ($row = $shipping_qry->fetch_assoc()):
+                                            ?>
+                                                <label>
+                                                    <input type="radio" name="shipping_method_id" value="<?= $row['id'] ?>" required>
+                                                    <?= $row['name'] ?> - <?= number_format($row['cost'], 2) ?> บาท
+                                                </label><br>
+                                            <?php endwhile; ?>
+                                        </td>
+                                    </tr>
                                 </table>
 
 
                             <?php else: ?>
                                 <h5 class="text-center text-muted">ไม่มีรายการที่เลือกสำหรับการชำระเงิน</h5>
                             <?php endif; ?>
+
                         </div>
                         <div class=" container-fluid">
                             <div class="cart-header-bar d-flex align-items-center gap-2">
