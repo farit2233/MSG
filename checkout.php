@@ -106,37 +106,64 @@ if ($customer) {
                                         กรุณาไปที่หน้า <a href="./?p=user" class="alert-link">บัญชีของฉัน</a> เพื่อกรอกข้อมูลที่อยู่ก่อนทำการสั่งซื้อ
                                     </div>
                                 <?php endif; ?>
-                                <ul class="list-group mb-3">
-                                    <?php foreach ($cart_items as $item): ?>
-                                        <?php
-                                        $is_discounted = $item['final_price'] < $item['price'];
-                                        ?>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div>
+                                <table class="table table-bordered mb-4">
+                                    <tr>
+                                        <td>
+                                            <?php foreach ($cart_items as $item): ?>
+                                                <?php
+                                                $is_discounted = $item['final_price'] < $item['price'];
+                                                ?>
+
                                                 <h6 class="my-0">
                                                     <?= $item['product'] ?>
                                                     <?php if ($is_discounted): ?>
                                                         <span class="badge badge-danger ml-1">ลดราคา</span>
                                                     <?php endif; ?>
                                                 </h6>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                จำนวน: <?= $item['quantity'] ?> ×
 
-                                                <small class="text-muted">
-                                                    จำนวน: <?= $item['quantity'] ?> ×
-                                                    <?php if ($is_discounted): ?>
-                                                        <span class="text-danger font-weight-bold"><?= format_num($item['final_price'], 2) ?></span>
-                                                        <span class="text-muted"><del><?= format_num($item['price'], 2) ?></del></span>
-                                                    <?php else: ?>
-                                                        <?= format_num($item['price'], 2) ?>
-                                                    <?php endif; ?>
-                                                </small>
-                                            </div>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+
+                                                <?php if ($is_discounted): ?>
+                                                    <span class="text-danger font-weight-bold"><?= format_num($item['final_price'], 2) ?></span>
+                                                    <span class="text-muted"><del><?= format_num($item['price'], 2) ?></del></span>
+                                                <?php else: ?>
+                                                    <?= format_num($item['price'], 2) ?>
+                                                <?php endif; ?>
+                                            </small>
+                                        </td>
+                                        <td>
                                             <span class="text-muted font-weight-bold"><?= format_num($item['final_price'] * $item['quantity'], 2) ?></span>
-                                        </li>
-                                    <?php endforeach; ?>
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <span><strong>รวม</strong></span>
-                                        <strong class="text-bold"><?= format_num($cart_total, 2) ?></strong>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>บริการขนส่ง</th>
+                                        <td>
+                                            <?php
+                                                $shipping_qry = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1");
+                                                while ($row = $shipping_qry->fetch_assoc()):
+                                            ?>
+                                                <label>
+                                                    <input type="radio" name="shipping_method_id" value="<?= $row['id'] ?>" required>
+                                                    <?= $row['name'] ?> - <?= number_format($row['cost'], 2) ?> บาท
+                                                </label><br>
+                                            <?php endwhile; ?>
+                                        </td>
+                                        <td></td>
+                                    </tr>
                                     </li>
+                                <?php endforeach; ?>
+                                <tr>
+                                    <th><strong>รวม</strong></th>
+                                    <td class="text-bold text-right"><?= format_num($cart_total, 2) ?></td>
+                                </tr>
                                 </ul>
 
 
@@ -161,20 +188,6 @@ if ($customer) {
                                             <?= !empty($customer['district']) ? 'อ.' . htmlentities($customer['district']) . ' ' : '' ?>
                                             <?= !empty($customer['province']) ? 'จ.' . htmlentities($customer['province']) : '' ?><br>
                                             <?= htmlentities($customer['postal_code']) ?>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>บริการขนส่ง</th>
-                                        <td>
-                                            <?php
-                                            $shipping_qry = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1");
-                                            while ($row = $shipping_qry->fetch_assoc()):
-                                            ?>
-                                                <label>
-                                                    <input type="radio" name="shipping_method_id" value="<?= $row['id'] ?>" required>
-                                                    <?= $row['name'] ?> - <?= number_format($row['cost'], 2) ?> บาท
-                                                </label><br>
-                                            <?php endwhile; ?>
                                         </td>
                                     </tr>
                                 </table>
