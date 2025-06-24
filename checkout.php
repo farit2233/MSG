@@ -108,6 +108,12 @@ if ($customer) {
                                 <?php endif; ?>
                                 <table class="table table-bordered mb-4">
                                     <tr>
+                                        <th>สั่งซื้อสินค้าแล้ว</th>
+                                        <th class="text-muted text-center">ราคาต่อหน่วย</th>
+                                        <th class="text-muted text-center">จำนวน</th>
+                                        <th class="text-muted text-center">รายการย่อย</th>
+                                    </tr>
+                                    <tr>
                                         <td>
                                             <?php foreach ($cart_items as $item): ?>
                                                 <?php
@@ -121,31 +127,26 @@ if ($customer) {
                                                     <?php endif; ?>
                                                 </h6>
                                         </td>
-                                        <td>
-                                            <small class="text-muted">
-                                                จำนวน: <?= $item['quantity'] ?> ×
-
-                                            </small>
+                                        <td class="text-right">
+                                            <?php if ($is_discounted): ?>
+                                                <span><?= format_num($item['final_price'], 2) ?></span>
+                                                <!--span class="text-muted"><del><?= format_num($item['price'], 2) ?></del></span-->
+                                            <?php else: ?>
+                                                <?= format_num($item['price'], 2) ?>
+                                            <?php endif; ?>
                                         </td>
-                                        <td>
-                                            <small class="text-muted">
-
-                                                <?php if ($is_discounted): ?>
-                                                    <span class="text-danger font-weight-bold"><?= format_num($item['final_price'], 2) ?></span>
-                                                    <span class="text-muted"><del><?= format_num($item['price'], 2) ?></del></span>
-                                                <?php else: ?>
-                                                    <?= format_num($item['price'], 2) ?>
-                                                <?php endif; ?>
-                                            </small>
+                                        <td class="text-right">
+                                            <?= $item['quantity'] ?>
                                         </td>
-                                        <td>
-                                            <span class="text-muted font-weight-bold"><?= format_num($item['final_price'] * $item['quantity'], 2) ?></span>
+                                        <td class="text-right">
+                                            <span><?= format_num($item['final_price'] * $item['quantity'], 2) ?></span>
                                         </td>
                                     </tr>
 
                                     <tr>
                                         <th>บริการขนส่ง</th>
-                                        <td>
+                                        <td></td>
+                                        <td class="text-right">
                                             <?php
                                                 $shipping_qry = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1");
                                                 while ($row = $shipping_qry->fetch_assoc()):
@@ -162,6 +163,8 @@ if ($customer) {
                                 <?php endforeach; ?>
                                 <tr>
                                     <th><strong>รวม</strong></th>
+                                    <td></td>
+                                    <td></td>
                                     <td class="text-bold text-right"><?= format_num($cart_total, 2) ?></td>
                                 </tr>
                                 </ul>
