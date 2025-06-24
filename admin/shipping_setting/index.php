@@ -65,10 +65,9 @@ if ($_settings->chk_flashdata('success')): ?>
                                             <span class="fa fa-trash text-danger"></span> Delete
                                         </a>
                                     </div>
-                                <?php else: ?>
-                                    <span class="text-muted">-</span>
                                 <?php endif; ?>
                             </td>
+
                         </tr>
                     <?php endwhile; ?>
                 </tbody>

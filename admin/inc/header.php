@@ -40,6 +40,7 @@ require_once('sess_auth.php');
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/summernote/summernote-bs4.min.css">
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style type="text/css">
     /* Chart.js */
     @keyframes chartjs-render-animation {
@@ -97,10 +98,6 @@ require_once('sess_auth.php');
   <script src="<?php echo base_url ?>plugins/jquery/jquery.min.js"></script>
   <!-- jQuery UI 1.11.4 -->
   <script src="<?php echo base_url ?>plugins/jquery-ui/jquery-ui.min.js"></script>
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="<?php echo base_url ?>plugins/bootstrap/css/bootstrap.min.css">
-  <!-- Bootstrap Bundle JS -->
-  <script src="<?php echo base_url ?>plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <!-- SweetAlert2 -->
   <script src="<?php echo base_url ?>plugins/sweetalert2/sweetalert2.min.js"></script>
   <!-- Toastr -->

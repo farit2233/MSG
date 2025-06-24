@@ -697,6 +697,73 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+	function save_shipping()
+	{
+		if (!isset($_SESSION['userdata']) || $_SESSION['userdata']['type'] != 1) {
+			http_response_code(403);
+			return json_encode(['status' => 'forbidden', 'message' => 'ไม่มีสิทธิ์ใช้งาน']);
+		}
+
+		extract($_POST);
+		$id = isset($id) ? intval($id) : 0;
+
+		// ป้องกัน SQL injection
+		$provider_id = intval($provider_id ?? 0);
+		$name = $this->conn->real_escape_string($display_name ?? '');
+		$description = $this->conn->real_escape_string($description ?? '');
+		$shipping_type = $this->conn->real_escape_string($shipping_type ?? 'fixed');
+		$cost = floatval($cost ?? 0);
+		$cod_enabled = ($_POST['cod_enabled'] == '1') ? 1 : 0;
+		$is_active = ($_POST['is_active'] == '1') ? 1 : 0;
+
+		if (!$provider_id || !$name) {
+			return json_encode(['status' => 'failed', 'msg' => 'กรุณากรอกข้อมูลให้ครบ']);
+		}
+
+		if ($id > 0) {
+			$sql = "UPDATE `shipping_methods` SET 
+				provider_id = '{$provider_id}',
+				name = '{$name}', 
+				description = '{$description}',
+				cost = '{$cost}',
+				shipping_type = '{$shipping_type}',
+				cod_enabled = '{$cod_enabled}',
+				is_active = '{$is_active}'
+			WHERE id = {$id}";
+		} else {
+			$sql = "INSERT INTO `shipping_methods` 
+			(provider_id, name, description, cost, shipping_type, cod_enabled, is_active)
+			VALUES 
+			('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$shipping_type}', '{$cod_enabled}', '{$is_active}')";
+		}
+
+		if ($this->conn->query($sql)) {
+			return json_encode(['status' => 'success']);
+		} else {
+			return json_encode(['status' => 'failed', 'msg' => $this->conn->error]);
+		}
+	}
+
+	function delete_shipping()
+	{
+		// ป้องกันการเข้าถึงโดยไม่ใช่ admin
+		if (!isset($_SESSION['userdata']) || $_SESSION['userdata']['type'] != 1) {
+			http_response_code(403); // forbidden
+			return json_encode(['status' => 'forbidden', 'message' => 'ไม่มีสิทธิ์ใช้งาน']);
+		}
+
+		$id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+		if ($id <= 0) {
+			return json_encode(['status' => 'error', 'message' => 'ID ไม่ถูกต้อง']);
+		}
+
+		$delete = $this->conn->query("DELETE FROM `shipping_methods` WHERE id = '{$id}'");
+		if ($delete) {
+			return 1; // สำหรับ JS success check
+		} else {
+			return json_encode(['status' => 'error', 'message' => $this->conn->error]);
+		}
+	}
 }
 
 $Master = new Master();
@@ -738,6 +805,9 @@ switch ($action) {
 		ob_end_clean();  // เคลียร์ buffer
 		echo $result;
 		break;
+	case 'save_shipping':
+		echo $Master->save_shipping();
+		break;
 	case 'delete_order':
 		echo $Master->delete_order();
 		break;
@@ -749,6 +819,9 @@ switch ($action) {
 		break;
 	case 'delete_inquiry':
 		echo $Master->delete_inquiry();
+		break;
+	case 'delete_shipping':
+		echo $Master->delete_shipping();
 		break;
 	default:
 		// echo $sysset->index();
