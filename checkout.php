@@ -10,17 +10,17 @@ $cart_items = [];
 if (!empty($selected_items)) {
     $ids = implode(',', array_map('intval', $selected_items));
     $cart_qry = $conn->query("
-        SELECT 
-            c.*, 
-            p.name as product, 
-            p.price,
-            p.discount_type,
-            p.discount_value,
-            p.discounted_price
-        FROM cart_list c 
-        INNER JOIN product_list p ON c.product_id = p.id 
-        WHERE c.id IN ($ids) AND customer_id = '{$_settings->userdata('id')}'
-    ");
+    SELECT 
+        c.*, 
+        p.name as product, 
+        p.price,
+        p.discount_type,
+        p.discount_value,
+        p.discounted_price
+    FROM cart_list c 
+    INNER JOIN product_list p ON c.product_id = p.id 
+    WHERE c.id IN ($ids) AND customer_id = '{$_settings->userdata('id')}'
+");
     while ($row = $cart_qry->fetch_assoc()) {
         // คำนวณราคาหลังลดเพื่อแสดง
         $original_price = $row['price'];
@@ -87,6 +87,38 @@ if ($customer) {
         color: white;
         display: inline-block;
     }
+
+    .product-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 350px;
+    }
+
+    tr.no-border td,
+    tr.no-border th {
+        border: none !important;
+    }
+
+    .cart-items-list table {
+        display: table;
+    }
+
+
+    @media only screen and (max-width: 768px) {
+        .product-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100px;
+        }
+
+        table.small-table,
+        table.small-table th,
+        table.small-table td {
+            font-size: 14px;
+        }
+    }
 </style>
 <section class="py-3">
     <div class="container">
@@ -101,100 +133,103 @@ if ($customer) {
                             </div>
                             <?php if (!empty($cart_items)): ?>
                                 <?php if (empty($full_address)): ?>
+
                                     <div class="alert alert-warning text-center">
                                         <strong>ยังไม่มีที่อยู่จัดส่ง!</strong><br>
                                         กรุณาไปที่หน้า <a href="./?p=user" class="alert-link">บัญชีของฉัน</a> เพื่อกรอกข้อมูลที่อยู่ก่อนทำการสั่งซื้อ
                                     </div>
                                 <?php endif; ?>
-                                <table class="table table-bordered mb-4">
-                                    <tr>
-                                        <th>สั่งซื้อสินค้าแล้ว</th>
-                                        <th class="text-muted text-center">ราคาต่อหน่วย</th>
-                                        <th class="text-muted text-center">จำนวน</th>
-                                        <th class="text-muted text-center">รายการย่อย</th>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <?php foreach ($cart_items as $item): ?>
-                                                <?php
-                                                $is_discounted = $item['final_price'] < $item['price'];
-                                                ?>
+                                <?php $default_shipping = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1 ORDER BY id ASC LIMIT 1")->fetch_assoc();
+                                $default_shipping_id = $default_shipping['id'];
+                                $default_shipping_name = $default_shipping['name'];
+                                $default_shipping_cost = $default_shipping['cost'];
+                                $grand_total = $cart_total + $default_shipping_cost; ?>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered mb-4 small-table">
+                                        <tr>
+                                            <th>สั่งซื้อสินค้าแล้ว</th>
+                                            <th class="text-muted text-right" colspan="2">ราคาต่อหน่วย</th>
+                                            <th class="text-muted text-right">จำนวน</th>
+                                            <th class="text-muted text-right">รายการย่อย</th>
+                                        </tr>
 
-                                                <h6 class="my-0">
-                                                    <?= $item['product'] ?>
-                                                    <?php if ($is_discounted): ?>
-                                                        <span class="badge badge-danger ml-1">ลดราคา</span>
-                                                    <?php endif; ?>
-                                                </h6>
-                                        </td>
-                                        <td class="text-right">
-                                            <?php if ($is_discounted): ?>
-                                                <span><?= format_num($item['final_price'], 2) ?></span>
-                                                <!--span class="text-muted"><del><?= format_num($item['price'], 2) ?></del></span-->
-                                            <?php else: ?>
-                                                <?= format_num($item['price'], 2) ?>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="text-right">
-                                            <?= $item['quantity'] ?>
-                                        </td>
-                                        <td class="text-right">
-                                            <span><?= format_num($item['final_price'] * $item['quantity'], 2) ?></span>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>บริการขนส่ง</th>
-                                        <td></td>
-                                        <td class="text-right">
+                                        <?php foreach ($cart_items as $item): ?>
                                             <?php
-                                                $shipping_qry = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1");
-                                                while ($row = $shipping_qry->fetch_assoc()):
+                                            $is_discounted = $item['final_price'] < $item['price'];
                                             ?>
-                                                <label>
-                                                    <input type="radio" name="shipping_method_id" value="<?= $row['id'] ?>" required>
-                                                    <?= $row['name'] ?> - <?= number_format($row['cost'], 2) ?> บาท
-                                                </label><br>
-                                            <?php endwhile; ?>
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                    </li>
-                                <?php endforeach; ?>
-                                <tr>
-                                    <th><strong>รวม</strong></th>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="text-bold text-right"><?= format_num($cart_total, 2) ?></td>
-                                </tr>
-                                </ul>
+                                            <tr class="no-border">
+                                                <td>
+                                                    <h6 class="my-0 product-name"><?= $item['product'] ?></h6>
+                                                </td>
+                                                <td class="text-right" colspan="2">
+                                                    <?php if ($is_discounted): ?>
+                                                        <span><?= format_num($item['final_price'], 2) ?></span>
+                                                        <!-- <span class="text-muted"><del><?= format_num($item['price'], 2) ?></del></span> -->
+                                                    <?php else: ?>
+                                                        <?= format_num($item['price'], 2) ?>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="text-right">
+                                                    <?= $item['quantity'] ?>
+                                                </td>
+                                                <td class="text-right">
+                                                    <span><?= format_num($item['final_price'] * $item['quantity'], 2) ?></span>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+
+                                        <!-- บริการขนส่ง -->
+                                        <tr class="no-border">
+                                            <th>บริการขนส่ง</th>
+                                            <td class="text-right" colspan="2">
+                                                <span id="shipping_method_name" style="margin-left: 10px;"><?= $default_shipping_name ?></span>
+                                            </td>
+                                            <td class="text-right">
+                                                <a href="javascript:void(0);" onclick="openShippingModal()">เปลี่ยน</a>
+                                            </td>
+                                            <td class="text-right">
+                                                <label id="shipping-cost"><?= number_format($default_shipping_cost, 2) ?> บาท</label>
+                                            </td>
+                                        </tr>
 
 
-                                <table class="table table-bordered mb-4">
-                                    <tr>
-                                        <th>ชื่อ</th>
-                                        <td><?= htmlentities($customer['firstname'] . ' ' . $customer['middlename'] . ' ' . $customer['lastname']) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email</th>
-                                        <td><?= htmlentities($customer['email']) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>เบอร์โทร</th>
-                                        <td><?= htmlentities($customer['contact']) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>ที่อยู่</th>
-                                        <td>
-                                            <?= htmlentities($customer['address']) ?><br>
-                                            <?= !empty($customer['sub_district']) ? 'ต.' . htmlentities($customer['sub_district']) . ' ' : '' ?>
-                                            <?= !empty($customer['district']) ? 'อ.' . htmlentities($customer['district']) . ' ' : '' ?>
-                                            <?= !empty($customer['province']) ? 'จ.' . htmlentities($customer['province']) : '' ?><br>
-                                            <?= htmlentities($customer['postal_code']) ?>
-                                        </td>
-                                    </tr>
-                                </table>
+                                        <tr>
+                                            <th><strong>รวม</strong></th>
+                                            <td colspan="4">
+                                                <h5 class="text-bold text-right">
+                                                    <span id="order-total-text"><?= format_num($grand_total, 2) ?></span> บาท
+                                                </h5>
+                                            </td>
+                                        </tr>
+                                    </table>
 
+                                    <table class="table table-bordered mb-4 small-table">
+                                        <tr>
+                                            <th colspan="2">
+                                                <h5 class="text-bold">ที่อยู่จัดส่ง</h5>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>ชื่อ</th>
+                                            <td><?= htmlentities($customer['firstname'] . ' ' . $customer['middlename'] . ' ' . $customer['lastname']) ?></td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>เบอร์โทร</th>
+                                            <td><?= htmlentities($customer['contact']) ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>ที่อยู่</th>
+                                            <td>
+                                                <?= htmlentities($customer['address']) ?><br>
+                                                <?= !empty($customer['sub_district']) ? 'ต.' . htmlentities($customer['sub_district']) . ' ' : '' ?>
+                                                <?= !empty($customer['district']) ? 'อ.' . htmlentities($customer['district']) . ' ' : '' ?>
+                                                <?= !empty($customer['province']) ? 'จ.' . htmlentities($customer['province']) : '' ?><br>
+                                                <?= htmlentities($customer['postal_code']) ?>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
 
                             <?php else: ?>
                                 <h5 class="text-center text-muted">ไม่มีรายการที่เลือกสำหรับการชำระเงิน</h5>
@@ -207,8 +242,10 @@ if ($customer) {
                                 <h3 class="d-inline mb-0">รูปแบบการชำระเงิน</h3>
                             </div>
                             <form action="" id="order-form">
-                                <input type="hidden" name="total_amount" value="<?= $cart_total ?>">
+                                <input type="hidden" name="total_amount" id="total_amount" value="<?= $grand_total ?>">
                                 <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
+                                <input type="hidden" name="shipping_cost" id="shipping_cost" value="<?= $default_shipping_cost ?>">
+                                <input type="hidden" name="shipping_method_id" id="shipping_method_id" value="<?= $default_shipping_id ?>">
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                                 <div class="py-1 text-center">
                                     <button class="btn addcart rounded-pill"
@@ -223,6 +260,31 @@ if ($customer) {
             </div>
         </div>
     </div>
+    <div class="modal" id="shippingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">เลือกบริการขนส่ง</h5>
+                    <button type="button" class="close" onclick="closeShippingModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <?php
+                    $shipping_qry = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1");
+                    while ($row = $shipping_qry->fetch_assoc()):
+                    ?>
+                        <div style="margin-bottom: 10px;">
+                            <button type="button"
+                                class="btn btn-outline-primary btn-block"
+                                onclick="selectShipping('<?= $row['id'] ?>', '<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>', <?= $row['cost'] ?>)">
+                                <?= $row['name'] ?> - <?= number_format($row['cost'], 2) ?> บาท
+                            </button>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>
 <script>
     $('#order-form').submit(function(e) {
@@ -245,4 +307,37 @@ if ($customer) {
             }
         });
     });
+
+    function openShippingModal() {
+        document.getElementById('shippingModal').style.display = 'block';
+    }
+
+    function closeShippingModal() {
+        document.getElementById('shippingModal').style.display = 'none';
+    }
+
+    function selectShipping(id, name, cost) {
+        document.getElementById('shipping_method_id').value = id;
+        document.getElementById('shipping_method_name').innerText = name;
+        document.getElementById('shipping_cost').value = cost;
+
+        // แสดงค่าส่ง
+        document.getElementById('shipping-cost').innerText = cost.toLocaleString('th-TH', {
+            minimumFractionDigits: 2
+        }) + ' บาท';
+
+        // คำนวณยอดรวมรวมค่าส่ง
+        let cartTotal = parseFloat(<?= $cart_total ?>);
+        let grandTotal = cartTotal + cost;
+
+        // อัปเดตค่าแสดงผล
+        document.getElementById('order-total-text').innerText = grandTotal.toLocaleString('th-TH', {
+            minimumFractionDigits: 2
+        });
+
+        // ✅ อัปเดตฟอร์มให้ส่งยอดรวมจริงไปหลังบ้าน
+        document.querySelector('input[name="total_amount"]').value = grandTotal;
+
+        closeShippingModal();
+    }
 </script>
