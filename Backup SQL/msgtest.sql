@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 17, 2025 at 09:43 AM
+-- Generation Time: Jun 24, 2025 at 07:54 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -63,7 +63,8 @@ INSERT INTO `category_list` (`id`, `name`, `description`, `status`, `delete_flag
 (6, 'Keyboard/คีย์บอร์ด', 'Keyboard/คีย์บอร์ด', 1, 0, '2025-06-17 13:37:41', '2025-06-17 13:37:41'),
 (7, 'HEADSET/หูฟัง', 'HEADSET/หูฟัง', 1, 0, '2025-06-17 13:42:26', '2025-06-17 13:42:26'),
 (8, 'ขนม', 'ขนม', 1, 0, '2025-06-17 13:50:33', '2025-06-17 13:50:33'),
-(9, 'ผงชงดื่ม', 'ผงชงดื่ม', 1, 0, '2025-06-17 14:20:49', '2025-06-17 14:20:49');
+(9, 'ผงชงดื่ม', 'ผงชงดื่ม', 1, 0, '2025-06-17 14:20:49', '2025-06-17 14:20:49'),
+(10, 'เทส2', 'เทส2', 1, 0, '2025-06-17 21:43:06', '2025-06-17 21:43:06');
 
 -- --------------------------------------------------------
 
@@ -105,7 +106,7 @@ INSERT INTO `customer_list` (`id`, `firstname`, `middlename`, `lastname`, `gende
 (9, 'นัทตี้', '', 'แต๋วแตก', 'ชาย', '055-555-5656', 'nutty@gmail.com', '55/5', 'ตลกจัง', NULL, 'ขำก๊าก', '55555', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/9.png?v=1748624417', '2025-05-31 00:00:17', '2025-05-31 00:00:17'),
 (10, 'address', '', 'pro', 'ชาย', '011-777-9999', 'address@gmail.com', '21 หมู่ 5 ถนนเพชเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '921110', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/10.png?v=1749005687', '2025-06-04 09:54:47', '2025-06-04 10:00:11'),
 (11, 'Address', '', '2', 'หญิง', '011-999-7777', 'address2@gmail.com', '50/5', 'บางรัก', 'บางบ่อ', 'สมุทรปราการ', '10560', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/11.png?v=1749006171', '2025-06-04 10:02:51', '2025-06-04 10:02:51'),
-(12, 'ีuser2', '', '2', 'ชาย', '777-888-9999', 'user2@gmail.com', '33', 'หมาป่า', 'เดียวดาย', 'ตัวเทา', '78945', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/12.png?v=1749007549', '2025-06-04 10:25:49', '2025-06-04 10:28:33'),
+(12, 'หมาป่าเดียวดาย', '', 'สมาธิ', 'Male', '777-888-9999', 'user2@gmail.com', '33', 'หมาป่า', 'เดียวดาย', 'ตัวเทา', '78945', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/12.png?v=1749007549', '2025-06-04 10:25:49', '2025-06-24 14:39:48'),
 (13, 'ล.เล่เล่เล่', '', 'หัวเรือ', 'Female', '014-528-7575', 'ley@gmail.com', '21/8', 'นานา', 'เมือง', 'ตรัง', '92222', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/13.png?v=1749030420', '2025-06-04 16:47:00', '2025-06-04 16:55:23'),
 (14, 'นายหมาในดำใดดง', 'ณ', 'ป่ามะขาม', 'Male', '011-557-8686', 'wolf@gmail.com', '56/65 ถนนป่าดิบ', 'มะขามเปียก', 'เขียวมะขาม', 'ป่ามะขาม', '11224', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/14.png?v=1749117170', '2025-06-05 16:52:50', '2025-06-05 16:52:50'),
 (15, 'นายเอกวัน', '', 'สองไม่รองใคร', 'Male', '022-555-9898', 'user3@gmail.com', '41 ถนนเส้นตรง', 'โค้งนิด', 'บิดหน่อย', 'ทางเร็ว', '92124', '81dc9bdb52d04dc20036dbd8313ed055', NULL, '2025-06-17 12:58:09', '2025-06-17 13:00:37'),
@@ -135,7 +136,32 @@ INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`) VALUES
 (35, 14, 1, 100.00),
 (36, 14, 1, 100.00),
 (37, 14, 18, 100.00),
-(38, 14, 1, 100.00);
+(38, 14, 1, 100.00),
+(39, 14, 1, 5982.81),
+(40, 14, 1, 5982.81),
+(41, 27, 8, 587.16),
+(42, 14, 4, 5982.81),
+(42, 27, 3, 587.16),
+(43, 27, 6, 587.16),
+(44, 14, 1, 5982.81),
+(45, 27, 1, 587.16),
+(46, 27, 1, 587.16),
+(47, 27, 1, 587.16),
+(48, 27, 1, 587.16),
+(49, 27, 1, 587.16),
+(50, 14, 1, 5982.81),
+(51, 14, 2, 5982.81),
+(51, 27, 1, 587.16),
+(52, 27, 1, 587.16),
+(52, 14, 1, 5982.81),
+(53, 27, 3, 587.16),
+(53, 14, 3, 5982.81),
+(54, 27, 5, 587.16),
+(54, 14, 5, 5982.81),
+(55, 14, 7, 5982.81),
+(56, 27, 4, 587.16),
+(57, 14, 4, 5982.81),
+(58, 14, 1, 5982.81);
 
 -- --------------------------------------------------------
 
@@ -149,12 +175,12 @@ CREATE TABLE `order_list` (
   `customer_id` int NOT NULL,
   `delivery_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `total_amount` float(12,2) NOT NULL DEFAULT '0.00',
+  `shipping_method_id` int DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0=pending,\r\n1=packed,\r\n2=out for delivery,\r\n3=paid\r\n',
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `payment_status` tinyint DEFAULT '0' COMMENT '0=ยังไม่ชำระเงิน, 1=รอตรวจสอบ, 2=ชำระเงินแล้ว, 3=ล้มเหลว, 4=คืนเงินแล้ว',
-  `delivery_status` tinyint DEFAULT '0' COMMENT '0=ตรวจสอบคำสั่งซื้อ, 1=กำลังเตรียมของ, 2=แพ๊กของแล้ว, 3=พัสดุกำลังจัดส่ง, 4=พัสดุจัดส่งสำเร็จ, 5=พัสดุจัดส่งไม่สำเร็จ, 6=คืนของระหว่างทาง, 7=คืนของสำเร็จ',
-  `order_status` tinyint DEFAULT '0' COMMENT '0=ใหม่, 1=กำลังดำเนินการ, 2=เสร็จ, 3=ยกเลิก, 4=ระบบยกเลิก, 5=คืนของ',
+  `delivery_status` tinyint DEFAULT '0' COMMENT '0=ตรวจสอบคำสั่งซื้อ, 1=กำลังเตรียมของ, 2=แพ็คของแล้ว, 3=พัสดุกำลังจัดส่ง, 4=พัสดุจัดส่งสำเร็จ, 5=พัสดุจัดส่งไม่สำเร็จ, 6=คืนของระหว่างทาง, 7=คืนของสำเร็จ',
   `is_seen` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -162,14 +188,34 @@ CREATE TABLE `order_list` (
 -- Dumping data for table `order_list`
 --
 
-INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `status`, `date_created`, `date_updated`, `payment_status`, `delivery_status`, `order_status`, `is_seen`) VALUES
-(32, '2025061300006', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 1490.00, 0, '2025-06-13 16:43:24', '2025-06-17 10:57:08', 1, 0, 0, 1),
-(33, '2025061700001', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 500.00, 0, '2025-06-17 10:57:33', '2025-06-17 10:57:34', 0, 0, 0, 1),
-(34, '2025061700002', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 2880.00, 0, '2025-06-17 11:13:57', '2025-06-17 11:13:58', 0, 0, 0, 1),
-(35, '2025061700003', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 100.00, 0, '2025-06-17 11:47:46', '2025-06-17 11:51:32', 0, 0, 0, 1),
-(36, '2025061700004', 15, '41 ถนนเส้นตรง, ต.โค้งนิด, อ.บิดหน่อย, จ.ทางเร็ว, 92124', 100.00, 0, '2025-06-17 13:01:02', '2025-06-17 13:01:04', 0, 0, 0, 1),
-(37, '2025061700005', 15, '41 ถนนเส้นตรง, ต.โค้งนิด, อ.บิดหน่อย, จ.ทางเร็ว, 92124', 1800.00, 0, '2025-06-17 13:08:27', '2025-06-17 13:08:36', 0, 0, 0, 1),
-(38, '2025061700006', 16, '32 หมู่ 8 ถนนเสียงบรรเลง, ต.ทองคำเปลว, อ.ร้องจนหมด, จ.หนี้ไม่มี, 88994', 100.00, 0, '2025-06-17 13:18:08', '2025-06-17 13:18:09', 0, 0, 0, 1);
+INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_method_id`, `status`, `date_created`, `date_updated`, `payment_status`, `delivery_status`, `is_seen`) VALUES
+(32, '2025061300006', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 1490.00, NULL, 0, '2025-06-13 16:43:24', '2025-06-17 10:57:08', 1, 0, 1),
+(33, '2025061700001', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 500.00, NULL, 0, '2025-06-17 10:57:33', '2025-06-17 10:57:34', 0, 0, 1),
+(34, '2025061700002', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 2880.00, NULL, 0, '2025-06-17 11:13:57', '2025-06-17 11:13:58', 0, 0, 1),
+(35, '2025061700003', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 100.00, NULL, 0, '2025-06-17 11:47:46', '2025-06-17 11:51:32', 0, 0, 1),
+(36, '2025061700004', 15, '41 ถนนเส้นตรง, ต.โค้งนิด, อ.บิดหน่อย, จ.ทางเร็ว, 92124', 100.00, NULL, 0, '2025-06-17 13:01:02', '2025-06-17 13:01:04', 0, 0, 1),
+(37, '2025061700005', 15, '41 ถนนเส้นตรง, ต.โค้งนิด, อ.บิดหน่อย, จ.ทางเร็ว, 92124', 1800.00, NULL, 0, '2025-06-17 13:08:27', '2025-06-17 13:08:36', 0, 0, 1),
+(38, '2025061700006', 16, '32 หมู่ 8 ถนนเสียงบรรเลง, ต.ทองคำเปลว, อ.ร้องจนหมด, จ.หนี้ไม่มี, 88994', 100.00, NULL, 0, '2025-06-17 13:18:08', '2025-06-17 13:18:09', 0, 0, 1),
+(39, '2025061700007', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 5982.81, NULL, 0, '2025-06-17 20:39:21', '2025-06-18 11:32:01', 2, 1, 1),
+(40, '2025061800001', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 5982.81, NULL, 0, '2025-06-18 11:31:55', '2025-06-18 11:32:01', 0, 0, 1),
+(41, '2025061900001', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 4697.28, NULL, 0, '2025-06-19 14:18:07', '2025-06-19 14:18:09', 0, 0, 1),
+(42, '2025061900002', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 25692.72, NULL, 0, '2025-06-19 14:18:31', '2025-06-19 14:18:33', 0, 0, 1),
+(43, '2025061900003', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 3522.96, NULL, 0, '2025-06-19 15:44:02', '2025-06-19 15:47:18', 0, 0, 1),
+(44, '2025061900004', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 5982.81, NULL, 0, '2025-06-19 15:47:23', '2025-06-19 15:47:41', 0, 0, 1),
+(45, '2025061900005', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 587.16, NULL, 0, '2025-06-19 15:50:14', '2025-06-19 15:50:40', 0, 0, 1),
+(46, '2025061900006', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 587.16, NULL, 0, '2025-06-19 15:50:47', '2025-06-19 15:50:59', 0, 0, 1),
+(47, '2025061900007', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 587.16, NULL, 0, '2025-06-19 15:57:38', '2025-06-19 16:00:06', 0, 0, 1),
+(48, '2025061900008', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 587.16, NULL, 0, '2025-06-19 16:00:14', '2025-06-19 16:02:39', 0, 0, 1),
+(49, '2025061900009', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 587.16, NULL, 0, '2025-06-19 16:02:53', '2025-06-19 16:02:56', 0, 0, 1),
+(50, '2025061900010', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 5982.81, NULL, 0, '2025-06-19 16:05:32', '2025-06-19 16:12:10', 0, 0, 1),
+(51, '2025062400001', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 12602.78, NULL, 0, '2025-06-24 10:46:08', '2025-06-24 10:46:12', 0, 0, 1),
+(52, '2025062400002', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 6619.97, NULL, 0, '2025-06-24 10:49:31', '2025-06-24 10:49:34', 0, 0, 1),
+(53, '2025062400003', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 19759.91, NULL, 0, '2025-06-24 10:58:03', '2025-06-24 11:00:02', 0, 0, 1),
+(54, '2025062400004', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 32899.85, 1, 0, '2025-06-24 11:00:37', '2025-06-24 11:01:42', 0, 0, 1),
+(55, '2025062400005', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 41929.67, 1, 0, '2025-06-24 11:08:06', '2025-06-24 11:08:40', 0, 0, 1),
+(56, '2025062400006', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 2378.64, 3, 0, '2025-06-24 11:08:49', '2025-06-24 11:09:01', 0, 0, 1),
+(57, '2025062400007', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 23981.24, 1, 0, '2025-06-24 11:09:46', '2025-06-24 11:09:52', 0, 0, 1),
+(58, '2025062400008', 12, '33, ต.หมาป่า, อ.เดียวดาย, จ.ตัวเทา, 78945', 6020.81, 2, 0, '2025-06-24 14:40:31', '2025-06-24 14:41:07', 0, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -202,7 +248,7 @@ CREATE TABLE `product_links` (
 --
 
 INSERT INTO `product_links` (`product_id`, `shopee_url`, `lazada_url`, `tiktok_url`, `date_created`, `date_updated`) VALUES
-(14, 'https://shopee.co.th/GALAX-VGA-GEFORCE-RTX-4060-1-CLICK-2X-V3-OC-8GB-GDDR6-A0169885-i.62824618.29537145261?sp_atk=c7a9f461-46a6-4fc9-a120-d703188051ea&xptdk=c7a9f461-46a6-4fc9-a120-d703188051ea', 'https://www.lazada.co.th/products/pdp-i5751319564-s24506083959.html?spm=a2o4m.10453683.0.0.153428746zVXgA&search=store', '', '2025-06-12 10:51:24', '2025-06-17 13:56:49'),
+(14, 'https://shopee.co.th/GALAX-VGA-GEFORCE-RTX-4060-1-CLICK-2X-V3-OC-8GB-GDDR6-A0169885-i.62824618.29537145261?sp_atk=c7a9f461-46a6-4fc9-a120-d703188051ea&xptdk=c7a9f461-46a6-4fc9-a120-d703188051ea', 'https://www.lazada.co.th/products/pdp-i5751319564-s24506083959.html?spm=a2o4m.10453683.0.0.153428746zVXgA&search=store', '', '2025-06-12 10:51:24', '2025-06-18 08:52:34'),
 (20, 'https://shopee.co.th/Madcatz-MAD-60-68-HE-%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%A7%E0%B8%B4%E0%B8%95%E0%B8%8A%E0%B9%8C%E0%B9%81%E0%B8%A1%E0%B9%88%E0%B9%80%E0%B8%AB%E0%B8%A5%E0%B9%87%E0%B8%81%E0%B8%AA%E0%B9%8D%E0%B8%B2%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%A5%E0%B9%88%E0%B8%99%E0%B9%80%E0%B8%81%E0%B8%A1-61-68-%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B9%8C-Latency-%E0%B8%95%E0%B9%88%E0%B9%8D%E0%B8%B2-Full-Key-Hot-Swap-i.145792167.26366613520', '', '', '2025-06-17 13:40:27', '2025-06-17 13:40:27'),
 (21, 'https://shopee.co.th/iHAVECPU-HEADSET-(%E0%B8%AB%E0%B8%B9%E0%B8%9F%E0%B8%B1%E0%B8%87)-iHAVECPU-MUSES-WITH-MIC-(BLACK-RED)-i.15422060.25650552218', '', '', '2025-06-17 13:43:16', '2025-06-17 13:43:16'),
 (22, 'https://shopee.co.th/-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%B1%E0%B8%99%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B9%84%E0%B8%97%E0%B8%A2-FiiO-JD10-%E0%B8%AB%E0%B8%B9%E0%B8%9F%E0%B8%B1%E0%B8%87-IEMs-%E0%B9%84%E0%B8%94%E0%B8%A3%E0%B9%80%E0%B8%A7%E0%B8%AD%E0%B8%A3%E0%B9%8C-Dynamic-%E0%B8%AA%E0%B8%B8%E0%B8%94%E0%B8%84%E0%B8%B8%E0%B9%89%E0%B8%A1-%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%A5%E0%B9%88%E0%B8%99%E0%B9%80%E0%B8%81%E0%B8%A1-%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%9A-Hi-Res-i.1819391.29563989283', '', '', '2025-06-17 13:48:50', '2025-06-17 13:48:50'),
@@ -254,6 +300,56 @@ INSERT INTO `product_list` (`id`, `category_id`, `brand`, `name`, `description`,
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `shipping_methods`
+--
+
+CREATE TABLE `shipping_methods` (
+  `id` int NOT NULL,
+  `provider_id` int NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `cost` decimal(10,2) DEFAULT '0.00',
+  `shipping_type` enum('fixed','weight') COLLATE utf8mb4_general_ci DEFAULT 'fixed',
+  `cod_enabled` tinyint(1) DEFAULT '0',
+  `is_active` tinyint(1) DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `shipping_methods`
+--
+
+INSERT INTO `shipping_methods` (`id`, `provider_id`, `name`, `description`, `cost`, `shipping_type`, `cod_enabled`, `is_active`) VALUES
+(2, 4, 'J&T Express', 'บริการด่วนต้นทุนต่ำ', 38.00, 'fixed', 1, 1),
+(3, 2, 'Flash Express', 'บริการราคาประหยัดทั่วประเทศ', 50.00, 'fixed', 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_providers`
+--
+
+CREATE TABLE `shipping_providers` (
+  `id` int NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `logo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` tinyint(1) DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `shipping_providers`
+--
+
+INSERT INTO `shipping_providers` (`id`, `name`, `description`, `logo`, `status`) VALUES
+(1, 'Kerry Express', 'บริการด่วนพิเศษ 1-2 วัน', NULL, 1),
+(2, 'Flash Express', 'บริการราคาประหยัดทั่วประเทศ', NULL, 1),
+(3, 'ไปรษณีย์ไทย', 'บริการ EMS, ลงทะเบียน, พัสดุ', NULL, 1),
+(4, 'J&T Express', 'บริการด่วนต้นทุนต่ำ', NULL, 1),
+(5, 'SCG Express', 'เหมาะสำหรับของเย็นหรือชิ้นใหญ่', NULL, 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `stock_list`
 --
 
@@ -279,7 +375,7 @@ INSERT INTO `stock_list` (`id`, `product_id`, `code`, `quantity`, `date_created`
 (19, 24, 'P100001', 1000.00, '2025-06-17 14:22:29', '2025-06-17 14:22:29'),
 (20, 25, 'H300001', 1000.00, '2025-06-17 14:25:53', '2025-06-17 14:25:53'),
 (21, 26, 'H400001', 1000.00, '2025-06-17 14:27:41', '2025-06-17 14:27:41'),
-(22, 27, 'H500001', 1000.00, '2025-06-17 14:30:43', '2025-06-17 14:30:43');
+(23, 27, '101010', 220.00, '2025-06-19 14:17:20', '2025-06-19 14:17:20');
 
 -- --------------------------------------------------------
 
@@ -311,7 +407,7 @@ CREATE TABLE `system_info` (
 --
 
 INSERT INTO `system_info` (`id`, `meta_field`, `meta_value`) VALUES
-(1, 'name', 'MSG'),
+(1, 'name', 'MSG.com'),
 (6, 'short_name', ''),
 (11, 'logo', 'uploads/logo.png?v=1747713664'),
 (13, 'user_avatar', 'uploads/user_avatar.jpg'),
@@ -414,6 +510,19 @@ ALTER TABLE `product_list`
   ADD KEY `category_id` (`category_id`);
 
 --
+-- Indexes for table `shipping_methods`
+--
+ALTER TABLE `shipping_methods`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `provider_id` (`provider_id`);
+
+--
+-- Indexes for table `shipping_providers`
+--
+ALTER TABLE `shipping_providers`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `stock_list`
 --
 ALTER TABLE `stock_list`
@@ -448,13 +557,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT for table `category_list`
 --
 ALTER TABLE `category_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `customer_list`
@@ -466,7 +575,7 @@ ALTER TABLE `customer_list`
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- AUTO_INCREMENT for table `product_list`
@@ -475,10 +584,22 @@ ALTER TABLE `product_list`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
+-- AUTO_INCREMENT for table `shipping_methods`
+--
+ALTER TABLE `shipping_methods`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `shipping_providers`
+--
+ALTER TABLE `shipping_providers`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `stock_list`
 --
 ALTER TABLE `stock_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `stock_out`
@@ -540,6 +661,12 @@ ALTER TABLE `product_links`
 --
 ALTER TABLE `product_list`
   ADD CONSTRAINT `category_id_fk_pl` FOREIGN KEY (`category_id`) REFERENCES `category_list` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `shipping_methods`
+--
+ALTER TABLE `shipping_methods`
+  ADD CONSTRAINT `shipping_methods_ibfk_1` FOREIGN KEY (`provider_id`) REFERENCES `shipping_providers` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `stock_list`
