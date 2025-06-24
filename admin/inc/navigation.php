@@ -46,7 +46,7 @@
               </li>
               <li class="nav-item dropdown">
                 <a href="./?page=products" class="nav-link nav-products">
-                  <i class="nav-icon fas fa-glasses"></i>
+                  <i class="nav-icon fas fa-boxes"></i>
                   <p>
                     สินค้าทั้งหมด
                   </p>
@@ -54,7 +54,7 @@
               </li>
               <li class="nav-item dropdown">
                 <a href="./?page=inventory" class="nav-link nav-inventory">
-                  <i class="nav-icon fas fa-clipboard"></i>
+                  <i class="nav-icon fas fa-warehouse"></i>
                   <p>
                     สต๊อกสินค้า
                   </p>
