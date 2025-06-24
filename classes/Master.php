@@ -714,7 +714,7 @@ class Master extends DBConnection
 		$shipping_type = $this->conn->real_escape_string($shipping_type ?? 'fixed');
 		$cost = floatval($cost ?? 0);
 		$cod_enabled = ($_POST['cod_enabled'] == '1') ? 1 : 0;
-		$is_active = ($_POST['is_active'] == '1') ? 1 : 0;
+		$is_active = ($_POST['cod_enabled'] == '1') ? 1 : 0;
 
 		if (!$provider_id || !$name) {
 			return json_encode(['status' => 'failed', 'msg' => 'กรุณากรอกข้อมูลให้ครบ']);
