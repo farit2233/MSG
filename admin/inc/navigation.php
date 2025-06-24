@@ -167,6 +167,14 @@
                   </p>
                 </a>
               </li>
+              <li class="nav-item dropdown">
+                <a href="./?page=shipping_setting" class="nav-link nav-shipping_setting">
+                  <i class="nav-icon fas fa-truck"></i>
+                  <p>
+                    ตั้งค่าขนส่ง
+                  </p>
+                </a>
+              </li>
               <?php if ($_settings->userdata('type') == 1): ?>
                 <li class="nav-header">Maintenance</li>
                 <li class="nav-item dropdown">
