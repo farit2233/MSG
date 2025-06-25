@@ -129,18 +129,7 @@ class SystemSettings extends DBConnection
 						break;
 					}
 					list($width, $height) = getimagesize($_FILES['banners']['tmp_name'][$k]);
-					if ($width > 1200 || $height > 480) {
-						if ($width > $height) {
-							$perc = ($width - 1200) / $width;
-							$width = 1200;
-							$height = $height - ($height * $perc);
-						} else {
-							$perc = ($height - 480) / $height;
-							$height = 480;
-							$width = $width - ($width * $perc);
-						}
-					}
-					$temp = imagescale($uploadfile, $width, $height);
+					$temp = imagescale($uploadfile, 1920, 600, IMG_BILINEAR_FIXED);
 					$spath = base_app . $banner_path . '/' . $_FILES['banners']['name'][$k];
 					$i = 1;
 					while (true) {
