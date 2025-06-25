@@ -33,6 +33,50 @@ class Master extends DBConnection
 			exit;
 		}
 	}
+	function resize_image($src_path, $dest_path, $max_width, $max_height)
+	{
+		list($src_w, $src_h, $type) = getimagesize($src_path);
+
+		$scale = min($max_width / $src_w, $max_height / $src_h);
+		if ($scale >= 1) { // ภาพเล็กกว่าขนาด max ไม่ต้องย่อ
+			return copy($src_path, $dest_path);
+		}
+
+		$new_w = floor($src_w * $scale);
+		$new_h = floor($src_h * $scale);
+
+		$dst_img = imagecreatetruecolor($new_w, $new_h);
+
+		// สำหรับ PNG ให้รองรับ transparency
+		if ($type == IMAGETYPE_PNG) {
+			imagealphablending($dst_img, false);
+			imagesavealpha($dst_img, true);
+		}
+
+		switch ($type) {
+			case IMAGETYPE_JPEG:
+				$src_img = imagecreatefromjpeg($src_path);
+				break;
+			case IMAGETYPE_PNG:
+				$src_img = imagecreatefrompng($src_path);
+				break;
+			default:
+				return false; // ไฟล์ประเภทอื่นไม่รองรับ
+		}
+
+		imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $new_w, $new_h, $src_w, $src_h);
+
+		if ($type == IMAGETYPE_JPEG) {
+			imagejpeg($dst_img, $dest_path, 85);
+		} elseif ($type == IMAGETYPE_PNG) {
+			imagepng($dst_img, $dest_path);
+		}
+
+		imagedestroy($src_img);
+		imagedestroy($dst_img);
+
+		return true;
+	}
 	function delete_img()
 	{
 		extract($_POST);
@@ -174,45 +218,26 @@ class Master extends DBConnection
 			if (!empty($_FILES['img']['tmp_name'])) {
 				$img_path = "uploads/product/";
 				if (!is_dir(base_app . $img_path)) {
-					mkdir(base_app . $img_path);
+					mkdir(base_app . $img_path, 0755, true);
 				}
-				$accept = array('image/jpeg', 'image/png', 'image/jpg');
+
+				$accept = ['image/jpeg', 'image/png', 'image/jpg'];
 				if (!in_array($_FILES['img']['type'], $accept)) {
 					$resp['msg'] .= " Image file type is invalid";
 				} else {
-					if ($_FILES['img']['type'] == 'image/jpeg')
-						$uploadfile = imagecreatefromjpeg($_FILES['img']['tmp_name']);
-					elseif ($_FILES['img']['type'] == 'image/png')
-						$uploadfile = imagecreatefrompng($_FILES['img']['tmp_name']);
-					if (!$uploadfile) {
-						$resp['msg'] .= " Image is invalid";
+					$filename = $_FILES['img']['name'];
+					$spath = $img_path . $filename;
+					$i = 1;
+					while (is_file(base_app . $spath)) {
+						$spath = $img_path . $i++ . '_' . $filename;
+					}
+
+					$success = $this->resize_image($_FILES['img']['tmp_name'], base_app . $spath, 1000, 1000);
+
+					if ($success) {
+						$this->conn->query("UPDATE product_list SET image_path = CONCAT('{$spath}', '?v=', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = '{$product_id}'");
 					} else {
-						list($width, $height) = getimagesize($_FILES['img']['tmp_name']);
-						if ($width > 640 || $height > 480) {
-							if ($width > $height) {
-								$perc = ($width - 640) / $width;
-								$width = 640;
-								$height = $height - ($height * $perc);
-							} else {
-								$perc = ($height - 480) / $height;
-								$height = 480;
-								$width = $width - ($width * $perc);
-							}
-						}
-						$temp = imagescale($uploadfile, $width, $height);
-						$spath = $img_path . '/' . $_FILES['img']['name'];
-						$i = 1;
-						while (is_file(base_app . $spath)) {
-							$spath = $img_path . '/' . ($i++) . '_' . $_FILES['img']['name'];
-						}
-						if ($_FILES['img']['type'] == 'image/jpeg')
-							$upload = imagejpeg($temp, base_app . $spath, 60);
-						elseif ($_FILES['img']['type'] == 'image/png')
-							$upload = imagepng($temp, base_app . $spath, 6);
-						if ($upload) {
-							$this->conn->query("UPDATE product_list set image_path = CONCAT('{$spath}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$product_id}' ");
-						}
-						imagedestroy($temp);
+						$resp['msg'] .= " Failed to resize image.";
 					}
 				}
 			}

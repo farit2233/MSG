@@ -35,9 +35,8 @@
         transition: all .3s ease-in-out;
     }
 
-
     .product-item:hover .product-img {
-        transform: scale(1.2)
+        transform: scale(1.1)
     }
 
     .bg-gradient-dark-FIXX {
