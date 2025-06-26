@@ -563,17 +563,29 @@ class Master extends DBConnection
 
 			$mail = new PHPMailer(true);
 			try {
+				//SMTP Setting
 				$mail->isSMTP();
-				$mail->Host = 'localhost';
-				$mail->Port = 1025;
-				$mail->SMTPAuth = false;
+				//$mail->Host = 'localhost';
+				//$mail->Port = 1025;
+				//$mail->SMTPAuth = false;
+
+
+				$mail->Host = 'smtp.gmail.com';
+				$mail->Port = 465;
+				$mail->SMTPAuth = true;
+				$mail->Username = "faritre5566@gmail.com";
+				$mail->Password = "bchljhaxoqflmbys";
+				$mail->SMTPSecure = "ssl";
+
 				$mail->CharSet = 'UTF-8';
-
-				$mail->setFrom('shop@example.com', 'ร้านของเรา');
-				$mail->addAddress($customer['email'], $customer_name);
-
+				//Email Setting
 				$mail->isHTML(true);
 				$mail->Subject = "📦 ยืนยันคำสั่งซื้อ #$code";
+
+				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->addAddress($customer['email'], $customer_name);
+
+
 
 				$body = "
 			<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
@@ -615,7 +627,7 @@ class Master extends DBConnection
 				</tr>
 				</tbody></table>
 			<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$delivery_address}</div></p>
-			<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:support@example.com'>support@example.com</a></p>
+			<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
 			</div>";
 
 				$mail->Body = $body;
