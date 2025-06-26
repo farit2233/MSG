@@ -27,11 +27,14 @@ if ($_settings->chk_flashdata('success')): ?>
         <div class="container-fluid">
             <table class="table table-hover table-striped table-bordered" id="shipping-list">
                 <thead>
-                    <tr>
-                        <th>#</th>
+                    <tr class="text-center">
+                        <th>ที่</th>
                         <th>ชื่อขนส่ง</th>
                         <th>คำอธิบาย</th>
-                        <th>ค่าขนส่ง</th>
+                        <th>ค่าจัดส่งคงที่</th>
+                        <th>จัดส่งตามขนาด S</th>
+                        <th>จัดส่งตามขนาด M</th>
+                        <th>จัดส่งตามขนาด L</th>
                         <th>สถานะ</th>
                         <th class="text-center action-buttons">จัดการ</th>
                     </tr>
@@ -47,6 +50,9 @@ if ($_settings->chk_flashdata('success')): ?>
                             <td><?= $row['name'] ?></td>
                             <td><?= $row['description'] ?></td>
                             <td><?= number_format($row['cost'], 2) ?> บาท</td>
+                            <td><?= $row['weight_cost_s'] ?></td>
+                            <td><?= $row['weight_cost_m'] ?></td>
+                            <td><?= $row['weight_cost_l'] ?></td>
                             <td class="text-center">
                                 <?= $row['is_active'] ? '<span class="badge badge-success">เปิดใช้งาน</span>' : '<span class="badge badge-secondary">ปิด</span>' ?>
                             </td>
