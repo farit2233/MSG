@@ -1,7 +1,7 @@
 <?php
 $main_category_id = null; // ป้องกัน warning
 $selected_extra_categories = [];
-
+$has_discount = (!empty($discount_type) && $discount_value > 0);
 if (isset($_GET['id']) && $_GET['id'] > 0) {
 	$qry = $conn->query("SELECT * from `product_list` where id = '{$_GET['id']}' ");
 	if ($qry->num_rows > 0) {
@@ -19,6 +19,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 		}
 	}
 }
+
 function get_platform_link($conn, $product_id, $platform)
 {
 	$col = "{$platform}_url"; // เช่น shopee_url
@@ -30,11 +31,26 @@ function get_platform_link($conn, $product_id, $platform)
 }
 
 ?>
+<style>
+	#cimg {
+		display: block;
+		/* ทำให้เป็นบล็อกเพื่อใช้ margin auto */
+		max-width: 300px;
+		/* กำหนดความกว้างสูงสุดตามต้องการ */
+		width: 100%;
+		/* ให้ขยายเต็มที่ในกรอบไม่เกิน max-width */
+		height: auto;
+		/* รักษาสัดส่วน */
+		margin: 0 auto;
+		/* จัดกึ่งกลางแนวนอน */
+	}
+</style>
 <div class="card card-outline card-primary rounded-0">
 	<div class="card-header">
 		<h1 class="card-title"><?php echo isset($id) ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'; ?></h1>
 	</div>
 	<form action="" id="product-form" method="POST" enctype="multipart/form-data">
+		<input type="hidden" name="calculated_size" id="calculated_size">
 		<input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
 		<div class="card-body">
 
@@ -145,21 +161,25 @@ function get_platform_link($conn, $product_id, $platform)
 				</div>
 				<div class="card-body">
 					<div class="custom-control custom-switch mb-3">
-						<input type="checkbox" class="custom-control-input" id="discount_toggle">
+						<input type="checkbox" class="custom-control-input" id="discount_toggle"
+							<?= (isset($discount_value) && $discount_value != 0) ? 'checked' : '' ?>>
+
 						<label class="custom-control-label" for="discount_toggle">เปิดใช้งานส่วนลด</label>
 					</div>
 					<div id="discount_section" class="border p-3 bg-light">
 						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="discount_type" id="discount_amount" value="amount">
+							<input class="form-check-input" type="radio" name="discount_type" id="discount_amount" value="amount"
+								<?= $discount_type == 'amount' ? 'checked' : '' ?>>
 							<label class="form-check-label" for="discount_amount">ลดเป็นจำนวนเงิน (บาท)</label>
 						</div>
 						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="discount_type" id="discount_percent" value="percent">
+							<input class="form-check-input" type="radio" name="discount_type" id="discount_percent" value="percent"
+								<?= $discount_type == 'percent' ? 'checked' : '' ?>>
 							<label class="form-check-label" for="discount_percent">ลดเป็นเปอร์เซ็นต์ (%)</label>
 						</div>
 						<div class="form-group mt-2">
 							<label>มูลค่าส่วนลด</label>
-							<input type="number" name="discount_value" class="form-control" min="0" step="any">
+							<input type="number" name="discount_value" class="form-control" min="0" step="any" value="<?= $discount_value ?>">
 						</div>
 						<div class="form-group">
 							<label>ราคาหลังหักส่วนลด</label>
@@ -191,14 +211,18 @@ function get_platform_link($conn, $product_id, $platform)
 							<div class="form-row">
 								<div class="col"><input type="number" step="any" name="dim_w" class="form-control" placeholder="กว้าง" value="<?= isset($dim_w) ? $dim_w : '' ?>"></div>
 								<div class="col"><input type="number" step="any" name="dim_l" class="form-control" placeholder="ยาว" value="<?= isset($dim_l) ? $dim_l : '' ?>"></div>
-								<div class="col"><input type="number" step="any" name="dim_h" class="form-control" placeholder="สูง" value="<?= isset($dim_h) ? $dim_h : '' ?>"></div>
-								<div class="col-auto d-flex align-items-center">cm</div>
+								<div class="input-group col">
+									<input type="number" step="any" name="dim_h" class="form-control" placeholder="สูง" value="<?= isset($dim_h) ? $dim_h : '' ?>">
+									<div class="input-group-append">
+										<span class="input-group-text">cm</span>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
 
 					<hr>
-					<h5>ค่าจัดส่ง (เปิด/ปิดการใช้งานได้)</h5>
+					<h5>ราคาขนส่ง</h5>
 					<table class="table table-bordered table-responsive-lg">
 						<thead class="thead-light">
 							<tr>
@@ -226,10 +250,7 @@ function get_platform_link($conn, $product_id, $platform)
 							?>
 								<tr>
 									<td>
-										<div class="custom-control custom-switch">
-											<input type="checkbox" class="custom-control-input shipping-toggle" id="ship<?= $method_id ?>" name="shipping_enabled[<?= $method_id ?>]" checked>
-											<label class="custom-control-label" for="ship<?= $method_id ?>"><?= $method_name ?></label>
-										</div>
+										<h6><?= $method_name ?></h6>
 									</td>
 									<td>
 										<input type="text" name="shipping_price[<?= $method_id ?>]" step="any" min="0" class="form-control shipping-price" id="shipping_price_<?= $method_id ?>" placeholder="ค่าคงที่ (บาท)" readonly>
@@ -238,6 +259,7 @@ function get_platform_link($conn, $product_id, $platform)
 										<input type="text" class="form-control parcel-size-display" id="parcel_size_<?= $method_id ?>" placeholder="ขนาด (S/M/L)" readonly>
 									</td>
 								</tr>
+
 							<?php endwhile; ?>
 						</tbody>
 					</table>
@@ -280,147 +302,43 @@ function get_platform_link($conn, $product_id, $platform)
 <script>
 	function displayImg(input) {
 		if (input.files && input.files[0]) {
-			var reader = new FileReader();
+			const reader = new FileReader();
 			reader.onload = function(e) {
 				$('#cimg').attr('src', e.target.result);
-				$(input).siblings('.custom-file-label').html(input.files[0].name)
-			}
-
+				$(input).siblings('.custom-file-label').html(input.files[0].name);
+			};
 			reader.readAsDataURL(input.files[0]);
 		} else {
-			$('#cimg').attr('src', "<?php echo validate_image(isset($image_path) ? $image_path : '') ?>");
-			$(input).siblings('.custom-file-label').html('Choose file')
+			$('#cimg').attr('src', "<?= validate_image(isset($image_path) ? $image_path : '') ?>");
+			$(input).siblings('.custom-file-label').html('Choose file');
 		}
 	}
-	$(document).ready(function() {
 
-		$('#category_id').select2({
-			placeholder: "Please Select Category Here",
-			width: '100%',
-			containerCssClass: 'form-control form-control-sm rounded-0'
-		})
-
-		$(function() {
-			$('.select2').select2({
-				width: '100%'
-			});
-			$('#discount_section').find('input').prop('disabled', true);
-
-			$('#discount_toggle').change(function() {
-				$('#discount_section').find('input').prop('disabled', !this.checked);
-			});
-		});
-
-		$(document).ready(function() {
-			// ซ่อน/แสดง ส่วนลดตาม toggle
-			$('#discount_toggle').change(function() {
-				$('#discount_section').toggle(this.checked);
-			});
-
-			// เริ่มต้น ถ้ามีการแก้ไขราคา, ส่วนลด หรือประเภทส่วนลด
-			$('input[name="price"], input[name="discount_value"], input[name="discount_type"]').on('input change', function() {
-				calculateFinalPrice();
-			});
-
-			function calculateFinalPrice() {
-				const price = parseFloat($('input[name="price"]').val()) || 0;
-				const discountType = $('input[name="discount_type"]:checked').val();
-				const discountValue = parseFloat($('input[name="discount_value"]').val()) || 0;
-				let finalPrice = price;
-
-				if (discountType === 'amount') {
-					finalPrice = price - discountValue;
-				} else if (discountType === 'percent') {
-					finalPrice = price - (price * discountValue / 100);
-				}
-
-				// ป้องกันราคาติดลบ
-				finalPrice = finalPrice < 0 ? 0 : finalPrice;
-
-				$('#final-price').val(finalPrice.toFixed(2));
-			}
-
-			// ถ้า checkbox เปิดใช้งานส่วนลดตอนโหลดหน้า ให้แสดง
-			if ($('#discount_toggle').is(':checked')) {
-				$('#discount_section').show();
-			} else {
-				$('#discount_section').hide();
-			}
-		});
-
-		$('#product-form').submit(function(e) {
-			e.preventDefault();
-			var _this = $(this)
-			$('.err-msg').remove();
-			start_loader();
-			$.ajax({
-				url: _base_url_ + "classes/Master.php?f=save_product",
-				data: new FormData($(this)[0]),
-				cache: false,
-				contentType: false,
-				processData: false,
-				method: 'POST',
-				type: 'POST',
-				dataType: 'json',
-				error: err => {
-					console.log(err)
-					alert_toast("เกิดข้อผิดพลาด", 'error');
-					end_loader();
-				},
-				success: function(resp) {
-					if (typeof resp == 'object' && resp.status == 'success') {
-						location.replace('./?page=products/view_product&id=' + resp.pid)
-					} else if (resp.status == 'failed' && !!resp.msg) {
-						var el = $('<div>')
-						el.addClass("alert alert-dark err-msg").text(resp.msg)
-						_this.prepend(el)
-						el.show('slow')
-						$("html, body").scrollTop(0);
-						end_loader()
-					} else {
-						alert_toast("เกิดข้อผิดพลาด", 'error');
-						end_loader();
-						console.log(resp)
-					}
-				}
-			})
-		})
-
-	})
-
-	function updateFinalPrice() {
-		let price = parseFloat($('#price').val()) || 0;
-		let discountType = $('#discount_type').val();
-		let discountValue = parseFloat($('#discount_value').val()) || 0;
+	function calculateFinalPrice() {
+		const price = parseFloat($('[name="price"]').val()) || 0;
+		const discountType = $('[name="discount_type"]:checked').val();
+		const discountValue = parseFloat($('[name="discount_value"]').val()) || 0;
 		let finalPrice = price;
 
 		if (discountType === 'amount') {
-			finalPrice = price - discountValue;
+			finalPrice -= discountValue;
 		} else if (discountType === 'percent') {
-			finalPrice = price - (price * discountValue / 100);
+			finalPrice -= (price * discountValue / 100);
 		}
 
-		// ป้องกันค่าติดลบ
-		finalPrice = finalPrice < 0 ? 0 : finalPrice;
-
-		// แสดงผล
+		finalPrice = Math.max(0, finalPrice);
+		$('#final-price').val(finalPrice.toFixed(2));
 		$('#final-price-display').text(finalPrice.toFixed(2) + ' บาท');
 	}
 
-	$('#price, #discount_type, #discount_value').on('input change', updateFinalPrice);
-
-	// เรียกตอนโหลดด้วย ถ้ามีค่า
-	updateFinalPrice();
-
 	function calculateShippingCosts() {
-		const w = parseFloat($('input[name="dim_w"]').val()) || 0;
-		const l = parseFloat($('input[name="dim_l"]').val()) || 0;
-		const h = parseFloat($('input[name="dim_h"]').val()) || 0;
-		const realWeight = parseFloat($('input[name="weight"]').val()) || 0;
+		const w = parseFloat($('[name="dim_w"]').val()) || 0;
+		const l = parseFloat($('[name="dim_l"]').val()) || 0;
+		const h = parseFloat($('[name="dim_h"]').val()) || 0;
+		const realWeight = parseFloat($('[name="weight"]').val()) || 0;
 
-		$.each(shippingMethods, function(methodId, data) {
-			const divider = data.divider;
-			const volumetricWeight = (w * l * h) / divider;
+		$.each(shippingMethods, (methodId, data) => {
+			const volumetricWeight = (w * l * h) / data.divider;
 			const finalWeight = Math.max(realWeight, volumetricWeight);
 
 			let parcelSize = 'S';
@@ -433,12 +351,80 @@ function get_platform_link($conn, $product_id, $platform)
 				estimatedPrice = data.l;
 			}
 
-			$('#shipping_price_' + methodId).val(`${estimatedPrice} (${parcelSize})`).prop('readonly', true);
-			$('#parcel_size_' + methodId).val(`${parcelSize} (${finalWeight.toFixed(2)} kg) = ${estimatedPrice} บาท`);
+			$('#calculated_size').val(parcelSize);
+			$(`#shipping_price_${methodId}`).val(`${estimatedPrice} (${parcelSize})`).prop('readonly', true);
+			$(`#parcel_size_${methodId}`).val(`${finalWeight.toFixed(2)} kg = ${estimatedPrice} บาท (${parcelSize})`);
+
+		});
+	}
+
+	$(document).ready(function() {
+		// Select2
+		$('.select2').select2({
+			width: '100%'
 		});
 
-	}
-	$('input[name="dim_w"], input[name="dim_l"], input[name="dim_h"], input[name="weight"]').on('input change', function() {
+		// Toggle ส่วนลด
+		function toggleDiscountSection(enabled) {
+			$('#discount_section').toggle(enabled).find('input').prop('disabled', !enabled);
+		}
+
+		// เรียกเมื่อโหลดหน้า
+		const hasDiscount = $('#discount_toggle').is(':checked');
+		toggleDiscountSection(hasDiscount);
+		$('#discount_toggle').prop('checked', hasDiscount);
+
+		// เมื่อเปลี่ยนสวิตช์ส่วนลด
+		$('#discount_toggle').on('change', function() {
+			toggleDiscountSection(this.checked);
+			calculateFinalPrice();
+		});
+
+		// คำนวณราคาทุกครั้งที่มีการแก้ไข
+		$('[name="price"], [name="discount_value"], [name="discount_type"]').on('input change', calculateFinalPrice);
+
+		// คำนวณค่าขนส่ง
+		$('[name="dim_w"], [name="dim_l"], [name="dim_h"], [name="weight"]').on('input change', calculateShippingCosts);
+
+		// คำนวณครั้งแรกตอนโหลด
+		calculateFinalPrice();
 		calculateShippingCosts();
+
+		// Form submit
+		$('#product-form').submit(function(e) {
+			e.preventDefault();
+			const form = $(this);
+			$('.err-msg').remove();
+			start_loader();
+
+			$.ajax({
+				url: _base_url_ + "classes/Master.php?f=save_product",
+				data: new FormData(this),
+				cache: false,
+				contentType: false,
+				processData: false,
+				method: 'POST',
+				dataType: 'json',
+				error: err => {
+					console.error(err);
+					alert_toast("เกิดข้อผิดพลาด", 'error');
+					end_loader();
+				},
+				success: function(resp) {
+					if (resp?.status === 'success') {
+						location.replace(`./?page=products/view_product&id=${resp.pid}`);
+					} else if (resp.status === 'failed' && resp.msg) {
+						const el = $('<div>').addClass("alert alert-dark err-msg").text(resp.msg);
+						form.prepend(el);
+						el.show('slow');
+						$("html, body").scrollTop(0);
+					} else {
+						alert_toast("เกิดข้อผิดพลาด", 'error');
+						console.log(resp);
+					}
+					end_loader();
+				}
+			});
+		});
 	});
 </script>

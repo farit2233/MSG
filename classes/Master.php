@@ -158,7 +158,7 @@ class Master extends DBConnection
 		$discount_type = (isset($_POST['discount_type']) && in_array($_POST['discount_type'], ['amount', 'percent'])) ? $_POST['discount_type'] : null;
 		$discount_value = (isset($_POST['discount_value']) && $_POST['discount_value'] !== '' && is_numeric($_POST['discount_value'])) ? floatval($_POST['discount_value']) : null;
 		$discounted_price = null;
-
+		$_POST['slow_prepare'] = isset($_POST['slow_prepare']) ? 1 : 0;
 		if ($discount_type !== null && $discount_value !== null) {
 			if ($discount_type == 'amount') {
 				$discounted_price = max(0, $price - $discount_value);
@@ -166,44 +166,44 @@ class Master extends DBConnection
 				$discounted_price = max(0, $price - ($price * $discount_value / 100));
 			}
 		} else {
-			// ถ้าไม่มีประเภทส่วนลด → ให้ discount_value กับ discounted_price เป็น null ด้วย
 			$discount_value = null;
 			$discounted_price = null;
 		}
 
-
-		// ให้ส่งเข้า $_POST ทุกครั้ง ไม่ว่าจะลดหรือไม่
-		$data = "";
+		// ให้แน่ใจว่า POST เหล่านี้ถูกส่งเข้า
 		$_POST['discount_value'] = $discount_value;
 		$_POST['discounted_price'] = $discounted_price;
 		$_POST['discount_type'] = $discount_type;
+
+		// รายการฟิลด์ที่ไม่ควรบันทึกลง product_list
+		$skip_keys = ['id', 'extra_categories', 'shopee', 'lazada', 'tiktok'];
+
+		$data = "";
 		foreach ($_POST as $k => $v) {
-			if (!in_array($k, array('id', 'extra_categories', 'shopee', 'lazada', 'tiktok'))) {
-				if (!empty($data)) $data .= ",";
-				if (is_null($v)) {
-					$data .= " `{$k}`=NULL ";
-				} else {
-					$v = $this->conn->real_escape_string($v);
-					$data .= " `{$k}`='{$v}' ";
-				}
+			if (in_array($k, $skip_keys)) continue;
+			if (is_array($v)) continue;
+
+			if (!empty($data)) $data .= ",";
+			if (is_null($v)) {
+				$data .= " `{$k}`=NULL ";
+			} else {
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
 			}
 		}
 
-
+		// ตรวจสอบสินค้าซ้ำ
 		$check = $this->conn->query("SELECT * FROM `product_list` where `brand` = '{$brand}' and `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
-		if ($this->capture_err())
-			return $this->capture_err();
+		if ($this->capture_err()) return $this->capture_err();
 		if ($check > 0) {
-			$resp['status'] = 'failed';
-			$resp['msg'] = "Product already exists.";
-			return json_encode($resp);
-			exit;
+			return json_encode(['status' => 'failed', 'msg' => "Product already exists."]);
 		}
 
+		// SQL บันทึก
 		if (empty($id)) {
-			$sql = "INSERT INTO `product_list` set {$data} ";
+			$sql = "INSERT INTO `product_list` SET {$data}";
 		} else {
-			$sql = "UPDATE `product_list` set {$data} where id = '{$id}' ";
+			$sql = "UPDATE `product_list` SET {$data} WHERE id = '{$id}'";
 		}
 		$save = $this->conn->query($sql);
 		$product_id = !empty($id) ? $id : $this->conn->insert_id;
@@ -212,15 +212,16 @@ class Master extends DBConnection
 			$resp['pid'] = $product_id;
 			$resp['status'] = 'success';
 			$resp['msg'] = empty($id) ? 'Product has been added successfully' : 'Product has been updated successfully';
-			//เซฟลิงก์แพลตฟอร์ม
+
+			// เซฟลิงก์
 			$this->save_product_link($product_id);
-			// จัดการรูปภาพ
+
+			// อัปโหลดรูปภาพ
 			if (!empty($_FILES['img']['tmp_name'])) {
 				$img_path = "uploads/product/";
 				if (!is_dir(base_app . $img_path)) {
 					mkdir(base_app . $img_path, 0755, true);
 				}
-
 				$accept = ['image/jpeg', 'image/png', 'image/jpg'];
 				if (!in_array($_FILES['img']['type'], $accept)) {
 					$resp['msg'] .= " Image file type is invalid";
@@ -231,9 +232,7 @@ class Master extends DBConnection
 					while (is_file(base_app . $spath)) {
 						$spath = $img_path . $i++ . '_' . $filename;
 					}
-
 					$success = $this->resize_image($_FILES['img']['tmp_name'], base_app . $spath, 1000, 1000);
-
 					if ($success) {
 						$this->conn->query("UPDATE product_list SET image_path = CONCAT('{$spath}', '?v=', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = '{$product_id}'");
 					} else {
@@ -242,18 +241,16 @@ class Master extends DBConnection
 				}
 			}
 		} else {
-			$resp['status'] = 'failed';
-			$resp['err'] = $this->conn->error . "[{$sql}]";
-			return json_encode($resp);
+			return json_encode(['status' => 'failed', 'err' => $this->conn->error . " [{$sql}]"]);
 		}
 
-		//ลบหมวดหมู่เพิ่มเติมเดิม
+		// ลบหมวดหมู่เพิ่มเติมเดิม
 		$this->conn->query("DELETE FROM product_categories WHERE product_id = {$product_id}");
 
-		//เพิ่มหมวดหมู่เพิ่มเติมใหม่
+		// เพิ่มหมวดหมู่เพิ่มเติมใหม่
 		if (!empty($_POST['extra_categories'])) {
 			foreach ($_POST['extra_categories'] as $cat_id) {
-				$cat_id = intval($cat_id); // ป้องกัน SQL Injection
+				$cat_id = intval($cat_id);
 				$sql = "INSERT INTO product_categories (product_id, category_id) VALUES ({$product_id}, {$cat_id})";
 				$ins = $this->conn->query($sql);
 				if (!$ins) {
@@ -262,12 +259,13 @@ class Master extends DBConnection
 			}
 		}
 
-
+		// Flash message
 		if ($resp['status'] == 'success' && isset($resp['msg']))
 			$this->settings->set_flashdata('success', $resp['msg']);
 
 		return json_encode($resp);
 	}
+
 	function save_product_link($product_id)
 	{
 		$shopee = $this->conn->real_escape_string(trim($_POST['shopee'] ?? ''));
