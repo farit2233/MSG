@@ -2,13 +2,19 @@
 $provider_id = null;
 $display_name = '';
 $description = '';
-$cost = 0.00;
 $shipping_type = 'fixed';
+$cost = 0.00;
+$weight_cost_s = 0.00;
+$weight_cost_m = 0.00;
+$weight_cost_l = 0.00;
+
 $cod_enabled = 0;
 $is_active = 1;
 $id = '';
 
+
 if (isset($_GET['id']) && $_GET['id'] > 0) {
+
     $qry = $conn->query("SELECT * FROM shipping_methods WHERE id = '{$_GET['id']}' ");
     if ($qry && $qry->num_rows > 0) {
         $row = $qry->fetch_assoc();
@@ -16,6 +22,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             $$k = $v;
         }
         $display_name = $name; // mapping display_name
+        $weight_cost_s = $row['weight_cost_s'];
+        $weight_cost_m = $row['weight_cost_m'];
+        $weight_cost_l = $row['weight_cost_l'];
     }
 }
 ?>
@@ -78,13 +87,49 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                             <label class="form-check-label" for="by_weight">ค่าจัดส่งตามน้ำหนัก</label>
                         </div>
                     </div>
-                    <div class="form-group mt-2">
+
+                    <!-- ค่าจัดส่งคงที่ -->
+                    <div class="form-group mt-2" id="fixed_cost_group">
                         <label for="cost">ค่าจัดส่ง <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">฿</span>
                             </div>
                             <input type="number" step="0.01" name="cost" class="form-control" value="<?= $cost ?>" required>
+                        </div>
+                    </div>
+
+                    <!-- ค่าจัดส่งตามน้ำหนัก -->
+                    <div class="form-group mt-2" id="weight_cost_group" style="display: none;">
+                        <label>ราคาจัดส่งแยกตามน้ำหนัก:</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>S <small class="text-muted d-block">0 - 1 กก.</small></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">฿</span>
+                                    </div>
+                                    <input type="number" step="0.01" name="weight_cost_s" class="form-control" value="<?= $weight_cost_s ?>">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label>M <small class="text-muted d-block">1 - 5 กก.</small></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">฿</span>
+                                    </div>
+                                    <input type="number" step="0.01" name="weight_cost_m" class="form-control" value="<?= $weight_cost_m ?>">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label>L <small class="text-muted d-block">มากกว่า 5 กก.</small></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">฿</span>
+                                    </div>
+                                    <input type="number" step="0.01" name="weight_cost_l" class="form-control" value="<?= $weight_cost_l ?>">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -170,5 +215,19 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 }
             })
         });
+    });
+    $(function() {
+        function toggleShippingTypeFields() {
+            if ($('#by_weight').is(':checked')) {
+                $('#fixed_cost_group').hide();
+                $('#weight_cost_group').show();
+            } else {
+                $('#fixed_cost_group').show();
+                $('#weight_cost_group').hide();
+            }
+        }
+
+        $('input[name="shipping_type"]').change(toggleShippingTypeFields);
+        toggleShippingTypeFields(); // เรียกครั้งแรกตอนโหลด
     });
 </script>

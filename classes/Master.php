@@ -736,10 +736,13 @@ class Master extends DBConnection
 		$provider_id = intval($provider_id ?? 0);
 		$name = $this->conn->real_escape_string($display_name ?? '');
 		$description = $this->conn->real_escape_string($description ?? '');
-		$shipping_type = $this->conn->real_escape_string($shipping_type ?? 'fixed');
 		$cost = floatval($cost ?? 0);
+		$weight_cost_s = floatval($_POST['weight_cost_s'] ?? 0);
+		$weight_cost_m = floatval($_POST['weight_cost_m'] ?? 0);
+		$weight_cost_l = floatval($_POST['weight_cost_l'] ?? 0);
 		$cod_enabled = ($_POST['cod_enabled'] == '1') ? 1 : 0;
-		$is_active = ($_POST['cod_enabled'] == '1') ? 1 : 0;
+		$is_active = ($_POST['is_active'] == '1') ? 1 : 0;
+
 
 		if (!$provider_id || !$name) {
 			return json_encode(['status' => 'failed', 'msg' => 'กรุณากรอกข้อมูลให้ครบ']);
@@ -751,15 +754,17 @@ class Master extends DBConnection
 				name = '{$name}', 
 				description = '{$description}',
 				cost = '{$cost}',
-				shipping_type = '{$shipping_type}',
 				cod_enabled = '{$cod_enabled}',
-				is_active = '{$is_active}'
+				is_active = '{$is_active}',
+				weight_cost_s = '{$weight_cost_s}',
+				weight_cost_m = '{$weight_cost_m}',
+				weight_cost_l = '{$weight_cost_l}'
 			WHERE id = {$id}";
 		} else {
 			$sql = "INSERT INTO `shipping_methods` 
-			(provider_id, name, description, cost, shipping_type, cod_enabled, is_active)
-			VALUES 
-			('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$shipping_type}', '{$cod_enabled}', '{$is_active}')";
+			(provider_id, name, description, cost, cod_enabled, is_active, weight_cost_s, weight_cost_m, weight_cost_l)
+		VALUES 
+			('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$is_active}', '{$weight_cost_s}', '{$weight_cost_m}', '{$weight_cost_l}')";
 		}
 
 		if ($this->conn->query($sql)) {
