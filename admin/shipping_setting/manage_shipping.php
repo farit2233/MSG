@@ -77,7 +77,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <h3 class="card-title h3">ประเภทค่าจัดส่ง</h3>
                 </div>
                 <div class="card-body">
-                    <div class="form-group">
+                    <!--div class="form-group">
                         <div class="form-check form-check-inline">
                             <input type="radio" class="form-check-input" name="shipping_type" id="fixed_rate" value="fixed" <?= $shipping_type == 'fixed' ? 'checked' : '' ?>>
                             <label class="form-check-label" for="fixed_rate">ค่าจัดส่งคงที่</label>
@@ -86,11 +86,11 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                             <input type="radio" class="form-check-input" name="shipping_type" id="by_weight" value="weight" <?= $shipping_type == 'weight' ? 'checked' : '' ?>>
                             <label class="form-check-label" for="by_weight">ค่าจัดส่งตามน้ำหนัก</label>
                         </div>
-                    </div>
+                    </div-->
 
                     <!-- ค่าจัดส่งคงที่ -->
                     <div class="form-group mt-2" id="fixed_cost_group">
-                        <label for="cost">ค่าจัดส่ง <span class="text-danger">*</span></label>
+                        <label for="cost">ค่าจัดส่งคงที่ <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">฿</span>
@@ -100,8 +100,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     </div>
 
                     <!-- ค่าจัดส่งตามน้ำหนัก -->
-                    <div class="form-group mt-2" id="weight_cost_group" style="display: none;">
-                        <label>ราคาจัดส่งแยกตามน้ำหนัก:</label>
+                    <div class="form-group mt-2" id="weight_cost_group">
+                        <label>ราคาจัดส่งแยกตามน้ำหนัก <span class="text-danger">*</span></label>
                         <div class="row">
                             <div class="col-md-4">
                                 <label>S <small class="text-muted d-block">0 - 1 กก.</small></label>
@@ -216,18 +216,18 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             })
         });
     });
-    $(function() {
-        function toggleShippingTypeFields() {
-            if ($('#by_weight').is(':checked')) {
-                $('#fixed_cost_group').hide();
-                $('#weight_cost_group').show();
-            } else {
-                $('#fixed_cost_group').show();
-                $('#weight_cost_group').hide();
-            }
-        }
+    //$(function() {
+    // function toggleShippingTypeFields() {
+    //     if ($('#by_weight').is(':checked')) {
+    //         $('#fixed_cost_group').hide();
+    //         $('#weight_cost_group').show();
+    //     } else {
+    //         $('#fixed_cost_group').show();
+    //         $('#weight_cost_group').hide();
+    //     }
+    // }
 
-        $('input[name="shipping_type"]').change(toggleShippingTypeFields);
-        toggleShippingTypeFields(); // เรียกครั้งแรกตอนโหลด
-    });
+    // $('input[name="shipping_type"]').change(toggleShippingTypeFields);
+    // toggleShippingTypeFields(); // เรียกครั้งแรกตอนโหลด
+    //});
 </script>

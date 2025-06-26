@@ -26,15 +26,23 @@ if ($_settings->chk_flashdata('success')): ?>
     <div class="card-body">
         <div class="container-fluid">
             <table class="table table-hover table-striped table-bordered" id="shipping-list">
+                <colgroup>
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="10%">
+                    <col width="10%">
+                    <col width="10%">
+                </colgroup>
                 <thead>
                     <tr class="text-center">
                         <th>ที่</th>
-                        <th>ชื่อขนส่ง</th>
-                        <th>คำอธิบาย</th>
-                        <th>ค่าจัดส่งคงที่</th>
-                        <th>จัดส่งตามขนาด S</th>
-                        <th>จัดส่งตามขนาด M</th>
-                        <th>จัดส่งตามขนาด L</th>
+                        <th colspan="4">ชื่อขนส่ง</th>
+                        <th>ค่าจัดส่ง</th>
+                        <th>เก็บเงินปลายทาง</th>
                         <th>สถานะ</th>
                         <th class="text-center action-buttons">จัดการ</th>
                     </tr>
@@ -47,14 +55,11 @@ if ($_settings->chk_flashdata('success')): ?>
                     ?>
                         <tr>
                             <td class="text-center"><?= $i++; ?></td>
-                            <td><?= $row['name'] ?></td>
-                            <td><?= $row['description'] ?></td>
-                            <td><?= number_format($row['cost'], 2) ?> บาท</td>
-                            <td><?= $row['weight_cost_s'] ?></td>
-                            <td><?= $row['weight_cost_m'] ?></td>
-                            <td><?= $row['weight_cost_l'] ?></td>
+                            <td colspan="4"><?= $row['name'] ?></td>
+                            <td class="text-center">฿ <?= number_format($row['cost'], 2) ?> - ฿ <?= $row['weight_cost_l'] ?></td>
+                            <td class="text-center"><?= $row['cod_enabled'] ? '<span class="badge badge-success">เปิดใช้งาน</span>' : '<span class="badge badge-secondary">ไม่ได้ใช้งาน</span>' ?></td>
                             <td class="text-center">
-                                <?= $row['is_active'] ? '<span class="badge badge-success">เปิดใช้งาน</span>' : '<span class="badge badge-secondary">ปิด</span>' ?>
+                                <?= $row['is_active'] ? '<span class="badge badge-success">เปิดใช้งาน</span>' : '<span class="badge badge-secondary">ไม่ได้ใช้งาน</span>' ?>
                             </td>
                             <td align="center">
                                 <?php if ($_settings->userdata('type') == 1): ?>

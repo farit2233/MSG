@@ -119,8 +119,8 @@ function get_platform_link($conn, $product_id, $platform)
 						<textarea name="description" rows="3" class="form-control"><?= isset($description) ? $description : '' ?></textarea>
 					</div>
 					<div class="form-group">
-						<label>รหัสสินค้า (SKU)</label>
-						<input type="text" name="sku" class="form-control" value="<?= isset($sku) ? $sku : '' ?>">
+						<label>รหัสสินค้า (SKU) <span class="text-danger">*</span></label>
+						<input type="text" name="sku" class="form-control" value="<?= isset($sku) ? $sku : '' ?>" required>
 					</div>
 					<div class="form-group">
 						<label>ราคาสินค้า (บาท)</label>

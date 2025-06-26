@@ -23,10 +23,10 @@
 			<table class="table table-hover table-striped table-bordered" id="list">
 				<colgroup>
 					<col width="5%">
-					<col width="15%">
 					<col width="10%">
-					<col width="20%">
-					<col width="20%">
+					<col width="10%">
+					<col width="30%">
+					<col width="15%">
 					<col width="10%">
 					<col width="10%">
 					<col width="10%">
@@ -34,10 +34,11 @@
 				<thead class="text-center">
 					<tr>
 						<th>ที่</th>
-						<th>วันที่สร้าง</th>
+
 						<th>รูปภาพสินค้า</th>
 						<th>แบรนด์</th>
 						<th>ชื่อสินค้า</th>
+						<th>วันที่สร้าง</th>
 						<th>ราคา</th>
 						<th>สถานะ</th>
 						<th>จัดการ</th>
@@ -51,7 +52,7 @@
 					?>
 						<tr>
 							<td class="text-center"><?php echo $i++; ?></td>
-							<td><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+
 							<td class="text-center">
 								<img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
 							</td>
@@ -62,6 +63,7 @@
 									<div><small class="text-muted"><?= $row['dose'] ?></small></div>
 								</div>
 							</td>
+							<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 							<td class="text-right">
 								<?php
 								$price = (float) $row['price'];
@@ -80,11 +82,7 @@
 								<?php if ($discounted_price < $price): ?>
 									<span class="text-muted" style="text-decoration: line-through;"><?= format_num($price, 2) ?> ฿</span><br>
 									<span class="text-danger font-weight-bold"><?= format_num($discounted_price, 2) ?> ฿</span><br>
-									<small class="badge badge-success">
-										<?= $row['discount_type'] === 'percent'
-											? $row['discount_value'] . '% OFF'
-											: format_num($row['discount_value'], 2) . '฿ OFF' ?>
-									</small>
+
 								<?php else: ?>
 									<span class="font-weight-bold"><?= format_num($price, 2) ?> ฿</span>
 								<?php endif; ?>
