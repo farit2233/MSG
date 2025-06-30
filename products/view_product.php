@@ -408,7 +408,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 												</div>
 											<?php endif; ?>
 											<div class="spec-row">
-												<div class="spec-label">ไซส์</div>
+												<div class="spec-label">ไซซ์</div>
 												<div class="spec-value"><?= $calculated_size ?></div>
 											</div>
 										</div>
@@ -521,7 +521,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											</div>
 											<div class="mb-3">
 												<?php if ($slow_prepare = 1): ?>
-													<div class="small-text text-danger">* ขนส่งนานว่าปกติ</div>
+													<div class="small-text text-danger">* ขนส่งนานกว่าปกติ</div>
 												<?php endif; ?>
 											</div>
 											<div class="mb-3">
@@ -604,7 +604,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										</div>
 									<?php endif; ?>
 									<div class="spec-row">
-										<div class="spec-label">ไซส์</div>
+										<div class="spec-label">ไซซ์</div>
 										<div class="spec-value"><?= $calculated_size ?></div>
 									</div>
 								</div>

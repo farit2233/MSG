@@ -16,11 +16,13 @@ if (!empty($selected_items)) {
         p.price,
         p.discount_type,
         p.discount_value,
-        p.discounted_price
+        p.discounted_price,
+        p.calculated_size
     FROM cart_list c 
     INNER JOIN product_list p ON c.product_id = p.id 
     WHERE c.id IN ($ids) AND customer_id = '{$_settings->userdata('id')}'
 ");
+
     while ($row = $cart_qry->fetch_assoc()) {
         // คำนวณราคาหลังลดเพื่อแสดง
         $original_price = $row['price'];
@@ -104,6 +106,95 @@ if ($customer) {
         display: table;
     }
 
+    .modal-backdrop-custom {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1050;
+    }
+
+    .shipping-modal-content {
+        width: 90%;
+        max-width: 540px;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .shipping-modal-header {
+        padding: 1rem 1.5rem;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        font-size: 18px;
+    }
+
+    .shipping-modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 1rem 1.5rem;
+    }
+
+    .shipping-option {
+        border: 1px solid #eee;
+        padding: 1rem;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .shipping-option:hover {
+        background: #f9f9f9;
+    }
+
+    .shipping-option.selected {
+        border: 2px solid #f57421;
+        background-color: #fff5f0;
+    }
+
+    .shipping-option .checkmark {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: #f57421;
+        display: none;
+    }
+
+    .shipping-option.selected .checkmark {
+        display: inline;
+    }
+
+    .shipping-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-cancel {
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 8px 20px;
+        border-radius: 6px;
+        color: #333;
+    }
+
+    .btn-confirm {
+        background: #f57421;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 6px;
+        color: white;
+    }
 
     @media only screen and (max-width: 768px) {
         .product-name {
@@ -139,7 +230,36 @@ if ($customer) {
                                         กรุณาไปที่หน้า <a href="./?p=user" class="alert-link">บัญชีของฉัน</a> เพื่อกรอกข้อมูลที่อยู่ก่อนทำการสั่งซื้อ
                                     </div>
                                 <?php endif; ?>
-                                <?php $default_shipping = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1 ORDER BY id ASC LIMIT 1")->fetch_assoc();
+                                <?php
+                                // ดึงไซซ์ของสินค้าในตะกร้า
+                                $product_sizes = [];
+                                $size_qry = $conn->query("SELECT calculated_size FROM product_list WHERE id IN (SELECT product_id FROM cart_list WHERE id IN ($ids))");
+                                while ($row = $size_qry->fetch_assoc()) {
+                                    if (!empty($row['calculated_size'])) {
+                                        $product_sizes[] = strtolower($row['calculated_size']);
+                                    }
+                                }
+                                // ถ้ามีหลายไซซ์ เอาไซซ์ใหญ่สุด
+                                $size_priority = ['l' => 3, 'm' => 2, 's' => 1];
+                                $cart_size = 's';
+                                foreach ($product_sizes as $size) {
+                                    if ($size_priority[$size] > $size_priority[$cart_size]) {
+                                        $cart_size = $size;
+                                    }
+                                }
+                                $default_shipping = $conn->query("
+                                    SELECT *, 
+                                    CASE 
+                                        WHEN '$cart_size' = 's' THEN weight_cost_s
+                                        WHEN '$cart_size' = 'm' THEN weight_cost_m
+                                        WHEN '$cart_size' = 'l' THEN weight_cost_l
+                                        ELSE weight_cost_s
+                                    END as cost 
+                                    FROM shipping_methods 
+                                    WHERE is_active = 1 
+                                    ORDER BY id ASC LIMIT 1
+                                ")->fetch_assoc();
+
                                 $default_shipping_id = $default_shipping['id'];
                                 $default_shipping_name = $default_shipping['name'];
                                 $default_shipping_cost = $default_shipping['cost'];
@@ -150,6 +270,7 @@ if ($customer) {
                                             <th>สั่งซื้อสินค้าแล้ว</th>
                                             <th class="text-muted text-right" colspan="2">ราคาต่อหน่วย</th>
                                             <th class="text-muted text-right">จำนวน</th>
+                                            <th class="text-muted text-right">ขนาดไซซ์</th>
                                             <th class="text-muted text-right">รายการย่อย</th>
                                         </tr>
 
@@ -173,17 +294,33 @@ if ($customer) {
                                                     <?= $item['quantity'] ?>
                                                 </td>
                                                 <td class="text-right">
+                                                    <?= $item['calculated_size'] ?>
+                                                </td>
+                                                <td class="text-right">
                                                     <span><?= format_num($item['final_price'] * $item['quantity'], 2) ?></span>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
-
+                                        <tr class="no-border">
+                                            <th></th>
+                                        </tr>
+                                        <tr class="no-border">
+                                            <th></th>
+                                        </tr>
+                                        <tr class="no-border">
+                                            <th></th>
+                                        </tr>
                                         <!-- บริการขนส่ง -->
                                         <tr class="no-border">
-                                            <th>บริการขนส่ง</th>
+                                            <th>
+                                                บริการขนส่ง
+                                                <span class="text-danger" style="font-size: 0.8em;">* อิงราคาจากไซซ์ที่ใหญ่ที่สุดในตระกร้า</span>
+                                            </th>
+
                                             <td class="text-right" colspan="2">
                                                 <span id="shipping_method_name" style="margin-left: 10px;"><?= $default_shipping_name ?></span>
                                             </td>
+                                            <td></td>
                                             <td class="text-right">
                                                 <a href="javascript:void(0);" onclick="openShippingModal()">เปลี่ยน</a>
                                             </td>
@@ -195,7 +332,7 @@ if ($customer) {
 
                                         <tr>
                                             <th><strong>รวม</strong></th>
-                                            <td colspan="4">
+                                            <td colspan="5">
                                                 <h5 class="text-bold text-right">
                                                     <span id="order-total-text"><?= format_num($grand_total, 2) ?></span> บาท
                                                 </h5>
@@ -260,30 +397,43 @@ if ($customer) {
             </div>
         </div>
     </div>
-    <div class="modal" id="shippingModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">เลือกบริการขนส่ง</h5>
-                    <button type="button" class="close" onclick="closeShippingModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <?php
-                    $shipping_qry = $conn->query("SELECT * FROM shipping_methods WHERE is_active = 1");
-                    while ($row = $shipping_qry->fetch_assoc()):
-                    ?>
-                        <div style="margin-bottom: 10px;">
-                            <button type="button"
-                                class="btn btn-outline-primary btn-block"
-                                onclick="selectShipping('<?= $row['id'] ?>', '<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>', <?= $row['cost'] ?>)">
-                                <?= $row['name'] ?> - <?= number_format($row['cost'], 2) ?> บาท
-                            </button>
+    <?php
+
+    $shipping_qry = $conn->query("
+        SELECT *, 
+        CASE 
+            WHEN '$cart_size' = 's' THEN weight_cost_s
+            WHEN '$cart_size' = 'm' THEN weight_cost_m
+            WHEN '$cart_size' = 'l' THEN weight_cost_l
+            ELSE weight_cost_s
+        END as cost 
+        FROM shipping_methods WHERE is_active = 1
+    ");
+    ?>
+
+    <div id="shippingModal" class="modal-backdrop-custom">
+        <div class="shipping-modal-content">
+            <div class="shipping-modal-header">เลือก ตัวเลือกการจัดส่ง</div>
+            <div class="shipping-modal-body">
+                <?php while ($row = $shipping_qry->fetch_assoc()): ?>
+                    <div class="shipping-option"
+                        onclick="selectShipping('<?= $row['id'] ?>', '<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>', <?= $row['cost'] ?>, this)">
+                        <div>
+                            <strong><?= $row['name'] ?></strong> - <?= number_format($row['cost'], 2) ?> บาท
+                            <span class="checkmark">&#10003;</span>
                         </div>
-                    <?php endwhile; ?>
-                </div>
+                        <div class="desc text-muted" style="font-size: 0.9em;"><?= $row['description'] ?></div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+            <div class="shipping-modal-footer">
+                <button class="btn-cancel" onclick="closeShippingModal()">ยกเลิก</button>
+                <button class="btn-confirm" onclick="confirmShipping()">ยืนยัน</button>
             </div>
         </div>
     </div>
+
+
 
 </section>
 <script>
@@ -309,35 +459,45 @@ if ($customer) {
     });
 
     function openShippingModal() {
-        document.getElementById('shippingModal').style.display = 'block';
+        document.getElementById('shippingModal').style.display = 'flex';
     }
 
     function closeShippingModal() {
         document.getElementById('shippingModal').style.display = 'none';
     }
 
-    function selectShipping(id, name, cost) {
+    let selectedShipping = null;
+
+    function selectShipping(id, name, cost, element) {
+        // ล้าง class ที่เลือกทั้งหมด
+        document.querySelectorAll('.shipping-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedShipping = {
+            id,
+            name,
+            cost
+        };
+
+        // update preview ทันที
         document.getElementById('shipping_method_id').value = id;
         document.getElementById('shipping_method_name').innerText = name;
         document.getElementById('shipping_cost').value = cost;
-
-        // แสดงค่าส่ง
-        document.getElementById('shipping-cost').innerText = cost.toLocaleString('th-TH', {
-            minimumFractionDigits: 2
+        document.getElementById('shipping-cost').innerText = cost.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         }) + ' บาท';
 
-        // คำนวณยอดรวมรวมค่าส่ง
-        let cartTotal = parseFloat(<?= $cart_total ?>);
-        let grandTotal = cartTotal + cost;
-
-        // อัปเดตค่าแสดงผล
-        document.getElementById('order-total-text').innerText = grandTotal.toLocaleString('th-TH', {
-            minimumFractionDigits: 2
+        const total = parseFloat(<?= $cart_total ?>) + parseFloat(cost);
+        document.getElementById('order-total-text').innerText = total.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
 
-        // ✅ อัปเดตฟอร์มให้ส่งยอดรวมจริงไปหลังบ้าน
-        document.querySelector('input[name="total_amount"]').value = grandTotal;
+        document.getElementById('total_amount').value = total;
+    }
 
+    function confirmShipping() {
+        if (!selectedShipping) return;
         closeShippingModal();
     }
 </script>
