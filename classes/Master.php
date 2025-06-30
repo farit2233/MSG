@@ -183,6 +183,13 @@ class Master extends DBConnection
 			if (in_array($k, $skip_keys)) continue;
 			if (is_array($v)) continue;
 
+			// เช็คเฉพาะขนาดพัสดุ
+			if (in_array($k, ['dim_w', 'dim_l', 'dim_h'])) {
+				if ($v === '' || $v === null || floatval($v) == 0) {
+					$v = null;
+				}
+			}
+
 			if (!empty($data)) $data .= ",";
 			if (is_null($v)) {
 				$data .= " `{$k}`=NULL ";
@@ -191,6 +198,7 @@ class Master extends DBConnection
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
+
 
 		// ตรวจสอบสินค้าซ้ำ
 		$check = $this->conn->query("SELECT * FROM `product_list` where `brand` = '{$brand}' and `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
