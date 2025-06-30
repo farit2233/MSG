@@ -276,6 +276,34 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		display: none;
 	}
 
+	.product-specs {
+		font-size: 14px;
+		line-height: 1.6;
+		color: #000;
+	}
+
+	.spec-row {
+		display: flex;
+		justify-content: space-between;
+		padding: 6px 0;
+		border-bottom: 1px solid #f1f1f1;
+	}
+
+	.spec-label {
+		color: #888;
+		/* สีเทาอ่อน */
+		flex: 0 0 40%;
+		word-break: break-word;
+	}
+
+	.spec-value {
+		flex: 1;
+		text-align: right;
+		font-weight: 500;
+		color: #333;
+		word-break: break-word;
+	}
+
 	@media only screen and (max-width: 768px) {
 		.product-info-sticky {
 			position: static !important;
@@ -317,6 +345,26 @@ if ($plat_q && $plat_q->num_rows > 0) {
 			display: none;
 		}
 
+		.product-specs {
+			font-size: 14px;
+			line-height: 1.6;
+			color: #000;
+		}
+
+		.spec-row {
+			display: flex;
+			justify-content: space-between;
+			padding: 12px 0;
+			border-bottom: 1px solid #f1f1f1;
+		}
+
+		.spec-label {
+			color: #888;
+			/* สีเทาอ่อน */
+			flex: 0 0 50%;
+			word-break: break-word;
+		}
+
 	}
 </style>
 <section class="py-3">
@@ -344,6 +392,27 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											class="img-thumbnail p-0 border w-100"
 											id="product-img">
 									</a>
+
+									<div class="product-description-mobile-1 mt-3">
+										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
+
+										<div class="product-specs">
+											<div class="spec-row">
+												<div class="spec-label">น้ำหนักสินค้า</div>
+												<div class="spec-value"><?= $weight ?></div>
+											</div>
+											<?php if (!empty($dim_w) && !empty($dim_l) && !empty($dim_h)): ?>
+												<div class="spec-row">
+													<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
+													<div class="spec-value"><?= $dim_w ?> x <?= $dim_l ?> x <?= $dim_h ?></div>
+												</div>
+											<?php endif; ?>
+											<div class="spec-row">
+												<div class="spec-label">ไซส์</div>
+												<div class="spec-value"><?= $calculated_size ?></div>
+											</div>
+										</div>
+									</div>
 									<!-- คำอธิบายสินค้าใต้รูป -->
 									<?php if (!empty($description)): ?>
 										<div class="product-description-mobile-1 mt-3">
@@ -451,6 +520,11 @@ if ($plat_q && $plat_q->num_rows > 0) {
 												<?php endif; ?>
 											</div>
 											<div class="mb-3">
+												<?php if ($slow_prepare = 1): ?>
+													<div class="small-text text-danger">* ขนส่งนานว่าปกติ</div>
+												<?php endif; ?>
+											</div>
+											<div class="mb-3">
 												<div class="mb-3 d-flex flex-wrap gap-2">
 													<?php if (!empty($platform_links['shopee'])): ?>
 														<a class="btn btn-shop rounded-pill" href="<?= $platform_links['shopee'] ?>" target="_blank">
@@ -468,7 +542,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 														</a>
 													<?php endif; ?>
 												</div>
-
 											</div>
 										<?php else: ?>
 											<div class="alert alert-danger mt-2">
@@ -516,16 +589,36 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										</div>
 									</div>
 								</div>
-								<div class="col-md-5 mb-3">
-									<!-- คำอธิบายสินค้าใต้รูป -->
-									<?php if (!empty($description)): ?>
-										<div class="product-description-mobile mt-3">
-											<h5><b>รายละเอียด</b></h5>
-											<p><?= str_replace(["\n\r", "\n", "\r"], "<br>", $description) ?></p>
+							</div>
+							<div class="product-description-mobile mt-3">
+								<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
+								<div class="product-specs">
+									<div class="spec-row">
+										<div class="spec-label">น้ำหนักสินค้า</div>
+										<div class="spec-value"><?= $weight ?></div>
+									</div>
+									<?php if (!empty($dim_w) && !empty($dim_l) && !empty($dim_h)): ?>
+										<div class="spec-row">
+											<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
+											<div class="spec-value"><?= $dim_w ?> x <?= $dim_l ?> x <?= $dim_h ?></div>
 										</div>
 									<?php endif; ?>
+									<div class="spec-row">
+										<div class="spec-label">ไซส์</div>
+										<div class="spec-value"><?= $calculated_size ?></div>
+									</div>
 								</div>
 							</div>
+							<div class="col-md-5 mb-3">
+								<!-- คำอธิบายสินค้าใต้รูป -->
+								<?php if (!empty($description)): ?>
+									<div class="product-description-mobile mt-3">
+										<h5><b>รายละเอียด</b></h5>
+										<p><?= str_replace(["\n\r", "\n", "\r"], "<br>", $description) ?></p>
+									</div>
+								<?php endif; ?>
+							</div>
+
 						</div>
 					</div>
 					<!--div class="card-footer py-1 text-center">
@@ -534,6 +627,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 				</div>
 			</div>
 		</div>
+
 		<!-- Modal รูปสินค้า -->
 		<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-hidden="true">
 			<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
