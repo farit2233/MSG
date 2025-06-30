@@ -118,14 +118,29 @@ function get_platform_link($conn, $product_id, $platform)
 						<label>รายละเอียดสินค้า</label>
 						<textarea name="description" rows="3" class="form-control"><?= isset($description) ? $description : '' ?></textarea>
 					</div>
-					<div class="form-group">
-						<label>รหัสสินค้า (SKU) <span class="text-danger">*</span></label>
-						<input type="text" name="sku" class="form-control" value="<?= isset($sku) ? $sku : '' ?>" required>
+					<div class="row">
+						<!-- ช่อง SKU -->
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>รหัสสินค้า (SKU) <span class="text-danger">*</span></label>
+								<input type="text" name="sku" class="form-control" value="<?= isset($sku) ? $sku : '' ?>" required>
+							</div>
+						</div>
+
+						<!-- ช่อง ราคา -->
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>ราคา <span class="text-danger">*</span></label>
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">฿</span>
+									</div>
+									<input type="number" step="0.01" name="price" class="form-control" value="<?= isset($price) ? $price : '' ?>" required>
+								</div>
+							</div>
+						</div>
 					</div>
-					<div class="form-group">
-						<label>ราคาสินค้า (บาท)</label>
-						<input type="number" name="price" class="form-control" step="any" min="0" value="<?= isset($price) ? $price : '' ?>" required>
-					</div>
+
 				</div>
 			</div>
 			<!-- end Card 1: ข้อมูลสินค้า -->
