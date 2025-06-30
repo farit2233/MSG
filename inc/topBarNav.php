@@ -284,10 +284,22 @@
               ?>
              <a class="nav-link text-white p-0" href="./?p=cart_list" title="ตะกร้าสินค้า">
                <i class="fa fa-basket-shopping icon-size"></i>
-               <?php if ($cart > 0): ?>
-                 <span class="cart-badge"><?= format_num($cart) ?></span>
+
+               <!-- กรณี login -->
+               <?php if ($_settings->userdata('id') && $_settings->userdata('login_type') == 2): ?>
+                 <?php
+                  $cart = $conn->query("SELECT SUM(quantity) FROM `cart_list` WHERE customer_id = '{$_settings->userdata('id')}'")->fetch_array()[0];
+                  $cart = $cart > 0 ? format_num($cart) : '';
+                  ?>
+                 <?php if ($cart): ?>
+                   <span class="cart-badge"><?= $cart ?></span>
+                 <?php endif; ?>
+               <?php else: ?>
+                 <!-- กรณี guest -->
+                 <span class="cart-badge d-none" id="guest_cart_count"></span>
                <?php endif; ?>
              </a>
+
            </div>
            <!--alert-->
            <?php
@@ -498,4 +510,40 @@
        }
      });
    });
+
+   function update_guest_cart_badge() {
+     const cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+     const totalQty = cart.reduce((sum, item) => sum + parseInt(item.qty), 0);
+
+     const badge = document.getElementById('guest_cart_count');
+     if (badge) {
+       if (totalQty > 0) {
+         badge.textContent = totalQty;
+         badge.classList.remove('d-none');
+         badge.classList.add('cart-badge'); // เพิ่ม class ถ้าอยากให้เหมือนของเดิม
+       } else {
+         badge.classList.add('d-none');
+       }
+     }
+   }
+
+   // เรียกเมื่อโหลดหน้า
+   document.addEventListener('DOMContentLoaded', update_guest_cart_badge);
+
+   function guest_add_to_cart(id, name, qty, price) {
+     let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+     const index = cart.findIndex(item => item.id === id);
+     if (index >= 0) {
+       cart[index].qty = parseInt(cart[index].qty) + parseInt(qty);
+     } else {
+       cart.push({
+         id,
+         name,
+         qty: parseInt(qty),
+         price
+       });
+     }
+     localStorage.setItem('guest_cart', JSON.stringify(cart));
+     update_guest_cart_badge(); // 👈 เรียกทันทีหลังเพิ่ม
+   }
  </script>

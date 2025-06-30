@@ -2,7 +2,7 @@
 if (isset($_GET['id']) && $_GET['id'] > 0) {
 	$qry = $conn->query("SELECT p.*, c.id as `category_id`, c.name as `category`, 
 (COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = p.id), 0)
- - COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = p.id), 0)
+- COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = p.id), 0)
 ) as `available`
 FROM product_list p
 INNER JOIN category_list c ON p.category_id = c.id
@@ -514,9 +514,9 @@ if ($plat_q && $plat_q->num_rows > 0) {
 														<i class="fa-solid fa-basket-shopping"></i> หยิบใส่ตระกร้า
 													</button>
 												<?php else: ?>
-													<a class="btn addcart rounded-pill" href="./?p=cart_list">
+													<button class="btn addcart rounded-pill" type="button" onclick="guest_add_to_cart()">
 														<i class="fa-solid fa-basket-shopping"></i> หยิบใส่ตระกร้า
-													</a>
+													</button>
 												<?php endif; ?>
 											</div>
 											<div class="mb-3">
@@ -559,8 +559,8 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										// ดึงหมวดหมู่เพิ่มเติม
 										$extra_names = [];
 										$extra_q = $conn->query("SELECT c.name, c.id FROM product_categories pc 
-										INNER JOIN category_list c ON c.id = pc.category_id 
-										WHERE pc.product_id = {$id}");
+									INNER JOIN category_list c ON c.id = pc.category_id 
+									WHERE pc.product_id = {$id}");
 
 										while ($ex = $extra_q->fetch_assoc()) {
 											$extra_names[] = '<a href="./?p=products&cid=' . $ex['id'] . '" class="plain-link"><b>' . $ex['name'] . '</b></a>';
@@ -622,8 +622,8 @@ if ($plat_q && $plat_q->num_rows > 0) {
 						</div>
 					</div>
 					<!--div class="card-footer py-1 text-center">
-						<a class="btn btn-light btn-sm bg-gradient-light border rounded-0" href="./?p=products"><i class="fa fa-angle-left"></i>กลับไปยังสินค้าทั้งหมด</a>
-					</div-->
+					<a class="btn btn-light btn-sm bg-gradient-light border rounded-0" href="./?p=products"><i class="fa fa-angle-left"></i>กลับไปยังสินค้าทั้งหมด</a>
+				</div-->
 				</div>
 			</div>
 		</div>
@@ -651,11 +651,11 @@ if ($plat_q && $plat_q->num_rows > 0) {
 	<?php
 	// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
 	$related = $conn->query("SELECT *, 
-        (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
-        - COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
-        FROM `product_list` 
-        WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
-        ORDER BY RAND() LIMIT 4");
+	(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
+	- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+	FROM `product_list` 
+	WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
+	ORDER BY RAND() LIMIT 4");
 
 	if ($related->num_rows > 0): ?>
 		<div class="container">
@@ -777,6 +777,16 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		});
 	});
 
+	function update_cart_count() {
+		const cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+		const totalQty = cart.reduce((sum, item) => sum + parseInt(item.qty), 0);
+		const cartCountEl = document.querySelector('.cart-count');
+		if (cartCountEl) {
+			cartCountEl.textContent = totalQty;
+			cartCountEl.classList.toggle('d-none', totalQty === 0);
+		}
+	}
+
 
 	function decreaseQty() {
 		const qtyInput = document.getElementById('qty');
@@ -795,5 +805,32 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		} else {
 			alert_toast(`จำกัดสูงสุด ${max} ชิ้นต่อคำสั่งซื้อนะครับ 🧾`, 'warning');
 		}
+	}
+
+	function guest_add_to_cart() {
+		const product_id = "<?= $id ?>";
+		const name = "<?= $name ?>";
+		const price = <?= $discounted_price && $discounted_price < $price ? $discounted_price : $price ?>;
+		const qty = parseInt(document.getElementById('qty').value) || 1;
+		const image = "<?= validate_image($image_path) ?>";
+
+		let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+
+		const index = cart.findIndex(item => item.id === product_id);
+		if (index > -1) {
+			cart[index].qty += qty;
+		} else {
+			cart.push({
+				id: product_id,
+				name,
+				price,
+				qty,
+				image
+			});
+		}
+
+		localStorage.setItem('guest_cart', JSON.stringify(cart));
+		alert_toast("เพิ่มลงตะกร้าเรียบร้อยแล้ว ✅", 'success');
+		update_cart_count();
 	}
 </script>
