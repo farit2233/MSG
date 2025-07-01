@@ -285,3 +285,28 @@
             </div>
         </div>
 </section>
+<?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const guestCart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
+            if (guestCart.length > 0) {
+                fetch('classes/Master.php?f=migrate_guest_cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            cart: guestCart
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(resp => {
+                        if (resp.status === 'success') {
+                            localStorage.removeItem('guest_cart');
+                            location.href = 'index.php?page=cart'; // หรือไปหน้าอื่นที่ต้องการ
+                        }
+                    });
+            }
+        });
+    </script>
+<?php endif; ?>

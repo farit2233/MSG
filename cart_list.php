@@ -47,9 +47,14 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
     }
 
     /* ข้อความสินค้า */
-    .cart-item h4 {
+    .product-title {
         font-size: 18px;
         font-weight: 600;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .cart-item .text-muted {
@@ -263,9 +268,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                                             </div>
 
                                             <div class="col-auto flex-shrink-1 flex-grow-1">
-                                                <h4><?= $row['product'] ?></h4>
-                                                <div class="text-muted brand">แบรนด์: <?= $row['brand'] ?></div>
-                                                <div class="text-muted category">หมวดหมู่: <?= $row['category'] ?></div>
+                                                <h4 class="product-title"><?= $row['product'] ?></h4>
                                                 <div class="text-muted d-flex w-100">
                                                     <div class="input-group" style="width: 20rem;">
                                                         <button class="btn addcart-plus minus-qty" type="button">-</button>
@@ -285,7 +288,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                                                 </h5>
                                                 <h4><b class="text-danger">ลดเหลือ: <?= format_num($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
                                             <?php else: ?>
-                                                <div id="guest_cart_container" style="display: none;"></div>
+
                                                 <h4><b>ราคา: <?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
                                             <?php endif; ?>
                                         </div>
@@ -294,7 +297,8 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                                 <?php endwhile; ?>
 
                             </div>
-                            <?php if ($cart->num_rows <= 0): ?>
+                            <div id="guest_cart_container" style="display: none;"></div>
+                            <?php if ($cart->num_rows <= 0 && $_settings->userdata('id') != ''): ?>
                                 <h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>
                             <?php endif; ?>
                             <div class="d-flex justify-content-end py-3">
@@ -312,7 +316,6 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                                     </form>
                                 </div>
                             <?php endif; ?>
-
                         </div>
                     </div>
                 </div>
@@ -483,10 +486,9 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         if (!container) return;
 
         const userLoggedIn = <?= ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) ? 'true' : 'false' ?>;
-        if (userLoggedIn) return; // ไม่ต้องทำอะไรถ้า login แล้ว
+        if (userLoggedIn) return;
 
         const cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-
         if (cart.length === 0) {
             container.innerHTML = '<h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>';
             container.style.display = 'block';
@@ -497,37 +499,106 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         let grandTotal = 0;
 
         cart.forEach((item, index) => {
-            const subtotal = item.qty * item.price;
+            const show_discount = item.discounted_price && item.discounted_price < item.price;
+            const price_to_use = show_discount ? item.discounted_price : item.price;
+            const subtotal = price_to_use * item.qty;
             grandTotal += subtotal;
-            html += `
-      <div class="list-group-item cart-item d-flex align-items-start w-100">
-        <div class="col-3 text-center">
-          <img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt="">
-        </div>
-        <div class="col flex-grow-1">
-          <h4>${item.name}</h4>
-          <div class="input-group mb-2" style="max-width: 15rem;">
-            <button class="btn minus-guest" data-id="${item.id}">-</button>
-            <input type="number" class="form-control text-center qty-guest" data-id="${item.id}" value="${item.qty}" min="1">
-            <button class="btn plus-guest" data-id="${item.id}">+</button>
-            <button class="btn btn-danger ms-2 del-guest" data-id="${item.id}"><i class="fa fa-trash"></i></button>
-          </div>
-          <h5><b>ราคารวม: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h5>
-        </div>
-      </div>
-    `;
-        });
 
-        html += `
-    <div class="d-flex justify-content-end py-3">
-      <h3><b>รวมทั้งสิ้น: ${grandTotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h3>
-    </div>
-    <div class="text-center py-2">
-      <a href="./login.php" class="btn btn-primary rounded-pill">เข้าสู่ระบบเพื่อดำเนินการชำระเงิน</a>
-    </div>
-  `;
+            html += `
+<label class="list-group-item cart-item d-flex w-100" data-id="${index}" data-max="999" style="cursor: pointer;">
+	<div class="col-auto pr-2">
+		<input type="checkbox" class="form-check-input cart-check" data-price="${subtotal}" />
+	</div>
+
+	<div class="cart-item-content d-flex w-100 align-items-start">
+		<div class="col-3 text-center">
+			<img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt="">
+		</div>
+
+		<div class="col-auto flex-shrink-1 flex-grow-1">
+			<h4 class="product-title">${item.name}</h4>
+			<div class="text-muted d-flex w-100">
+				<div class="input-group" style="width: 20rem;">
+					<button class="btn addcart-plus minus-qty guest" type="button">−</button>
+					<input type="number" class="form-control text-center qty" value="${item.qty}" min="1" max="999" required>
+					<button class="btn addcart-plus add-qty guest" type="button">+</button>
+					<button class="btn btn-danger ms-2 del-item guest" type="button">
+						<i class="fa-solid fa-trash-can"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-auto text-right">
+		${show_discount
+			? `<h5 class="text-muted mb-0"><del>${(item.price * item.qty).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</del></h5>
+			   <h4><b class="text-danger">ลดเหลือ: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
+			: `<h4><b>ราคา: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
+		}
+	</div>
+</label>`;
+        });
 
         container.innerHTML = html;
         container.style.display = 'block';
+        calculateSelectedTotal(); // เรียกทันทีตอนโหลด
     });
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-qty') && e.target.classList.contains('guest')) {
+            const itemEl = e.target.closest('.cart-item');
+            const index = parseInt(itemEl.dataset.id);
+            let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+            if (cart[index]) {
+                const currentQty = cart[index].qty || 1;
+                updateGuestCartQty(index, currentQty + 1);
+            }
+        }
+
+
+        if (e.target.classList.contains('minus-qty') && e.target.classList.contains('guest')) {
+            const itemEl = e.target.closest('.cart-item');
+            const index = parseInt(itemEl.dataset.id);
+            const qtyInput = itemEl.querySelector('.qty');
+            let qty = parseInt(qtyInput.value) || 1;
+            if (qty > 1) updateGuestCartQty(index, qty - 1);
+        }
+
+        if (e.target.classList.contains('del-item') && e.target.classList.contains('guest')) {
+            const itemEl = e.target.closest('.cart-item');
+            const index = parseInt(itemEl.dataset.id);
+            Swal.fire({
+                icon: 'warning',
+                title: 'คุณแน่ใจไหม?',
+                text: "ลบสินค้าออกจากตะกร้า?",
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c', // สีแดงปุ่มยืนยัน
+                cancelButtonColor: '#95a5a6', // สีเทาปุ่มยกเลิก
+                confirmButtonText: 'ใช่ ลบเลย!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteGuestCartItem(index);
+                }
+            });
+        }
+    });
+
+    function updateGuestCartQty(index, qty) {
+        let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        if (cart[index]) {
+            cart[index].qty = qty;
+            localStorage.setItem('guest_cart', JSON.stringify(cart));
+            location.reload(); // ถ้าอยาก smooth กว่านี้ ค่อยทำ render ซ้ำโดยไม่ reload
+        }
+    }
+
+    function deleteGuestCartItem(index) {
+        let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        if (cart[index]) {
+            cart.splice(index, 1);
+            localStorage.setItem('guest_cart', JSON.stringify(cart));
+            location.reload();
+        }
+    }
 </script>

@@ -810,7 +810,8 @@ if ($plat_q && $plat_q->num_rows > 0) {
 	function guest_add_to_cart() {
 		const product_id = "<?= $id ?>";
 		const name = "<?= $name ?>";
-		const price = <?= $discounted_price && $discounted_price < $price ? $discounted_price : $price ?>;
+		const price = <?= $price ?>;
+		const discounted_price = <?= ($discounted_price && $discounted_price < $price) ? $discounted_price : 'null' ?>;
 		const qty = parseInt(document.getElementById('qty').value) || 1;
 		const image = "<?= validate_image($image_path) ?>";
 
@@ -824,13 +825,14 @@ if ($plat_q && $plat_q->num_rows > 0) {
 				id: product_id,
 				name,
 				price,
+				discounted_price,
 				qty,
 				image
 			});
 		}
 
 		localStorage.setItem('guest_cart', JSON.stringify(cart));
-		alert_toast("เพิ่มลงตะกร้าเรียบร้อยแล้ว ✅", 'success');
+		alert_toast("เพิ่มสินค้าในตะกร้าแล้ว", 'success');
 		update_cart_count();
 	}
 </script>

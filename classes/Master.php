@@ -812,6 +812,35 @@ class Master extends DBConnection
 			return json_encode(['status' => 'error', 'message' => $this->conn->error]);
 		}
 	}
+	function migrate_guest_cart()
+	{
+		$data = json_decode(file_get_contents('php://input'), true);
+		$user_id = $this->settings->userdata('id') ?? 0;
+
+		if ($user_id <= 0 || !isset($data['cart']) || !is_array($data['cart'])) {
+			return json_encode([
+				'status' => 'failed',
+				'msg' => 'ข้อมูลไม่ถูกต้อง หรือไม่ได้เข้าสู่ระบบ'
+			]);
+		}
+
+		foreach ($data['cart'] as $item) {
+			$product_id = $item['id'];
+			$qty = $item['qty'];
+
+			// ตรวจสอบว่ามีอยู่ใน cart_list อยู่แล้วไหม
+			$check = $this->conn->query("SELECT id FROM cart_list WHERE customer_id = '{$user_id}' AND product_id = '{$product_id}'");
+			if ($check && $check->num_rows > 0) {
+				// ถ้ามีแล้ว เพิ่มจำนวน
+				$this->conn->query("UPDATE cart_list SET quantity = quantity + '{$qty}' WHERE customer_id = '{$user_id}' AND product_id = '{$product_id}'");
+			} else {
+				// ถ้ายังไม่มี เพิ่มใหม่
+				$this->conn->query("INSERT INTO cart_list (customer_id, product_id, quantity) VALUES ('{$user_id}', '{$product_id}', '{$qty}')");
+			}
+		}
+
+		return json_encode(['status' => 'success']);
+	}
 }
 
 $Master = new Master();
@@ -870,6 +899,9 @@ switch ($action) {
 		break;
 	case 'delete_shipping':
 		echo $Master->delete_shipping();
+		break;
+	case 'migrate_guest_cart':
+		echo $Master->migrate_guest_cart();
 		break;
 	default:
 		// echo $sysset->index();
