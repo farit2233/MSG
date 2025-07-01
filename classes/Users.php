@@ -206,7 +206,15 @@
 						$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
 					}
 					imagedestroy($temp);
+				} else {
+					// **เพิ่มส่วนนี้**
+					if (!is_dir(base_app . "uploads/customers"))
+						mkdir(base_app . "uploads/customers");
+					$fname = "uploads/customers/$uid.png";
+					copy(base_app . "uploads/customers/default_user.png", base_app . $fname);
+					$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
 				}
+
 				if (!empty($uid) && $this->settings->userdata('login_type') != 1) {
 					$user = $this->conn->query("SELECT * FROM `customer_list` where id = '{$uid}' ");
 					if ($user->num_rows > 0) {
@@ -224,6 +232,7 @@
 				$resp['msg'] = $this->conn->error;
 				$resp['sql'] = $sql;
 			}
+
 			if ($resp['status'] == 'success' && isset($resp['msg']))
 				$this->settings->set_flashdata('success', $resp['msg']);
 			return json_encode($resp);

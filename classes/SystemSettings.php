@@ -54,33 +54,69 @@ class SystemSettings extends DBConnection
 			}
 		}
 		if (!empty($_FILES['img']['tmp_name'])) {
-			$ext = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-			$fname = "uploads/logo.png";
+			$ext = strtolower(pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION));
+			$fname = "uploads/logo.{$ext}";
 			$accept = array('image/jpeg', 'image/png');
+
 			if (!in_array($_FILES['img']['type'], $accept)) {
 				$err = "Image file type is invalid";
-			}
-			if ($_FILES['img']['type'] == 'image/jpeg')
-				$uploadfile = imagecreatefromjpeg($_FILES['img']['tmp_name']);
-			elseif ($_FILES['img']['type'] == 'image/png')
-				$uploadfile = imagecreatefrompng($_FILES['img']['tmp_name']);
-			if (!$uploadfile) {
-				$err = "Image is invalid";
-			}
-			$temp = imagescale($uploadfile, 200, 200);
-			if (is_file(base_app . $fname))
-				unlink(base_app . $fname);
-			$upload = imagepng($temp, base_app . $fname);
-			if ($upload) {
-				if (isset($_SESSION['system_info']['logo'])) {
-					$qry = $this->conn->query("UPDATE system_info set meta_value = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where meta_field = 'logo' ");
-					if (is_file(base_app . $_SESSION['system_info']['logo'])) unlink(base_app . $_SESSION['system_info']['logo']);
+			} else {
+				if ($_FILES['img']['type'] == 'image/jpeg') {
+					$uploadfile = imagecreatefromjpeg($_FILES['img']['tmp_name']);
+				} elseif ($_FILES['img']['type'] == 'image/png') {
+					$uploadfile = imagecreatefrompng($_FILES['img']['tmp_name']);
+				}
+
+				if (!$uploadfile) {
+					$err = "Image is invalid";
 				} else {
-					$qry = $this->conn->query("INSERT into system_info set meta_value = '{$fname}',meta_field = 'logo' ");
+					// ปรับขนาดให้ชัดด้วย imagecopyresampled
+					$width = 200;
+					$height = 200;
+					$temp = imagecreatetruecolor($width, $height);
+
+					// ถ้าเป็น PNG ต้อง preserve transparency
+					if ($_FILES['img']['type'] == 'image/png') {
+						imagealphablending($temp, false);
+						imagesavealpha($temp, true);
+					}
+
+					$src_w = imagesx($uploadfile);
+					$src_h = imagesy($uploadfile);
+					imagecopyresampled($temp, $uploadfile, 0, 0, 0, 0, $width, $height, $src_w, $src_h);
+
+					// ลบไฟล์เดิม
+					if (is_file(base_app . $fname)) {
+						unlink(base_app . $fname);
+					}
+
+					// บันทึกไฟล์ใหม่
+					if ($_FILES['img']['type'] == 'image/jpeg') {
+						$upload = imagejpeg($temp, base_app . $fname, 95); // quality 95
+					} elseif ($_FILES['img']['type'] == 'image/png') {
+						$upload = imagepng($temp, base_app . $fname, 1); // compression low = ชัด
+					}
+
+					if ($upload) {
+						if (isset($_SESSION['system_info']['logo'])) {
+							$qry = $this->conn->query("UPDATE system_info 
+                        SET meta_value = CONCAT('{$fname}', '?v=', unix_timestamp(CURRENT_TIMESTAMP)) 
+                        WHERE meta_field = 'logo'");
+
+							if (is_file(base_app . $_SESSION['system_info']['logo'])) {
+								unlink(base_app . $_SESSION['system_info']['logo']);
+							}
+						} else {
+							$qry = $this->conn->query("INSERT INTO system_info SET meta_value = '{$fname}', meta_field = 'logo'");
+						}
+					}
+
+					imagedestroy($temp);
+					imagedestroy($uploadfile);
 				}
 			}
-			imagedestroy($temp);
 		}
+
 		if (!empty($_FILES['cover']['tmp_name'])) {
 			$ext = pathinfo($_FILES['cover']['name'], PATHINFO_EXTENSION);
 			$fname = "uploads/cover.png";

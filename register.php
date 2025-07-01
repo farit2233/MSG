@@ -115,8 +115,8 @@
                   <div class="row justify-content-center">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group d-flex justify-content-center mt-2">
-                        <img src="<?php echo validate_image('') ?>" alt="" id="cimg"
-                          class="img-fluid img-thumbnail" style="max-width: 200px;">
+                        <img src="uploads/customers/default_user.png" alt="" id="cimg"
+                          class="img-fluid img-thumbnail" style="max-width: 200px; object-fit: cover; border-radius: 100%;">
                       </div>
                       <div class="custom-file custom-input">
                         <input type="file" class="custom-file-input custom-input" id="customFile" name="img"
