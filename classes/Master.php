@@ -644,6 +644,143 @@ class Master extends DBConnection
 				error_log("❌ ส่งอีเมลไม่สำเร็จ: " . $mail->ErrorInfo);
 			}
 
+			// ฟังก์ชันส่งอีเมลให้แอดมิน
+			$mail_admin = new PHPMailer(true);
+			try {
+				// SMTP Setting
+				$mail_admin->isSMTP();
+				$mail_admin->Host = 'smtp.gmail.com';
+				$mail_admin->Port = 465;
+				$mail_admin->SMTPAuth = true;
+				$mail_admin->Username = "faritre5566@gmail.com";  // ใช้อีเมลของคุณ
+				$mail_admin->Password = "bchljhaxoqflmbys";  // รหัสผ่าน SMTP
+				$mail_admin->SMTPSecure = "ssl";
+
+				$mail_admin->CharSet = 'UTF-8';
+				$mail_admin->isHTML(true);
+				$mail_admin->Subject = "📦 คำสั่งซื้อใหม่จากลูกค้า #$code";
+
+				// ตั้งค่าอีเมลผู้ส่งและผู้รับ
+				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
+				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
+				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+
+				// สร้างเนื้อหาของอีเมล
+				$admin_body = "
+    <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
+        <h2 style='color: #16542b; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
+        <p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
+        <p><strong>ลูกค้า:</strong> $customer_name</p>
+        <p><strong>ที่อยู่จัดส่ง:</strong> {$delivery_address}</p>
+        <p><strong>ยอดรวม:</strong> " . number_format($grand_total, 2) . " บาท</p>
+        <p><strong>ขนส่ง:</strong> $shipping_name</p>
+        <h3>รายการสินค้า</h3>
+        <table style='width:100%; border-collapse: collapse; margin-top:10px;'>
+            <thead style='background:#16542b; color:white;'>
+                <tr>
+                    <th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
+                    <th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
+                    <th style='padding:8px; border:1px solid #ddd;'>ราคาต่อชิ้น</th>
+                    <th style='padding:8px; border:1px solid #ddd;'>รวม</th>
+                </tr>
+            </thead>
+            <tbody>";
+
+				// รายการสินค้า
+				$items = $this->conn->query("SELECT oi.*, p.name 
+                                FROM order_items oi 
+                                INNER JOIN product_list p ON oi.product_id = p.id 
+                                WHERE oi.order_id = {$oid}");
+
+				while ($row = $items->fetch_assoc()) {
+					$subtotal = $row['price'] * $row['quantity'];
+					$admin_body .= "
+            <tr>
+                <td style='padding:8px; border:1px solid #ddd;'>{$row['name']}</td>
+                <td style='padding:8px; border:1px solid #ddd; text-align:center;'>{$row['quantity']}</td>
+                <td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($row['price'], 2) . "</td>
+                <td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($subtotal, 2) . "</td>
+            </tr>";
+				}
+
+				$admin_body .= "
+            <tr>
+                <td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
+                <td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
+            </tr>
+            <tr>
+                <td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
+                <td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
+            </tr>
+            </tbody></table>
+        </div>";
+
+				$mail_admin->Body = $admin_body;
+				$mail_admin->send();
+			} catch (Exception $e) {
+				error_log("❌ ส่งอีเมลแอดมินไม่สำเร็จ: " . $mail_admin->ErrorInfo);
+			}
+
+			// ฟังก์ชันส่ง Telegram
+			function sendTelegramNotification($message)
+			{
+				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
+				$chat_id = "-4869854888";      // ใช้ Chat ID ของแอดมินหรือ Group
+
+				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
+
+				$data = [
+					'chat_id' => $chat_id,
+					'text' => $message,
+					'parse_mode' => 'HTML',  // ถ้าคุณต้องการให้ข้อความในรูปแบบ HTML
+				];
+
+				// ส่งข้อความด้วย cURL
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+				$response = curl_exec($ch);
+				curl_close($ch);
+
+				return $response;
+			}
+
+			// สร้างข้อความแจ้งเตือนสำหรับ Telegram
+			$telegram_message = "
+			📦 คำสั่งซื้อใหม่จากลูกค้า
+			- รหัสคำสั่งซื้อ: $code
+			- ลูกค้า: $customer_name
+			- ที่อยู่จัดส่ง: $delivery_address
+			- ยอดรวม: " . number_format($grand_total, 2) . " บาท
+			- ขนส่ง: $shipping_name
+
+			รายละเอียดสินค้า:
+			";
+
+			// รายการสินค้า
+			$items = $this->conn->query("SELECT oi.*, p.name 
+                            FROM order_items oi 
+                            INNER JOIN product_list p ON oi.product_id = p.id 
+                            WHERE oi.order_id = {$oid}");
+
+			while ($row = $items->fetch_assoc()) {
+				$subtotal = $row['price'] * $row['quantity'];
+				$telegram_message .= "
+			- {$row['name']} x{$row['quantity']} = " . number_format($subtotal, 2) . " บาท
+			";
+			}
+			$telegram_message .= "
+			ค่าส่ง: " . number_format($shipping_cost, 2) . " บาท
+			รวมทั้งสิ้น: " . number_format($grand_total, 2) . " บาท
+			";
+			// ส่งข้อความ Telegram
+			sendTelegramNotification($telegram_message);
+
 			$this->settings->set_flashdata('success', 'ชำระสินค้าสำเร็จ');
 			$resp = ['status' => 'success'];
 		} catch (Exception $e) {
