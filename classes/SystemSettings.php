@@ -115,36 +115,53 @@ class SystemSettings extends DBConnection
 			$banner_path = "uploads/banner/";
 			foreach ($_FILES['banners']['tmp_name'] as $k => $v) {
 				if (!empty($_FILES['banners']['tmp_name'][$k])) {
-					$accept = array('image/jpeg', 'image/png');
-					if (!in_array($_FILES['banners']['type'][$k], $accept)) {
+					$accept = ['image/jpeg', 'image/png'];
+					$type = $_FILES['banners']['type'][$k];
+
+					if (!in_array($type, $accept)) {
 						$err = "Image file type is invalid";
 						break;
 					}
-					if ($_FILES['banners']['type'][$k] == 'image/jpeg')
+
+					if ($type == 'image/jpeg')
 						$uploadfile = imagecreatefromjpeg($_FILES['banners']['tmp_name'][$k]);
-					elseif ($_FILES['banners']['type'][$k] == 'image/png')
+					elseif ($type == 'image/png')
 						$uploadfile = imagecreatefrompng($_FILES['banners']['tmp_name'][$k]);
+
 					if (!$uploadfile) {
 						$err = "Image is invalid";
 						break;
 					}
+
 					list($width, $height) = getimagesize($_FILES['banners']['tmp_name'][$k]);
-					$temp = imagescale($uploadfile, 1920, 600, IMG_BILINEAR_FIXED);
+
+					$temp = imagecreatetruecolor(1920, 600);
+
+					// สำหรับ PNG: เปิด transparency
+					if ($type == 'image/png') {
+						imagealphablending($temp, false);
+						imagesavealpha($temp, true);
+						$transparent = imagecolorallocatealpha($temp, 0, 0, 0, 127);
+						imagefilledrectangle($temp, 0, 0, 1920, 600, $transparent);
+					}
+
+					imagecopyresampled($temp, $uploadfile, 0, 0, 0, 0, 1920, 600, $width, $height);
+
+					// 🔥 สำคัญมาก: ตั้งชื่อ path ปลายทาง
 					$spath = base_app . $banner_path . '/' . $_FILES['banners']['name'][$k];
 					$i = 1;
-					while (true) {
-						if (is_file($spath)) {
-							$spath = base_app . $banner_path . '/' . ($i++) . '_' . $_FILES['banners']['name'][$k];
-						} else {
-							break;
-						}
+					while (is_file($spath)) {
+						$spath = base_app . $banner_path . '/' . ($i++) . '_' . $_FILES['banners']['name'][$k];
 					}
-					if ($_FILES['banners']['type'][$k] == 'image/jpeg')
-						imagejpeg($temp, $spath, 60);
-					elseif ($_FILES['banners']['type'][$k] == 'image/png')
+
+					// Save ไฟล์
+					if ($type == 'image/jpeg')
+						imagejpeg($temp, $spath, 90);
+					elseif ($type == 'image/png')
 						imagepng($temp, $spath, 6);
 
 					imagedestroy($temp);
+					imagedestroy($uploadfile);
 				}
 			}
 			if (!empty($err)) {
@@ -152,6 +169,7 @@ class SystemSettings extends DBConnection
 				$resp['msg'] = $err;
 			}
 		}
+
 
 		$update = $this->update_system_info();
 		$flash = $this->set_flashdata('success', 'System Info Successfully Updated.');

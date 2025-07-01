@@ -9,7 +9,8 @@
     }
 
     .carousel-inner {
-        height: 30em;
+        aspect-ratio: 1920 / 600;
+        /* หรือ 3.2 */
     }
 
     .carousel-item {
@@ -20,7 +21,6 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center center;
     }
 
     /*#carouselExampleControls .carousel-inner{
@@ -162,36 +162,43 @@
     }
 </style>
 <section class="py-3">
-    <a href="?p=products">
-        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner">
+
+    <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+            <a href="?p=products">
                 <?php
                 $upload_path = "uploads/banner";
                 if (is_dir(base_app . $upload_path)):
                     $file = scandir(base_app . $upload_path);
                     $_i = 0;
+                    $allowed_ext = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                     foreach ($file as $img):
                         if (in_array($img, array('.', '..')))
                             continue;
-                        $_i++;
 
+                        $ext = strtolower(pathinfo($img, PATHINFO_EXTENSION));
+                        if (!in_array($ext, $allowed_ext))
+                            continue;
+
+                        $_i++;
                 ?>
                         <div class="carousel-item w-100 h-100 <?php echo $_i == 1 ? "active" : '' ?>">
-                            <img src="<?php echo validate_image($upload_path . '/' . $img) ?>" class="d-block w-100  h-100" alt="<?php echo $img ?>">
+                            <img src="<?php echo validate_image($upload_path . '/' . $img) ?>" class="d-block w-100" alt="<?php echo $img ?>">
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
-            </div>
-            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
             </a>
         </div>
-    </a>
+        <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
+
     <div class="container">
 
         <div class="container py-5">
