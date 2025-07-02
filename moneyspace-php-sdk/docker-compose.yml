@@ -1,0 +1,12 @@
+version: "3.1"
+services: 
+    moneyspace-example:
+        build: 
+            dockerfile: Dockerfile
+            context: ./
+        container_name: moneyspace-example
+        image: moneyspace-example:latest
+        volumes: 
+            - $PWD/tests:/var/www/html/
+        ports: 
+            - "9001:80"
