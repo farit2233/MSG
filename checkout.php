@@ -102,12 +102,6 @@ if ($customer) {
         border: none !important;
     }
 
-    tr.no-border-deli td,
-    tr.no-border-deli th {
-        border-left: none !important;
-        border-right: none !important;
-    }
-
     .cart-items-list table {
         display: table;
     }
@@ -273,32 +267,6 @@ if ($customer) {
                                 <div class="table-responsive">
                                     <table class="table table-bordered mb-4 small-table">
                                         <tr>
-                                            <th colspan="2">
-                                                <h5 class="text-bold">ที่อยู่จัดส่ง</h5>
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <th>ชื่อ</th>
-                                            <td><?= htmlentities($customer['firstname'] . ' ' . $customer['middlename'] . ' ' . $customer['lastname']) ?></td>
-                                        </tr>
-
-                                        <tr>
-                                            <th>เบอร์โทร</th>
-                                            <td><?= htmlentities($customer['contact']) ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>ที่อยู่</th>
-                                            <td>
-                                                <?= htmlentities($customer['address']) ?><br>
-                                                <?= !empty($customer['sub_district']) ? 'ต.' . htmlentities($customer['sub_district']) . ' ' : '' ?>
-                                                <?= !empty($customer['district']) ? 'อ.' . htmlentities($customer['district']) . ' ' : '' ?>
-                                                <?= !empty($customer['province']) ? 'จ.' . htmlentities($customer['province']) : '' ?><br>
-                                                <?= htmlentities($customer['postal_code']) ?>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <table class="table table-bordered mb-4 small-table">
-                                        <tr>
                                             <th>สั่งซื้อสินค้าแล้ว</th>
                                             <th class="text-muted text-right" colspan="2">ราคาต่อหน่วย</th>
                                             <th class="text-muted text-right">จำนวน</th>
@@ -343,22 +311,25 @@ if ($customer) {
                                             <th></th>
                                         </tr>
                                         <!-- บริการขนส่ง -->
-                                        <tr>
+                                        <tr class="no-border">
                                             <th>
                                                 บริการขนส่ง
                                                 <span class="text-danger" style="font-size: 0.8em;">* อิงราคาจากไซซ์ที่ใหญ่ที่สุดในตระกร้า</span>
                                             </th>
 
-                                            <td class="text-right">
+                                            <td class="text-right" colspan="2">
                                                 <span id="shipping_method_name" style="margin-left: 10px;"><?= $default_shipping_name ?></span>
                                             </td>
-                                            <td class="text-right" colspan="3">
+                                            <td></td>
+                                            <td class="text-right">
                                                 <a href="javascript:void(0);" onclick="openShippingModal()">เปลี่ยน</a>
                                             </td>
                                             <td class="text-right">
-                                                <span id="shipping-cost"><?= number_format($default_shipping_cost, 2) ?> บาท</span>
+                                                <label id="shipping-cost"><?= number_format($default_shipping_cost, 2) ?> บาท</label>
                                             </td>
                                         </tr>
+
+
                                         <tr>
                                             <th><strong>รวม</strong></th>
                                             <td colspan="5">
@@ -369,7 +340,32 @@ if ($customer) {
                                         </tr>
                                     </table>
 
+                                    <table class="table table-bordered mb-4 small-table">
+                                        <tr>
+                                            <th colspan="2">
+                                                <h5 class="text-bold">ที่อยู่จัดส่ง</h5>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>ชื่อ</th>
+                                            <td><?= htmlentities($customer['firstname'] . ' ' . $customer['middlename'] . ' ' . $customer['lastname']) ?></td>
+                                        </tr>
 
+                                        <tr>
+                                            <th>เบอร์โทร</th>
+                                            <td><?= htmlentities($customer['contact']) ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>ที่อยู่</th>
+                                            <td>
+                                                <?= htmlentities($customer['address']) ?><br>
+                                                <?= !empty($customer['sub_district']) ? 'ต.' . htmlentities($customer['sub_district']) . ' ' : '' ?>
+                                                <?= !empty($customer['district']) ? 'อ.' . htmlentities($customer['district']) . ' ' : '' ?>
+                                                <?= !empty($customer['province']) ? 'จ.' . htmlentities($customer['province']) : '' ?><br>
+                                                <?= htmlentities($customer['postal_code']) ?>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
 
                             <?php else: ?>
@@ -380,66 +376,19 @@ if ($customer) {
                         <div class=" container-fluid">
                             <div class="cart-header-bar d-flex align-items-center gap-2">
                                 <i class="fa-solid fa-money-bill-wave mr-2 text-success" style="font-size: 30px;"></i>
-                                <h3 class="mb-0"> รูปแบบการชำระเงิน</h3>
+                                <h3 class="d-inline mb-0">รูปแบบการชำระเงิน</h3>
                             </div>
-
-                            <!-- Payment Method Section -->
-                            <div class="payment-method-preview p-3 border rounded" style="cursor:pointer;" onclick="openPaymentModal()">
-                                <span id="payment-method-name">ชำระเงินปลายทาง (Cash on Delivery)</span>
-                                <i class="fa fa-chevron-right float-end"></i>
-                                <a href="javascript:void(0);"> เปลี่ยน</a>
-                            </div>
-
-                            <div class="order-summary mt-3 border rounded p-3">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <div>รวมราคาสินค้า</div>
-                                    <div><span id="summary-subtotal"><?= number_format($cart_total, 2) ?></span> บาท</div>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <div>ค่าจัดส่ง</div>
-                                    <div><span id="summary-shipping"><?= number_format($default_shipping_cost, 2) ?></span> บาท</div>
-                                </div>
-                                <hr>
-                                <div class="d-flex justify-content-between fw-bold fs-5">
-                                    <div>ยอดชำระรวม</div>
-                                    <div>
-                                        <h4 class="text-bold"><span id="summary-total"><?= number_format($grand_total, 2) ?></span> บาท
-                                    </div>
-                                    </h4>
-                                </div>
-                            </div>
-
-                            <!-- Payment Modal -->
-                            <div id="paymentModal" class="modal-backdrop-custom" style="display:none;">
-                                <div class="shipping-modal-content">
-                                    <div class="shipping-modal-header">เลือกวิธีชำระเงิน</div>
-                                    <div class="shipping-modal-body">
-                                        <div class="shipping-option selected" onclick="selectPaymentMethod('cod', 'ชำระเงินปลายทาง (Cash on Delivery)', this)">
-                                            <strong>ชำระเงินปลายทาง (Cash on Delivery)</strong>
-                                        </div>
-                                        <div class="shipping-option" onclick="selectPaymentMethod('qrnone', 'ชำระเต็มผ่าน QR PromptPay', this)">
-                                            <strong>ชำระเต็มผ่าน QR PromptPay</strong>
-                                        </div>
-                                        <div class="shipping-option" onclick="selectPaymentMethod('installment', 'ผ่อนชำระ 0%', this)">
-                                            <strong>ผ่อนชำระ 0%</strong>
-                                        </div>
-                                    </div>
-                                    <div class="shipping-modal-footer">
-                                        <button class="btn-cancel" onclick="closePaymentModal()">ยกเลิก</button>
-                                        <button class="btn-confirm" onclick="confirmPaymentMethod()">ยืนยัน</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Order Form with Payment Method -->
                             <form action="" id="order-form">
                                 <input type="hidden" name="total_amount" id="total_amount" value="<?= $grand_total ?>">
                                 <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
                                 <input type="hidden" name="shipping_cost" id="shipping_cost" value="<?= $default_shipping_cost ?>">
                                 <input type="hidden" name="shipping_method_id" id="shipping_method_id" value="<?= $default_shipping_id ?>">
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
-                                <input type="hidden" id="payment_method" name="payment_method" value="">
                                 <div class="py-1 text-center">
-                                    <button class="btn addcart rounded-pill" <?= empty($full_address) ? 'disabled' : '' ?>>ยืนยันคำสั่งซื้อ</button>
+                                    <button class="btn addcart rounded-pill"
+                                        <?= empty($full_address) ? 'disabled' : '' ?>>
+                                        ยืนยันคำสั่งซื้อ
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -483,6 +432,9 @@ if ($customer) {
             </div>
         </div>
     </div>
+
+
+
 </section>
 <script>
     $('#order-form').submit(function(e) {
@@ -497,7 +449,7 @@ if ($customer) {
             success: function(resp) {
                 console.log(resp);
                 if (resp.status == 'success') {
-                    location.replace('./'); // Redirect to confirmation page
+                    location.replace('./');
                 } else {
                     alert_toast(resp.msg || "เกิดข้อผิดพลาดตอนสั่งซื้อ", 'error');
                 }
@@ -505,7 +457,6 @@ if ($customer) {
             }
         });
     });
-
 
     function openShippingModal() {
         document.getElementById('shippingModal').style.display = 'flex';
@@ -548,40 +499,5 @@ if ($customer) {
     function confirmShipping() {
         if (!selectedShipping) return;
         closeShippingModal();
-    }
-
-    let selectedPaymentMethod = {
-        id: 'cod',
-        name: 'ชำระเงินปลายทาง (Cash on Delivery)'
-    };
-
-    function openPaymentModal() {
-        document.getElementById('paymentModal').style.display = 'flex';
-        // แสดงสถานะที่เลือกไว้
-        document.querySelectorAll('#paymentModal .shipping-option').forEach(el => {
-            el.classList.remove('selected');
-            if (el.textContent.trim() === selectedPaymentMethod.name) {
-                el.classList.add('selected');
-            }
-        });
-    }
-
-    function closePaymentModal() {
-        document.getElementById('paymentModal').style.display = 'none';
-    }
-
-    function selectPaymentMethod(id, name, element) {
-        document.querySelectorAll('#paymentModal .shipping-option').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-        selectedPaymentMethod = {
-            id,
-            name
-        };
-    }
-
-    function confirmPaymentMethod() {
-        document.getElementById('payment_method').value = selectedPaymentMethod.id;
-        document.getElementById('payment-method-name').innerText = selectedPaymentMethod.name;
-        closePaymentModal();
     }
 </script>
