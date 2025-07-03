@@ -36,13 +36,32 @@
                   </p>
                 </a>
               </li>
-              <li class="nav-item dropdown">
-                <a href="./?page=categories" class="nav-link nav-categories">
-                  <i class="nav-icon fas fa-th-list"></i>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon fas fa-list"></i>
                   <p>
-                    หมวดหมู่สินค้าทั้งหมด
+                    หมวดหมู่สินค้า
+                    <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
+                <ul class="nav nav-treeview" style="display: none;">
+                  <li class="nav-item">
+                    <a href="./?page=categories" class="nav-link nav-categories">
+                      <i class="nav-icon fas fa-th-list"></i>
+                      <p>
+                        หมวดหมู่สินค้าทั้งหมด
+                      </p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=subcategories" class="nav-link nav-subcategories">
+                      <i class="nav-icon fas fa-th-list"></i>
+                      <p>
+                        หมวดหมู่ย่อย
+                      </p>
+                    </a>
+                  </li>
+                </ul>
               </li>
               <li class="nav-item dropdown">
                 <a href="./?page=products" class="nav-link nav-products">
