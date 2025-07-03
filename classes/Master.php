@@ -877,8 +877,12 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+
 	function save_shipping()
 	{
+		// ตรวจสอบข้อมูลที่ได้รับจากฟอร์ม
+		var_dump($_POST);  // แสดงข้อมูลที่ได้รับ
+
 		if (!isset($_SESSION['userdata']) || $_SESSION['userdata']['type'] != 1) {
 			http_response_code(403);
 			return json_encode(['status' => 'forbidden', 'message' => 'ไม่มีสิทธิ์ใช้งาน']);
@@ -892,37 +896,64 @@ class Master extends DBConnection
 		$name = $this->conn->real_escape_string($display_name ?? '');
 		$description = $this->conn->real_escape_string($description ?? '');
 		$cost = floatval($cost ?? 0);
-		$weight_cost_s = floatval($_POST['weight_cost_s'] ?? 0);
-		$weight_cost_m = floatval($_POST['weight_cost_m'] ?? 0);
-		$weight_cost_l = floatval($_POST['weight_cost_l'] ?? 0);
 		$cod_enabled = ($_POST['cod_enabled'] == '1') ? 1 : 0;
 		$is_active = ($_POST['is_active'] == '1') ? 1 : 0;
 
-
+		// ตรวจสอบค่าจากฟอร์มว่าครบหรือไม่
 		if (!$provider_id || !$name) {
 			return json_encode(['status' => 'failed', 'msg' => 'กรุณากรอกข้อมูลให้ครบ']);
 		}
 
+		// SQL สำหรับการเพิ่มหรืออัปเดตข้อมูลใน shipping_methods
 		if ($id > 0) {
 			$sql = "UPDATE `shipping_methods` SET 
-				provider_id = '{$provider_id}',
-				name = '{$name}', 
-				description = '{$description}',
-				cost = '{$cost}',
-				cod_enabled = '{$cod_enabled}',
-				is_active = '{$is_active}',
-				weight_cost_s = '{$weight_cost_s}',
-				weight_cost_m = '{$weight_cost_m}',
-				weight_cost_l = '{$weight_cost_l}'
-			WHERE id = {$id}";
+                provider_id = '{$provider_id}',
+                name = '{$name}', 
+                description = '{$description}',
+                cost = '{$cost}',
+                cod_enabled = '{$cod_enabled}',
+                is_active = '{$is_active}'
+                WHERE id = {$id}";
 		} else {
 			$sql = "INSERT INTO `shipping_methods` 
-			(provider_id, name, description, cost, cod_enabled, is_active, weight_cost_s, weight_cost_m, weight_cost_l)
-		VALUES 
-			('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$is_active}', '{$weight_cost_s}', '{$weight_cost_m}', '{$weight_cost_l}')";
+                (provider_id, name, description, cost, cod_enabled, is_active)
+                VALUES 
+                ('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$is_active}')";
 		}
 
+		// บันทึกข้อมูลใน shipping_methods
 		if ($this->conn->query($sql)) {
+			// หากบันทึก shipping_methods สำเร็จ, ดึง id ของการจัดส่ง
+			if ($id <= 0) {
+				$shipping_method_id = $this->conn->insert_id; // กรณีสร้างใหม่
+			} else {
+				$shipping_method_id = $id; // กรณีแก้ไข
+			}
+
+			// ลบข้อมูลเก่าก่อนแล้วบันทึกใหม่ (หากมี)
+			if ($id > 0) {
+				$this->conn->query("DELETE FROM `shipping_prices` WHERE shipping_method_id = {$shipping_method_id}");
+			}
+
+			// บันทึกข้อมูลราคาตามน้ำหนักใน shipping_prices
+			$weight_from = $_POST['weight_from'];
+			$weight_to = $_POST['weight_to'];
+			$price = $_POST['price'];
+
+			for ($i = 0; $i < count($weight_from); $i++) {
+				$w_from = intval($weight_from[$i]);
+				$w_to = intval($weight_to[$i]);
+				$p = floatval($price[$i]);
+
+				// SQL สำหรับการบันทึกข้อมูลราคาตามน้ำหนักใน shipping_prices
+				$sql_price = "INSERT INTO shipping_prices (shipping_method_id, min_weight, max_weight, price)
+                          VALUES ('$shipping_method_id', '$w_from', '$w_to', '$p')";
+				if (!$this->conn->query($sql_price)) {
+					return json_encode(['status' => 'failed', 'msg' => 'ไม่สามารถบันทึกข้อมูลราคาจัดส่งตามน้ำหนัก']);
+				}
+			}
+
+			// หากบันทึกสำเร็จ
 			return json_encode(['status' => 'success']);
 		} else {
 			return json_encode(['status' => 'failed', 'msg' => $this->conn->error]);
