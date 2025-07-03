@@ -383,6 +383,7 @@ if ($customer) {
                                 <h3 class="mb-0"> รูปแบบการชำระเงิน</h3>
                             </div>
 
+                            <!-- Payment Method Section -->
                             <div class="payment-method-preview p-3 border rounded" style="cursor:pointer;" onclick="openPaymentModal()">
                                 <span id="payment-method-name">ชำระเงินปลายทาง (Cash on Delivery)</span>
                                 <i class="fa fa-chevron-right float-end"></i>
@@ -408,7 +409,7 @@ if ($customer) {
                                 </div>
                             </div>
 
-                            <!-- Modal Payment Method -->
+                            <!-- Payment Modal -->
                             <div id="paymentModal" class="modal-backdrop-custom" style="display:none;">
                                 <div class="shipping-modal-content">
                                     <div class="shipping-modal-header">เลือกวิธีชำระเงิน</div>
@@ -429,6 +430,7 @@ if ($customer) {
                                     </div>
                                 </div>
                             </div>
+                            <!-- Order Form with Payment Method -->
                             <form action="" id="order-form">
                                 <input type="hidden" name="total_amount" id="total_amount" value="<?= $grand_total ?>">
                                 <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
@@ -437,10 +439,7 @@ if ($customer) {
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                                 <input type="hidden" id="payment_method" name="payment_method" value="">
                                 <div class="py-1 text-center">
-                                    <button class="btn addcart rounded-pill"
-                                        <?= empty($full_address) ? 'disabled' : '' ?>>
-                                        ยืนยันคำสั่งซื้อ
-                                    </button>
+                                    <button class="btn addcart rounded-pill" <?= empty($full_address) ? 'disabled' : '' ?>>ยืนยันคำสั่งซื้อ</button>
                                 </div>
                             </form>
                         </div>
@@ -484,9 +483,6 @@ if ($customer) {
             </div>
         </div>
     </div>
-
-
-
 </section>
 <script>
     $('#order-form').submit(function(e) {
@@ -501,7 +497,7 @@ if ($customer) {
             success: function(resp) {
                 console.log(resp);
                 if (resp.status == 'success') {
-                    location.replace('./');
+                    location.replace('./'); // Redirect to confirmation page
                 } else {
                     alert_toast(resp.msg || "เกิดข้อผิดพลาดตอนสั่งซื้อ", 'error');
                 }
@@ -509,6 +505,7 @@ if ($customer) {
             }
         });
     });
+
 
     function openShippingModal() {
         document.getElementById('shippingModal').style.display = 'flex';
@@ -552,6 +549,7 @@ if ($customer) {
         if (!selectedShipping) return;
         closeShippingModal();
     }
+
     let selectedPaymentMethod = {
         id: 'cod',
         name: 'ชำระเงินปลายทาง (Cash on Delivery)'
@@ -559,7 +557,7 @@ if ($customer) {
 
     function openPaymentModal() {
         document.getElementById('paymentModal').style.display = 'flex';
-        // โชว์สถานะเลือกปัจจุบัน
+        // แสดงสถานะที่เลือกไว้
         document.querySelectorAll('#paymentModal .shipping-option').forEach(el => {
             el.classList.remove('selected');
             if (el.textContent.trim() === selectedPaymentMethod.name) {
@@ -586,6 +584,4 @@ if ($customer) {
         document.getElementById('payment-method-name').innerText = selectedPaymentMethod.name;
         closePaymentModal();
     }
-
-    // อัปเดตยอดรวมถ้าต้องการในอนาคต
 </script>
