@@ -54,7 +54,7 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./?page=subcategories" class="nav-link nav-subcategories">
+                    <a href="./?page=category_hierarchy" class="nav-link nav-category_hierarchy">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
                         หมวดหมู่ย่อย
