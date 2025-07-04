@@ -1,4 +1,19 @@
 <?php
+if ($_settings->userdata('type') != 1) {
+    echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่มีสิทธิ์ใช้งาน',
+                text: 'คุณไม่มีสิทธิ์ใช้งานหน้าเพจนี้',
+                confirmButtonText: 'ตกลง',
+                allowOutsideClick: false,
+            }).then(function() {
+                window.location.href = './';  // กำหนดให้เด้งกลับหน้าแรก
+            });
+          </script>";
+    exit;
+}
+
 $provider_id = null;
 $display_name = '';
 $description = '';
