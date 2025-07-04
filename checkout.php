@@ -318,7 +318,7 @@ if ($customer) {
                                             </th>
 
                                             <td class="text-right" colspan="2">
-                                                <span id="shipping_method_name" style="margin-left: 10px;"><?= $default_shipping_name ?></span>
+                                                <span id="shipping_methods_name" style="margin-left: 10px;"><?= $default_shipping_name ?></span>
                                             </td>
                                             <td></td>
                                             <td class="text-right">
@@ -382,7 +382,7 @@ if ($customer) {
                                 <input type="hidden" name="total_amount" id="total_amount" value="<?= $grand_total ?>">
                                 <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
                                 <input type="hidden" name="shipping_cost" id="shipping_cost" value="<?= $default_shipping_cost ?>">
-                                <input type="hidden" name="shipping_method_id" id="shipping_method_id" value="<?= $default_shipping_id ?>">
+                                <input type="hidden" name="shipping_methods_id" id="shipping_methods_id" value="<?= $default_shipping_id ?>">
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                                 <div class="py-1 text-center">
                                     <button class="btn addcart rounded-pill"
@@ -479,8 +479,8 @@ if ($customer) {
         };
 
         // update preview ทันที
-        document.getElementById('shipping_method_id').value = id;
-        document.getElementById('shipping_method_name').innerText = name;
+        document.getElementById('shipping_methods_id').value = id;
+        document.getElementById('shipping_methods_name').innerText = name;
         document.getElementById('shipping_cost').value = cost;
         document.getElementById('shipping-cost').innerText = cost.toLocaleString(undefined, {
             minimumFractionDigits: 2,

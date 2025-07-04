@@ -975,23 +975,18 @@ class Master extends DBConnection
 
 	function delete_shipping()
 	{
-		// ป้องกันการเข้าถึงโดยไม่ใช่ admin
-		if (!isset($_SESSION['userdata']) || $_SESSION['userdata']['type'] != 1) {
-			http_response_code(403); // forbidden
-			return json_encode(['status' => 'forbidden', 'message' => 'ไม่มีสิทธิ์ใช้งาน']);
-		}
-
-		$id = isset($_POST['id']) ? intval($_POST['id']) : 0;
-		if ($id <= 0) {
-			return json_encode(['status' => 'error', 'message' => 'ID ไม่ถูกต้อง']);
-		}
-
-		$delete = $this->conn->query("DELETE FROM `shipping_methods` WHERE id = '{$id}'");
+		extract($_POST);
+		$delete = $this->conn->query("DELETE FROM `shipping_methods` where id = '{$id}'");
 		if ($delete) {
-			return 1; // สำหรับ JS success check
+			$resp['status'] = 'success';
 		} else {
-			return json_encode(['status' => 'error', 'message' => $this->conn->error]);
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
 		}
+		if ($resp['status'] == 'success') {
+			$this->settings->set_flashdata('success', 'Order has been deleted successfully.');
+		}
+		return json_encode($resp);
 	}
 	function migrate_guest_cart()
 	{

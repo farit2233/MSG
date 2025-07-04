@@ -193,7 +193,7 @@ CREATE TABLE `order_list` (
   `customer_id` int NOT NULL,
   `delivery_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `total_amount` float(12,2) NOT NULL DEFAULT '0.00',
-  `shipping_method_id` int DEFAULT NULL,
+  `shipping_methods_id` int DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0=pending,\r\n1=packed,\r\n2=out for delivery,\r\n3=paid\r\n',
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -206,7 +206,7 @@ CREATE TABLE `order_list` (
 -- Dumping data for table `order_list`
 --
 
-INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_method_id`, `status`, `date_created`, `date_updated`, `payment_status`, `delivery_status`, `is_seen`) VALUES
+INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_methods_id`, `status`, `date_created`, `date_updated`, `payment_status`, `delivery_status`, `is_seen`) VALUES
 (32, '2025061300006', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 1490.00, NULL, 0, '2025-06-13 16:43:24', '2025-06-17 10:57:08', 1, 0, 1),
 (33, '2025061700001', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 500.00, NULL, 0, '2025-06-17 10:57:33', '2025-06-17 10:57:34', 0, 0, 1),
 (34, '2025061700002', 8, '21/8, ต.นานา, อ.เมือง, จ.ตรัง, 92222', 2880.00, NULL, 0, '2025-06-17 11:13:57', '2025-06-17 11:13:58', 0, 0, 1),
@@ -357,7 +357,7 @@ INSERT INTO `product_list` (`id`, `category_id`, `brand`, `name`, `description`,
 
 CREATE TABLE `product_shipping` (
   `product_id` int NOT NULL,
-  `shipping_method_id` int NOT NULL,
+  `shipping_methods_id` int NOT NULL,
   `price` float DEFAULT '0',
   `enabled` tinyint DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -397,7 +397,7 @@ INSERT INTO `shipping_methods` (`id`, `provider_id`, `name`, `description`, `cos
 
 CREATE TABLE `shipping_prices` (
   `id` int NOT NULL,
-  `shipping_method_id` int NOT NULL,
+  `shipping_methods_id` int NOT NULL,
   `min_weight` int NOT NULL,
   `max_weight` int NOT NULL,
   `price` decimal(10,2) NOT NULL
@@ -407,7 +407,7 @@ CREATE TABLE `shipping_prices` (
 -- Dumping data for table `shipping_prices`
 --
 
-INSERT INTO `shipping_prices` (`id`, `shipping_method_id`, `min_weight`, `max_weight`, `price`) VALUES
+INSERT INTO `shipping_prices` (`id`, `shipping_methods_id`, `min_weight`, `max_weight`, `price`) VALUES
 (11, 3, 1, 11, 1.00),
 (54, 7, 0, 1000, 40.00),
 (55, 7, 1001, 2000, 50.00),
@@ -626,7 +626,7 @@ ALTER TABLE `product_list`
 -- Indexes for table `product_shipping`
 --
 ALTER TABLE `product_shipping`
-  ADD PRIMARY KEY (`product_id`,`shipping_method_id`);
+  ADD PRIMARY KEY (`product_id`,`shipping_methods_id`);
 
 --
 -- Indexes for table `shipping_methods`
@@ -640,7 +640,7 @@ ALTER TABLE `shipping_methods`
 --
 ALTER TABLE `shipping_prices`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `shipping_method_id` (`shipping_method_id`);
+  ADD KEY `shipping_methods_id` (`shipping_methods_id`);
 
 --
 -- Indexes for table `shipping_providers`
@@ -804,7 +804,7 @@ ALTER TABLE `shipping_methods`
 -- Constraints for table `shipping_prices`
 --
 ALTER TABLE `shipping_prices`
-  ADD CONSTRAINT `shipping_prices_ibfk_1` FOREIGN KEY (`shipping_method_id`) REFERENCES `shipping_methods` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `shipping_prices_ibfk_1` FOREIGN KEY (`shipping_methods_id`) REFERENCES `shipping_methods` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `stock_list`
