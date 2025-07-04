@@ -54,7 +54,6 @@ function get_platform_link($conn, $product_id, $platform)
 		<input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
 		<div class="card-body">
 
-			<!-- Card: รูปภาพสินค้า -->
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
 					<h3 class="card-title">รูปภาพสินค้า</h3>
@@ -72,8 +71,6 @@ function get_platform_link($conn, $product_id, $platform)
 					</div>
 				</div>
 			</div>
-			<!-- end Card: รูปภาพสินค้า -->
-			<!-- Card 1: ข้อมูลสินค้า -->
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
 					<h3 class="card-title h3">ข้อมูลสินค้า</h3>
@@ -99,7 +96,6 @@ function get_platform_link($conn, $product_id, $platform)
 							<input type="text" name="brand" class="form-control" value="<?= isset($brand) ? $brand : '' ?>">
 						</div>
 					</div>
-					<!-- หมวดหมู่เพิ่มเติม (ถ้ามี) -->
 					<div class="form-group">
 						<label>หมวดหมู่เพิ่มเติม (เฉพาะตามอายุ)</label>
 						<div class="row">
@@ -119,7 +115,6 @@ function get_platform_link($conn, $product_id, $platform)
 						<textarea name="description" rows="3" class="form-control"><?= isset($description) ? $description : '' ?></textarea>
 					</div>
 					<div class="row">
-						<!-- ช่อง SKU -->
 						<div class="col-md-6">
 							<div class="form-group">
 								<label>รหัสสินค้า (SKU) <span class="text-danger">*</span></label>
@@ -127,7 +122,6 @@ function get_platform_link($conn, $product_id, $platform)
 							</div>
 						</div>
 
-						<!-- ช่อง ราคา -->
 						<div class="col-md-6">
 							<div class="form-group">
 								<label>ราคา <span class="text-danger">*</span></label>
@@ -143,9 +137,6 @@ function get_platform_link($conn, $product_id, $platform)
 
 				</div>
 			</div>
-			<!-- end Card 1: ข้อมูลสินค้า -->
-
-			<!-- Card 2: ช่องทางจำหน่าย -->
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
 					<h3 class="card-title">ช่องทางจำหน่าย</h3>
@@ -167,9 +158,6 @@ function get_platform_link($conn, $product_id, $platform)
 					</div>
 				</div>
 			</div>
-			<!-- end Card 2: ช่องทางจำหน่าย -->
-
-			<!-- Card 3: ส่วนลด -->
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
 					<h3 class="card-title">ส่วนลด</h3>
@@ -203,9 +191,6 @@ function get_platform_link($conn, $product_id, $platform)
 					</div>
 				</div>
 			</div>
-			<!-- end Card 3: ส่วนลด -->
-
-			<!-- Card: การจัดส่ง -->
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
 					<h3 class="card-title">การจัดส่ง</h3>
@@ -213,11 +198,11 @@ function get_platform_link($conn, $product_id, $platform)
 				<div class="card-body">
 					<div class="form-row">
 						<div class="form-group col-md-6">
-							<label>น้ำหนัก <span class="text-danger">*</span></label>
+							<label>น้ำหนัก (กรัม) <span class="text-danger">*</span></label>
 							<div class="input-group">
 								<input type="number" step="any" min="0" name="weight" class="form-control" value="<?= isset($weight) ? $weight : '' ?>" required>
 								<div class="input-group-append">
-									<span class="input-group-text">kg</span>
+									<span class="input-group-text">g</span>
 								</div>
 							</div>
 						</div>
@@ -246,40 +231,42 @@ function get_platform_link($conn, $product_id, $platform)
 								<th>ราคาขนส่งตามขนาด</th>
 							</tr>
 						</thead>
-						<tbody>
-							<?php
-							$shipping_js_data = [];
-							$shippings = $conn->query("SELECT * FROM shipping_methods WHERE delete_flag = 0");
-							while ($row = $shippings->fetch_assoc()):
-								$method_id = $row['id'];
-								$method_name = $row['name'];
-								$divider = $row['volumetric_divider'];
+						<?php
+						// เตรียมข้อมูลราคาทั้งหมดจาก shipping_prices
+						$prices_query = $conn->query("SELECT * FROM `shipping_prices` ORDER BY shipping_method_id, min_weight ASC");
+						$prices_by_method = [];
+						while ($price_row = $prices_query->fetch_assoc()) {
+							$prices_by_method[$price_row['shipping_method_id']][] = $price_row;
+						}
 
-								$shipping_js_data[$method_id] = [
-									'divider' => $divider,
-									'cost' => $row['cost'],
-									's' => $row['weight_cost_s'],
-									'm' => $row['weight_cost_m'],
-									'l' => $row['weight_cost_l']
-								];
-							?>
-								<tr>
-									<td>
-										<h6><?= $method_name ?></h6>
-									</td>
-									<td>
-										<input type="text" name="shipping_price[<?= $method_id ?>]" step="any" min="0" class="form-control shipping-price" id="shipping_price_<?= $method_id ?>" placeholder="ค่าคงที่ (บาท)" readonly>
-									</td>
-									<td>
-										<input type="text" class="form-control parcel-size-display" id="parcel_size_<?= $method_id ?>" placeholder="ขนาด (S/M/L)" readonly>
-									</td>
-								</tr>
+						// สร้าง object สำหรับส่งให้ JavaScript
+						$shipping_js_data = [];
+						$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND is_active = 1");
+						while ($row = $shippings->fetch_assoc()):
+							$method_id = $row['id'];
 
-							<?php endwhile; ?>
+							// นำข้อมูลราคาที่เตรียมไว้ gชื่อมกับ method id
+							$shipping_js_data[$method_id] = [
+								'prices' => $prices_by_method[$method_id] ?? []
+							];
+						?>
+							<tr>
+								<td>
+									<h6><?= $row['name'] ?></h6>
+								</td>
+								<td>
+									<input type="text" class="form-control shipping-price" value="<?= $row['cost'] ?> บาท" readonly>
+								</td>
+								<td>
+									<input type="text" class="form-control parcel-weight-display" id="parcel_weight_display_<?= $method_id ?>" placeholder="คำนวณจากน้ำหนักจริง" readonly>
+								</td>
+							</tr>
+						<?php endwhile; ?>
 						</tbody>
 					</table>
 
 					<script>
+						// ส่งข้อมูลราคาที่จัดรูปแบบใหม่แล้วไปยัง JavaScript
 						const shippingMethods = <?= json_encode($shipping_js_data) ?>;
 					</script>
 
@@ -290,9 +277,6 @@ function get_platform_link($conn, $product_id, $platform)
 					</div>
 				</div>
 			</div>
-			<!-- end Card: การจัดส่ง -->
-
-			<!-- Card 4: สถานะการขาย -->
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
 					<h3 class="card-title">สถานะการขาย</h3>
@@ -305,8 +289,6 @@ function get_platform_link($conn, $product_id, $platform)
 					</div>
 				</div>
 			</div>
-			<!-- end Card 4: สถานะการขาย -->
-
 	</form>
 
 </div>
@@ -346,32 +328,51 @@ function get_platform_link($conn, $product_id, $platform)
 		$('#final-price-display').text(finalPrice.toFixed(2) + ' บาท');
 	}
 
+	// ========== START: MODIFIED BLOCK ==========
 	function calculateShippingCosts() {
-		const w = parseFloat($('[name="dim_w"]').val()) || 0;
-		const l = parseFloat($('[name="dim_l"]').val()) || 0;
-		const h = parseFloat($('[name="dim_h"]').val()) || 0;
-		const realWeight = parseFloat($('[name="weight"]').val()) || 0;
+		// รับค่าน้ำหนัก (กรัม) จากฟอร์มโดยตรง
+		const weightInGrams = parseFloat($('[name="weight"]').val()) || 0;
 
+		// วนลูปเพื่อคำนวณค่าส่งของแต่ละบริษัท
 		$.each(shippingMethods, (methodId, data) => {
-			const volumetricWeight = (w * l * h) / data.divider;
-			const finalWeight = Math.max(realWeight, volumetricWeight);
+			let foundPrice = null;
+			let displayMessage = "ไม่รองรับน้ำหนักนี้";
+			let priceDisplay = "-";
 
-			let parcelSize = 'S';
-			let estimatedPrice = data.s;
-			if (finalWeight > 2 && finalWeight <= 5) {
-				parcelSize = 'M';
-				estimatedPrice = data.m;
-			} else if (finalWeight > 5) {
-				parcelSize = 'L';
-				estimatedPrice = data.l;
+			if (data.prices && data.prices.length > 0) {
+				// ค้นหาราคาที่ตรงกับช่วงน้ำหนัก
+				for (const tier of data.prices) {
+					if (weightInGrams > 0 && weightInGrams >= parseInt(tier.min_weight) && weightInGrams <= parseInt(tier.max_weight)) {
+						foundPrice = parseFloat(tier.price).toFixed(2);
+						break; // หยุดเมื่อเจอราคาที่ตรงกันแล้ว
+					}
+				}
 			}
 
-			$('#calculated_size').val(parcelSize);
-			$(`#shipping_price_${methodId}`).val(`${estimatedPrice} (${parcelSize})`).prop('readonly', true);
-			$(`#parcel_size_${methodId}`).val(`${finalWeight.toFixed(2)} kg = ${estimatedPrice} บาท (${parcelSize})`);
+			if (weightInGrams <= 0) {
+				displayMessage = "กรุณาระบุน้ำหนัก";
+				priceDisplay = "-";
+			} else if (foundPrice !== null) {
+				priceDisplay = foundPrice;
+				// จัดรูปแบบข้อความให้สวยงาม
+				displayMessage = `น้ำหนัก: ${weightInGrams.toLocaleString()} g = ${foundPrice} บาท`;
+			} else {
+				// กรณีน้ำหนักเกินพิกัดสูงสุดของบริษัทนั้นๆ
+				if (data.prices.length > 0) {
+					const maxWeight = Math.max(...data.prices.map(p => parseInt(p.max_weight)));
+					if (weightInGrams > maxWeight) {
+						displayMessage = "น้ำหนักเกินพิกัดสูงสุด";
+					}
+				}
+			}
 
+			// อัปเดตข้อมูลในฟอร์ม
+			$(`#shipping_price_${methodId}`).val(priceDisplay);
+			$(`#parcel_weight_display_${methodId}`).val(displayMessage);
 		});
 	}
+	// ========== END: MODIFIED BLOCK ==========
+
 
 	$(document).ready(function() {
 		// Select2
@@ -396,13 +397,9 @@ function get_platform_link($conn, $product_id, $platform)
 		});
 
 		// คำนวณราคาทุกครั้งที่มีการแก้ไข
-		$('[name="price"], [name="discount_value"], [name="discount_type"]').on('input change', calculateFinalPrice);
+		$('[name="weight"]').on('input change', calculateShippingCosts);
 
-		// คำนวณค่าขนส่ง
-		$('[name="dim_w"], [name="dim_l"], [name="dim_h"], [name="weight"]').on('input change', calculateShippingCosts);
-
-		// คำนวณครั้งแรกตอนโหลด
-		calculateFinalPrice();
+		// เรียกใช้ฟังก์ชันคำนวณเมื่อโหลดหน้าเสร็จ
 		calculateShippingCosts();
 
 		// Form submit
