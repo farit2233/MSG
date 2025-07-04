@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 01, 2025 at 03:08 AM
+-- Generation Time: Jul 04, 2025 at 04:30 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -178,7 +178,8 @@ INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`) VALUES
 (68, 25, 1, 288.00),
 (69, 27, 1, 587.16),
 (70, 20, 1, 640.00),
-(71, 29, 2, 200.00);
+(71, 29, 2, 200.00),
+(72, 25, 1, 288.00);
 
 -- --------------------------------------------------------
 
@@ -245,7 +246,8 @@ INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `tota
 (68, '2025062600007', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 326.00, 2, 0, '2025-06-26 15:50:11', '2025-06-26 15:50:16', 0, 0, 1),
 (69, '2025063000001', 18, '21 หมู่ 5 ถนนเพชรเกษม, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 625.16, 7, 0, '2025-06-30 10:40:12', '2025-06-30 10:40:24', 0, 0, 1),
 (70, '2025063000002', 18, '21 หมู่ 5 ถนนเพชรเกษม, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 698.00, 7, 0, '2025-06-30 11:54:14', '2025-06-30 11:55:50', 0, 0, 1),
-(71, '2025063000003', 18, '21 หมู่ 5 ถนนเพชรเกษม, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 475.00, 3, 0, '2025-06-30 11:54:35', '2025-06-30 11:55:50', 0, 0, 1);
+(71, '2025063000003', 18, '21 หมู่ 5 ถนนเพชรเกษม, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 475.00, 3, 0, '2025-06-30 11:54:35', '2025-06-30 11:55:50', 0, 0, 1),
+(72, '2025070400001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 313.00, 3, 0, '2025-07-04 01:34:42', '2025-07-04 01:34:53', 0, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -273,9 +275,9 @@ INSERT INTO `product_categories` (`product_id`, `category_id`) VALUES
 
 CREATE TABLE `product_links` (
   `product_id` int NOT NULL,
-  `shopee_url` text COLLATE utf8mb4_general_ci,
-  `lazada_url` text COLLATE utf8mb4_general_ci,
-  `tiktok_url` text COLLATE utf8mb4_general_ci,
+  `shopee_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lazada_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `tiktok_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -317,16 +319,16 @@ CREATE TABLE `product_list` (
   `delete_flag` tinyint(1) NOT NULL DEFAULT '0',
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `discount_type` enum('amount','percent') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `discount_type` enum('amount','percent') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `discount_value` float DEFAULT NULL,
   `discounted_price` float DEFAULT NULL,
   `weight` float(10,2) DEFAULT NULL,
   `dim_w` float(10,2) DEFAULT NULL,
   `dim_l` float(10,2) DEFAULT NULL,
   `dim_h` float(10,2) DEFAULT NULL,
-  `calculated_size` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `calculated_size` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `slow_prepare` tinyint(1) NOT NULL DEFAULT '0',
-  `sku` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL
+  `sku` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -369,12 +371,9 @@ CREATE TABLE `product_shipping` (
 CREATE TABLE `shipping_methods` (
   `id` int NOT NULL,
   `provider_id` int NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `cost` decimal(10,2) DEFAULT '0.00',
-  `weight_cost_s` float(10,2) DEFAULT '0.00',
-  `weight_cost_m` float(10,2) DEFAULT '0.00',
-  `weight_cost_l` float(10,2) DEFAULT '0.00',
   `cod_enabled` tinyint(1) DEFAULT '0',
   `is_active` tinyint(1) DEFAULT '1',
   `delete_flag` tinyint(1) DEFAULT '0',
@@ -385,9 +384,53 @@ CREATE TABLE `shipping_methods` (
 -- Dumping data for table `shipping_methods`
 --
 
-INSERT INTO `shipping_methods` (`id`, `provider_id`, `name`, `description`, `cost`, `weight_cost_s`, `weight_cost_m`, `weight_cost_l`, `cod_enabled`, `is_active`, `delete_flag`, `volumetric_divider`) VALUES
-(3, 2, 'Flash Express', 'บริการราคาประหยัดทั่วประเทศ', 25.00, 25.00, 50.00, 75.00, 1, 1, 0, 5000),
-(7, 3, 'ไปรษณีย์ไทย', '', 38.00, 38.00, 58.00, 118.00, 0, 1, 0, 5000);
+INSERT INTO `shipping_methods` (`id`, `provider_id`, `name`, `description`, `cost`, `cod_enabled`, `is_active`, `delete_flag`, `volumetric_divider`) VALUES
+(3, 2, 'Flash Express', 'บริการราคาประหยัดทั่วประเทศ', 25.00, 1, 1, 0, 5000),
+(7, 3, 'ไปรษณีย์ไทย', 'สามารถเก็บเงินปลายทางได้', 40.00, 1, 1, 0, 5000),
+(11, 1, 'test', '', 100.00, 0, 1, 0, 5000);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_prices`
+--
+
+CREATE TABLE `shipping_prices` (
+  `id` int NOT NULL,
+  `shipping_method_id` int NOT NULL,
+  `min_weight` int NOT NULL,
+  `max_weight` int NOT NULL,
+  `price` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `shipping_prices`
+--
+
+INSERT INTO `shipping_prices` (`id`, `shipping_method_id`, `min_weight`, `max_weight`, `price`) VALUES
+(11, 3, 1, 11, 1.00),
+(54, 7, 0, 1000, 40.00),
+(55, 7, 1001, 2000, 50.00),
+(56, 7, 2001, 3000, 65.00),
+(57, 7, 3001, 4000, 75.00),
+(58, 7, 4001, 5000, 90.00),
+(59, 7, 5001, 6000, 100.00),
+(60, 7, 6001, 7000, 120.00),
+(61, 7, 7001, 8000, 135.00),
+(62, 7, 8001, 9000, 140.00),
+(63, 7, 9001, 10000, 150.00),
+(64, 7, 10001, 11000, 160.00),
+(65, 7, 11001, 12000, 170.00),
+(66, 7, 12001, 13000, 180.00),
+(67, 7, 13001, 14000, 190.00),
+(68, 7, 14001, 15000, 200.00),
+(69, 7, 15001, 16000, 210.00),
+(70, 7, 16001, 17000, 220.00),
+(71, 7, 17001, 18000, 230.00),
+(72, 7, 18001, 19000, 240.00),
+(73, 7, 19001, 20000, 250.00),
+(74, 7, 20001, 25000, 400.00),
+(79, 11, 0, 100, 0.00);
 
 -- --------------------------------------------------------
 
@@ -397,9 +440,9 @@ INSERT INTO `shipping_methods` (`id`, `provider_id`, `name`, `description`, `cos
 
 CREATE TABLE `shipping_providers` (
   `id` int NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
-  `logo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `logo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` tinyint(1) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -593,6 +636,13 @@ ALTER TABLE `shipping_methods`
   ADD KEY `provider_id` (`provider_id`);
 
 --
+-- Indexes for table `shipping_prices`
+--
+ALTER TABLE `shipping_prices`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `shipping_method_id` (`shipping_method_id`);
+
+--
 -- Indexes for table `shipping_providers`
 --
 ALTER TABLE `shipping_providers`
@@ -633,7 +683,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=146;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=148;
 
 --
 -- AUTO_INCREMENT for table `category_list`
@@ -651,7 +701,7 @@ ALTER TABLE `customer_list`
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- AUTO_INCREMENT for table `product_list`
@@ -663,7 +713,13 @@ ALTER TABLE `product_list`
 -- AUTO_INCREMENT for table `shipping_methods`
 --
 ALTER TABLE `shipping_methods`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `shipping_prices`
+--
+ALTER TABLE `shipping_prices`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `shipping_providers`
@@ -743,6 +799,12 @@ ALTER TABLE `product_list`
 --
 ALTER TABLE `shipping_methods`
   ADD CONSTRAINT `shipping_methods_ibfk_1` FOREIGN KEY (`provider_id`) REFERENCES `shipping_providers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `shipping_prices`
+--
+ALTER TABLE `shipping_prices`
+  ADD CONSTRAINT `shipping_prices_ibfk_1` FOREIGN KEY (`shipping_method_id`) REFERENCES `shipping_methods` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `stock_list`
