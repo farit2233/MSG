@@ -4,32 +4,35 @@ $display_name = '';
 $description = '';
 $shipping_type = 'fixed';
 $cost = 0.00;
-$weight_cost_s = 0.00;
-$weight_cost_m = 0.00;
-$weight_cost_l = 0.00;
-
 $cod_enabled = 0;
 $is_active = 1;
 $id = '';
 
 
+// ตรวจสอบว่า id มีอยู่ใน URL หรือไม่
 if (isset($_GET['id']) && $_GET['id'] > 0) {
 
+    // ดึงข้อมูลการจัดส่ง
     $qry = $conn->query("SELECT * FROM shipping_methods WHERE id = '{$_GET['id']}' ");
     if ($qry && $qry->num_rows > 0) {
         $row = $qry->fetch_assoc();
+        // ทำการเก็บค่าที่ดึงมาไว้ในตัวแปร
         foreach ($row as $k => $v) {
-            $$k = $v;
+            $$k = $v; // map ค่าใน $row ให้ตรงกับตัวแปร
         }
         $display_name = $name; // mapping display_name
-        $weight_cost_s = $row['weight_cost_s'];
-        $weight_cost_m = $row['weight_cost_m'];
-        $weight_cost_l = $row['weight_cost_l'];
+    }
+
+    // ดึงข้อมูลราคาตามน้ำหนัก
+    $weight_ranges = [];
+    $price_qry = $conn->query("SELECT * FROM shipping_prices WHERE shipping_method_id = '{$id}'");
+    while ($price_row = $price_qry->fetch_assoc()) {
+        $weight_ranges[] = $price_row; // เก็บข้อมูลในอาร์เรย์
     }
 }
+
 ?>
 
-<!-- Begin: ฟอร์มการตั้งค่าขนส่งทั้งหมดภายใน Card -->
 <div class="card card-outline card-primary rounded-0">
     <div class="card-header">
         <h1 class="card-title"><?php echo isset($id) && $id > 0 ? 'แก้ไขข้อมูลการจัดส่ง' : 'เพิ่มข้อมูลการจัดส่ง'; ?></h1>
@@ -37,7 +40,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     <form action="" id="shipping-form" method="POST">
         <input type="hidden" name="id" value="<?= $id ?>">
         <div class="card-body">
-            <!-- Card 1: ข้อมูลการจัดส่ง -->
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
                     <h3 class="card-title h3">ข้อมูลการจัดส่ง</h3>
@@ -61,7 +63,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label">ชื่อการจัดส่งสำหรับลูกค้า <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
-                            <input type="text" name="display_name" class="form-control" placeholder="ชื่อแสดงในหน้าสั่งซื้อสินค้าของลูกค้า" value="<?= htmlspecialchars($display_name) ?>" required>
+                            <input type="text" name="display_name" class="form-control" placeholder="ชื่อแสดงในหน้าสั่งซื้อสินค้าของลูกค้า" value="<?= isset($display_name) ? htmlspecialchars($display_name) : '' ?>" required>
                         </div>
                     </div>
                     <div class="form-group">
@@ -71,71 +73,68 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 </div>
             </div>
 
-            <!-- Card 2: ประเภทค่าจัดส่ง -->
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
                     <h3 class="card-title h3">ประเภทค่าจัดส่ง</h3>
                 </div>
                 <div class="card-body">
-                    <!--div class="form-group">
-                        <div class="form-check form-check-inline">
-                            <input type="radio" class="form-check-input" name="shipping_type" id="fixed_rate" value="fixed" <?= $shipping_type == 'fixed' ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="fixed_rate">ค่าจัดส่งคงที่</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input type="radio" class="form-check-input" name="shipping_type" id="by_weight" value="weight" <?= $shipping_type == 'weight' ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="by_weight">ค่าจัดส่งตามน้ำหนัก</label>
-                        </div>
-                    </div-->
-
-                    <!-- ค่าจัดส่งคงที่ -->
-                    <div class="form-group mt-2" id="fixed_cost_group">
+                    <div class="form-group" id="fixed_cost_group">
                         <label for="cost">ค่าจัดส่งคงที่ <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">฿</span>
                             </div>
-                            <input type="number" step="0.01" name="cost" class="form-control" value="<?= $cost ?>" required>
+                            <input type="number" step="0.01" name="cost" class="form-control" value="<?= isset($cost) ? $cost : 0 ?>" required>
                         </div>
                     </div>
 
-                    <!-- ค่าจัดส่งตามน้ำหนัก -->
-                    <div class="form-group mt-2" id="weight_cost_group">
-                        <label>ราคาจัดส่งแยกตามน้ำหนัก <span class="text-danger">*</span></label>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label>S <small class="text-muted d-block">0 - 1 กก.</small></label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">฿</span>
+                    <hr>
+
+                    <div class="form-group" id="weight_cost_group">
+                        <label>ค่าจัดส่งตามน้ำหนัก <span class="text-danger">*</span></label>
+                        <div id="weight-price-group">
+                            <?php if (empty($weight_ranges)): ?>
+                                <div class="row weight-price-row mb-2">
+                                    <div class="col-md-3">
+                                        <label>ราคา</label>
+                                        <input type="number" step="0.01" name="price[]" class="form-control" placeholder="เช่น 40" required>
                                     </div>
-                                    <input type="number" step="0.01" name="weight_cost_s" class="form-control" value="<?= $weight_cost_s ?>">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label>M <small class="text-muted d-block">1 - 5 กก.</small></label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">฿</span>
+                                    <div class="col-md-3">
+                                        <label>น้ำหนักเริ่มต้น (กรัม.)</label>
+                                        <input type="number" step="0.01" name="weight_from[]" class="form-control" placeholder="เช่น 0" required>
                                     </div>
-                                    <input type="number" step="0.01" name="weight_cost_m" class="form-control" value="<?= $weight_cost_m ?>">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label>L <small class="text-muted d-block">มากกว่า 5 กก.</small></label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">฿</span>
+                                    <div class="col-md-3">
+                                        <label>น้ำหนักสูงสุด (กรัม.)</label>
+                                        <input type="number" step="0.01" name="weight_to[]" class="form-control" placeholder="เช่น 1000" required>
                                     </div>
-                                    <input type="number" step="0.01" name="weight_cost_l" class="form-control" value="<?= $weight_cost_l ?>">
+                                    <div class="col-md-3 d-flex align-items-end button-container">
+                                    </div>
                                 </div>
-                            </div>
+                            <?php else: ?>
+                                <?php foreach ($weight_ranges as $range): ?>
+                                    <div class="row weight-price-row mb-2">
+                                        <div class="col-md-3">
+                                            <label>ราคา</label>
+                                            <input type="number" step="0.01" name="price[]" class="form-control" value="<?= htmlspecialchars($range['price']) ?>" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>น้ำหนักเริ่มต้น (กรัม.)</label>
+                                            <input type="number" step="0.01" name="weight_from[]" class="form-control" value="<?= htmlspecialchars($range['min_weight']) ?>" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>น้ำหนักสูงสุด (กรัม.)</label>
+                                            <input type="number" step="0.01" name="weight_to[]" class="form-control" value="<?= htmlspecialchars($range['max_weight']) ?>" required>
+                                        </div>
+                                        <div class="col-md-3 d-flex align-items-end button-container">
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 3: เก็บเงินปลายทาง -->
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
                     <h3 class="card-title">เก็บเงินปลายทาง</h3>
@@ -143,13 +142,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 <div class="card-body">
                     <input type="hidden" name="cod_enabled" value="0">
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="cod_enabled" name="cod_enabled" value="1" <?= $cod_enabled ? 'checked' : '' ?>>
+                        <input type="checkbox" class="custom-control-input" id="cod_enabled" name="cod_enabled" value="1" <?= isset($cod_enabled) && $cod_enabled == 1 ? 'checked' : '' ?>>
                         <label class="custom-control-label" for="cod_enabled">ตั้งค่าให้การจัดส่งนี้เป็นแบบเก็บเงินปลายทาง</label>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 4: สถานะการแสดงผล -->
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
                     <h3 class="card-title">สถานะการแสดงผล</h3>
@@ -157,7 +155,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 <div class="card-body">
                     <input type="hidden" name="is_active" value="0">
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" value="1" <?= $is_active ? 'checked' : '' ?>>
+                        <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" value="1" <?= isset($is_active) && $is_active == 1 ? 'checked' : '' ?>>
                         <label class="custom-control-label" for="is_active">ปิดเพื่อซ่อนการจัดส่งจากหน้าร้าน แต่ร้านค้ายังสามารถจัดการต่อได้</label>
                     </div>
                 </div>
@@ -173,14 +171,77 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 <script>
     $(function() {
-        $('#provider_id').select2({
-            placeholder: "เลือกหรือพิมพ์ชื่อบริษัทขนส่ง",
-            width: '100%'
+
+        // --- START: โค้ดส่วน JavaScript ---
+
+        // HTML สำหรับสร้างแถวใหม่
+        const newRowTemplate = `
+        <div class="row weight-price-row mb-2">
+            <div class="col-md-3">
+                <label>ราคา</label>
+                <input type="number" step="0.01" name="price[]" class="form-control" placeholder="เช่น 50" required>
+            </div>
+            <div class="col-md-3">
+                <label>น้ำหนักเริ่มต้น (กรัม.)</label>
+                <input type="number" step="0.01" name="weight_from[]" class="form-control" placeholder="เช่น 1001" required>
+            </div>
+            <div class="col-md-3">
+                <label>น้ำหนักสูงสุด (กรัม.)</label>
+                <input type="number" step="0.01" name="weight_to[]" class="form-control" placeholder="เช่น 2000" required>
+            </div>
+            <div class="col-md-3 d-flex align-items-end button-container">
+                </div>
+        </div>`;
+
+        // ฟังก์ชันสำหรับอัปเดตปุ่ม + และ -
+        function updateWeightPriceButtons() {
+            const rows = $('#weight-price-group .weight-price-row');
+
+            // ถ้าไม่มีแถวเลย ให้เพิ่มแถวเริ่มต้น 1 แถว (เป็น safety net)
+            if (rows.length === 0) {
+                $('#weight-price-group').append(newRowTemplate);
+                updateWeightPriceButtons(); // เรียกใช้ฟังก์ชันอีกครั้งเพื่อใส่ปุ่ม
+                return;
+            }
+
+            rows.each(function(index) {
+                const buttonContainer = $(this).find('.button-container');
+                const removeButtonHtml = '<button type="button" class="btn btn-danger remove-weight-price ml-2"><i class="fas fa-trash"></i></button>';
+
+                // ถ้าเป็นแถวสุดท้าย ให้แสดงปุ่ม + และ -
+                if (index === rows.length - 1) {
+                    const addButtonHtml = '<button type="button" class="btn btn-primary add-weight-price ml-2"><i class="fas fa-plus"></i></button>';
+                    // สลับตำแหน่งปุ่ม + มาก่อน -
+                    buttonContainer.html(addButtonHtml + ' ' + removeButtonHtml);
+                } else {
+                    // สำหรับแถวอื่นๆ ให้แสดงเฉพาะปุ่ม -
+                    buttonContainer.html(removeButtonHtml);
+                }
+            });
+        }
+
+        // Event Listener สำหรับกดปุ่ม + (Add)
+        $('#weight-price-group').on('click', '.add-weight-price', function() {
+            $('#weight-price-group').append(newRowTemplate);
+            updateWeightPriceButtons(); // อัปเดตปุ่มทั้งหมด
         });
 
+        // Event Listener สำหรับกดปุ่ม - (Remove)
+        $('#weight-price-group').on('click', '.remove-weight-price', function() {
+            $(this).closest('.weight-price-row').remove();
+            updateWeightPriceButtons(); // อัปเดตปุ่มทั้งหมด
+        });
+
+        // เรียกใช้ฟังก์ชันเพื่อตั้งค่าปุ่มเมื่อหน้าเว็บโหลดเสร็จ
+        updateWeightPriceButtons();
+
+        // --- END: โค้ดส่วน JavaScript ---
+
+
+        // ส่งข้อมูลฟอร์ม (โค้ดเดิม)
         $('#shipping-form').submit(function(e) {
             e.preventDefault();
-            var _this = $(this)
+            var _this = $(this);
             $('.err-msg').remove();
             start_loader();
             $.ajax({
@@ -190,7 +251,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 contentType: false,
                 processData: false,
                 method: 'POST',
-                type: 'POST',
                 dataType: 'json',
                 error: err => {
                     console.log(err)
@@ -199,35 +259,21 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 },
                 success: function(resp) {
                     if (resp.status == 'success') {
-                        alert_toast("บันทึกข้อมูลเรียบร้อยแล้ว", 'success')
+                        alert_toast("บันทึกข้อมูลเรียบร้อยแล้ว", 'success');
                         setTimeout(() => {
-                            location.href = "./?page=shipping_setting"
-                        }, 1000)
+                            location.href = "./?page=shipping_setting";
+                        }, 1000);
                     } else if (resp.status == 'failed' && !!resp.msg) {
-                        var el = $('<div class="alert alert-danger err-msg">').text(resp.msg)
-                        _this.prepend(el)
-                        $("html, body").scrollTop(0)
-                        end_loader()
+                        var el = $('<div class="alert alert-danger err-msg">').text(resp.msg);
+                        _this.prepend(el);
+                        $("html, body").scrollTop(0);
+                        end_loader();
                     } else {
                         alert_toast("ไม่สามารถบันทึกได้", 'error');
                         end_loader();
                     }
                 }
-            })
+            });
         });
     });
-    //$(function() {
-    // function toggleShippingTypeFields() {
-    //     if ($('#by_weight').is(':checked')) {
-    //         $('#fixed_cost_group').hide();
-    //         $('#weight_cost_group').show();
-    //     } else {
-    //         $('#fixed_cost_group').show();
-    //         $('#weight_cost_group').hide();
-    //     }
-    // }
-
-    // $('input[name="shipping_type"]').change(toggleShippingTypeFields);
-    // toggleShippingTypeFields(); // เรียกครั้งแรกตอนโหลด
-    //});
 </script>

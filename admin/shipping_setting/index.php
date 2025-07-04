@@ -50,13 +50,18 @@ if ($_settings->chk_flashdata('success')): ?>
                 <tbody>
                     <?php
                     $i = 1;
-                    $qry = $conn->query("SELECT * FROM shipping_methods ORDER BY id ASC");
+                    $qry = $conn->query("SELECT sm.*, MAX(sp.price) AS max_price 
+                         FROM shipping_methods sm
+                         LEFT JOIN shipping_prices sp ON sm.id = sp.shipping_method_id
+                         GROUP BY sm.id 
+                         ORDER BY sm.id ASC");
+
                     while ($row = $qry->fetch_assoc()):
                     ?>
                         <tr>
                             <td class="text-center"><?= $i++; ?></td>
                             <td colspan="4"><?= $row['name'] ?></td>
-                            <td class="text-center">฿ <?= number_format($row['cost'], 2) ?> - ฿ <?= $row['weight_cost_l'] ?></td>
+                            <td class="text-center">฿ <?= number_format($row['cost'], 2) ?> - ฿ <?= number_format($row['max_price'], 2) ?></td>
                             <td class="text-center"><?= $row['cod_enabled'] ? '<span class="badge badge-success">เปิดใช้งาน</span>' : '<span class="badge badge-secondary">ไม่ได้ใช้งาน</span>' ?></td>
                             <td class="text-center">
                                 <?= $row['is_active'] ? '<span class="badge badge-success">เปิดใช้งาน</span>' : '<span class="badge badge-secondary">ไม่ได้ใช้งาน</span>' ?>
@@ -78,10 +83,10 @@ if ($_settings->chk_flashdata('success')): ?>
                                     </div>
                                 <?php endif; ?>
                             </td>
-
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
+
             </table>
         </div>
     </div>
