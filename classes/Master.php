@@ -151,10 +151,31 @@ class Master extends DBConnection
 	}
 	function save_product()
 	{
+
+		// ตรวจสอบน้ำหนักก่อนบันทึก
+		$max_weight_allowed = 25000; // กำหนดขีดจำกัดสูงสุดที่อนุญาต (กรัม)
+
+		if (isset($_POST['product_weight']) && $_POST['product_weight'] > $max_weight_allowed) {
+			return json_encode(['status' => 'failed', 'msg' => 'น้ำหนักสินค้าสูงเกินขีดจำกัดที่กำหนด']);
+		}
+
 		if (isset($_POST['description']))
 			$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
 
 		extract($_POST);
+
+		$shipping_price_id = isset($_POST['shipping_price_id']) ? intval($_POST['shipping_price_id']) : null;
+
+		// ถ้าไม่ได้ส่งมาก็ลองคำนวณเองตามน้ำหนักจริง (สำรอง)
+		if (!$shipping_price_id && isset($_POST['product_weight'])) {
+			$weight = floatval($_POST['product_weight']);
+			$qry = $this->conn->query("SELECT id FROM shipping_prices WHERE min_weight <= {$weight} AND max_weight >= {$weight} ORDER BY min_weight ASC LIMIT 1");
+			if ($qry && $qry->num_rows > 0) {
+				$shipping_price_id = $qry->fetch_assoc()['id'];
+			}
+		}
+		$_POST['shipping_price_id'] = $shipping_price_id ?: null;
+
 		$discount_type = (isset($_POST['discount_type']) && in_array($_POST['discount_type'], ['amount', 'percent'])) ? $_POST['discount_type'] : null;
 		$discount_value = (isset($_POST['discount_value']) && $_POST['discount_value'] !== '' && is_numeric($_POST['discount_value'])) ? floatval($_POST['discount_value']) : null;
 		$discounted_price = null;
@@ -184,7 +205,7 @@ class Master extends DBConnection
 			if (is_array($v)) continue;
 
 			// เช็คเฉพาะขนาดพัสดุ
-			if (in_array($k, ['dim_w', 'dim_l', 'dim_h'])) {
+			if (in_array($k, ['product_width', 'product_length', 'product_height'])) {
 				if ($v === '' || $v === null || floatval($v) == 0) {
 					$v = null;
 				}

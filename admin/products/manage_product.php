@@ -50,7 +50,6 @@ function get_platform_link($conn, $product_id, $platform)
 		<h1 class="card-title"><?php echo isset($id) ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'; ?></h1>
 	</div>
 	<form action="" id="product-form" method="POST" enctype="multipart/form-data">
-		<input type="hidden" name="calculated_size" id="calculated_size">
 		<input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
 		<div class="card-body">
 
@@ -200,7 +199,7 @@ function get_platform_link($conn, $product_id, $platform)
 						<div class="form-group col-md-6">
 							<label>น้ำหนัก (กรัม) <span class="text-danger">*</span></label>
 							<div class="input-group">
-								<input type="number" step="any" min="0" name="weight" class="form-control" value="<?= isset($weight) ? $weight : '' ?>" required>
+								<input type="number" step="any" min="0" name="product_weight" class="form-control" value="<?= isset($product_weight) ? $product_weight : '' ?>" required>
 								<div class="input-group-append">
 									<span class="input-group-text">g</span>
 								</div>
@@ -209,10 +208,10 @@ function get_platform_link($conn, $product_id, $platform)
 						<div class="form-group col-md-6">
 							<label>ขนาดพัสดุ (กว้าง x ยาว x สูง)</label>
 							<div class="form-row">
-								<div class="col"><input type="number" step="any" name="dim_w" class="form-control" placeholder="กว้าง" value="<?= isset($dim_w) ? $dim_w : '' ?>"></div>
-								<div class="col"><input type="number" step="any" name="dim_l" class="form-control" placeholder="ยาว" value="<?= isset($dim_l) ? $dim_l : '' ?>"></div>
+								<div class="col"><input type="number" step="any" name="product_width" class="form-control" placeholder="กว้าง" value="<?= isset($product_width) ? $product_width : '' ?>"></div>
+								<div class="col"><input type="number" step="any" name="product_length" class="form-control" placeholder="ยาว" value="<?= isset($product_length) ? $product_length : '' ?>"></div>
 								<div class="input-group col">
-									<input type="number" step="any" name="dim_h" class="form-control" placeholder="สูง" value="<?= isset($dim_h) ? $dim_h : '' ?>">
+									<input type="number" step="any" name="product_height" class="form-control" placeholder="สูง" value="<?= isset($product_height) ? $product_height : '' ?>">
 									<div class="input-group-append">
 										<span class="input-group-text">cm</span>
 									</div>
@@ -231,46 +230,53 @@ function get_platform_link($conn, $product_id, $platform)
 								<th>ราคาขนส่งตามขนาด</th>
 							</tr>
 						</thead>
-						<?php
-						// เตรียมข้อมูลราคาทั้งหมดจาก shipping_prices
-						$prices_query = $conn->query("SELECT * FROM `shipping_prices` ORDER BY shipping_method_id, min_weight ASC");
-						$prices_by_method = [];
-						while ($price_row = $prices_query->fetch_assoc()) {
-							$prices_by_method[$price_row['shipping_method_id']][] = $price_row;
-						}
+						<tbody>
+							<?php
+							// 1) เตรียมน้ำหนักจริง
+							$product_weight = isset($product_weight) ? (float)$product_weight : 0;
 
-						// สร้าง object สำหรับส่งให้ JavaScript
-						$shipping_js_data = [];
-						$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND is_active = 1");
-						while ($row = $shippings->fetch_assoc()):
-							$method_id = $row['id'];
+							// 2) วนขนส่งทั้งหมด
+							$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND is_active = 1");
 
-							// นำข้อมูลราคาที่เตรียมไว้ gชื่อมกับ method id
-							$shipping_js_data[$method_id] = [
-								'prices' => $prices_by_method[$method_id] ?? []
-							];
-						?>
-							<tr>
-								<td>
-									<h6><?= $row['name'] ?></h6>
-								</td>
-								<td>
-									<input type="text" class="form-control shipping-price" value="<?= $row['cost'] ?> บาท" readonly>
-								</td>
-								<td>
-									<input type="text" class="form-control parcel-weight-display" id="parcel_weight_display_<?= $method_id ?>" placeholder="คำนวณจากน้ำหนักจริง" readonly>
-								</td>
-							</tr>
-						<?php endwhile; ?>
+							$matched_shipping_price_id = null; // จะเก็บ id ช่วงราคาที่ match จริง
+
+							while ($row = $shippings->fetch_assoc()):
+								$method_id = $row['id'];
+
+								// หา rate ตามช่วงน้ำหนัก
+								$qry = $conn->query("SELECT * FROM shipping_prices 
+								WHERE shipping_method_id = {$method_id} 
+								AND min_weight <= {$product_weight} 
+								AND max_weight >= {$product_weight}
+								ORDER BY min_weight ASC LIMIT 1");
+
+								$matched_row = $qry && $qry->num_rows ? $qry->fetch_assoc() : null;
+
+								// ถ้าเจอช่วงแรก เอา id เก็บไว้
+								if ($matched_row && !$matched_shipping_price_id) {
+									$matched_shipping_price_id = $matched_row['id'];
+								}
+
+							?>
+								<tr data-method-id="<?= $row['id'] ?>">
+									<td>
+										<h6><?= $row['name'] ?></h6>
+									</td>
+									<td>
+										<input type="text" class="form-control" value="<?= number_format($row['cost'], 2) ?> บาท" readonly>
+									</td>
+									<td>
+										<input type="text" class="form-control dynamic-shipping"
+											value="<?= $matched_row ? "ช่วง {$matched_row['min_weight']}-{$matched_row['max_weight']} g | " . number_format($matched_row['price'], 2) . " บาท" : "น้ำหนักสินค้าสูงเกินขีดจำกัด" ?>"
+											readonly>
+										<div class="weight-error text-danger" style="display: none;"></div> <!-- เพิ่มช่องข้อความเตือน -->
+									</td>
+								</tr>
+							<?php endwhile; ?>
 						</tbody>
+
 					</table>
-
-					<script>
-						// ส่งข้อมูลราคาที่จัดรูปแบบใหม่แล้วไปยัง JavaScript
-						const shippingMethods = <?= json_encode($shipping_js_data) ?>;
-					</script>
-
-					<hr>
+					<input type="hidden" name="shipping_price_id" value="<?= $matched_shipping_price_id ?>">
 					<div class="form-check">
 						<input type="checkbox" name="slow_prepare" id="slow_prepare" class="form-check-input" <?= isset($slow_prepare) && $slow_prepare ? 'checked' : '' ?>>
 						<label class="form-check-label" for="slow_prepare">เตรียมส่งนานกว่าปกติ</label>
@@ -296,6 +302,8 @@ function get_platform_link($conn, $product_id, $platform)
 	<button class="btn btn-success btn-sm btn-flat" form="product-form"><i class="fa fa-save"></i> บันทึก</button>
 	<a class="btn btn-danger btn-sm border btn-flat" href="./?page=products"><i class="fa fa-times"></i> ยกเลิก</a>
 </div>
+
+
 <script>
 	function displayImg(input) {
 		if (input.files && input.files[0]) {
@@ -328,115 +336,136 @@ function get_platform_link($conn, $product_id, $platform)
 		$('#final-price-display').text(finalPrice.toFixed(2) + ' บาท');
 	}
 
-	// ========== START: MODIFIED BLOCK ==========
-	function calculateShippingCosts() {
-		// รับค่าน้ำหนัก (กรัม) จากฟอร์มโดยตรง
-		const weightInGrams = parseFloat($('[name="weight"]').val()) || 0;
+	function updateShippingPrices(weight) {
+		const tbody = $('table tbody');
+		let isWeightValid = true; // ตัวแปรเช็คว่าถูกต้องไหม
 
-		// วนลูปเพื่อคำนวณค่าส่งของแต่ละบริษัท
-		$.each(shippingMethods, (methodId, data) => {
-			let foundPrice = null;
-			let displayMessage = "ไม่รองรับน้ำหนักนี้";
-			let priceDisplay = "-";
+		tbody.find('tr').each(function() {
+			const row = $(this);
+			const methodId = row.data('method-id');
+			let found = false;
 
-			if (data.prices && data.prices.length > 0) {
-				// ค้นหาราคาที่ตรงกับช่วงน้ำหนัก
-				for (const tier of data.prices) {
-					if (weightInGrams > 0 && weightInGrams >= parseInt(tier.min_weight) && weightInGrams <= parseInt(tier.max_weight)) {
-						foundPrice = parseFloat(tier.price).toFixed(2);
-						break; // หยุดเมื่อเจอราคาที่ตรงกันแล้ว
+			// เช็คว่า weight ตรงกับช่วงขนส่งไหน
+			if (SHIPPING_PRICES[methodId]) {
+				for (const sp of SHIPPING_PRICES[methodId]) {
+					if (weight >= parseFloat(sp.min_weight) && weight <= parseFloat(sp.max_weight)) {
+						// แสดงราคาตามช่วง
+						row.find('.dynamic-shipping').val(`ช่วง ${sp.min_weight}-${sp.max_weight} g | ${parseFloat(sp.price).toFixed(2)} บาท`);
+
+						// ตั้งค่า shipping_price_id ที่ต้องการ
+						$('input[name="shipping_price_id"]').val(sp.id);
+						found = true;
+						break;
 					}
 				}
 			}
 
-			if (weightInGrams <= 0) {
-				displayMessage = "กรุณาระบุน้ำหนัก";
-				priceDisplay = "-";
-			} else if (foundPrice !== null) {
-				priceDisplay = foundPrice;
-				// จัดรูปแบบข้อความให้สวยงาม
-				displayMessage = `น้ำหนัก: ${weightInGrams.toLocaleString()} g = ${foundPrice} บาท`;
+			if (!found) {
+				row.find('.dynamic-shipping').val('น้ำหนักสินค้าสูงเกินขีดจำกัด');
+				isWeightValid = false; // ถ้าไม่เจอช่วงที่ match ก็ไม่ valid
+			}
+
+			// เพิ่มข้อความเตือนในทุกๆ ขนส่ง
+			if (weight > 25000) {
+				row.find('.weight-error').text('น้ำหนักสินค้าสูงเกินขีดจำกัด (25,000 กรัม)').show(); // ข้อความเตือน
 			} else {
-				// กรณีน้ำหนักเกินพิกัดสูงสุดของบริษัทนั้นๆ
-				if (data.prices.length > 0) {
-					const maxWeight = Math.max(...data.prices.map(p => parseInt(p.max_weight)));
-					if (weightInGrams > maxWeight) {
-						displayMessage = "น้ำหนักเกินพิกัดสูงสุด";
-					}
-				}
+				row.find('.weight-error').hide(); // ซ่อนข้อความเตือนเมื่อถูกต้อง
 			}
-
-			// อัปเดตข้อมูลในฟอร์ม
-			$(`#shipping_price_${methodId}`).val(priceDisplay);
-			$(`#parcel_weight_display_${methodId}`).val(displayMessage);
 		});
+
+		// แสดงหรือปิดปุ่มบันทึก
+		if (weight > 25000) {
+			$('#save-btn').prop('disabled', true); // ปิดปุ่มเซฟ
+		} else {
+			$('#save-btn').prop('disabled', false); // เปิดปุ่มเซฟ
+		}
 	}
-	// ========== END: MODIFIED BLOCK ==========
+
 
 
 	$(document).ready(function() {
-		// Select2
 		$('.select2').select2({
 			width: '100%'
 		});
 
-		// Toggle ส่วนลด
 		function toggleDiscountSection(enabled) {
 			$('#discount_section').toggle(enabled).find('input').prop('disabled', !enabled);
 		}
 
-		// เรียกเมื่อโหลดหน้า
 		const hasDiscount = $('#discount_toggle').is(':checked');
 		toggleDiscountSection(hasDiscount);
-		$('#discount_toggle').prop('checked', hasDiscount);
 
-		// เมื่อเปลี่ยนสวิตช์ส่วนลด
 		$('#discount_toggle').on('change', function() {
 			toggleDiscountSection(this.checked);
 			calculateFinalPrice();
 		});
 
-		// คำนวณราคาทุกครั้งที่มีการแก้ไข
-		$('[name="weight"]').on('input change', calculateShippingCosts);
+		// 🔑 เพิ่ม Event listener คำนวณทันทีเมื่อกรอก
+		$('[name="price"], [name="discount_type"], [name="discount_value"]').on('input change', calculateFinalPrice);
+		calculateFinalPrice(); // เรียกครั้งแรกเลย
 
-		// เรียกใช้ฟังก์ชันคำนวณเมื่อโหลดหน้าเสร็จ
-		calculateShippingCosts();
-
-		// Form submit
+		$('[name="product_weight"]').on('input', function() {
+			const weight = parseFloat($(this).val()) || 0;
+			updateShippingPrices(weight);
+		});
 		$('#product-form').submit(function(e) {
-			e.preventDefault();
-			const form = $(this);
-			$('.err-msg').remove();
-			start_loader();
+			e.preventDefault(); // ป้องกันการ submit ปกติ
+
+			// เช็คว่ามีน้ำหนักเกินขีดจำกัดหรือไม่
+			const weight = parseFloat($('[name="product_weight"]').val()) || 0;
+			if (weight > 25000) {
+				$('#weight-error').text('น้ำหนักสินค้าสูงเกินขีดจำกัด (25,000 กรัม)').show(); // แสดงข้อความเตือน
+				Swal.fire({
+					icon: 'error',
+					title: 'น้ำหนักสินค้าสูงเกินขีดจำกัด',
+					text: 'น้ำหนักไม่สามารถเกิน 25,000 กรัมได้',
+				});
+				return; // ไม่ส่งฟอร์ม
+			}
+
+
+			// หากผ่านเงื่อนไข
+			$('.err-msg').remove(); // ลบ error ที่เก่าก่อนหน้า
+			start_loader(); // เริ่มโหลดหน้า
 
 			$.ajax({
-				url: _base_url_ + "classes/Master.php?f=save_product",
+				url: _base_url_ + "classes/Master.php?f=save_product", // ส่งฟอร์ม
 				data: new FormData(this),
 				cache: false,
 				contentType: false,
 				processData: false,
 				method: 'POST',
 				dataType: 'json',
-				error: err => {
+				error: function(err) {
 					console.error(err);
 					alert_toast("เกิดข้อผิดพลาด", 'error');
 					end_loader();
 				},
 				success: function(resp) {
-					if (resp?.status === 'success') {
+					if (resp.status === 'success') {
 						location.replace(`./?page=products/view_product&id=${resp.pid}`);
-					} else if (resp.status === 'failed' && resp.msg) {
+					} else {
 						const el = $('<div>').addClass("alert alert-dark err-msg").text(resp.msg);
-						form.prepend(el);
+						$('#product-form').prepend(el);
 						el.show('slow');
 						$("html, body").scrollTop(0);
-					} else {
-						alert_toast("เกิดข้อผิดพลาด", 'error');
-						console.log(resp);
 					}
 					end_loader();
 				}
 			});
 		});
+
 	});
+</script>
+
+<?php
+// จัดรูปแบบ shipping_prices เป็น array แบบ group ตาม shipping_method_id
+$shipping_prices_data = [];
+$shipping_q = $conn->query("SELECT * FROM shipping_prices");
+while ($row = $shipping_q->fetch_assoc()) {
+	$shipping_prices_data[$row['shipping_method_id']][] = $row;
+}
+?>
+<script>
+	const SHIPPING_PRICES = <?= json_encode($shipping_prices_data) ?>;
 </script>

@@ -401,16 +401,12 @@ if ($plat_q && $plat_q->num_rows > 0) {
 												<div class="spec-label">น้ำหนักสินค้า</div>
 												<div class="spec-value"><?= $weight ?></div>
 											</div>
-											<?php if (!empty($dim_w) && !empty($dim_l) && !empty($dim_h)): ?>
+											<?php if (!empty($width) && !empty($length) && !empty($height)): ?>
 												<div class="spec-row">
 													<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
-													<div class="spec-value"><?= $dim_w ?> x <?= $dim_l ?> x <?= $dim_h ?></div>
+													<div class="spec-value"><?= $width ?> x <?= $length ?> x <?= $height ?></div>
 												</div>
 											<?php endif; ?>
-											<div class="spec-row">
-												<div class="spec-label">ไซซ์</div>
-												<div class="spec-value"><?= $calculated_size ?></div>
-											</div>
 										</div>
 									</div>
 									<!-- คำอธิบายสินค้าใต้รูป -->
@@ -596,16 +592,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									<div class="spec-row">
 										<div class="spec-label">น้ำหนักสินค้า</div>
 										<div class="spec-value"><?= $weight ?></div>
-									</div>
-									<?php if (!empty($dim_w) && !empty($dim_l) && !empty($dim_h)): ?>
-										<div class="spec-row">
-											<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
-											<div class="spec-value"><?= $dim_w ?> x <?= $dim_l ?> x <?= $dim_h ?></div>
-										</div>
-									<?php endif; ?>
-									<div class="spec-row">
-										<div class="spec-label">ไซซ์</div>
-										<div class="spec-value"><?= $calculated_size ?></div>
 									</div>
 								</div>
 							</div>
