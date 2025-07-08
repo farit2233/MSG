@@ -164,18 +164,6 @@ class Master extends DBConnection
 
 		extract($_POST);
 
-		$shipping_price_id = isset($_POST['shipping_price_id']) ? intval($_POST['shipping_price_id']) : null;
-
-		// ถ้าไม่ได้ส่งมาก็ลองคำนวณเองตามน้ำหนักจริง (สำรอง)
-		if (!$shipping_price_id && isset($_POST['product_weight'])) {
-			$weight = floatval($_POST['product_weight']);
-			$qry = $this->conn->query("SELECT id FROM shipping_prices WHERE min_weight <= {$weight} AND max_weight >= {$weight} ORDER BY min_weight ASC LIMIT 1");
-			if ($qry && $qry->num_rows > 0) {
-				$shipping_price_id = $qry->fetch_assoc()['id'];
-			}
-		}
-		$_POST['shipping_price_id'] = $shipping_price_id ?: null;
-
 		$discount_type = (isset($_POST['discount_type']) && in_array($_POST['discount_type'], ['amount', 'percent'])) ? $_POST['discount_type'] : null;
 		$discount_value = (isset($_POST['discount_value']) && $_POST['discount_value'] !== '' && is_numeric($_POST['discount_value'])) ? floatval($_POST['discount_value']) : null;
 		$discounted_price = null;

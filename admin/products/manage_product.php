@@ -168,7 +168,13 @@ function get_platform_link($conn, $product_id, $platform)
 
 						<label class="custom-control-label" for="discount_toggle">เปิดใช้งานส่วนลด</label>
 					</div>
+
 					<div id="discount_section" class="border p-3 bg-light">
+						<?php
+						$discount_type = $discount_type ?? ''; // กำหนดค่าเริ่มต้น
+						$discount_value = $discount_value ?? ''; // กำหนดค่าเริ่มต้น
+						?>
+
 						<div class="form-check form-check-inline">
 							<input class="form-check-input" type="radio" name="discount_type" id="discount_amount" value="amount"
 								<?= $discount_type == 'amount' ? 'checked' : '' ?>>
@@ -276,7 +282,6 @@ function get_platform_link($conn, $product_id, $platform)
 						</tbody>
 
 					</table>
-					<input type="hidden" name="shipping_price_id" value="<?= $matched_shipping_price_id ?>">
 					<div class="form-check">
 						<input type="checkbox" name="slow_prepare" id="slow_prepare" class="form-check-input" <?= isset($slow_prepare) && $slow_prepare ? 'checked' : '' ?>>
 						<label class="form-check-label" for="slow_prepare">เตรียมส่งนานกว่าปกติ</label>
@@ -443,7 +448,7 @@ function get_platform_link($conn, $product_id, $platform)
 				},
 				success: function(resp) {
 					if (resp.status === 'success') {
-						location.replace(`./?page=products/view_product&id=${resp.pid}`);
+						location.replace(`./?page=products`);
 					} else {
 						const el = $('<div>').addClass("alert alert-dark err-msg").text(resp.msg);
 						$('#product-form').prepend(el);
