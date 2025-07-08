@@ -468,6 +468,31 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
+	public function get_shipping_cost()
+	{
+		extract($_POST);
+		$shipping_method_id = isset($shipping_method_id) ? intval($shipping_method_id) : 0;
+		$total_weight = isset($total_weight) ? floatval($total_weight) : 0;
+
+		if ($shipping_method_id <= 0 || $total_weight <= 0) {
+			echo json_encode(['status' => 'error', 'msg' => 'ข้อมูลไม่ครบ']);
+			return;
+		}
+
+		$qry = $this->conn->query("SELECT price FROM shipping_prices 
+        WHERE shipping_method_id = '{$shipping_method_id}' 
+        AND min_weight <= {$total_weight} 
+        AND max_weight >= {$total_weight} 
+        LIMIT 1");
+
+		if ($qry && $qry->num_rows > 0) {
+			$price = $qry->fetch_assoc()['price'];
+			echo json_encode(['status' => 'success', 'price' => $price]);
+		} else {
+			echo json_encode(['status' => 'error', 'msg' => 'ไม่พบค่าขนส่งที่เหมาะสม']);
+		}
+	}
+
 	function place_order()
 	{
 		extract($_POST);
@@ -1062,6 +1087,10 @@ switch ($action) {
 	case 'delete_cart':
 		echo $Master->delete_cart();
 		break;
+	case 'get_shipping_cost':
+		$Master->get_shipping_cost();
+		break;
+
 	case 'place_order':
 		$result = $Master->place_order();
 		ob_end_clean();  // เคลียร์ buffer
