@@ -170,10 +170,18 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		text-decoration: none;
 	}
 
+	.sku {
+		margin-left: 0.5rem;
+		font-weight: normal !important;
+	}
+
+
 	.product-img-holder {
 		width: 100%;
-		height: 15em;
+		aspect-ratio: 1 / 1;
+		/* ทำให้กล่องภาพเป็นจัตุรัส */
 		overflow: hidden;
+		background: #f5f5f5;
 		position: relative;
 	}
 
@@ -186,7 +194,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 	}
 
 	.product-item:hover .product-img {
-		transform: scale(1.2)
+		transform: scale(1.1)
 	}
 
 	.bg-gradient-dark-FIXX {
@@ -393,18 +401,19 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											id="product-img">
 									</a>
 
+									<!----------------- Desktop ----------------->
 									<div class="product-description-mobile-1 mt-3">
 										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
 
 										<div class="product-specs">
 											<div class="spec-row">
 												<div class="spec-label">น้ำหนักสินค้า</div>
-												<div class="spec-value"><?= $weight ?></div>
+												<div class="spec-value"><?= $product_weight ?> กรัม.</div>
 											</div>
-											<?php if (!empty($width) && !empty($length) && !empty($height)): ?>
+											<?php if (!empty($product_width) && !empty($product_length) && !empty($product_height)): ?>
 												<div class="spec-row">
 													<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
-													<div class="spec-value"><?= $width ?> x <?= $length ?> x <?= $height ?></div>
+													<div class="spec-value"><?= $product_width ?> x <?= $product_length ?> x <?= $product_height ?> ซม.</div>
 												</div>
 											<?php endif; ?>
 										</div>
@@ -573,6 +582,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 
 										echo implode(', ', $all_categories);
 										?>
+										<label class="sku"> | </label> <label class="sku">รหัสสินค้า:</label> <b style="margin-left: 0.5rem;"><?= $sku ?> </b>
 									</p>
 
 									<!-- ติดต่อสอบถาม -->
@@ -586,13 +596,21 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									</div>
 								</div>
 							</div>
+
+							<!----------------- Mobile ----------------->
 							<div class="product-description-mobile mt-3">
 								<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
 								<div class="product-specs">
 									<div class="spec-row">
 										<div class="spec-label">น้ำหนักสินค้า</div>
-										<div class="spec-value"><?= $weight ?></div>
+										<div class="spec-value"><?= $product_weight ?> กรัม.</div>
 									</div>
+									<?php if (!empty($product_width) && !empty($product_length) && !empty($product_height)): ?>
+										<div class="spec-row">
+											<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
+											<div class="spec-value"><?= $product_width ?> x <?= $product_length ?> x <?= $product_height ?> ซม.</div>
+										</div>
+									<?php endif; ?>
 								</div>
 							</div>
 							<div class="col-md-5 mb-3">
