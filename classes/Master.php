@@ -468,7 +468,7 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
-	public function get_shipping_cost()
+	function get_shipping_cost()
 	{
 		extract($_POST);
 		$shipping_method_id = isset($shipping_method_id) ? intval($shipping_method_id) : 0;
@@ -630,13 +630,13 @@ class Master extends DBConnection
 
 
 				$body = "
-			<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
-			<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
-			<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
-			<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
-			<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
-			<p><strong>ขนส่ง:</strong> {$shipping_name}</p>
-			<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
+				<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
+				<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
+				<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
+				<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
+				<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
+				<p><strong>ขนส่ง:</strong> {$shipping_name}</p>
+				<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
 				<thead style='background:#16542b; color:white;'>
 				<tr>
 					<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>

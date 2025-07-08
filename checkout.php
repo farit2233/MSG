@@ -534,4 +534,48 @@ HTML: แสดงรายการสินค้าในตะกร้า �
         if (!selectedShipping) return;
         closeShippingModal();
     }
+
+    $(document).ready(function() {
+        // คำนวณค่าขนส่งใหม่เมื่อรีเฟรชหน้า
+        const totalWeight = parseInt(document.getElementById('total_weight').value) || 0;
+
+        if (totalWeight > 0) {
+            // เรียกใช้งาน API เพื่อคำนวณค่าขนส่งใหม่
+            $.ajax({
+                url: _base_url_ + 'classes/Master.php?f=get_shipping_cost',
+                method: 'POST',
+                data: {
+                    shipping_method_id: $('#shipping_methods_id').val(), // ใช้ shipping method id ที่เลือก
+                    total_weight: totalWeight
+                },
+                dataType: 'json',
+                success: function(resp) {
+                    if (resp.status === 'success') {
+                        const cost = parseFloat(resp.price) || 0;
+
+                        // อัปเดตค่าใหม่
+                        document.getElementById('shipping_cost').value = cost;
+                        document.getElementById('shipping-cost').innerText = cost.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }) + ' บาท';
+
+                        const cartTotal = parseFloat(<?= json_encode($cart_total) ?>) || 0;
+                        const grandTotal = cartTotal + cost;
+
+                        document.getElementById('order-total-text').innerText = grandTotal.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                        document.getElementById('total_amount').value = grandTotal;
+                    } else {
+                        alert('ไม่สามารถคำนวณค่าขนส่งได้');
+                    }
+                },
+                error: function() {
+                    alert('เกิดข้อผิดพลาดขณะคำนวณค่าขนส่ง');
+                }
+            });
+        }
+    });
 </script>
