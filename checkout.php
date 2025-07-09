@@ -22,9 +22,11 @@ if (!empty($selected_items)) {
             p.discount_type,
             p.discount_value,
             p.discounted_price,
-            p.product_weight
+            p.product_weight,
+            p.image_path
+
         FROM cart_list c 
-        INNER JOIN product_list p ON c.product_id = p.id 
+        INNER JOIN product_list p ON c.product_id = p.id
         WHERE c.id IN ($ids) AND customer_id = '{$_settings->userdata('id')}'
     ");
 
@@ -46,7 +48,6 @@ if (!empty($selected_items)) {
 
         // น้ำหนักรวม
         $total_weight += ($row['product_weight'] ?? 0) * $row['quantity'];
-
         $cart_items[] = $row;
     }
 }
@@ -89,8 +90,8 @@ $grand_total = $cart_total + $default_shipping_cost;
 
 <style>
     .product-logo {
-        width: 7em;
-        height: 7em;
+        width: 5em;
+        height: 5em;
         object-fit: cover;
         object-position: center center;
     }
@@ -230,10 +231,18 @@ $grand_total = $cart_total + $default_shipping_cost;
 
     @media only screen and (max-width: 768px) {
         .product-name {
+            padding-left: 25px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100px;
+        }
+
+        .product-logo {
+            width: 3.5em;
+            height: 3.5em;
+            object-fit: cover;
+            object-position: center center;
         }
 
         table.small-table,
@@ -284,7 +293,12 @@ HTML: แสดงรายการสินค้าในตะกร้า �
                                             ?>
                                                 <tr class="no-border">
                                                     <td>
-                                                        <h6 class="my-0 product-name"><?= $item['product'] ?></h6>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="col-3 text-center">
+                                                                <img src="<?= validate_image($item['image_path']) ?>" class="product-logo" alt="">
+                                                            </div>
+                                                            <h6 class="my-0 product-name"><?= $item['product'] ?></h6>
+                                                        </div>
                                                     </td>
                                                     <td class="text-right" colspan="2">
                                                         <?php if ($is_discounted): ?>

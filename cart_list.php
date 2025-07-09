@@ -443,7 +443,9 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
             Swal.fire({
                 icon: 'warning',
                 title: 'ยังไม่ได้เลือกสินค้า',
-                text: 'กรุณาเลือกสินค้าที่ต้องการชำระก่อน'
+                text: 'กรุณาเลือกสินค้าที่ต้องการชำระก่อน',
+                confirmButtonColor: '#95a5a6',
+                confirmButtonText: 'ปิด'
             });
             return false;
         }

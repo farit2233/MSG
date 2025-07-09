@@ -561,22 +561,23 @@ class Master extends DBConnection
 
 			$customer = $this->conn->query("SELECT * FROM customer_list WHERE id = '{$customer_id}'")->fetch_assoc();
 			$customer_name = trim("{$customer['firstname']} {$customer['middlename']} {$customer['lastname']}");
-			$full_address = $this->conn->real_escape_string($delivery_address);
-
+			$delivery_address = $this->conn->real_escape_string($delivery_address);
+			$shipping_methods = $this->conn->query("SELECT * FROM shipping_methods WHERE id = '{$shipping_methods_id}'")->fetch_assoc();
+			$shipping_methods_name = trim("{$shipping_methods['name']}");
 			// 📦 ดึงชื่อขนส่งจาก shipping_methods
-			$shipping_name = 'ไม่ระบุ';
+			$shipping_methods_name = 'ไม่ระบุ';
 			if (!empty($shipping_methods_id)) {
 				$res = $this->conn->query("SELECT name, cost FROM shipping_methods WHERE id = {$shipping_methods_id}");
 				if ($res->num_rows > 0) {
 					$ship = $res->fetch_assoc();
-					$shipping_name = $ship['name'] . ' (' . number_format($ship['cost'], 2) . ' บาท)';
+					$shipping_methods_name = $ship['name'] . ' (' . number_format($shipping_cost, 2) . ' บาท)';
 				}
 			}
 
 			$insert = $this->conn->query("INSERT INTO `order_list` 
 		(`code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_methods_id`, `status`, `payment_status`, `delivery_status`, `date_created`, `date_updated`) 
 		VALUES 
-		('{$code}', '{$customer_id}', '{$full_address}', '{$grand_total}', {$shipping_methods_id}, 0, 0, 0, NOW(), NOW())");
+		('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', {$shipping_methods_id}, 0, 0, 0, NOW(), NOW())");
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
 
@@ -635,7 +636,7 @@ class Master extends DBConnection
 				<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
 				<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
 				<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
-				<p><strong>ขนส่ง:</strong> {$shipping_name}</p>
+				<p><strong>ขนส่ง:</strong> {$shipping_methods_name}</p>
 				<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
 				<thead style='background:#16542b; color:white;'>
 				<tr>
@@ -708,7 +709,7 @@ class Master extends DBConnection
         <p><strong>ลูกค้า:</strong> $customer_name</p>
         <p><strong>ที่อยู่จัดส่ง:</strong> {$delivery_address}</p>
         <p><strong>ยอดรวม:</strong> " . number_format($grand_total, 2) . " บาท</p>
-        <p><strong>ขนส่ง:</strong> $shipping_name</p>
+        <p><strong>ขนส่ง:</strong> $shipping_methods_name</p>
         <h3>รายการสินค้า</h3>
         <table style='width:100%; border-collapse: collapse; margin-top:10px;'>
             <thead style='background:#16542b; color:white;'>
@@ -791,7 +792,7 @@ class Master extends DBConnection
 			- ลูกค้า: $customer_name
 			- ที่อยู่จัดส่ง: $delivery_address
 			- ยอดรวม: " . number_format($grand_total, 2) . " บาท
-			- ขนส่ง: $shipping_name
+			- ขนส่ง: $shipping_methods_name
 
 			รายละเอียดสินค้า:
 			";

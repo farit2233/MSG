@@ -7,6 +7,27 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         }
     }
 }
+
+
+// ตรวจสอบว่ามีค่าของ shipping_methods_id หรือไม่
+if (!empty($shipping_methods_id)) {
+    $shipping_query = $conn->query("SELECT name, cost FROM shipping_methods WHERE id = '{$shipping_methods_id}'");
+    if ($shipping_query->num_rows > 0) {
+        $shipping_data = $shipping_query->fetch_assoc();
+        $shipping_methods_name = $shipping_data['name']; // เก็บชื่อขนส่ง
+        $shipping_methods_cost = $shipping_data['cost']; // เก็บราคาขนส่ง
+        $shipping_methods_name .= ' (' . number_format($shipping_methods_cost, 2) . ' บาท)';
+    } else {
+        $shipping_methods_name = 'ไม่พบข้อมูลขนส่ง';
+    }
+} else {
+    $shipping_methods_name = 'ไม่ระบุขนส่ง';
+}
+
+// ตรวจสอบค่าของ shipping_methods_name ก่อนแสดงผล
+if (empty($shipping_methods_name)) {
+    $shipping_methods_name = 'ไม่พบคำสั่งซื้อ';
+}
 ?>
 
 <style>
@@ -127,6 +148,10 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                                     }
                                     ?>
                                 </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="" class="control-label">ขนส่ง</label>
+                                <div class="pl-4"><?= !empty($shipping_methods_name) ? nl2br(htmlentities($shipping_methods_name)) : 'ไม่พบข้อมูลขนส่ง' ?></div>
                             </div>
                         </div>
                     </div>
