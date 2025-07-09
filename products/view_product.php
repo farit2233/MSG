@@ -312,6 +312,14 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		word-break: break-word;
 	}
 
+	.badge-sm {
+		font-size: 12px;
+		/* ลดขนาดฟอนต์ */
+		padding: 4px 5px;
+		/* ปรับ padding */
+		background-color: #f79c60;
+	}
+
 	@media only screen and (max-width: 768px) {
 		.product-info-sticky {
 			position: static !important;
@@ -652,16 +660,33 @@ if ($plat_q && $plat_q->num_rows > 0) {
 
 
 	</div>
+
+	<!--------------------สินค้าที่เกี่ยวข้อง--------------------->
 	<?php
 	// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
 	$related = $conn->query("SELECT *, 
-	(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
-	- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
-	FROM `product_list` 
-	WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
-	ORDER BY RAND() LIMIT 4");
+(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
+- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+FROM `product_list` 
+WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
+ORDER BY RAND() LIMIT 4");
+
+	// ============== โค้ดที่แก้ไข เริ่มต้นที่นี่ ==============
+
+	// ตรวจสอบและสร้างฟังก์ชันสำหรับจัดรูปแบบราคา (หากยังไม่มี)
+	if (!function_exists('format_price_custom')) {
+		function format_price_custom($price)
+		{
+			$formatted_price = format_num($price, 2);
+			if (substr($formatted_price, -3) == '.00') {
+				return format_num($price, 0);
+			}
+			return $formatted_price;
+		}
+	}
 
 	if ($related->num_rows > 0): ?>
+
 		<div class="container">
 			<div class="row mt-n3 justify-content-center">
 				<div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
@@ -673,8 +698,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									<a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= ($rel['available'] <= 0 ? 'out-of-stock' : '') ?>" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
 										<div class="position-relative">
 											<div class="img-top position-relative product-img-holder">
-												<?php if ($rel['available'] <= 0): // เพิ่มเงื่อนไขเช็คสินค้าหมด 
-												?>
+												<?php if ($rel['available'] <= 0): ?>
 													<div class="out-of-stock-label">สินค้าหมด</div>
 												<?php endif; ?>
 												<img src="<?= validate_image($rel['image_path']) ?>" alt="<?= $rel['name'] ?>" class="product-img">
@@ -686,20 +710,20 @@ if ($plat_q && $plat_q->num_rows > 0) {
 												<div class="d-flex justify-content-between w-100 mb-3">
 													<div><small class="text-muted"><?= $rel['brand'] ?? '' ?></small></div>
 												</div>
-												<div class="d-flex justify-content-end">
+
+												<div class="d-flex justify-content-end align-items-center">
 													<?php if (!is_null($rel['discounted_price']) && $rel['discounted_price'] < $rel['price']): ?>
-														<div class="text-end">
-															<div>
-																<span class="banner-price fw-bold"><?= format_num($rel['discounted_price'], 2) ?> ฿</span>
-															</div>
-															<div>
-																<small class="text-muted"><del><?= format_num($rel['price'], 2) ?> ฿</del></small>
-															</div>
-														</div>
+
+														<span class="banner-price fw-bold me-2"><?= format_price_custom($rel['discounted_price']) ?> ฿</span>
+
+														<?php $discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100); ?>
+														<span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
+
 													<?php else: ?>
-														<span class="banner-price"><?= format_num($rel['price'], 2) ?> ฿</span>
+														<span class="banner-price"><?= format_price_custom($rel['price']) ?> ฿</span>
 													<?php endif; ?>
 												</div>
+
 											</div>
 										</div>
 									</a>

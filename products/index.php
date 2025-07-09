@@ -52,7 +52,7 @@
     }
 
     .banner-price {
-        font-size: 20px;
+        font-size: 25px;
         color: #f57421;
     }
 
@@ -95,6 +95,14 @@
         z-index: 5;
         /* อยู่ใต้ label แต่ทับรูปภาพ */
     }
+
+    .badge-sm {
+        font-size: 12px;
+        /* ลดขนาดฟอนต์ */
+        padding: 4px 5px;
+        /* ปรับ padding */
+        background-color: #f79c60;
+    }
 </style>
 <?php
 // ... (ส่วนโค้ด PHP ที่อยู่ด้านบนของ products.php เหมือนเดิม) ...
@@ -126,8 +134,9 @@ if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
         $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบหมวดหมู่</li>';
     }
 }
-// ... (ส่วนโค้ด HTML ที่เหลือ) ...
+
 ?>
+
 
 <section class="py-3">
     <div class="container">
