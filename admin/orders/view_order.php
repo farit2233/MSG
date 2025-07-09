@@ -28,6 +28,24 @@ if (!empty($shipping_methods_id)) {
 if (empty($shipping_methods_name)) {
     $shipping_methods_name = 'ไม่พบคำสั่งซื้อ';
 }
+
+// ============================
+// PHP: ดึงข้อมูลขนส่ง สำหรับแสดงใน modal และค่า default
+// ============================
+$shipping_qry_all = $conn->query("SELECT id, name, description, cost FROM shipping_methods WHERE is_active = 1 AND delete_flag = 0 ORDER BY id ASC");
+
+$default_shipping_qry = $conn->query("SELECT id, name, description, cost FROM shipping_methods WHERE is_active = 1 AND delete_flag = 0 ORDER BY id ASC LIMIT 1");
+$default_shipping_id = 0;
+$default_shipping_name = 'เลือกขนส่ง';
+$default_shipping_cost = 0.00;
+
+if ($default_shipping_qry && $row = $default_shipping_qry->fetch_assoc()) {
+    $default_shipping_id = $row['id'];
+    $default_shipping_name = $row['name'];
+    $default_shipping_cost = floatval($row['cost']);
+}
+?>
+
 ?>
 
 <style>
@@ -219,6 +237,13 @@ if (empty($shipping_methods_name)) {
         </div>
     </div>
 </div>
+<td class="text-right" colspan="2">
+    <span id="shipping_methods_name" style="margin-left: 10px;"><?= $default_shipping_name ?></span>
+</td>
+<td class="text-right">
+    <label id="shipping-cost"><?= number_format($default_shipping_cost, 2) ?> บาท</label>
+</td>
+
 <noscript id="print-header">
     <div>
         <div class="d-flex w-100 align-items-center">
@@ -307,4 +332,101 @@ if (empty($shipping_methods_name)) {
             }
         })
     }
+
+    function selectShipping(id, name, element) {
+        if (!element) return;
+
+        // ล้าง selection เดิม
+        document.querySelectorAll('.shipping-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+
+        // ดึงน้ำหนักรวมจาก hidden input
+        const totalWeight = parseInt(document.getElementById('total_weight').value) || 0;
+
+        $.ajax({
+            url: _base_url_ + 'classes/Master.php?f=get_shipping_cost',
+            method: 'POST',
+            data: {
+                shipping_methods_id: id,
+                total_weight: totalWeight
+            },
+            dataType: 'json',
+            success: function(resp) {
+                if (resp.status === 'success') {
+                    const cost = parseFloat(resp.price) || 0;
+
+                    document.getElementById('shipping_methods_id').value = id;
+                    document.getElementById('shipping_methods_name').innerText = name;
+                    document.getElementById('shipping_cost').value = cost;
+                    document.getElementById('shipping-cost').innerText = cost.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) + ' บาท';
+
+                    const cartTotal = parseFloat(<?= json_encode($cart_total) ?>) || 0;
+                    const grandTotal = cartTotal + cost;
+
+                    document.getElementById('order-total-text').innerText = grandTotal.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    document.getElementById('total_amount').value = grandTotal;
+
+                    selectedShipping = {
+                        id,
+                        name,
+                        cost
+                    };
+                } else {
+                    alert('ไม่สามารถคำนวณค่าขนส่งได้');
+                }
+            },
+            error: function() {
+                alert('เกิดข้อผิดพลาดขณะคำนวณค่าขนส่ง');
+            }
+        });
+    }
+    $(document).ready(function() {
+        // คำนวณค่าขนส่งใหม่เมื่อรีเฟรชหน้า
+        const totalWeight = parseInt(document.getElementById('total_weight').value) || 0;
+
+        if (totalWeight > 0) {
+            // เรียกใช้งาน API เพื่อคำนวณค่าขนส่งใหม่
+            $.ajax({
+                url: _base_url_ + 'classes/Master.php?f=get_shipping_cost',
+                method: 'POST',
+                data: {
+                    shipping_methods_id: $('#shipping_methods_id').val(), // ใช้ shipping method id ที่เลือก
+                    total_weight: totalWeight
+                },
+                dataType: 'json',
+                success: function(resp) {
+                    if (resp.status === 'success') {
+                        const cost = parseFloat(resp.price) || 0;
+
+                        // อัปเดตค่าใหม่
+                        document.getElementById('shipping_cost').value = cost;
+                        document.getElementById('shipping-cost').innerText = cost.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }) + ' บาท';
+
+                        const cartTotal = parseFloat(<?= json_encode($cart_total) ?>) || 0;
+                        const grandTotal = cartTotal + cost;
+
+                        document.getElementById('order-total-text').innerText = grandTotal.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                        document.getElementById('total_amount').value = grandTotal;
+                    } else {
+                        alert('ไม่สามารถคำนวณค่าขนส่งได้');
+                    }
+                },
+                error: function() {
+                    alert('เกิดข้อผิดพลาดขณะคำนวณค่าขนส่ง');
+                }
+            });
+        }
+    });
 </script>

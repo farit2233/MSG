@@ -90,8 +90,8 @@ $grand_total = $cart_total + $default_shipping_cost;
 
 <style>
     .product-logo {
-        width: 5em;
-        height: 5em;
+        width: 7em;
+        height: 7em;
         object-fit: cover;
         object-position: center center;
     }
@@ -231,18 +231,10 @@ $grand_total = $cart_total + $default_shipping_cost;
 
     @media only screen and (max-width: 768px) {
         .product-name {
-            padding-left: 25px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100px;
-        }
-
-        .product-logo {
-            width: 3.5em;
-            height: 3.5em;
-            object-fit: cover;
-            object-position: center center;
         }
 
         table.small-table,
