@@ -49,7 +49,7 @@
                     // Query to fetch shipping methods and price range (min_price, max_price)
                     $qry = $conn->query("
                         SELECT 
-                            sm.id AS shipping_method_id,
+                            sm.id AS shipping_methods_id,
                             sm.name AS shipping_method_name,
                             sm.description AS shipping_method_description,
                             sm.cod_enabled AS is_cod_enabled,
@@ -60,7 +60,7 @@
                         FROM 
                             shipping_methods sm
                         LEFT JOIN 
-                            shipping_prices sp ON sm.id = sp.shipping_method_id
+                            shipping_prices sp ON sm.id = sp.shipping_methods_id
                         WHERE 
                             sm.delete_flag = 0
                         GROUP BY 
@@ -103,11 +103,11 @@
                                     </button>
 
                                     <div class="dropdown-menu" role="menu">
-                                        <a class="dropdown-item" href="./?page=shipping_setting/manage_shipping&id=<?php echo $row['shipping_method_id'] ?>">
+                                        <a class="dropdown-item" href="./?page=shipping_setting/manage_shipping&id=<?php echo $row['shipping_methods_id'] ?>">
                                             <span class="fa fa-edit text-primary"></span> แก้ไขขนส่ง
                                         </a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['shipping_method_id'] ?>">
+                                        <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['shipping_methods_id'] ?>">
                                             <span class="fa fa-trash text-danger"></span> ลบขนส่ง
                                         </a>
                                     </div>

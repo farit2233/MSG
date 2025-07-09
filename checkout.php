@@ -387,6 +387,7 @@ HTML: แสดงรายการสินค้าในตะกร้า �
                                 <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
                                 <input type="hidden" name="shipping_cost" id="shipping_cost" value="<?= $default_shipping_cost ?>">
                                 <input type="hidden" name="shipping_methods_id" id="shipping_methods_id" value="<?= $default_shipping_id ?>">
+                                <input type="hidden" name="shipping_methods_name" id="shipping_methods_name" value="<?= $default_shipping_name ?>">
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                                 <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
                                 <div class="py-1 text-center">
@@ -488,7 +489,7 @@ HTML: แสดงรายการสินค้าในตะกร้า �
             url: _base_url_ + 'classes/Master.php?f=get_shipping_cost',
             method: 'POST',
             data: {
-                shipping_method_id: id,
+                shipping_methods_id: id,
                 total_weight: totalWeight
             },
             dataType: 'json',
@@ -545,7 +546,7 @@ HTML: แสดงรายการสินค้าในตะกร้า �
                 url: _base_url_ + 'classes/Master.php?f=get_shipping_cost',
                 method: 'POST',
                 data: {
-                    shipping_method_id: $('#shipping_methods_id').val(), // ใช้ shipping method id ที่เลือก
+                    shipping_methods_id: $('#shipping_methods_id').val(), // ใช้ shipping method id ที่เลือก
                     total_weight: totalWeight
                 },
                 dataType: 'json',

@@ -40,7 +40,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
     // ดึงข้อมูลราคาตามน้ำหนัก
     $weight_ranges = [];
-    $price_qry = $conn->query("SELECT * FROM shipping_prices WHERE shipping_method_id = '{$id}'");
+    $price_qry = $conn->query("SELECT * FROM shipping_prices WHERE shipping_methods_id = '{$id}'");
     while ($price_row = $price_qry->fetch_assoc()) {
         $weight_ranges[] = $price_row; // เก็บข้อมูลในอาร์เรย์
     }

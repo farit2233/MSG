@@ -471,16 +471,16 @@ class Master extends DBConnection
 	function get_shipping_cost()
 	{
 		extract($_POST);
-		$shipping_method_id = isset($shipping_method_id) ? intval($shipping_method_id) : 0;
+		$shipping_methods_id = isset($shipping_methods_id) ? intval($shipping_methods_id) : 0;
 		$total_weight = isset($total_weight) ? floatval($total_weight) : 0;
 
-		if ($shipping_method_id <= 0 || $total_weight <= 0) {
+		if ($shipping_methods_id <= 0 || $total_weight <= 0) {
 			echo json_encode(['status' => 'error', 'msg' => 'ข้อมูลไม่ครบ']);
 			return;
 		}
 
 		$qry = $this->conn->query("SELECT price FROM shipping_prices 
-        WHERE shipping_method_id = '{$shipping_method_id}' 
+        WHERE shipping_methods_id = '{$shipping_methods_id}' 
         AND min_weight <= {$total_weight} 
         AND max_weight >= {$total_weight} 
         LIMIT 1");
@@ -552,7 +552,7 @@ class Master extends DBConnection
 			if (empty($cart_data)) throw new Exception('ไม่พบรายการสินค้าที่ตรงกันในตะกร้า');
 
 			$shipping_cost = isset($_POST['shipping_cost']) ? floatval($_POST['shipping_cost']) : 0;
-			$shipping_method_id = isset($_POST['shipping_method_id']) ? intval($_POST['shipping_method_id']) : 'NULL';
+			$shipping_methods_id = isset($_POST['shipping_methods_id']) ? intval($_POST['shipping_methods_id']) : 'NULL';
 			$grand_total = $backend_total + $shipping_cost;
 
 			if (round($total_amount, 2) != round($grand_total, 2)) {
@@ -565,8 +565,8 @@ class Master extends DBConnection
 
 			// 📦 ดึงชื่อขนส่งจาก shipping_methods
 			$shipping_name = 'ไม่ระบุ';
-			if (!empty($shipping_method_id)) {
-				$res = $this->conn->query("SELECT name, cost FROM shipping_methods WHERE id = {$shipping_method_id}");
+			if (!empty($shipping_methods_id)) {
+				$res = $this->conn->query("SELECT name, cost FROM shipping_methods WHERE id = {$shipping_methods_id}");
 				if ($res->num_rows > 0) {
 					$ship = $res->fetch_assoc();
 					$shipping_name = $ship['name'] . ' (' . number_format($ship['cost'], 2) . ' บาท)';
@@ -574,9 +574,9 @@ class Master extends DBConnection
 			}
 
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-		(`code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_method_id`, `status`, `payment_status`, `delivery_status`, `date_created`, `date_updated`) 
+		(`code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_methods_id`, `status`, `payment_status`, `delivery_status`, `date_created`, `date_updated`) 
 		VALUES 
-		('{$code}', '{$customer_id}', '{$full_address}', '{$grand_total}', {$shipping_method_id}, 0, 0, 0, NOW(), NOW())");
+		('{$code}', '{$customer_id}', '{$full_address}', '{$grand_total}', {$shipping_methods_id}, 0, 0, 0, NOW(), NOW())");
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
 
@@ -953,11 +953,11 @@ class Master extends DBConnection
 
 		// บันทึกข้อมูลใน shipping_methods
 		if ($this->conn->query($sql)) {
-			$shipping_method_id = ($id > 0) ? $id : $this->conn->insert_id; // กรณีเพิ่มใหม่หรือแก้ไข
+			$shipping_methods_id = ($id > 0) ? $id : $this->conn->insert_id; // กรณีเพิ่มใหม่หรือแก้ไข
 
 			// ลบข้อมูลราคาจัดส่งเก่าในกรณีที่มีการแก้ไขข้อมูล
 			if ($id > 0) {
-				$this->conn->query("DELETE FROM `shipping_prices` WHERE shipping_method_id = {$shipping_method_id}");
+				$this->conn->query("DELETE FROM `shipping_prices` WHERE shipping_methods_id = {$shipping_methods_id}");
 			}
 
 			// บันทึกข้อมูลราคาตามน้ำหนักใน shipping_prices
@@ -981,10 +981,10 @@ class Master extends DBConnection
 					}
 
 					// SQL สำหรับการบันทึกข้อมูลราคาตามน้ำหนัก
-					$sql_price = "INSERT INTO shipping_prices (shipping_method_id, min_weight, max_weight, price)
+					$sql_price = "INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price)
                               VALUES (?, ?, ?, ?)";
 					$stmt_price = $this->conn->prepare($sql_price);
-					$stmt_price->bind_param('iiid', $shipping_method_id, $w_from, $w_to, $p);
+					$stmt_price->bind_param('iiid', $shipping_methods_id, $w_from, $w_to, $p);
 					if (!$stmt_price->execute()) {
 						return json_encode(['status' => 'failed', 'msg' => 'ไม่สามารถบันทึกข้อมูลราคาจัดส่งตามน้ำหนัก']);
 					}

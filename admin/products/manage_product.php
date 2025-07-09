@@ -251,7 +251,7 @@ function get_platform_link($conn, $product_id, $platform)
 
 								// หา rate ตามช่วงน้ำหนัก
 								$qry = $conn->query("SELECT * FROM shipping_prices 
-								WHERE shipping_method_id = {$method_id} 
+								WHERE shipping_methods_id = {$method_id} 
 								AND min_weight <= {$product_weight} 
 								AND max_weight >= {$product_weight}
 								ORDER BY min_weight ASC LIMIT 1");
@@ -464,11 +464,11 @@ function get_platform_link($conn, $product_id, $platform)
 </script>
 
 <?php
-// จัดรูปแบบ shipping_prices เป็น array แบบ group ตาม shipping_method_id
+// จัดรูปแบบ shipping_prices เป็น array แบบ group ตาม shipping_methods_id
 $shipping_prices_data = [];
 $shipping_q = $conn->query("SELECT * FROM shipping_prices");
 while ($row = $shipping_q->fetch_assoc()) {
-	$shipping_prices_data[$row['shipping_method_id']][] = $row;
+	$shipping_prices_data[$row['shipping_methods_id']][] = $row;
 }
 ?>
 <script>
