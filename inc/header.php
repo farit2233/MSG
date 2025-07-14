@@ -135,7 +135,7 @@
     html,
     body {
       height: 100%;
-      padding-top: 42px;
+      padding-top: 32px;
     }
 
     .wrapper {

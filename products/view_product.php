@@ -48,6 +48,17 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		background-color: #FAFAFA;
 	}
 
+	.navbar {
+		padding-top: 2.5rem !important;
+		/* ลด padding บน */
+		padding-bottom: 2.5rem !important;
+		/* ลด padding ล่าง */
+		height: 50px !important;
+		/* กำหนดความสูง navbar */
+		font-size: 14px !important;
+		/* ลดขนาดตัวอักษรใน navbar */
+	}
+
 	.breadcrumb {
 		font-size: 0.95rem;
 		background: none;
@@ -59,12 +70,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		content: "/";
 	}
 
-	#product-img {
-		max-width: 100%;
-		max-height: 50em;
-		object-fit: scale-down;
-		object-position: center center;
-	}
 
 	.text-muted-FIXX-FIXX {
 		color: #202020;
@@ -100,7 +105,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 
 	.product-info-sticky {
 		position: sticky;
-		top: 8rem;
+		top: 2rem;
 		z-index: 2;
 	}
 
@@ -422,10 +427,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 			padding: 10px 0;
 		}
 
-		.card-title {
-			-webkit-line-clamp: 3;
-		}
-
 		.modal-dialog.modal-lg {
 			max-width: 95% !important;
 		}
@@ -507,10 +508,18 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									<?php if (!empty($description)): ?>
 										<div class="product-description-mobile-pc mt-3">
 											<h5><b>รายละเอียด</b></h5>
-											<p id="text-pc" class="collapsed">
-												<span class="more-text"><?= nl2br(htmlspecialchars($description)) ?></span>
-											</p>
-
+											<div id="text-pc" class="collapsed">
+												<div class="more-text">
+													<?php
+													$paragraphs = preg_split('/\r\n|\r|\n/', trim($description));
+													foreach ($paragraphs as $para) {
+														if (trim($para) !== '') {
+															echo '<p>' . htmlspecialchars(trim($para)) . '</p>';
+														}
+													}
+													?>
+												</div>
+											</div>
 											<div class="text-center mt-2">
 												<button class="btn btn-readmore rounded-pill" id="toggleButton-pc">ดูเพิ่มเติม +</button>
 											</div>
@@ -602,7 +611,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											<div class="d-flex flex-wrap align-items-center group-qty">
 												<div class="input-group" style="width: 20rem;">
 													<button class="btn addcart-plus" style="margin-right: 5px;" type="button" onclick="decreaseQty()">−</button>
-													<input type="number" id="qty" name="qty" class="form-control text-center"
+													<input type="number" id="qty" name="qty" class="form-control text-center input-mobile"
 														value="1" min="1" max="<?= $max_order_qty ?>" required>
 													<button class="btn addcart-plus" style="margin-left: 5px;" type="button" onclick="increaseQty()">+</button>
 												</div>
@@ -710,10 +719,18 @@ if ($plat_q && $plat_q->num_rows > 0) {
 								<?php if (!empty($description)): ?>
 									<div class="product-description-mobile mt-3">
 										<h5><b>รายละเอียด</b></h5>
-										<p id="text-mobile" class="collapsed">
-											<span class="more-text"><?= nl2br(htmlspecialchars($description)) ?></span>
-										</p>
-
+										<div id="text-mobile" class="collapsed">
+											<div class="more-text">
+												<?php
+												$paragraphs = preg_split('/\r\n|\r|\n/', trim($description));
+												foreach ($paragraphs as $para) {
+													if (trim($para) !== '') {
+														echo '<p>' . htmlspecialchars(trim($para)) . '</p>';
+													}
+												}
+												?>
+											</div>
+										</div>
 										<div class="text-center mt-2">
 											<button class="btn btn-readmore rounded-pill" id="toggleButton-mobile">ดูเพิ่มเติม +</button>
 										</div>
@@ -780,6 +797,7 @@ ORDER BY RAND() LIMIT 4");
 		<div class="container">
 			<div class="row mt-n3 justify-content-center">
 				<div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
+
 					<div class="card-body">
 						<h1 align="center">สินค้าที่เกี่ยวข้อง</h1>
 						<div class="row gy-3 gx-3">
@@ -795,12 +813,15 @@ ORDER BY RAND() LIMIT 4");
 											</div>
 										</div>
 										<div class="card-body">
-											<div style="line-height:1em">
+											<div style="line-height:1.5em">
 												<div class="card-title w-100 mb-0"><?= $rel['name'] ?></div>
-												<div class="d-flex justify-content-between w-100 mb-3">
-													<div><small class="text-muted"><?= $rel['brand'] ?? '' ?></small></div>
+												<div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
+													<div class="w-100">
+														<small class="text-muted" style="line-height: 1.25em; display: block;">
+															<?= $rel['brand'] ?>
+														</small>
+													</div>
 												</div>
-
 												<div class="d-flex justify-content-end align-items-center">
 													<?php if (!is_null($rel['discounted_price']) && $rel['discounted_price'] < $rel['price']): ?>
 
@@ -825,6 +846,7 @@ ORDER BY RAND() LIMIT 4");
 			</div>
 		</div>
 	<?php endif; ?>
+
 </section>
 <script>
 	document.addEventListener("DOMContentLoaded", function() {

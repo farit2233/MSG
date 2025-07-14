@@ -28,8 +28,10 @@
     }*/
     .product-img-holder {
         width: 100%;
-        height: 15em;
+        aspect-ratio: 1 / 1;
+        /* ทำให้กล่องภาพเป็นจัตุรัส */
         overflow: hidden;
+        background: #f5f5f5;
         position: relative;
     }
 
@@ -42,7 +44,7 @@
     }
 
     .product-item:hover .product-img {
-        transform: scale(1.2)
+        transform: scale(1.1)
     }
 
     .bg-gradient-dark-FIXX {
@@ -72,7 +74,6 @@
         font-weight: bold;
         font-size: 20px;
     }
-
 
     .card-title {
         display: -webkit-box;
@@ -208,7 +209,6 @@
     </div>
 
     <div class="container">
-
         <div class="container py-5">
             <h2 class="text-center mb-4"> ของเล่นหมวดหมู่ <span class="text-primary">ตามอายุ</span></h2>
             <p class="text-center mb-5">"เลือกของเล่นที่ใช่ ตามวัยของลูก"</p>
@@ -234,78 +234,91 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="container">
-            <div class="row mt-n3 justify-content-center">
-                <div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
-                    <div class="card card-outline rounded-0">
-                        <div class="card-body">
-                            <h1 align="center">สินค้าแนะนำ</h1>
-                            <div class="d-flex justify-content-center flex-wrap gap-2">
-                                <?php
-                                $qry = $conn->query("
-            SELECT *, 
-                (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
-                COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
-            FROM `product_list` 
-            WHERE 
-                (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
-                COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
-            ORDER BY 
-                IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
-                RAND() 
-            LIMIT 4
-        ");
-                                while ($row = $qry->fetch_assoc()):
-                                ?>
-                                    <div class="col-6 col-md-4 col-lg-3 d-flex product-box" style="margin-top: 1rem;">
-                                        <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
-                                            <div class="position-relative">
-                                                <div class="img-top position-relative product-img-holder">
-                                                    <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
-                                                </div>
+    <div class="container">
+        <div class="row mt-n3 justify-content-center">
+            <div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
+                <div class="card card-outline rounded-0">
+                    <div class="card-body">
+                        <h1 align="center">สินค้าแนะนำ</h1>
+                        <div class="row gy-3 gx-3">
+                            <?php
+                            if (!function_exists('format_price_custom')) {
+                                function format_price_custom($price)
+                                {
+                                    $formatted_price = format_num($price, 2);
+                                    if (substr($formatted_price, -3) == '.00') {
+                                        return format_num($price, 0);
+                                    }
+                                    return $formatted_price;
+                                }
+                            }
+
+                            $qry = $conn->query("
+                                    SELECT *, 
+                                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                        COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+                                    FROM `product_list` 
+                                    WHERE 
+                                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                        COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
+                                    ORDER BY 
+                                        IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
+                                        RAND() 
+                                    LIMIT 4
+                                ");
+                            while ($row = $qry->fetch_assoc()):
+                            ?>
+                                <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
+
+                                    <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
+                                        <div class="position-relative">
+                                            <div class="img-top position-relative product-img-holder">
+                                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
                                             </div>
-                                            <div class="card-body">
-                                                <div style="line-height:1em">
-                                                    <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
-                                                    <div class="d-flex justify-content-between w-100 mb-3">
-                                                        <div><small class="text-muted"><?= $row['brand'] ?></small></div>
-                                                    </div>
-                                                    <div class="d-flex justify-content-end align-items-center">
-                                                        <?php if (!is_null($row['discounted_price']) && $row['discounted_price'] < $row['price']): ?>
-                                                            <?php
-                                                            // คำนวณส่วนลด
-                                                            $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
-                                                            ?>
-                                                            <div class="text-end d-flex align-items-center">
-                                                                <div>
-                                                                    <span class="banner-price fw-bold"><?= format_num($row['discounted_price'], 2) ?> ฿</span>
-                                                                </div>
-                                                                <div class="ms-2">
-                                                                    <span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
-                                                                </div>
-                                                            </div>
-                                                        <?php else: ?>
-                                                            <span class="banner-price"><?= format_num($row['price'], 2) ?> ฿</span>
-                                                        <?php endif; ?>
+                                        </div>
+                                        <div class="card-body">
+                                            <div style="line-height:1.5em">
+                                                <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
+                                                <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
+                                                    <div class="w-100">
+                                                        <small class="text-muted" style="line-height: 1.25em; display: block;">
+                                                            <?= $row['brand'] ?>
+                                                        </small>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                <?php endwhile; ?>
-                            </div>
-                        </div>
+                                                <div class="d-flex justify-content-end align-items-center">
+                                                    <?php if (!is_null($row['discounted_price']) && $row['discounted_price'] < $row['price']): ?>
+                                                        <?php
+                                                        // คำนวณส่วนลด
+                                                        $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
+                                                        ?>
 
-                        <div class="text-center py-1">
-                            <a href="./?p=products" class="btn btn-product rounded-pill">ดูสินค้าอื่น ๆ</a>
+                                                        <span class="banner-price fw-bold me-2"><?= format_price_custom($row['discounted_price'], 2) ?> ฿</span>
+                                                        <span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
+
+                                                    <?php else: ?>
+                                                        <span class="banner-price"><?= format_price_custom($row['price'], 2) ?> ฿</span>
+                                                    <?php endif; ?>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            <?php endwhile; ?>
                         </div>
+                    </div>
+                    <div class="text-center py-1">
+                        <a href="./?p=products" class="btn btn-product rounded-pill">ดูสินค้าอื่น ๆ</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
 <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

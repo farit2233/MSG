@@ -1,10 +1,5 @@
  <link rel="stylesheet" href="assets/css/navbar.css">
  <style>
-   .navbar {
-     padding-top: 0.3rem;
-     padding-bottom: 0.3rem;
-   }
-
    .sbr {
      font-size: 14px;
      border-radius: 13px;
@@ -83,11 +78,34 @@
      min-width: 180px;
    }
 
+   .navbar {
+     padding-top: 2.5rem;
+     /* ลด padding บน */
+     padding-bottom: 2.5rem;
+     /* ลด padding ล่าง */
+     height: 50px;
+     /* กำหนดความสูง navbar */
+     font-size: 14px;
+     /* ลดขนาดตัวอักษรใน navbar */
+   }
 
    .navbar-msg {
      background: linear-gradient(135deg, #16542b 0%, #2f6828 40%, #3f7b25 60%, #f57421 95%);
      color: white;
      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+     top: 0;
+     transition: top 0.3s ease-in-out;
+     position: fixed;
+     width: 100%;
+     z-index: 999;
+   }
+
+   .navbar-hidden {
+     top: -100px !important;
+   }
+
+   .navbar-shown {
+     top: 0 !important;
    }
 
    .bg-foot-msg {
@@ -233,7 +251,7 @@
      }
    }
  </style>
- <nav class="navbar navbar-expand-lg navbar-dark navbar-msg fixed-top">
+ <nav class="navbar navbar-expand-lg navbar-dark navbar-msg navbar-shown">
    <div class="container container-wide px-0 px-lg-0">
      <button class="navbar-toggler btn btn-sm" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
      <a class="navbar-brand" href="./">
@@ -243,9 +261,9 @@
 
      <div class="collapse navbar-collapse" id="navbarSupportedContent">
        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-         <li class="nav-item active">
+         <!--li class="nav-item active">
            <a class="nav-link text-white fos" aria-current="page" href="./">หน้าหลัก</a>
-         </li>
+         </li-->
          <li class="nav-item dropdown position-relative">
            <a class="nav-link dropdown-toggle text-white fos" href="javascript:void(0)" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              หมวดหมู่
@@ -261,10 +279,10 @@
              </div>
            </div>
          </li>
-         <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li -->
+         <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li>
          <li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li>
          <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
-         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=contact">ติดต่อเรา</a></li>
+         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=contact">ติดต่อเรา</a></li-->
        </ul>
        <ul class="navbar-nav ml-auto mb-2 mb-lg-0 ms-lg-4">
          <li class="nav-item d-flex align-items-center gap-2 flex-wrap flex-md-nowrap">
@@ -454,6 +472,24 @@
    </button>
  </nav>
  <script>
+   let lastScrollTop = 0;
+   const navbar = document.querySelector('.navbar-msg');
+
+   window.addEventListener('scroll', function() {
+     const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+     if (currentScroll > lastScrollTop && currentScroll > 50) {
+       // scroll ลง
+       navbar.classList.remove('navbar-shown');
+       navbar.classList.add('navbar-hidden');
+     } else {
+       // scroll ขึ้น
+       navbar.classList.remove('navbar-hidden');
+       navbar.classList.add('navbar-shown');
+     }
+
+     lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+   });
    $(function() {
      $('#search_report').click(function() {
        uni_modal("Search Request Report", "report/search.php")

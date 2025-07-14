@@ -103,10 +103,13 @@ if ($qry->num_rows > 0):
                 <div class="card-body">
                     <div style="line-height:1.5em">
                         <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
-                        <div class="d-flex justify-content-between w-100 mb-3">
-                            <div class=""><small class="text-muted"><?= $row['brand'] ?></small></div>
+                        <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
+                            <div class="w-100">
+                                <small class="text-muted" style="line-height: 1.25em; display: block;">
+                                    <?= $row['brand'] ?>
+                                </small>
+                            </div>
                         </div>
-
                         <div class="d-flex justify-content-end align-items-center">
                             <?php if (!is_null($row['discounted_price']) && $row['discounted_price'] < $row['price']): ?>
 

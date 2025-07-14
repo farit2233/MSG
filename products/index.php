@@ -1,8 +1,4 @@
 <style>
-    body {
-        background-color: #FAFAFA;
-    }
-
     .plain-link {
         color: inherit;
         text-decoration: none;
