@@ -320,6 +320,83 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		background-color: #f79c60;
 	}
 
+
+	.btn-readmore {
+		min-width: 120px;
+		/* ความกว้างขั้นต่ำ */
+		text-align: center;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-size: 14px;
+
+		background: #f57421;
+		color: white;
+		border: 2px solid #f57421;
+		padding: 10px 20px;
+		margin-top: 0.5rem;
+		margin-bottom: 0.5rem;
+		margin-right: 0.5rem;
+		/* <-- เว้นระยะห่างขวา */
+		transition: all 0.2s ease-in-out;
+	}
+
+	.btn-readmore:hover {
+		color: white;
+		filter: brightness(90%);
+	}
+
+	#text-pc {
+		max-height: 150px;
+		/* ย่อตามความเหมาะสม */
+		overflow: hidden;
+		transition: max-height 0.3s ease;
+		position: relative;
+	}
+
+	#text-pc.collapsed::after {
+		content: "";
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 50px;
+		background: linear-gradient(to bottom, rgba(255, 255, 255, 0), white);
+	}
+
+	#text-pc.expanded {
+		max-height: none;
+	}
+
+	/* มือถือ */
+	#text-mobile {
+		max-height: 150px;
+		/* ย่อตามความเหมาะสม */
+		overflow: hidden;
+		transition: max-height 0.3s ease;
+		position: relative;
+	}
+
+	#text-mobile.collapsed::after {
+		content: "";
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 50px;
+		background: linear-gradient(to bottom, rgba(255, 255, 255, 0), white);
+	}
+
+	#text-mobile.expanded {
+		max-height: none;
+	}
+
+	.more-text {
+		line-height: 1.5;
+		/* หรือ 1.6, 1.8 ตามความเหมาะสม */
+	}
+
+
 	@media only screen and (max-width: 768px) {
 		.product-info-sticky {
 			position: static !important;
@@ -357,7 +434,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 			display: block;
 		}
 
-		.product-description-mobile-1 {
+		.product-description-mobile-pc {
 			display: none;
 		}
 
@@ -410,7 +487,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									</a>
 
 									<!----------------- Desktop ----------------->
-									<div class="product-description-mobile-1 mt-3">
+									<div class="product-description-mobile-pc mt-3">
 										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
 
 										<div class="product-specs">
@@ -428,10 +505,17 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									</div>
 									<!-- คำอธิบายสินค้าใต้รูป -->
 									<?php if (!empty($description)): ?>
-										<div class="product-description-mobile-1 mt-3">
+										<div class="product-description-mobile-pc mt-3">
 											<h5><b>รายละเอียด</b></h5>
-											<p><?= str_replace(["\n\r", "\n", "\r"], "<br>", $description) ?></p>
+											<p id="text-pc" class="collapsed">
+												<span class="more-text"><?= nl2br(htmlspecialchars($description)) ?></span>
+											</p>
+
+											<div class="text-center mt-2">
+												<button class="btn btn-readmore rounded-pill" id="toggleButton-pc">ดูเพิ่มเติม +</button>
+											</div>
 										</div>
+
 									<?php endif; ?>
 								</div>
 								<div class=""></div>
@@ -626,8 +710,15 @@ if ($plat_q && $plat_q->num_rows > 0) {
 								<?php if (!empty($description)): ?>
 									<div class="product-description-mobile mt-3">
 										<h5><b>รายละเอียด</b></h5>
-										<p><?= str_replace(["\n\r", "\n", "\r"], "<br>", $description) ?></p>
+										<p id="text-mobile" class="collapsed">
+											<span class="more-text"><?= nl2br(htmlspecialchars($description)) ?></span>
+										</p>
+
+										<div class="text-center mt-2">
+											<button class="btn btn-readmore rounded-pill" id="toggleButton-mobile">ดูเพิ่มเติม +</button>
+										</div>
 									</div>
+
 								<?php endif; ?>
 							</div>
 
@@ -686,7 +777,6 @@ ORDER BY RAND() LIMIT 4");
 	}
 
 	if ($related->num_rows > 0): ?>
-
 		<div class="container">
 			<div class="row mt-n3 justify-content-center">
 				<div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
@@ -737,6 +827,32 @@ ORDER BY RAND() LIMIT 4");
 	<?php endif; ?>
 </section>
 <script>
+	document.addEventListener("DOMContentLoaded", function() {
+		// มือถือ
+		const textMobile = document.getElementById("text-mobile");
+		const buttonMobile = document.getElementById("toggleButton-mobile");
+
+		// PC
+		const textPC = document.getElementById("text-pc");
+		const buttonPC = document.getElementById("toggleButton-pc");
+
+		// ฟังก์ชันเดียวกันสำหรับมือถือและ PC
+		function toggleText(text, button) {
+			if (text && button) {
+				button.addEventListener("click", function() {
+					const isCollapsed = text.classList.toggle("collapsed") === false;
+					text.classList.toggle("expanded", isCollapsed);
+					button.textContent = isCollapsed ? "ดูน้อยลง -" : "ดูเพิ่มเติม +";
+				});
+			}
+		}
+
+		// ผูกฟังก์ชันให้ทำงานทั้งบนมือถือและพีซี
+		toggleText(textMobile, buttonMobile);
+		toggleText(textPC, buttonPC);
+	});
+
+
 	$(function() {
 		$('#add_to_cart').click(function() {
 			let qty = $('#qty').val(); // ดึงจำนวนจาก input
