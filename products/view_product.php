@@ -48,16 +48,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		background-color: #FAFAFA;
 	}
 
-	.navbar {
-		padding-top: 2.5rem !important;
-		/* ลด padding บน */
-		padding-bottom: 2.5rem !important;
-		/* ลด padding ล่าง */
-		height: 50px !important;
-		/* กำหนดความสูง navbar */
-		font-size: 14px !important;
-		/* ลดขนาดตัวอักษรใน navbar */
-	}
 
 	.breadcrumb {
 		font-size: 0.95rem;
@@ -611,7 +601,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											<div class="d-flex flex-wrap align-items-center group-qty">
 												<div class="input-group" style="width: 20rem;">
 													<button class="btn addcart-plus" style="margin-right: 5px;" type="button" onclick="decreaseQty()">−</button>
-													<input type="number" id="qty" name="qty" class="form-control text-center input-mobile"
+													<input type="number" id="qty" name="qty" class="form-control text-center"
 														value="1" min="1" max="<?= $max_order_qty ?>" required>
 													<button class="btn addcart-plus" style="margin-left: 5px;" type="button" onclick="increaseQty()">+</button>
 												</div>
