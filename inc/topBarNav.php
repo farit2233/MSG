@@ -1,5 +1,6 @@
  <link rel="stylesheet" href="assets/css/navbar.css">
  <style>
+   /* Base and Original Styles */
    .sbr {
      font-size: 14px;
      border-radius: 13px;
@@ -12,8 +13,7 @@
 
    .fos:hover {
      color: #ffffff;
-     text-shadow: 0 0 5px rgba(255, 255, 255, 0.6),
-       0 0 10px rgba(255, 255, 255, 0.3);
+     text-shadow: 0 0 5px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 255, 255, 0.3);
    }
 
    .icon-size {
@@ -80,37 +80,68 @@
 
    .navbar {
      padding-top: 2.5rem;
-     /* ลด padding บน */
      padding-bottom: 2.5rem;
-     /* ลด padding ล่าง */
      height: 50px;
-     /* กำหนดความสูง navbar */
      font-size: 14px;
-     /* ลดขนาดตัวอักษรใน navbar */
+     display: flex !important;
+     align-items: center !important;
+     /* จัดกึ่งกลางแนวตั้ง */
    }
 
+   .navbar .container-wide {
+     display: flex;
+     align-items: center;
+     height: 100%;
+     padding-left: 0;
+     padding-right: 0;
+   }
+
+   .navbar-toggler {
+     margin: 0;
+     padding: 0;
+   }
+
+   .navbar-brand img {
+     margin: 0;
+     padding: 0;
+     height: 60px;
+     width: 60px;
+     /* หรือสูงตามต้องการ */
+   }
+
+   .navbar-brand,
+   .navbar-toggler {
+     display: flex;
+     align-items: center;
+     height: 100%;
+     /* เต็มความสูงของ navbar */
+   }
+
+
+   /* --- Navbar Styles --- */
    .navbar-msg {
      background: linear-gradient(135deg, #16542b 0%, #2f6828 40%, #3f7b25 60%, #f57421 95%);
      color: white;
      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-     top: 0;
-     transition: top 0.3s ease-in-out;
+     /* ทำให้ Navbar อยู่ด้านบนสุดและยึดตำแหน่ง */
      position: fixed;
+     top: 0;
      width: 100%;
      z-index: 999;
+     /* เพิ่ม transition เพื่อให้การซ่อน/แสดง плавный */
+     transition: top 0.3s ease-in-out;
    }
 
    .navbar-hidden {
-     top: -100px !important;
-   }
-
-   .navbar-shown {
-     top: 0 !important;
+     /* ย้าย Navbar ออกไปนอกจอ (ซ่อนด้านบน) */
+     top: -100px;
+     /* ควรมากกว่าหรือเท่ากับความสูงของ Navbar */
    }
 
    .bg-foot-msg {
      background: #16542b !important;
    }
+
 
    .ndc {
      left: 0;
@@ -141,25 +172,6 @@
      padding: 2px 6px;
      border-radius: 50%;
      font-weight: bold;
-
-   }
-
-   .notif-thumb {
-     width: 60px;
-     height: 60px;
-     object-fit: cover;
-     flex-shrink: 0;
-     border-radius: 4px;
-   }
-
-   .text-truncate {
-     display: inline-block;
-     max-width: 400px;
-     overflow: hidden;
-     white-space: nowrap;
-     text-overflow: ellipsis;
-     vertical-align: middle;
-     line-height: 1.2;
    }
 
    #toTopBtn {
@@ -191,69 +203,116 @@
      background-color: #d85f1a;
    }
 
-   @media (max-width: 1200px) {
-     .navbar-nav .nav-link {
-       font-size: 14px;
-       padding: 0.5rem 0.75rem;
-     }
+   html.body-no-scroll,
+   body.body-no-scroll {
+     overflow: hidden;
+     /* position: relative; อาจช่วยในบางกรณี */
+   }
 
-     .sbr {
-       font-size: 14px;
-       border-radius: 13px;
-       max-width: 12rem;
-     }
+   .sidebar-overlay {
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     background-color: rgba(0, 0, 0, 0.5);
+     z-index: 1040;
+     opacity: 0;
+     visibility: hidden;
+     transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+   }
 
-     .container-wide {
-       max-width: 100%;
-       padding-left: 1rem;
-       padding-right: 1rem;
-     }
+   .sidebar-overlay.show {
+     opacity: 1;
+     visibility: visible;
+   }
 
-     .dropdown-menu {
-       width: 100%;
-       min-width: unset;
-       font-size: 1rem;
-       /* เพิ่มขนาดตัวอักษร */
-       padding: 1rem;
-     }
+   .mobile-sidebar {
+     position: fixed;
+     top: 0;
+     right: 0;
+     height: 100%;
+     width: 311px;
+     background: #fff;
+     z-index: 1050;
+     transform: translateX(100%);
+     /* <-- เปลี่ยนเป็นค่าบวก */
+     transition: transform 0.3s ease-in-out;
+     display: flex;
+     flex-direction: column;
+     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+   }
 
-     .dropdown-menu-notify {
-       display: none;
-     }
+   .mobile-sidebar.show {
+     transform: translateX(0);
+   }
 
-     .user-dropdown-menu {
-       width: 12rem;
-       right: 0 !important;
-       left: auto !important;
-     }
+   .sidebar-header {
+     padding: 23px 24px;
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     border-bottom: 1px solid #e9ecef;
+     background: linear-gradient(135deg, #16542b 0%, #2f6828 100%);
+     color: white;
+   }
 
-     .user-dropdown-wrapper {
-       margin-left: auto !important;
-     }
+   .sidebar-header h5 {
+     margin: 0;
+   }
 
-     .navbar .d-flex.align-items-center {
-       justify-content: flex-end;
-       gap: 1rem;
-       margin-top: 0.5rem;
-     }
+   .sidebar-close-btn {
+     font-size: 2rem;
+     color: white;
+     background: none;
+     border: none;
+     cursor: pointer;
+     line-height: 1;
+   }
 
-     .icon-size {
-       font-size: 20px !important;
-       margin-top: 0.5rem !important;
-       margin-left: 4px;
-       margin-right: 0px;
-     }
+   .sidebar-body {
+     flex-grow: 1;
+     overflow-y: auto;
+   }
 
-     .cart-badge {
-       font-size: 12px;
-       margin-left: 1rem;
-       margin-top: 0.5rem;
-     }
+   .sidebar-body .sidebar-search-form {
+     padding: 1rem 1.5rem;
+     border-bottom: 1px solid #e9ecef;
+   }
+
+   .sidebar-body .sidebar-search-form .form-control {
+     border-radius: 13px;
+   }
+
+   .sidebar-body .nav-link {
+     display: flex;
+     align-items: center;
+     gap: 1rem;
+     padding: 0.75rem 1.5rem;
+     color: #333;
+     font-size: 1rem;
+     text-decoration: none;
+     transition: background-color 0.2s;
+   }
+
+   .sidebar-body .nav-link i {
+     width: 20px;
+     text-align: center;
+     color: #f57421;
+   }
+
+   .sidebar-body .nav-link:hover {
+     background-color: #f8f9fa;
+   }
+
+   .sidebar-body .dropdown-divider {
+     margin: 0.5rem 0;
    }
  </style>
+
  <nav class="navbar navbar-expand-lg navbar-dark navbar-msg navbar-shown">
    <div class="container container-wide px-0 px-lg-0">
-     <button class="navbar-toggler btn btn-sm" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+
      <a class="navbar-brand" href="./">
        <img src="<?php echo validate_image($_settings->info('logo')) ?>" width="80" height="80" class="d-inline-block align-top" alt="" loading="lazy">
        <?php echo $_settings->info('short_name') ?>
@@ -261,9 +320,7 @@
 
      <div class="collapse navbar-collapse" id="navbarSupportedContent">
        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-         <!--li class="nav-item active">
-           <a class="nav-link text-white fos" aria-current="page" href="./">หน้าหลัก</a>
-         </li-->
+         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li>
          <li class="nav-item dropdown position-relative">
            <a class="nav-link dropdown-toggle text-white fos" href="javascript:void(0)" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              หมวดหมู่
@@ -279,307 +336,234 @@
              </div>
            </div>
          </li>
-         <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li>
          <li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li>
          <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
-         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=contact">ติดต่อเรา</a></li-->
        </ul>
-       <ul class="navbar-nav ml-auto mb-2 mb-lg-0 ms-lg-4">
-         <li class="nav-item d-flex align-items-center gap-2 flex-wrap flex-md-nowrap">
-           <form class="form-inline d-flex align-items-center" method="get" action="./" style="gap: 0.5rem;">
+     </div>
+
+     <div class="d-none d-lg-flex align-items-center ms-auto">
+       <ul class="navbar-nav flex-row align-items-center">
+         <li class="nav-item">
+           <form class="form-inline d-flex align-items-center" id="desktop-search-form" method="get" action="./" style="gap: 0.5rem;">
              <input class="form-control sbr mr-sm-2" type="search" placeholder="ค้นหาสินค้า..." name="search" required>
              <button class="btn button1 searchcolor" title="ค้นหาสินค้า" type="submit"><i class="fas fa-search"></i></button>
            </form>
-
-           <div class="position-relative">
-             <!--CART-->
-             <?php
-              $cart = '';
-              if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) {
-                $cart = $conn->query("SELECT SUM(quantity) FROM `cart_list` where customer_id = '{$_settings->userdata('id')}' ")->fetch_array()[0];
-                $cart = $cart > 0 ? format_num($cart) : '';
-              }
-              ?>
-             <a class="nav-link text-white p-0" href="./?p=cart_list" title="ตะกร้าสินค้า">
-               <i class="fa fa-basket-shopping icon-size"></i>
-
-               <!-- กรณี login -->
-               <?php if ($_settings->userdata('id') && $_settings->userdata('login_type') == 2): ?>
-                 <?php
-                  $cart = $conn->query("SELECT SUM(quantity) FROM `cart_list` WHERE customer_id = '{$_settings->userdata('id')}'")->fetch_array()[0];
-                  $cart = $cart > 0 ? format_num($cart) : '';
-                  ?>
-                 <?php if ($cart): ?>
-                   <span class="cart-badge"><?= $cart ?></span>
-                 <?php endif; ?>
-               <?php else: ?>
-                 <!-- กรณี guest -->
-                 <span class="cart-badge d-none" id="guest_cart_count"></span>
-               <?php endif; ?>
-             </a>
-
-           </div>
-           <!--alert-->
+         </li>
+         <li class="nav-item position-relative mx-2">
+           <a class="nav-link text-white p-0" href="./?p=cart_list" title="ตะกร้าสินค้า">
+             <i class="fa fa-basket-shopping icon-size"></i>
+             <?php if ($_settings->userdata('id') && $_settings->userdata('login_type') == 2): ?>
+               <?php
+                $cart_count = $conn->query("SELECT SUM(quantity) FROM `cart_list` WHERE customer_id = '{$_settings->userdata('id')}'")->fetch_array()[0];
+                $cart_count = $cart_count > 0 ? format_num($cart_count) : '';
+                ?>
+               <?php if ($cart_count): ?><span class="cart-badge"><?= $cart_count ?></span><?php endif; ?>
+             <?php else: ?>
+               <span class="cart-badge d-none" id="guest_cart_count"></span>
+             <?php endif; ?>
+           </a>
+         </li>
+         <li class="nav-item position-relative me-2">
            <?php
-            $is_logged_in = $_settings->userdata('id') && $_settings->userdata('login_type') == 2;
-            $customer_id = $_settings->userdata('id');
-
-            // เตรียม query แจ้งเตือน (หากล็อกอินแล้ว)
-            if ($is_logged_in) {
-              $notif_qry = $conn->query("
-              SELECT 
-                o.code, o.id, o.date_updated, o.payment_status, o.delivery_status,
-                
-                -- สินค้าชิ้นที่ 1
-                (SELECT p.name 
-                FROM order_items oi1 
-                INNER JOIN product_list p ON p.id = oi1.product_id 
-                WHERE oi1.order_id = o.id 
-                ORDER BY oi1.product_id ASC 
-                LIMIT 1 OFFSET 0) AS product_name,
-
-                -- สินค้าชิ้นที่ 2 (ถ้ามี)
-                (SELECT p.name 
-                FROM order_items oi2 
-                INNER JOIN product_list p ON p.id = oi2.product_id 
-                WHERE oi2.order_id = o.id 
-                ORDER BY oi2.product_id ASC 
-                LIMIT 1 OFFSET 1) AS more_product_name,
-
-                -- รูปภาพจากสินค้าชิ้นแรก
-                (SELECT p.image_path 
-                FROM order_items oi3 
-                INNER JOIN product_list p ON p.id = oi3.product_id 
-                WHERE oi3.order_id = o.id 
-                ORDER BY oi3.product_id ASC 
-                LIMIT 1 OFFSET 0) AS image_path
-
-              FROM order_list o
-              WHERE o.customer_id = '{$customer_id}'
-              ORDER BY o.date_updated DESC
-              LIMIT 5
-            ");
+            $has_new_notif = false;
+            if ($_settings->userdata('id') && $_settings->userdata('login_type') == 2) {
+              $check_unseen = $conn->query("SELECT 1 FROM order_list WHERE customer_id = '{$_settings->userdata('id')}' AND is_seen = 0 LIMIT 1");
+              $has_new_notif = $check_unseen->num_rows > 0;
             }
             ?>
-           <div class="position-relative">
+           <a href="/?p=orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน">
+             <i class="fa fa-bell icon-size position-relative">
+               <?php if ($has_new_notif): ?>
+                 <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+               <?php endif; ?>
+             </i>
+           </a>
+         </li>
+         <li class="nav-item dropdown">
+           <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
              <div class="dropdown">
-               <?php
-                // เช็กว่ามีแจ้งเตือนที่ยังไม่อ่าน
-                $has_new_notif = false;
-                if ($is_logged_in) {
-                  $check_unseen = $conn->query("SELECT 1 FROM order_list WHERE customer_id = '{$customer_id}' AND is_seen = 0 LIMIT 1");
-                  $has_new_notif = $check_unseen->num_rows > 0;
-                }
-                ?>
-               <a href="/?p=orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน" data-toggle="dropdown" id="notifDropdown">
-                 <i class="fa fa-bell icon-size position-relative">
-                   <?php if ($has_new_notif): ?>
-                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                     </span>
-                   <?php endif; ?>
-                 </i>
-               </a>
-               <div class="dropdown-menu-notify">
-                 <div class="dropdown-menu dropdown-menu-right ">
-                   <?php if (!$is_logged_in): ?>
-                     <div class="dropdown-item text-muted text-center small">
-                       กรุณาเข้าสู่ระบบเพื่อดูแจ้งเตือน
-                     </div>
-
-                   <?php elseif ($notif_qry->num_rows == 0): ?>
-                     <div class="dropdown-item text-muted text-center small">
-                       คุณยังไม่ได้สั่งสินค้า<br>
-                       <a href="./?p=products" class="text-decoration-underline">ไปสั่งซื้อเลย!</a>
-                     </div>
-
-                   <?php else: ?>
-                     <?php
-                      function get_payment_text($status)
-                      {
-                        return ['ยังไม่ชำระเงิน', 'รอตรวจสอบ', 'ชำระแล้ว', 'ชำระล้มเหลว', 'คืนเงินแล้ว'][$status] ?? 'N/A';
-                      }
-                      function get_delivery_text($status)
-                      {
-                        return ['ตรวจสอบคำสั่งซื้อ', 'เตรียมของ', 'แพ๊กของแล้ว', 'กำลังจัดส่ง', 'จัดส่งสำเร็จ', 'ส่งไม่สำเร็จ', 'คืนของระหว่างทาง', 'คืนของสำเร็จ'][$status] ?? 'N/A';
-                      }
-                      while ($notif = $notif_qry->fetch_assoc()): ?>
-
-                       <a class="dropdown-item d-flex align-items-start gap-2" href=" ./?p=orders">
-                         <div class="d-flex align-items-center gap-2">
-                           <img src="<?= validate_image($notif['image_path']) ?>" class="notif-thumb" alt="product">
-                           <div class="">
-                             <h6 class="mb-0">เลขที่คำสั่งซื้อ: <?= $notif['code'] ?></h6>
-                             <small class="text-truncate">
-                               <?= htmlentities($notif['product_name']) ?>
-                               <?php if (!empty($notif['more_product_name'])): ?>
-                                 , <?= htmlentities($notif['more_product_name']) ?>
-                               <?php endif; ?>
-                             </small><br>
-                             <small class="text-muted">
-                               สถานะการชำระเงิน: <b><?= get_payment_text($notif['payment_status']) ?></b> |
-                               สถานะการจัดส่ง: <b><?= get_delivery_text($notif['delivery_status']) ?></b>
-                             </small>
-                           </div>
-                         </div>
-                       </a>
-                       <div class="dropdown-divider"></div>
-                     <?php endwhile; ?>
-                   <?php endif; ?>
-                 </div>
+               <button type="button" class="dropdown-toggle user-dd-toggle" data-toggle="dropdown">
+                 <img src="<?= validate_image($_settings->userdata('avatar')) ?>" class="user-img-nav" alt="User">
+                 <span class="user-name d-none d-lg-inline"><?= ucwords($_settings->userdata('firstname')) ?></span>
+               </button>
+               <div class="dropdown-menu user-dropdown-menu dropdown-menu-right">
+                 <a class="dropdown-item" href="<?= base_url . '?p=user' ?>"><i class="fa fa-user"></i> บัญชีของฉัน</a>
+                 <a class="dropdown-item" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-shopping-cart"></i> ตะกร้าของฉัน</a>
+                 <a class="dropdown-item" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
+                 <div class="dropdown-divider"></div>
+                 <a class="dropdown-item" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>"><i class="fa fa-sign-out-alt"></i> ออกจากระบบ</a>
                </div>
              </div>
-           </div>
-           <!-- end alert-->
+           <?php else: ?>
+             <div class="dropdown">
+               <button type="button" class="btn btn-rounded dropdown-toggle dropdown-icon text-white" data-toggle="dropdown">
+                 <i class="fas fa-user-circle icon-acc-size text-white" title="แอคเคานท์"></i>
+               </button>
+               <div class="dropdown-menu user-dropdown-menu dropdown-menu-right" role="menu">
+                 <a class="dropdown-item" href="./login.php"><i class="fa fa-sign-in-alt"></i> เข้าสู่ระบบ</a>
+                 <a class="dropdown-item" href="./register.php"><i class="fa fa-user-plus"></i> สมัครสมาชิก</a>
+                 <div class="dropdown-divider"></div>
+                 <a class="dropdown-item" href="./admin"><i class="fa fa-user-tie"></i> Admin Panel</a>
+               </div>
+             </div>
+           <?php endif; ?>
          </li>
        </ul>
-       <div class="dropdown ml-3  d-flex align-items-center user-dropdown-wrapper">
-         <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
-           <div class="dropdown">
-             <button type="button" class="dropdown-toggle user-dd-toggle" data-toggle="dropdown">
-               <img src="<?= validate_image($_settings->userdata('avatar')) ?>" class="user-img-nav" alt="User">
-               <span class="user-name"><?= ucwords($_settings->userdata('firstname')) ?></span>
-             </button>
-             <div class="dropdown-menu user-dropdown-menu">
-               <a class="dropdown-item" href="<?= base_url . '?p=user' ?>"><i class="fa fa-user"></i> บัญชีของฉัน</a>
-               <div class="dropdown-divider"></div>
-               <a class="dropdown-item" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-shopping-cart"></i> ตะกร้าของฉัน</a>
-               <div class="dropdown-divider"></div>
-               <a class="dropdown-item" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
-               <div class="dropdown-divider"></div>
-               <a class="dropdown-item" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>"><i class="fa fa-sign-out-alt"></i> ออกจากระบบ</a>
-             </div>
-           </div>
-         <?php else: ?>
-           <div class="dropdown ml-3  d-flex align-items-center user-dropdown-wrapper">
-             <button type="button" class="btn btn-rounded dropdown-toggle dropdown-icon text-white" data-toggle="dropdown">
-               <i class="fas fa-user-circle icon-acc-size text-white" title="แอคเคานท์"></i>
-             </button>
-             <div class="dropdown-menu user-dropdown-menu" role="menu">
-               <a class="dropdown-item" href="./login.php"><i class="fa fa-sign-in-alt"></i> เข้าสู่ระบบ</a>
-               <div class="dropdown-divider"></div>
-               <a class="dropdown-item" href="./register.php"><i class="fa fa-user-plus"></i> สมัครสมาชิก</a>
-               <div class="dropdown-divider"></div>
-               <a class="dropdown-item" href="./admin"><i class="fa fa-user-tie"></i> Admin Panel</a>
-             </div>
-           </div>
-         <?php endif; ?>
-
-       </div>
      </div>
+
+     <button class="navbar-toggler d-lg-none" type="button" id="openSidebarBtn">
+       <span class="navbar-toggler-icon"></span>
+     </button>
+
    </div>
-   <button id="toTopBtn" title="กลับขึ้นบน">
-     <i class="fas fa-chevron-up"></i>
-   </button>
  </nav>
+
+ <div class="sidebar-overlay" id="sidebarOverlay"></div>
+ <div class="mobile-sidebar" id="mobileSidebar">
+   <div class="sidebar-header">
+     <h5>เมนู</h5>
+     <button class="sidebar-close-btn" id="closeSidebarBtn">&times;</button>
+   </div>
+   <div class="sidebar-body">
+     <div class="sidebar-search-form">
+       <form id="sidebar-search-form" method="get" action="./">
+         <input class="form-control" type="search" placeholder="ค้นหาสินค้า..." name="search" required>
+       </form>
+     </div>
+     <nav class="nav flex-column pt-3">
+       <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
+         <a class="nav-link" href="<?= base_url . '?p=user' ?>"><i class="fa fa-user"></i> บัญชีของฉัน</a>
+         <a class="nav-link" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-shopping-cart"></i> ตะกร้าของฉัน</a>
+         <a class="nav-link" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
+         <div class="dropdown-divider"></div>
+       <?php endif; ?>
+       <a class="nav-link" href="./"><i class="fa fa-home"></i> หน้าหลัก</a>
+       <a class="nav-link" href="./?p=products"><i class="fa fa-box-open"></i> สินค้าทั้งหมด</a>
+       <div class="dropdown-divider"></div>
+       <h6 class="px-3 mt-2 mb-1 text-muted">หมวดหมู่สินค้า</h6>
+       <?php
+        $category_qry_side = $conn->query("SELECT * FROM `category_list` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `name` ASC");
+        while ($row = $category_qry_side->fetch_assoc()):
+        ?>
+         <a class="nav-link" href="<?= base_url . "?p=products&cid={$row['id']}" ?>"><?= $row['name'] ?></a>
+       <?php endwhile; ?>
+       <div class="dropdown-divider"></div>
+       <a class="nav-link" href="./?p=help"><i class="fa fa-question-circle"></i> ช่วยเหลือ</a>
+       <a class="nav-link" href="./?p=about"><i class="fa fa-info-circle"></i> เกี่ยวกับเรา</a>
+       <a class="nav-link" href="./?p=contact"><i class="fa fa-envelope"></i> ติดต่อเรา</a>
+       <div class="dropdown-divider"></div>
+       <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
+         <a class="nav-link" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>"><i class="fa fa-sign-out-alt"></i> ออกจากระบบ</a>
+       <?php else: ?>
+         <a class="nav-link" href="./login.php"><i class="fa fa-sign-in-alt"></i> เข้าสู่ระบบ</a>
+         <a class="nav-link" href="./register.php"><i class="fa fa-user-plus"></i> สมัครสมาชิก</a>
+       <?php endif; ?>
+       <a class="nav-link" href="./admin"><i class="fa fa-user-tie"></i> Admin Panel</a>
+     </nav>
+   </div>
+ </div>
+
+ <button id="toTopBtn" title="กลับขึ้นบน"><i class="fas fa-chevron-up"></i></button>
+
  <script>
-   let lastScrollTop = 0;
-   const navbar = document.querySelector('.navbar-msg');
+   document.addEventListener('DOMContentLoaded', function() {
 
-   window.addEventListener('scroll', function() {
-     const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+     // --- Navbar Scroll Behavior ---
+     let lastScrollTop = 0;
+     const navbar = document.querySelector('.navbar-msg');
+     const navbarHeight = navbar.offsetHeight; // ความสูงของ Navbar
 
-     if (currentScroll > lastScrollTop && currentScroll > 50) {
-       // scroll ลง
-       navbar.classList.remove('navbar-shown');
-       navbar.classList.add('navbar-hidden');
-     } else {
-       // scroll ขึ้น
-       navbar.classList.remove('navbar-hidden');
-       navbar.classList.add('navbar-shown');
-     }
+     window.addEventListener('scroll', function() {
+       const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
 
-     lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-   });
-   $(function() {
-     $('#search_report').click(function() {
-       uni_modal("Search Request Report", "report/search.php")
-     })
-     $('#navbarResponsive').on('show.bs.collapse', function() {
-       $('#mainNav').addClass('navbar-shrink')
-     })
-     $('#navbarResponsive').on('hidden.bs.collapse', function() {
-       if ($('body').offset.top == 0)
-         $('#mainNav').removeClass('navbar-shrink')
-     })
-   })
-
-   $('#search-form').submit(function(e) {
-     e.preventDefault()
-     var sTxt = $('[name="search"]').val()
-     if (sTxt != '')
-       location.href = './?p=products&search=' + sTxt;
-   })
-
-   // เมื่อ scroll เกิน 100px ให้แสดงปุ่ม
-   window.addEventListener('scroll', function() {
-     const toTopBtn = document.getElementById('toTopBtn');
-     if (window.scrollY > 200) {
-       toTopBtn.classList.add('show');
-     } else {
-       toTopBtn.classList.remove('show');
-     }
-   });
-
-   document.getElementById('toTopBtn').addEventListener('click', function() {
-     window.scrollTo({
-       top: 0,
-       behavior: 'smooth'
-     });
-   });
-   $(function() {
-     $('#notifDropdown').on('click', function() {
-       $.ajax({
-         url: './ajax/mark_notifications_seen.php',
-         method: 'POST',
-         success: function(resp) {
-           console.log("Marked as seen");
-           $('.fa-bell .position-absolute').remove();
-         }
-       });
-     });
-
-     // ถ้าเป็นมือถือ → redirect ไป orders ทันที
-     document.querySelector(".notif-bell").addEventListener("click", function(e) {
-       if (window.innerWidth <= 768) {
-         e.preventDefault(); // กัน dropdown เด้ง
-         window.location.href = "./?p=orders";
-       }
-     });
-   });
-
-   function update_guest_cart_badge() {
-     const cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-     const totalQty = cart.reduce((sum, item) => sum + parseInt(item.qty), 0);
-
-     const badge = document.getElementById('guest_cart_count');
-     if (badge) {
-       if (totalQty > 0) {
-         badge.textContent = totalQty;
-         badge.classList.remove('d-none');
-         badge.classList.add('cart-badge'); // เพิ่ม class ถ้าอยากให้เหมือนของเดิม
+       // ถ้าเลื่อนลงและตำแหน่ง scroll มากกว่าความสูงของ Navbar
+       if (currentScroll > lastScrollTop && currentScroll > navbarHeight) {
+         // เพิ่ม class เพื่อซ่อน Navbar
+         navbar.classList.add('navbar-hidden');
        } else {
-         badge.classList.add('d-none');
+         // ถ้าเลื่อนขึ้น
+         // ลบ class เพื่อแสดง Navbar
+         navbar.classList.remove('navbar-hidden');
        }
-     }
-   }
 
-   // เรียกเมื่อโหลดหน้า
-   document.addEventListener('DOMContentLoaded', update_guest_cart_badge);
+       // อัปเดตตำแหน่ง scroll ล่าสุด
+       lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+     }, false);
 
-   function guest_add_to_cart(id, name, qty, price) {
-     let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-     const index = cart.findIndex(item => item.id === id);
-     if (index >= 0) {
-       cart[index].qty = parseInt(cart[index].qty) + parseInt(qty);
-     } else {
-       cart.push({
-         id,
-         name,
-         qty: parseInt(qty),
-         price
+
+     // --- To Top Button ---
+     const toTopBtn = document.getElementById('toTopBtn');
+     window.addEventListener('scroll', function() {
+       if (window.scrollY > 200) {
+         toTopBtn.classList.add('show');
+       } else {
+         toTopBtn.classList.remove('show');
+       }
+     });
+     toTopBtn.addEventListener('click', function() {
+       window.scrollTo({
+         top: 0,
+         behavior: 'smooth'
+       });
+     });
+
+     // --- Sidebar Controls ---
+     const openSidebarBtn = document.getElementById('openSidebarBtn');
+     const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+     const sidebarOverlay = document.getElementById('sidebarOverlay');
+     const mobileSidebar = document.getElementById('mobileSidebar');
+
+     if (openSidebarBtn) {
+       openSidebarBtn.addEventListener('click', () => {
+         mobileSidebar.classList.add('show');
+         sidebarOverlay.classList.add('show');
+         // เพิ่มคลาสทั้งที่ html และ body
+         document.documentElement.classList.add('body-no-scroll'); // <html>
+         document.body.classList.add('body-no-scroll');
        });
      }
-     localStorage.setItem('guest_cart', JSON.stringify(cart));
-     update_guest_cart_badge(); // 👈 เรียกทันทีหลังเพิ่ม
-   }
+
+     const closeSidebar = () => {
+       mobileSidebar.classList.remove('show');
+       sidebarOverlay.classList.remove('show');
+       // ลบคลาสทั้งจาก html และ body
+       document.documentElement.classList.remove('body-no-scroll'); // <html>
+       document.body.classList.remove('body-no-scroll');
+     };
+
+     if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+     if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+     // --- Search Form Submission ---
+     function handleSearch(event) {
+       event.preventDefault();
+       const searchInput = event.target.querySelector('[name="search"]');
+       if (searchInput && searchInput.value.trim() !== '') {
+         location.href = './?p=products&search=' + encodeURIComponent(searchInput.value.trim());
+       }
+     }
+     const desktopSearchForm = document.getElementById('desktop-search-form');
+     const sidebarSearchForm = document.getElementById('sidebar-search-form');
+     if (desktopSearchForm) desktopSearchForm.addEventListener('submit', handleSearch);
+     if (sidebarSearchForm) sidebarSearchForm.addEventListener('submit', handleSearch);
+
+     // --- Guest Cart Badge Update (ถ้ามี) ---
+     function update_guest_cart_badge() {
+       const cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+       const totalQty = cart.reduce((sum, item) => sum + parseInt(item.qty, 10), 0);
+       const badge = document.getElementById('guest_cart_count');
+       if (badge) {
+         if (totalQty > 0) {
+           badge.textContent = totalQty;
+           badge.classList.remove('d-none');
+         } else {
+           badge.classList.add('d-none');
+         }
+       }
+     }
+     // ตรวจสอบว่ามีฟังก์ชันนี้ก่อนเรียกใช้
+     if (typeof update_guest_cart_badge === "function") {
+       update_guest_cart_badge();
+     }
+   });
  </script>
