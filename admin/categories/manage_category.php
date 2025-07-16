@@ -1,8 +1,13 @@
 <?php
+// --- ดึงข้อมูลประเภทสินค้ามาเตรียมไว้ ---
+$product_types_result = $conn->query("SELECT id, name FROM `product_type` WHERE status = 1 AND delete_flag = 0 ORDER BY name ASC");
+
+
 if (isset($_GET['id']) && $_GET['id'] > 0) {
 	$qry = $conn->query("SELECT * from `category_list` where id = '{$_GET['id']}' ");
 	if ($qry->num_rows > 0) {
 		foreach ($qry->fetch_assoc() as $k => $v) {
+			// ทำให้ตัวแปร $id, $product_type_id, $name, $description, $status ถูกสร้างขึ้นโดยอัตโนมัติ
 			$$k = $v;
 		}
 	}
@@ -19,6 +24,21 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 				<div class="container-fluid">
 					<form action="" id="category-form">
 						<input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
+
+						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
+							<label for="product_type_id" class="control-label">ประเภทสินค้า</label>
+							<select name="product_type_id" id="product_type_id" class="form-control form-control-sm rounded-0" required>
+								<option value="" disabled <?= !isset($product_type_id) ? 'selected' : '' ?>>-- กรุณาเลือก --</option>
+								<?php
+								// วนลูปสร้าง <option> จากข้อมูลที่ดึงมา
+								while ($pt_row = $product_types_result->fetch_assoc()) :
+								?>
+									<option value="<?= $pt_row['id'] ?>" <?= (isset($product_type_id) && $product_type_id == $pt_row['id']) ? 'selected' : '' ?>>
+										<?= $pt_row['name'] ?>
+									</option>
+								<?php endwhile; ?>
+							</select>
+						</div>
 						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
 							<label for="name" class="control-label">ชื่อหมวดหมู่</label>
 							<input type="text" name="name" id="name" class="form-control form-control-sm rounded-0" value="<?php echo isset($name) ? $name : ''; ?>" required />
@@ -46,6 +66,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 </div>
 <script>
 	$(document).ready(function() {
+		// ไม่ต้องแก้ไขส่วนของ script นี้เลย
+		// FormData จะรวบรวมข้อมูลจากฟอร์มทั้งหมด (รวมถึง product_type_id) ไปให้เอง
 		$('#category-form').submit(function(e) {
 			e.preventDefault();
 			var _this = $(this)

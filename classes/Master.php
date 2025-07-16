@@ -93,6 +93,64 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+
+	function save_product_type()
+	{
+		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
+		extract($_POST);
+		$data = "";
+		foreach ($_POST as $k => $v) {
+			if (!in_array($k, array('id'))) {
+				if (!empty($data)) $data .= ",";
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
+			}
+		}
+		$check = $this->conn->query("SELECT * FROM `product_type` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
+		if ($this->capture_err())
+			return $this->capture_err();
+		if ($check > 0) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "ประเภท already exists.";
+			return json_encode($resp);
+			exit;
+		}
+		if (empty($id)) {
+			$sql = "INSERT INTO `product_type` set {$data} ";
+		} else {
+			$sql = "UPDATE `product_type` set {$data} where id = '{$id}' ";
+		}
+		$save = $this->conn->query($sql);
+		if ($save) {
+			$cid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['cid'] = $cid;
+			$resp['status'] = 'success';
+			if (empty($id))
+				$resp['msg'] = "New ประเภท successfully saved.";
+			else
+				$resp['msg'] = " ประเภท successfully updated.";
+		} else {
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error . "[{$sql}]";
+		}
+		if ($resp['status'] == 'success')
+			$this->settings->set_flashdata('success', $resp['msg']);
+		return json_encode($resp);
+	}
+	function delete_product_type()
+	{
+		extract($_POST);
+		$del = $this->conn->query("UPDATE `product_type` set `delete_flag` = 1 where id = '{$id}'");
+		if ($del) {
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success', " ประเภท successfully deleted.");
+		} else {
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
+		return json_encode($resp);
+	}
+
 	function save_category()
 	{
 		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
@@ -1060,6 +1118,12 @@ $sysset = new SystemSettings();
 switch ($action) {
 	case 'delete_img':
 		echo $Master->delete_img();
+		break;
+	case 'save_product_type':
+		echo $Master->save_product_type();
+		break;
+	case 'delete_product_type':
+		echo $Master->delete_product_type();
 		break;
 	case 'save_category':
 		echo $Master->save_category();

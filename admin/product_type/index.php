@@ -4,7 +4,7 @@
     </script>
 <?php endif; ?>
 <style>
-    .category-logo {
+    .product-type-logo {
         width: 3em;
         height: 3em;
         object-fit: cover;
@@ -13,9 +13,9 @@
 </style>
 <div class="card card-outline rounded-0 card-dark">
     <div class="card-header">
-        <h3 class="card-title text-bold">หมวดหมู่ย่อยทั้งหมด</h3>
+        <h3 class="card-title text-bold">ประเภทสินค้าทั้งหมด</h3>
         <div class="card-tools">
-            <a href="./?page=category_hierarchy/manage_category_hierarchy" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> สร้างหมวดหมู่ย่อยใหม่</a>
+            <a href="./?page=product_type/manage_product_type" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> สร้างประเภทสินค้าใหม่</a>
         </div>
     </div>
     <div class="card-body">
@@ -24,17 +24,17 @@
                 <colgroup>
                     <col width="5%">
                     <col width="20%">
-                    <col width="20%">
                     <col width="30%">
+                    <col width="20%">
                     <col width="15%">
                     <col width="10%">
                 </colgroup>
                 <thead class="text-center">
                     <tr>
                         <th>ที่</th>
-                        <th>วันที่สร้าง</th>
                         <th>ชื่อหมวดหมู่</th>
                         <th>รายละเอียดหมวดหมู่</th>
+                        <th>วันที่สร้าง</th>
                         <th>สถานะ</th>
                         <th>จัดการ</th>
                     </tr>
@@ -42,21 +42,16 @@
                 <tbody>
                     <?php
                     $i = 1;
-                    $qry = $conn->query("SELECT * FROM `category_hierarchy` WHERE `delete_flag` = 0 ORDER BY `parent_category_id` ASC, `name` ASC");
+                    $qry = $conn->query("SELECT * FROM `product_type` WHERE `delete_flag` = 0 ORDER BY `id` ASC, `name` ASC");
                     while ($row = $qry->fetch_assoc()):
-                        $parent_category_id = $row['parent_category_id'];
-                        if ($parent_category_id == NULL): // หมวดหมู่หลัก
-                            echo "<tr class='parent-category'>";
-                        else: // หมวดหมู่ย่อย
-                            echo "<tr class='subcategory'>";
-                        endif;
+                        $id = $row['id'];
                     ?>
                         <td class="text-center"><?php echo $i++; ?></td>
-                        <td><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
                         <td><?= $row['name'] ?></td>
                         <td>
                             <p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
                         </td>
+                        <td><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
                         <td class="text-center">
                             <?php if ($row['status'] == 1): ?>
                                 <span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
@@ -70,9 +65,9 @@
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <div class="dropdown-menu" role="menu">
-                                <a class="dropdown-item" href="./?page=category_hierarchy/view_category_hierarchy&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> ดู</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="./?page=category_hierarchy/manage_category_hierarchy&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> แก้ไขหมวดหมู่</a>
+                                <!--a class="dropdown-item" href="./?page=product_type/view_product_type&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> ดู</a>
+                                <div class="dropdown-divider"></div-->
+                                <a class="dropdown-item" href="./?page=product_type/manage_product_type&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> แก้ไขหมวดหมู่</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบหมวดหมู่</a>
                             </div>
@@ -87,7 +82,7 @@
 <script>
     $(document).ready(function() {
         $('.delete_data').click(function() {
-            _conf("Are you sure to delete this categoryhierarchy permanently?", "delete_categoryhierarchy", [$(this).attr('data-id')])
+            _conf("Are you sure to delete this ประเภท permanently?", "delete_product_type", [$(this).attr('data-id')])
         })
         $('.table').dataTable({
             columnDefs: [{
@@ -99,10 +94,10 @@
         $('.dataTable td,.dataTable th').addClass('py-1 px-2 align-middle')
     })
 
-    function delete_category($id) {
+    function delete_product_type($id) {
         start_loader();
         $.ajax({
-            url: _base_url_ + "classes/Master.php?f=delete_category",
+            url: _base_url_ + "classes/Master.php?f=delete_product_type",
             method: "POST",
             data: {
                 id: $id

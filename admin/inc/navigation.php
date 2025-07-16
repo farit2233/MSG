@@ -46,18 +46,18 @@
                 </a>
                 <ul class="nav nav-treeview" style="display: none;">
                   <li class="nav-item">
-                    <a href="./?page=categories" class="nav-link nav-categories">
+                    <a href="./?page=product_type" class="nav-link nav-product_type">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
-                        หมวดหมู่สินค้าทั้งหมด
+                        ประเภทสินค้าทั้งหมด
                       </p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./?page=category_hierarchy" class="nav-link nav-category_hierarchy">
+                    <a href="./?page=categories" class="nav-link nav-categories">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
-                        หมวดหมู่ย่อย
+                        หมวดหมู่สินค้าทั้งหมด
                       </p>
                     </a>
                   </li>

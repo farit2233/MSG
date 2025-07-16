@@ -23,11 +23,12 @@
 			<table class="table table-hover table-striped table-bordered" id="list">
 				<colgroup>
 					<col width="5%">
+					<col width="15%">
 					<col width="20%">
-					<col width="20%">
-					<col width="30%">
+					<col width="25%">
 					<col width="15%">
 					<col width="10%">
+					<col width="15%">
 				</colgroup>
 				<thead class="text-center">
 					<tr>
@@ -35,6 +36,7 @@
 						<th>วันที่สร้าง</th>
 						<th>ชื่อหมวดหมู่</th>
 						<th>รายละเอียดหมวดหมู่</th>
+						<th>ประเภทสินค้า</th>
 						<th>สถานะ</th>
 						<th>จัดการ</th>
 					</tr>
@@ -42,7 +44,13 @@
 				<tbody>
 					<?php
 					$i = 1;
-					$qry = $conn->query("SELECT * from `category_list` where delete_flag = 0 order by `name` asc ");
+					// แก้ไขคิวรีเพื่อ JOIN ตาราง category_list กับ product_type โดยตรง
+					$qry = $conn->query("SELECT cl.*, pt.name as product_type_name 
+                    FROM `category_list` cl
+                    LEFT JOIN `product_type` pt ON cl.product_type_id = pt.id 
+                    WHERE cl.delete_flag = 0 
+                    ORDER BY cl.name ASC");
+
 					while ($row = $qry->fetch_assoc()):
 					?>
 						<tr>
@@ -51,6 +59,16 @@
 							<td class=""><?= $row['name'] ?></td>
 							<td>
 								<p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
+							</td>
+							<td class="text-center">
+								<?php
+								if (isset($row['product_type_name']) && $row['product_type_name'] != null) {
+									// ใช้ badge-info หรือ badge สีอื่นๆ ที่คุณต้องการ
+									echo '<span class="">' . $row['product_type_name'] . '</span>';
+								} else {
+									echo '<span class="text-muted">-</span>'; // ใช้สีเทาสำหรับค่าว่าง
+								}
+								?>
 							</td>
 							<td class="text-center">
 								<?php if ($row['status'] == 1): ?>
@@ -65,8 +83,6 @@
 									<span class="sr-only">Toggle Dropdown</span>
 								</button>
 								<div class="dropdown-menu" role="menu">
-									<a class="dropdown-item" href="./?page=categories/view_category&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> ดู</a>
-									<div class="dropdown-divider"></div>
 									<a class="dropdown-item" href="./?page=categories/manage_category&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> แก้ไขหมวดหมู่</a>
 									<div class="dropdown-divider"></div>
 									<a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบหมวดหมู่</a>
