@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 14, 2025 at 03:57 AM
+-- Generation Time: Jul 16, 2025 at 03:59 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -50,6 +50,7 @@ INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
 
 CREATE TABLE `category_list` (
   `id` int NOT NULL,
+  `product_type_id` int DEFAULT NULL,
   `name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1',
@@ -62,17 +63,17 @@ CREATE TABLE `category_list` (
 -- Dumping data for table `category_list`
 --
 
-INSERT INTO `category_list` (`id`, `name`, `description`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(1, 'ของเล่นหมวดหมู่ 0-2 ปี', 'ของเล่นหมวดหมู่ 0-2 ปี', 1, 0, '2025-06-05 11:59:25', '2025-06-05 11:59:25'),
-(2, 'ของเล่นหมวดหมู่ 3-4 ปี', 'ของเล่นหมวดหมู่ 3-4 ปี', 1, 0, '2025-06-05 11:59:38', '2025-06-05 11:59:38'),
-(3, 'ของเล่นหมวดหมู่ 5-6 ปี', 'ของเล่นหมวดหมู่ 5-6 ปี', 1, 0, '2025-06-05 11:59:45', '2025-06-05 11:59:45'),
-(4, 'ของเล่นกระดานลื่น', 'ของเล่นกระดานลื่น สุดสนุก!', 1, 0, '2025-06-05 13:19:47', '2025-06-05 13:19:47'),
-(5, 'เทส', 'เทส', 1, 0, '2025-06-12 09:57:50', '2025-06-12 09:57:50'),
-(6, 'Keyboard/คีย์บอร์ด', 'Keyboard/คีย์บอร์ด', 1, 0, '2025-06-17 13:37:41', '2025-06-17 13:37:41'),
-(7, 'HEADSET/หูฟัง', 'HEADSET/หูฟัง', 1, 0, '2025-06-17 13:42:26', '2025-06-17 13:42:26'),
-(8, 'ขนม', 'ขนม', 1, 0, '2025-06-17 13:50:33', '2025-06-17 13:50:33'),
-(9, 'ผงชงดื่ม', 'ผงชงดื่ม', 1, 0, '2025-06-17 14:20:49', '2025-06-17 14:20:49'),
-(10, 'เทส2', 'เทส2', 1, 0, '2025-06-17 21:43:06', '2025-06-17 21:43:06');
+INSERT INTO `category_list` (`id`, `product_type_id`, `name`, `description`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
+(1, NULL, 'ของเล่นหมวดหมู่ 0-2 ปี', 'ของเล่นหมวดหมู่ 0-2 ปี', 1, 0, '2025-06-05 11:59:25', '2025-06-05 11:59:25'),
+(2, NULL, 'ของเล่นหมวดหมู่ 3-4 ปี', 'ของเล่นหมวดหมู่ 3-4 ปี', 1, 0, '2025-06-05 11:59:38', '2025-06-05 11:59:38'),
+(3, NULL, 'ของเล่นหมวดหมู่ 5-6 ปี', 'ของเล่นหมวดหมู่ 5-6 ปี', 1, 0, '2025-06-05 11:59:45', '2025-06-05 11:59:45'),
+(4, NULL, 'ของเล่นกระดานลื่น', 'ของเล่นกระดานลื่น สุดสนุก!', 1, 0, '2025-06-05 13:19:47', '2025-06-05 13:19:47'),
+(5, NULL, 'เทส', 'เทส', 1, 0, '2025-06-12 09:57:50', '2025-06-12 09:57:50'),
+(6, NULL, 'Keyboard/คีย์บอร์ด', 'Keyboard/คีย์บอร์ด', 1, 0, '2025-06-17 13:37:41', '2025-06-17 13:37:41'),
+(7, NULL, 'HEADSET/หูฟัง', 'HEADSET/หูฟัง', 1, 0, '2025-06-17 13:42:26', '2025-06-17 13:42:26'),
+(8, NULL, 'ขนม', 'ขนม', 1, 0, '2025-06-17 13:50:33', '2025-06-17 13:50:33'),
+(9, NULL, 'ผงชงดื่ม', 'ผงชงดื่ม', 1, 0, '2025-06-17 14:20:49', '2025-06-17 14:20:49'),
+(10, NULL, 'เทส2', 'เทส2', 1, 0, '2025-06-17 21:43:06', '2025-06-17 21:43:06');
 
 -- --------------------------------------------------------
 
@@ -289,17 +290,6 @@ INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `tota
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_categories`
---
-
-CREATE TABLE `product_categories` (
-  `product_id` int NOT NULL,
-  `category_id` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `product_links`
 --
 
@@ -391,6 +381,22 @@ CREATE TABLE `product_shipping` (
   `shipping_methods_id` int NOT NULL,
   `price` float DEFAULT '0',
   `enabled` tinyint DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `product_type`
+--
+
+CREATE TABLE `product_type` (
+  `id` int NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `delete_flag` tinyint(1) NOT NULL DEFAULT '0',
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -629,7 +635,8 @@ ALTER TABLE `cart_list`
 -- Indexes for table `category_list`
 --
 ALTER TABLE `category_list`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_category_product_type` (`product_type_id`);
 
 --
 -- Indexes for table `customer_list`
@@ -652,13 +659,6 @@ ALTER TABLE `order_list`
   ADD KEY `customer_id` (`customer_id`);
 
 --
--- Indexes for table `product_categories`
---
-ALTER TABLE `product_categories`
-  ADD PRIMARY KEY (`product_id`,`category_id`),
-  ADD KEY `category_id` (`category_id`);
-
---
 -- Indexes for table `product_links`
 --
 ALTER TABLE `product_links`
@@ -676,6 +676,12 @@ ALTER TABLE `product_list`
 --
 ALTER TABLE `product_shipping`
   ADD PRIMARY KEY (`product_id`,`shipping_methods_id`);
+
+--
+-- Indexes for table `product_type`
+--
+ALTER TABLE `product_type`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `shipping_methods`
@@ -759,6 +765,12 @@ ALTER TABLE `product_list`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
+-- AUTO_INCREMENT for table `product_type`
+--
+ALTER TABLE `product_type`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `shipping_methods`
 --
 ALTER TABLE `shipping_methods`
@@ -812,6 +824,12 @@ ALTER TABLE `cart_list`
   ADD CONSTRAINT `product_id_fk_cl` FOREIGN KEY (`product_id`) REFERENCES `product_list` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `category_list`
+--
+ALTER TABLE `category_list`
+  ADD CONSTRAINT `fk_category_product_type` FOREIGN KEY (`product_type_id`) REFERENCES `product_type` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
 -- Constraints for table `order_items`
 --
 ALTER TABLE `order_items`
@@ -823,13 +841,6 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `order_list`
   ADD CONSTRAINT `customer_id_fk_ol` FOREIGN KEY (`customer_id`) REFERENCES `customer_list` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `product_categories`
---
-ALTER TABLE `product_categories`
-  ADD CONSTRAINT `product_categories_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_list` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `product_categories_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category_list` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `product_links`

@@ -217,7 +217,7 @@
     height: 100%;
     border: none;
     background: transparent;
-    color: #333;
+    color: #f57421;
     font-size: 16px;
     cursor: pointer;
     display: flex;
