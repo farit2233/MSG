@@ -26,20 +26,19 @@
 					<col width="10%">
 					<col width="10%">
 					<col width="30%">
-					<col width="15%">
 					<col width="10%">
+					<col width="15%">
 					<col width="10%">
 					<col width="10%">
 				</colgroup>
 				<thead class="text-center">
 					<tr>
 						<th>ที่</th>
-
 						<th>รูปภาพสินค้า</th>
 						<th>แบรนด์</th>
 						<th>ชื่อสินค้า</th>
-						<th>วันที่สร้าง</th>
 						<th>ราคา</th>
+						<th>วันที่สร้าง</th>
 						<th>สถานะ</th>
 						<th>จัดการ</th>
 					</tr>
@@ -63,7 +62,6 @@
 									<div><small class="text-muted"><?= $row['dose'] ?></small></div>
 								</div>
 							</td>
-							<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 							<td class="text-right">
 								<?php
 								$price = (float) $row['price'];
@@ -87,7 +85,7 @@
 									<span class="font-weight-bold"><?= format_num($price, 2) ?> ฿</span>
 								<?php endif; ?>
 							</td>
-
+							<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 							<td class="text-center">
 								<?php if ($row['status'] == 1): ?>
 									<span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>

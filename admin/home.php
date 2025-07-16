@@ -30,6 +30,7 @@
   //  ['link' => '?page=inventory', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-secondary', 'icon' => 'fas fa-warehouse'],
   //];
   $boxes = [
+    ['link' => '?page=product_type', 'label' => 'ประเภทสินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-layer-group', 'query' => "SELECT * FROM product_type where delete_flag = 0"],
     ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
     ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
     ['link' => '?page=inventory', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-white', 'icon' => 'fas fa-warehouse'],

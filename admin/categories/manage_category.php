@@ -13,57 +13,70 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 	}
 }
 ?>
-<div class="content py-5 px-3 bg-gradient-dark">
-	<h2><b><?= isset($id) ? "แก้ไขหมวดหมู่" : "สร้างหมวดหมู่ใหม่" ?></b></h2>
-</div>
-<div class="row mt-lg-n4 mt-md-n4 justify-content-center">
-	<div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
-		<div class="card rounded-0">
-			<div class="card-body">
+<div class="card card-outline card-primary rounded-0">
+	<div class="card-header">
+		<h1 class="card-title"><?= isset($id) ? "แก้ไขหมวดหมู่" : "สร้างหมวดหมู่ใหม่" ?></h1>
+	</div>
+	<form action="" id="category-form">
+		<input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
+		<div class="card-body">
+			<div class="card card-outline card-dark rounded-0 mb-3">
+				<div class="card-header">
+					<h3 class="card-title">ข้อมูลหมวดหมู่</h3>
+				</div>
+				<div class="card-body">
+					<div class="form-group">
+						<label>ชื่อหมวดหมู่ <span class="text-danger">*</span></label>
+						<input type="text" name="name" id="name" class="form-control" value="<?php echo isset($name) ? $name : ''; ?>" required />
+					</div>
+					<div class="form-group">
+						<label for="description">รายละเอียด</label>
+						<textarea rows="3" name="description" id="description" class="form-control"><?php echo isset($description) ? $description : ''; ?></textarea>
+					</div>
+					<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
+						<label for="product_type_id" class="control-label">เลือกประเภทสินค้า</label>
+						<?php
+						// สมมติว่านี่คือโค้ดเดิมที่ใช้ดึงข้อมูลประเภทสินค้า
+						// $product_types_result = $conn->query("SELECT id, name FROM product_type WHERE status = 1");
 
-				<div class="container-fluid">
-					<form action="" id="category-form">
-						<input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
+						// ให้คุณเพิ่ม 'ORDER BY id ASC' ต่อท้ายเข้าไปใน query ดังนี้
+						$product_types_result = $conn->query("SELECT id, name FROM product_type WHERE status = 1 ORDER BY id ASC");
+						?>
 
-						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-							<label for="product_type_id" class="control-label">ประเภทสินค้า</label>
-							<select name="product_type_id" id="product_type_id" class="form-control form-control-sm rounded-0" required>
-								<option value="" disabled <?= !isset($product_type_id) ? 'selected' : '' ?>>-- กรุณาเลือก --</option>
-								<?php
-								// วนลูปสร้าง <option> จากข้อมูลที่ดึงมา
-								while ($pt_row = $product_types_result->fetch_assoc()) :
-								?>
-									<option value="<?= $pt_row['id'] ?>" <?= (isset($product_type_id) && $product_type_id == $pt_row['id']) ? 'selected' : '' ?>>
-										<?= $pt_row['name'] ?>
-									</option>
-								<?php endwhile; ?>
-							</select>
-						</div>
-						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-							<label for="name" class="control-label">ชื่อหมวดหมู่</label>
-							<input type="text" name="name" id="name" class="form-control form-control-sm rounded-0" value="<?php echo isset($name) ? $name : ''; ?>" required />
-						</div>
-						<div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
-							<label for="description" class="control-label">รายละเอียดหมวดหมู่</label>
-							<textarea rows="3" name="description" id="description" class="form-control form-control-sm rounded-0" required><?php echo isset($description) ? $description : ''; ?></textarea>
-						</div>
-						<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-							<label for="status" class="control-label">สถานะ</label>
-							<select name="status" id="status" class="form-control form-control-sm rounded-0" required="required">
-								<option value="1" <?= isset($status) && $status == 1 ? 'selected' : '' ?>>กำลังใช้งาน</option>
-								<option value="0" <?= isset($status) && $status == 0 ? 'selected' : '' ?>>ไม่ได้ใช้งาน</option>
-							</select>
-						</div>
-					</form>
+						<select name="product_type_id" id="product_type_id" class="form-control form-control-sm rounded-0" required>
+							<option value="" disabled <?= !isset($product_type_id) ? 'selected' : '' ?>>-- กรุณาเลือก --</option>
+							<?php
+							// วนลูปสร้าง <option> จากข้อมูลที่ดึงมา ซึ่งตอนนี้เรียงตาม id แล้ว
+							while ($pt_row = $product_types_result->fetch_assoc()) :
+							?>
+								<option value="<?= $pt_row['id'] ?>" <?= (isset($product_type_id) && $product_type_id == $pt_row['id']) ? 'selected' : '' ?>>
+									<?= $pt_row['name'] ?>
+								</option>
+							<?php endwhile; ?>
+						</select>
+					</div>
 				</div>
 			</div>
-			<div class="card-footer py-1 text-center">
-				<button class="btn btn-sm btn-success btn-flat" form="category-form"><i class="fa fa-save"></i> บันทึก</button>
-				<a class="btn btn-danger btn-sm border btn-flat" href="./?page=categories"><i class="fa fa-times"></i> ยกเลิก</a>
+			<div class="card card-outline card-dark rounded-0 mb-3">
+				<div class="card-header">
+					<h3 class="card-title">สถานะการขาย</h3>
+				</div>
+				<div class="card-body">
+					<input type="hidden" name="status" value="0">
+					<div class="custom-control custom-switch">
+						<input type="checkbox" class="custom-control-input" id="status" name="status" value="1" <?= (isset($status) && $status == 1) ? 'checked' : '' ?>>
+						<label class="custom-control-label" for="status">เปิด/ปิดการใช้งานประเภทสินค้า</label>
+					</div>
+				</div>
 			</div>
 		</div>
+	</form>
+	<div class="card-footer py-1 text-center">
+		<button class="btn btn-success btn-sm btn-flat" form="category-form"><i class="fa fa-save"></i> บันทึก</button>
+		<a class="btn btn-danger btn-sm border btn-flat" href="./?page=categories"><i class="fa fa-times"></i> ยกเลิก</a>
 	</div>
 </div>
+
 <script>
 	$(document).ready(function() {
 		// ไม่ต้องแก้ไขส่วนของ script นี้เลย

@@ -23,9 +23,9 @@
 			<table class="table table-hover table-striped table-bordered" id="list">
 				<colgroup>
 					<col width="5%">
-					<col width="15%">
 					<col width="20%">
 					<col width="25%">
+					<col width="15%">
 					<col width="15%">
 					<col width="10%">
 					<col width="15%">
@@ -33,10 +33,11 @@
 				<thead class="text-center">
 					<tr>
 						<th>ที่</th>
-						<th>วันที่สร้าง</th>
+
 						<th>ชื่อหมวดหมู่</th>
 						<th>รายละเอียดหมวดหมู่</th>
 						<th>ประเภทสินค้า</th>
+						<th>วันที่สร้าง</th>
 						<th>สถานะ</th>
 						<th>จัดการ</th>
 					</tr>
@@ -44,18 +45,15 @@
 				<tbody>
 					<?php
 					$i = 1;
-					// แก้ไขคิวรีเพื่อ JOIN ตาราง category_list กับ product_type โดยตรง
 					$qry = $conn->query("SELECT cl.*, pt.name as product_type_name 
-                    FROM `category_list` cl
-                    LEFT JOIN `product_type` pt ON cl.product_type_id = pt.id 
-                    WHERE cl.delete_flag = 0 
-                    ORDER BY cl.name ASC");
-
+                           FROM `category_list` cl
+                           LEFT JOIN `product_type` pt ON cl.product_type_id = pt.id 
+                           WHERE cl.delete_flag = 0 
+                           ORDER BY cl.date_created ASC	");
 					while ($row = $qry->fetch_assoc()):
 					?>
 						<tr>
 							<td class="text-center"><?php echo $i++; ?></td>
-							<td><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 							<td class=""><?= $row['name'] ?></td>
 							<td>
 								<p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
@@ -63,13 +61,13 @@
 							<td class="text-center">
 								<?php
 								if (isset($row['product_type_name']) && $row['product_type_name'] != null) {
-									// ใช้ badge-info หรือ badge สีอื่นๆ ที่คุณต้องการ
 									echo '<span class="">' . $row['product_type_name'] . '</span>';
 								} else {
-									echo '<span class="text-muted">-</span>'; // ใช้สีเทาสำหรับค่าว่าง
+									echo '<span class="text-muted">-</span>';
 								}
 								?>
 							</td>
+							<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 							<td class="text-center">
 								<?php if ($row['status'] == 1): ?>
 									<span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>

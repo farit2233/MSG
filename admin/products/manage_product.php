@@ -47,7 +47,7 @@ function get_platform_link($conn, $product_id, $platform)
 </style>
 <div class="card card-outline card-primary rounded-0">
 	<div class="card-header">
-		<h1 class="card-title"><?php echo isset($id) ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'; ?></h1>
+		<h1 class="card-title"><?= isset($id) ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'; ?></h1>
 	</div>
 	<form action="" id="product-form" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">

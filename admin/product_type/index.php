@@ -42,7 +42,7 @@
                 <tbody>
                     <?php
                     $i = 1;
-                    $qry = $conn->query("SELECT * FROM `product_type` WHERE `delete_flag` = 0 ORDER BY `id` ASC, `name` ASC");
+                    $qry = $conn->query("SELECT * FROM `product_type` WHERE `delete_flag` = 0 ORDER BY `date_created`  ASC, `name` ASC");
                     while ($row = $qry->fetch_assoc()):
                         $id = $row['id'];
                     ?>
@@ -51,7 +51,7 @@
                         <td>
                             <p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
                         </td>
-                        <td><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+                        <td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
                         <td class="text-center">
                             <?php if ($row['status'] == 1): ?>
                                 <span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>

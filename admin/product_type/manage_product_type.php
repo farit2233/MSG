@@ -1,5 +1,4 @@
 <?php
-
 if (isset($_GET['id']) && $_GET['id'] > 0) {
     $qry = $conn->query("SELECT * from `product_type` where id = '{$_GET['id']}' ");
     if ($qry->num_rows > 0) {
@@ -9,42 +8,51 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     }
 }
 ?>
-<div class="content py-5 px-3 bg-gradient-dark">
-    <h2><b><?= isset($id) ? "แก้ไขประเภทสินค้า" : "สร้างประเภทสินค้าใหม่" ?></b></h2>
-</div>
-<div class="row mt-lg-n4 mt-md-n4 justify-content-center">
-    <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
-        <div class="card rounded-0">
-            <div class="card-body">
 
-                <div class="container-fluid">
-                    <form action="" id="product-type-form">
-                        <input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
-                        <div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                            <label for="name" class="control-label">ชื่อประเภทสินค้า</label>
-                            <input type="text" name="name" id="name" class="form-control form-control-sm rounded-0" value="<?php echo isset($name) ? $name : ''; ?>" required />
-                        </div>
-                        <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                            <label for="description" class="control-label">รายละเอียดประเภทสินค้า</label>
-                            <textarea rows="3" name="description" id="description" class="form-control form-control-sm rounded-0" required><?php echo isset($description) ? $description : ''; ?></textarea>
-                        </div>
-                        <div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                            <label for="status" class="control-label">สถานะ</label>
-                            <select name="status" id="status" class="form-control form-control-sm rounded-0" required="required">
-                                <option value="1" <?= isset($status) && $status == 1 ? 'selected' : '' ?>>กำลังใช้งาน</option>
-                                <option value="0" <?= isset($status) && $status == 0 ? 'selected' : '' ?>>ไม่ได้ใช้งาน</option>
-                            </select>
-                        </div>
-                    </form>
+<div class="card card-outline card-primary rounded-0">
+    <div class="card-header">
+        <h1 class="card-title"><?= isset($id) ? "แก้ไขประเภทสินค้า" : "สร้างประเภทสินค้าใหม่" ?></h1>
+    </div>
+    <form action="" id="product-type-form">
+        <input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
+        <div class="card-body">
+
+            <div class="card card-outline card-dark rounded-0 mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">ข้อมูลประเภทสินค้า</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>ชื่อประเภทสินค้า <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="name" class="form-control" value="<?php echo isset($name) ? $name : ''; ?>" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="description">รายละเอียด</label>
+                        <textarea rows="3" name="description" id="description" class="form-control"><?php echo isset($description) ? $description : ''; ?></textarea>
+                    </div>
                 </div>
             </div>
-            <div class="card-footer py-1 text-center">
-                <button class="btn btn-sm btn-success btn-flat" form="product-type-form"><i class="fa fa-save"></i> บันทึก</button>
-                <a class="btn btn-danger btn-sm border btn-flat" href="./?page=product_type"><i class="fa fa-times"></i> ยกเลิก</a>
+            <div class="card card-outline card-dark rounded-0 mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">สถานะการขาย</h3>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" name="status" value="0">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" <?= (isset($status) && $status == 1) ? 'checked' : '' ?>>
+                        <label class="custom-control-label" for="status">เปิด/ปิดการใช้งานประเภทสินค้า</label>
+                    </div>
+                </div>
             </div>
         </div>
+    </form>
+    <div class="card-footer py-1 text-center">
+        <button class="btn btn-success btn-sm btn-flat" form="product-type-form"><i class="fa fa-save"></i> บันทึก</button>
+        <a class="btn btn-danger btn-sm border btn-flat" href="./?page=product_type"><i class="fa fa-times"></i> ยกเลิก</a>
     </div>
 </div>
+
+
 <script>
     $(document).ready(function() {
         $('#product-type-form').submit(function(e) {
@@ -63,12 +71,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 dataType: 'json',
                 error: err => {
                     console.log(err)
-                    alert_toast("An error occured", 'error');
+                    alert_toast("เกิดข้อผิดพลาด", 'error');
                     end_loader();
                 },
                 success: function(resp) {
                     if (typeof resp == 'object' && resp.status == 'success') {
-                        location.replace('./?page=product_type/manage_product_type&id=' + resp.cid)
+                        location.replace('./?page=product_type');
                     } else if (resp.status == 'failed' && !!resp.msg) {
                         var el = $('<div>')
                         el.addClass("alert alert-danger err-msg").text(resp.msg)
@@ -77,13 +85,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                         $("html, body").scrollTop(0);
                         end_loader()
                     } else {
-                        alert_toast("An error occured", 'error');
+                        alert_toast("เกิดข้อผิดพลาด", 'error');
                         end_loader();
                         console.log(resp)
                     }
                 }
             })
         })
-
     })
 </script>
