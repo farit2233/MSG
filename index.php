@@ -9,6 +9,7 @@
     })
   </script>
 <?php endif; ?>
+<link rel="stylesheet" href="assets/css/navbar.css">
 
 <body>
   <?php require_once('inc/topBarNav.php') ?>

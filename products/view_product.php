@@ -648,30 +648,18 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									<p class="mb-3">
 										หมวดหมู่สินค้า:
 										<?php
-										// ดึงหมวดหมู่หลัก
-										$cat_main = $conn->query("SELECT name FROM category_list WHERE id = {$category_id}")->fetch_assoc();
+										// ดึงข้อมูลหมวดหมู่หลัก
+										$stmt = $conn->prepare("SELECT name FROM category_list WHERE id = ?");
+										$stmt->bind_param("i", $category_id);
+										$stmt->execute();
+										$result = $stmt->get_result();
+										$cat_main = $result->fetch_assoc();
+
+										// กำหนดชื่อหมวดหมู่หลัก หากไม่พบให้ใช้คำว่า 'ไม่ระบุ'
 										$main_name = $cat_main['name'] ?? 'ไม่ระบุ';
 
-										// ดึงหมวดหมู่เพิ่มเติม
-										$extra_names = [];
-										$extra_q = $conn->query("SELECT c.name, c.id FROM product_categories pc 
-									INNER JOIN category_list c ON c.id = pc.category_id 
-									WHERE pc.product_id = {$id}");
-
-										while ($ex = $extra_q->fetch_assoc()) {
-											$extra_names[] = '<a href="./?p=products&cid=' . $ex['id'] . '" class="plain-link"><b>' . $ex['name'] . '</b></a>';
-										}
-
-										// รวมทั้งหมด
-										$all_categories = [
-											'<a href="./?p=products&cid=' . $category_id . '" class="plain-link"><b>' . $main_name . '</b></a>'
-										];
-
-										if (!empty($extra_names)) {
-											$all_categories = array_merge($all_categories, $extra_names);
-										}
-
-										echo implode(', ', $all_categories);
+										// แสดงผลลิงก์ของหมวดหมู่หลัก
+										echo '<a href="./?p=products&cid=' . $category_id . '" class="plain-link"><b>' . htmlspecialchars($main_name) . '</b></a>';
 										?>
 										<label class="sku"> | </label> <label class="sku">รหัสสินค้า:</label> <b style="margin-left: 0.5rem;"><?= $sku ?> </b>
 									</p>
