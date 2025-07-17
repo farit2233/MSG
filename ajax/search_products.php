@@ -33,19 +33,10 @@ if (isset($_GET['sort'])) {
 /* ---------------- เงื่อนไข WHERE ---------------- */
 $where_clauses = ["status = 1", "delete_flag = 0"];
 
-/* --- หมวดหลัก + หมวดย่อย (cid) --- */
+/* --- หมวดหลักเท่านั้น (ไม่มีหมวดเพิ่มเติม) --- */
 if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
     $cid = intval($_GET['cid']);
-    $where_clauses[] = "
-        (
-            product_list.category_id = {$cid}
-            OR EXISTS (
-                SELECT 1 FROM product_categories pc
-                WHERE pc.product_id = product_list.id
-                  AND pc.category_id = {$cid}
-            )
-        )
-    ";
+    $where_clauses[] = "product_list.category_id = {$cid}";
 }
 
 /* --- คำค้นหา (search) --- */
@@ -76,18 +67,6 @@ if ($qry->num_rows > 0):
     while ($row = $qry->fetch_assoc()):
         $in_stock   = $row['available'] > 0;
         $stock_class = $in_stock ? '' : 'out-of-stock';
-
-        /* ดึงหมวดหมู่เพิ่มเติม */
-        $extra_cats = [];
-        $cat_q = $conn->query("
-            SELECT c.name
-            FROM product_categories pc
-            INNER JOIN category_list c ON c.id = pc.category_id
-            WHERE pc.product_id = {$row['id']}
-        ");
-        while ($c = $cat_q->fetch_assoc()) {
-            $extra_cats[] = $c['name'];
-        }
 ?>
         <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
             <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= $stock_class ?>"

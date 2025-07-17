@@ -106,6 +106,7 @@
 $page_title = "สินค้าทั้งหมด"; // ตั้งชื่อหน้าเริ่มต้น
 $page_description = "";
 $current_cid = '';
+$current_tid = '';
 $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">สินค้าทั้งหมด</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
 
 if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {

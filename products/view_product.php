@@ -44,11 +44,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 
 ?>
 <style>
-	body {
-		background-color: #FAFAFA;
-	}
-
-
 	.breadcrumb {
 		font-size: 0.95rem;
 		background: none;
@@ -601,7 +596,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											<div class="d-flex flex-wrap align-items-center group-qty">
 												<div class="input-group" style="width: 20rem;">
 													<button class="btn addcart-plus" style="margin-right: 5px;" type="button" onclick="decreaseQty()">−</button>
-													<input type="number" id="qty" name="qty" class="form-control text-center"
+													<input type="number" id="qty" name="qty" class="form-control text-center input-mobile"
 														value="1" min="1" max="<?= $max_order_qty ?>" required>
 													<button class="btn addcart-plus" style="margin-left: 5px;" type="button" onclick="increaseQty()">+</button>
 												</div>
@@ -648,18 +643,12 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									<p class="mb-3">
 										หมวดหมู่สินค้า:
 										<?php
-										// ดึงข้อมูลหมวดหมู่หลัก
-										$stmt = $conn->prepare("SELECT name FROM category_list WHERE id = ?");
-										$stmt->bind_param("i", $category_id);
-										$stmt->execute();
-										$result = $stmt->get_result();
-										$cat_main = $result->fetch_assoc();
-
-										// กำหนดชื่อหมวดหมู่หลัก หากไม่พบให้ใช้คำว่า 'ไม่ระบุ'
+										// ดึงหมวดหมู่หลัก
+										$cat_main = $conn->query("SELECT name FROM category_list WHERE id = {$category_id}")->fetch_assoc();
 										$main_name = $cat_main['name'] ?? 'ไม่ระบุ';
 
-										// แสดงผลลิงก์ของหมวดหมู่หลัก
-										echo '<a href="./?p=products&cid=' . $category_id . '" class="plain-link"><b>' . htmlspecialchars($main_name) . '</b></a>';
+										// แสดงเฉพาะหมวดหมู่หลักอย่างเดียว
+										echo '<a href="./?p=products&cid=' . $category_id . '" class="plain-link"><b>' . $main_name . '</b></a>';
 										?>
 										<label class="sku"> | </label> <label class="sku">รหัสสินค้า:</label> <b style="margin-left: 0.5rem;"><?= $sku ?> </b>
 									</p>
@@ -673,157 +662,156 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											<p class="mb-0"><i class="fa fa-phone text-primary"></i> โทร: <?php echo $_settings->info('mobile') ?></p>
 										</div>
 									</div>
-								</div>
-							</div>
 
-							<!----------------- Mobile ----------------->
-							<div class="product-description-mobile mt-3">
-								<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
-								<div class="product-specs">
-									<div class="spec-row">
-										<div class="spec-label">น้ำหนักสินค้า</div>
-										<div class="spec-value"><?= $product_weight ?> กรัม.</div>
-									</div>
-									<?php if (!empty($product_width) && !empty($product_length) && !empty($product_height)): ?>
-										<div class="spec-row">
-											<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
-											<div class="spec-value"><?= $product_width ?> x <?= $product_length ?> x <?= $product_height ?> ซม.</div>
-										</div>
-									<?php endif; ?>
-								</div>
-							</div>
-							<div class="col-md-5 mb-3">
-								<!-- คำอธิบายสินค้าใต้รูป -->
-								<?php if (!empty($description)): ?>
+
+									<!----------------- Mobile ----------------->
 									<div class="product-description-mobile mt-3">
-										<h5><b>รายละเอียด</b></h5>
-										<div id="text-mobile" class="collapsed">
-											<div class="more-text">
-												<?php
-												$paragraphs = preg_split('/\r\n|\r|\n/', trim($description));
-												foreach ($paragraphs as $para) {
-													if (trim($para) !== '') {
-														echo '<p>' . htmlspecialchars(trim($para)) . '</p>';
-													}
-												}
-												?>
+										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
+										<div class="product-specs">
+											<div class="spec-row">
+												<div class="spec-label">น้ำหนักสินค้า</div>
+												<div class="spec-value"><?= $product_weight ?> กรัม.</div>
 											</div>
-										</div>
-										<div class="text-center mt-2">
-											<button class="btn btn-readmore rounded-pill" id="toggleButton-mobile">ดูเพิ่มเติม +</button>
+											<?php if (!empty($product_width) && !empty($product_length) && !empty($product_height)): ?>
+												<div class="spec-row">
+													<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
+													<div class="spec-value"><?= $product_width ?> x <?= $product_length ?> x <?= $product_height ?> ซม.</div>
+												</div>
+											<?php endif; ?>
 										</div>
 									</div>
+									<div class="col-md-5 mb-3">
+										<!-- คำอธิบายสินค้าใต้รูป -->
+										<?php if (!empty($description)): ?>
+											<div class="product-description-mobile mt-3">
+												<h5><b>รายละเอียด</b></h5>
+												<div id="text-mobile" class="collapsed">
+													<div class="more-text">
+														<?php
+														$paragraphs = preg_split('/\r\n|\r|\n/', trim($description));
+														foreach ($paragraphs as $para) {
+															if (trim($para) !== '') {
+																echo '<p>' . htmlspecialchars(trim($para)) . '</p>';
+															}
+														}
+														?>
+													</div>
+												</div>
+												<div class="text-center mt-2">
+													<button class="btn btn-readmore rounded-pill" id="toggleButton-mobile">ดูเพิ่มเติม +</button>
+												</div>
+											</div>
 
-								<?php endif; ?>
+										<?php endif; ?>
+									</div>
+
+								</div>
 							</div>
-
-						</div>
-					</div>
-					<!--div class="card-footer py-1 text-center">
+							<!--div class="card-footer py-1 text-center">
 					<a class="btn btn-light btn-sm bg-gradient-light border rounded-0" href="./?p=products"><i class="fa fa-angle-left"></i>กลับไปยังสินค้าทั้งหมด</a>
 				</div-->
-				</div>
-			</div>
-		</div>
-
-		<!-- Modal รูปสินค้า -->
-		<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-hidden="true">
-			<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-				<div class="modal-content position-relative">
-					<!-- ปุ่มกากบาท -->
-					<button type="button" class="close position-absolute" style="right: 10px; top: 10px; z-index: 10;" data-dismiss="modal" aria-label="Close">
-						<i class="fa fa-times"></i>
-					</button>
-
-					<div class="modal-body p-0 text-center">
-						<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
-							alt="<?= isset($name) ? $name : '' ?>"
-							class="img-fluid rounded">
+						</div>
 					</div>
 				</div>
+
+				<!-- Modal รูปสินค้า -->
+				<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+						<div class="modal-content position-relative">
+							<!-- ปุ่มกากบาท -->
+							<button type="button" class="close position-absolute" style="right: 10px; top: 10px; z-index: 10;" data-dismiss="modal" aria-label="Close">
+								<i class="fa fa-times"></i>
+							</button>
+
+							<div class="modal-body p-0 text-center">
+								<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
+									alt="<?= isset($name) ? $name : '' ?>"
+									class="img-fluid rounded">
+							</div>
+						</div>
+					</div>
+				</div>
+
+
 			</div>
-		</div>
 
-
-	</div>
-
-	<!--------------------สินค้าที่เกี่ยวข้อง--------------------->
-	<?php
-	// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
-	$related = $conn->query("SELECT *, 
+			<!--------------------สินค้าที่เกี่ยวข้อง--------------------->
+			<?php
+			// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
+			$related = $conn->query("SELECT *, 
 (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
 - COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
 FROM `product_list` 
 WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
 ORDER BY RAND() LIMIT 4");
 
-	// ============== โค้ดที่แก้ไข เริ่มต้นที่นี่ ==============
+			// ============== โค้ดที่แก้ไข เริ่มต้นที่นี่ ==============
 
-	// ตรวจสอบและสร้างฟังก์ชันสำหรับจัดรูปแบบราคา (หากยังไม่มี)
-	if (!function_exists('format_price_custom')) {
-		function format_price_custom($price)
-		{
-			$formatted_price = format_num($price, 2);
-			if (substr($formatted_price, -3) == '.00') {
-				return format_num($price, 0);
+			// ตรวจสอบและสร้างฟังก์ชันสำหรับจัดรูปแบบราคา (หากยังไม่มี)
+			if (!function_exists('format_price_custom')) {
+				function format_price_custom($price)
+				{
+					$formatted_price = format_num($price, 2);
+					if (substr($formatted_price, -3) == '.00') {
+						return format_num($price, 0);
+					}
+					return $formatted_price;
+				}
 			}
-			return $formatted_price;
-		}
-	}
 
-	if ($related->num_rows > 0): ?>
-		<div class="container">
-			<div class="row mt-n3 justify-content-center">
-				<div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
+			if ($related->num_rows > 0): ?>
+				<div class="container">
+					<div class="row mt-n3 justify-content-center">
+						<div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
 
-					<div class="card-body">
-						<h1 align="center">สินค้าที่เกี่ยวข้อง</h1>
-						<div class="row gy-3 gx-3">
-							<?php while ($rel = $related->fetch_assoc()): ?>
-								<div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
-									<a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= ($rel['available'] <= 0 ? 'out-of-stock' : '') ?>" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
-										<div class="position-relative">
-											<div class="img-top position-relative product-img-holder">
-												<?php if ($rel['available'] <= 0): ?>
-													<div class="out-of-stock-label">สินค้าหมด</div>
-												<?php endif; ?>
-												<img src="<?= validate_image($rel['image_path']) ?>" alt="<?= $rel['name'] ?>" class="product-img">
-											</div>
-										</div>
-										<div class="card-body">
-											<div style="line-height:1.5em">
-												<div class="card-title w-100 mb-0"><?= $rel['name'] ?></div>
-												<div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
-													<div class="w-100">
-														<small class="text-muted" style="line-height: 1.25em; display: block;">
-															<?= $rel['brand'] ?>
-														</small>
+							<div class="card-body">
+								<h1 align="center">สินค้าที่เกี่ยวข้อง</h1>
+								<div class="row gy-3 gx-3">
+									<?php while ($rel = $related->fetch_assoc()): ?>
+										<div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
+											<a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= ($rel['available'] <= 0 ? 'out-of-stock' : '') ?>" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
+												<div class="position-relative">
+													<div class="img-top position-relative product-img-holder">
+														<?php if ($rel['available'] <= 0): ?>
+															<div class="out-of-stock-label">สินค้าหมด</div>
+														<?php endif; ?>
+														<img src="<?= validate_image($rel['image_path']) ?>" alt="<?= $rel['name'] ?>" class="product-img">
 													</div>
 												</div>
-												<div class="d-flex justify-content-end align-items-center">
-													<?php if (!is_null($rel['discounted_price']) && $rel['discounted_price'] < $rel['price']): ?>
+												<div class="card-body">
+													<div style="line-height:1.5em">
+														<div class="card-title w-100 mb-0"><?= $rel['name'] ?></div>
+														<div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
+															<div class="w-100">
+																<small class="text-muted" style="line-height: 1.25em; display: block;">
+																	<?= $rel['brand'] ?>
+																</small>
+															</div>
+														</div>
+														<div class="d-flex justify-content-end align-items-center">
+															<?php if (!is_null($rel['discounted_price']) && $rel['discounted_price'] < $rel['price']): ?>
 
-														<span class="banner-price fw-bold me-2"><?= format_price_custom($rel['discounted_price']) ?> ฿</span>
+																<span class="banner-price fw-bold me-2"><?= format_price_custom($rel['discounted_price']) ?> ฿</span>
 
-														<?php $discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100); ?>
-														<span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
+																<?php $discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100); ?>
+																<span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
 
-													<?php else: ?>
-														<span class="banner-price"><?= format_price_custom($rel['price']) ?> ฿</span>
-													<?php endif; ?>
+															<?php else: ?>
+																<span class="banner-price"><?= format_price_custom($rel['price']) ?> ฿</span>
+															<?php endif; ?>
+														</div>
+
+													</div>
 												</div>
-
-											</div>
+											</a>
 										</div>
-									</a>
+									<?php endwhile; ?>
 								</div>
-							<?php endwhile; ?>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</div>
-	<?php endif; ?>
+			<?php endif; ?>
 
 </section>
 <script>
