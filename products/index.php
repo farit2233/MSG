@@ -106,7 +106,6 @@
 $page_title = "สินค้าทั้งหมด"; // ตั้งชื่อหน้าเริ่มต้น
 $page_description = "";
 $current_cid = '';
-$current_tid = '';
 $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">สินค้าทั้งหมด</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
 
 if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
@@ -115,9 +114,7 @@ if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
         $cat_result = $category_qry->fetch_assoc();
         $page_title = $cat_result['name'];
         $page_description = $cat_result['description'];
-        $current_cid = isset($_GET['cid']) ? $_GET['cid'] : '';
-        $current_tid = isset($_GET['tid']) ? $_GET['tid'] : '';
-
+        $current_cid = $_GET['cid'];
         // ถ้ามี CID และพบหมวดหมู่ ให้ Breadcrumb เส้นที่ 2 เป็นลิงก์ไปยังหมวดนั้น
         $breadcrumb_item_2_html = '<li class="breadcrumb-item"><a href="./?p=products&cid=' . $current_cid . '" class="plain-link">' . $cat_result['name'] . '</a></li>';
         // และอาจจะต้องมีเส้นที่ 3 เป็น active item สำหรับหน้าปัจจุบัน ถ้าเป็นหน้าหมวดหมู่ย่อย
@@ -131,28 +128,6 @@ if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
         $page_title = "ไม่พบหมวดหมู่";
         $page_description = "หมวดหมู่ที่คุณระบุไม่ถูกต้องหรือไม่สามารถใช้งานได้";
         $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบหมวดหมู่</li>';
-    }
-}
-if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
-    $product_type = $conn->query("SELECT * FROM `product_type` where `id` = '{$_GET['tid']}' and `status` = 1 and `delete_flag` = 0");
-    if ($product_type->num_rows > 0) {
-        $product_type_result = $product_type->fetch_assoc();
-        $page_title = $product_type_result['name'];
-        $page_description = $product_type_result['description'];
-        $current_tid = $_GET['tid'];
-        // ถ้ามี CID และพบหมวดหมู่ ให้ Breadcrumb เส้นที่ 2 เป็นลิงก์ไปยังหมวดนั้น
-        $breadcrumb_tid_item_2_html = '<li class="breadcrumb-item"><a href="./?p=products&tid=' . $current_tid . '" class="plain-link">' . $product_type_result['name'] . '</a></li>';
-        // และอาจจะต้องมีเส้นที่ 3 เป็น active item สำหรับหน้าปัจจุบัน ถ้าเป็นหน้าหมวดหมู่ย่อย
-        // แต่ในกรณีนี้คุณต้องการแสดงหน้าหมวดหมู่หลักเลย (products) ดังนั้นเส้นนี้ควร active
-        $breadcrumb_tid_item_2_html = '<li class="breadcrumb-item active" aria-current="page">' . $product_type_result['name'] . '</li>';
-        // ผมคิดว่าคุณต้องการแบบนี้มากกว่า:
-        // HOME > ชื่อหมวดหมู่ (เมื่ออยู่หน้าหมวดหมู่นั้นๆ)
-        // HOME > สินค้าทั้งหมด (เมื่ออยู่หน้า products ไม่มี tid)
-    } else {
-        // กรณีที่ cid ไม่ถูกต้องหรือไม่พบหมวดหมู่
-        $page_title = "ไม่พบหมวดหมู่";
-        $page_description = "หมวดหมู่ที่คุณระบุไม่ถูกต้องหรือไม่สามารถใช้งานได้";
-        $breadcrumb_tid_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบหมวดหมู่</li>';
     }
 }
 
@@ -211,36 +186,36 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
 <script>
     // เก็บค่า category ID ปัจจุบันจาก PHP เพื่อใช้ใน JavaScript
     var currentCid = "<?= $current_cid ?>";
-    var currentTid = "<?= $current_tid ?>";
 
     function sortProducts() {
-        var sortBy = $('#sort_by').val();
+        var sortBy = $('#sort_by').val(); // ดึงค่าที่เลือกจาก dropdown
         var productContainer = $('#product-list-container');
         var loadingSpinner = $('#loading-spinner');
 
+        // แสดง loading spinner
         loadingSpinner.show();
-        productContainer.html('');
+        productContainer.html(''); // เคลียร์เนื้อหาเก่า
 
         $.ajax({
-            url: './ajax/fetch_products.php',
+            url: './ajax/fetch_products.php', // แก้ไขพาธนี้ให้ถูกต้อง (เช่น './products/fetch_products.php' หรือ './fetch_products.php')
             method: 'GET',
             data: {
                 sort: sortBy,
-                cid: currentCid,
-                tid: currentTid
+                cid: currentCid // ส่ง category ID ไปด้วย
             },
             success: function(response) {
+                // ซ่อน loading spinner
                 loadingSpinner.hide();
-                productContainer.html(response);
+                productContainer.html(response); // นำ HTML ที่ได้มาใส่ใน container
             },
             error: function(xhr, status, error) {
+                // ซ่อน loading spinner
                 loadingSpinner.hide();
                 console.error("AJAX Error: ", status, error);
                 productContainer.html('<div class="col-12 text-center py-5 text-danger">เกิดข้อผิดพลาดในการโหลดสินค้า กรุณาลองใหม่อีกครั้ง</div>');
             }
         });
     }
-
 
     // เรียกใช้ฟังก์ชันเมื่อหน้าโหลดเสร็จครั้งแรก เพื่อแสดงสินค้าตามการเรียงลำดับเริ่มต้น
     $(document).ready(function() {

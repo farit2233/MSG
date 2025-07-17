@@ -6,63 +6,65 @@ if (!isset($conn)) {
     die("Database connection not established.");
 }
 
-// กำหนดการเรียงลำดับ
-$order_by = "`date_created` DESC";
+// การเรียงลำดับ
+$order_by = "`pl`.`date_created` DESC";
 if (isset($_GET['sort'])) {
     switch ($_GET['sort']) {
         case 'date_asc':
-            $order_by = "`date_created` ASC";
+            $order_by = "`pl`.`date_created` ASC";
             break;
         case 'price_asc':
-            $order_by = "IF(discounted_price IS NOT NULL AND discounted_price < price, discounted_price, price) ASC";
+            $order_by = "IF(pl.discounted_price IS NOT NULL AND pl.discounted_price < pl.price, pl.discounted_price, pl.price) ASC";
             break;
         case 'price_desc':
-            $order_by = "IF(discounted_price IS NOT NULL AND discounted_price < price, discounted_price, price) DESC";
+            $order_by = "IF(pl.discounted_price IS NOT NULL AND pl.discounted_price < pl.price, pl.discounted_price, pl.price) DESC";
             break;
         case 'name_asc':
-            $order_by = "`name` ASC";
+            $order_by = "`pl`.`name` ASC";
             break;
         case 'name_desc':
-            $order_by = "`name` DESC";
+            $order_by = "`pl`.`name` DESC";
             break;
         default:
-            $order_by = "`date_created` DESC";
+            $order_by = "`pl`.`date_created` DESC";
     }
 }
 
-// เงื่อนไขหมวดหมู่หลัก (ลบหมวดเพิ่มเติม)
-$cat_where = "";
+// สร้างเงื่อนไขเพิ่มเติมจาก GET
+$additional_where = "";
 if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
     $cid = intval($_GET['cid']);
-    $cat_where = " AND product_list.category_id = {$cid}";
+    $additional_where .= " AND pl.category_id = {$cid}";
+}
+if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
+    $tid = intval($_GET['tid']);
+    $additional_where .= " AND cl.product_type_id = {$tid}";
 }
 
-// ดึงรายการสินค้า
+// ดึงรายการสินค้า พร้อม JOIN ตาราง category_list เพื่อใช้ product_type_id
 $qry = $conn->query("
-    SELECT *,
+    SELECT pl.*,
         (
-            COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = product_list.id), 0)
-            - COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = product_list.id), 0)
+            COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = pl.id), 0)
+            - COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = pl.id), 0)
         ) AS available
-    FROM product_list
-    WHERE status = 1 AND delete_flag = 0
-    {$cat_where}
+    FROM product_list pl
+    INNER JOIN category_list cl ON pl.category_id = cl.id
+    WHERE pl.status = 1 AND pl.delete_flag = 0
+    {$additional_where}
     ORDER BY {$order_by}
 ");
 
-// ฟังก์ชันสำหรับจัดรูปแบบราคา (ตัด .00 ออก)
+// ฟังก์ชันแสดงราคาแบบไม่มี .00
 if (!function_exists('format_price_custom')) {
     function format_price_custom($price)
     {
         $formatted_price = format_num($price, 2);
-        if (substr($formatted_price, -3) == '.00') {
-            return format_num($price, 0);
-        }
-        return $formatted_price;
+        return substr($formatted_price, -3) == '.00' ? format_num($price, 0) : $formatted_price;
     }
 }
 
-// แสดงผล HTML
+// แสดง HTML
 ob_start();
 
 if ($qry->num_rows > 0):
@@ -104,15 +106,12 @@ if ($qry->num_rows > 0):
                 </div>
             </a>
         </div>
-    <?php
-    endwhile;
-else:
-    ?>
+    <?php endwhile; ?>
+<?php else: ?>
     <div class="col-12 text-center py-5">
         <p>ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
     </div>
-<?php
-endif;
+<?php endif;
 
 echo ob_get_clean();
 ?>
