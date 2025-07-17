@@ -120,6 +120,7 @@
               </button>
               <div class="dropdown-menu user-dropdown-menu dropdown-menu-right" role="menu">
                 <a class="dropdown-item" href="./login.php"><i class="fa fa-sign-in-alt"></i> เข้าสู่ระบบ</a>
+                <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="./register.php"><i class="fa fa-user-plus"></i> สมัครสมาชิก</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="./admin"><i class="fa fa-user-tie"></i> Admin Panel</a>
