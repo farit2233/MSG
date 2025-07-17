@@ -106,6 +106,7 @@
 $page_title = "สินค้าทั้งหมด"; // ตั้งชื่อหน้าเริ่มต้น
 $page_description = "";
 $current_cid = '';
+$current_tid = '';
 $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">สินค้าทั้งหมด</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
 
 if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
@@ -120,6 +121,29 @@ if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
         // และอาจจะต้องมีเส้นที่ 3 เป็น active item สำหรับหน้าปัจจุบัน ถ้าเป็นหน้าหมวดหมู่ย่อย
         // แต่ในกรณีนี้คุณต้องการแสดงหน้าหมวดหมู่หลักเลย (products) ดังนั้นเส้นนี้ควร active
         $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">' . $cat_result['name'] . '</li>';
+        // ผมคิดว่าคุณต้องการแบบนี้มากกว่า:
+        // HOME > ชื่อหมวดหมู่ (เมื่ออยู่หน้าหมวดหมู่นั้นๆ)
+        // HOME > สินค้าทั้งหมด (เมื่ออยู่หน้า products ไม่มี cid)
+    } else {
+        // กรณีที่ cid ไม่ถูกต้องหรือไม่พบหมวดหมู่
+        $page_title = "ไม่พบหมวดหมู่";
+        $page_description = "หมวดหมู่ที่คุณระบุไม่ถูกต้องหรือไม่สามารถใช้งานได้";
+        $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบหมวดหมู่</li>';
+    }
+}
+
+if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
+    $product_type_qry = $conn->query("SELECT * FROM `product_type` where `id` = '{$_GET['tid']}' and `status` = 1 and `delete_flag` = 0");
+    if ($product_type_qry->num_rows > 0) {
+        $pdt_result = $product_type_qry->fetch_assoc();
+        $page_title = $pdt_result['name'];
+        $page_description = $pdt_result['description'];
+        $current_tid = $_GET['tid'];
+        // ถ้ามี CID และพบหมวดหมู่ ให้ Breadcrumb เส้นที่ 2 เป็นลิงก์ไปยังหมวดนั้น
+        $breadcrumb_item_2_html = '<li class="breadcrumb-item"><a href="./?p=products&cid=' . $current_tid . '" class="plain-link">' . $pdt_result['name'] . '</a></li>';
+        // และอาจจะต้องมีเส้นที่ 3 เป็น active item สำหรับหน้าปัจจุบัน ถ้าเป็นหน้าหมวดหมู่ย่อย
+        // แต่ในกรณีนี้คุณต้องการแสดงหน้าหมวดหมู่หลักเลย (products) ดังนั้นเส้นนี้ควร active
+        $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">' . $pdt_result['name'] . '</li>';
         // ผมคิดว่าคุณต้องการแบบนี้มากกว่า:
         // HOME > ชื่อหมวดหมู่ (เมื่ออยู่หน้าหมวดหมู่นั้นๆ)
         // HOME > สินค้าทั้งหมด (เมื่ออยู่หน้า products ไม่มี cid)
