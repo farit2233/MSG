@@ -1,3 +1,24 @@
+<?php
+$product_structure = [];
+
+$type_qry = $conn->query("SELECT * FROM `product_type` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
+while ($type_row = $type_qry->fetch_assoc()) {
+  $tid = $type_row['id'];
+  $product_structure[$tid] = [
+    'name' => $type_row['name'],
+    'categories' => []
+  ];
+
+  $cat_qry = $conn->query("SELECT * FROM `category_list` WHERE `status` = 1 AND `delete_flag` = 0 AND `product_type_id` = {$tid} ORDER BY `date_created` ASC");
+  while ($cat_row = $cat_qry->fetch_assoc()) {
+    $product_structure[$tid]['categories'][] = [
+      'id' => $cat_row['id'],
+      'name' => $cat_row['name']
+    ];
+  }
+}
+?>
+
 <nav class="navbar navbar-expand-lg navbar-dark navbar-msg navbar-shown">
   <div class="container container-wide px-0 px-lg-0">
 
@@ -27,9 +48,10 @@
                       <div class="d-flex justify-content-between align-items-center">
                         <a class="dropdown-item flex-grow-1" href="<?= base_url . "?p=products&tid={$tid}" ?>">
                           <?= htmlspecialchars($type_row['name']) ?>
+
                         </a>
-                        <a class="submenu-toggle" href="#" data-toggle="collapse" data-target="#collapse-cat-<?= $tid ?>" role="button" aria-expanded="false" aria-controls="collapse-cat-<?= $tid ?>">
-                          &gt;
+                        <a class="submenu-toggle collapsed" href="#" data-toggle="collapse" data-target="#collapse-cat-<?= $tid ?>" role="button" aria-expanded="false" aria-controls="collapse-cat-<?= $tid ?>">
+                          <i class="fas fa-chevron-down toggle-icon fa-xs"></i>
                         </a>
                       </div>
                       <div class="collapse" id="collapse-cat-<?= $tid ?>">
@@ -233,7 +255,7 @@
       <a class="nav-link" href="./"><i class="fa fa-home"></i> หน้าหลัก</a>
       <a class="nav-link" href="./?p=products"><i class="fa fa-box-open"></i> สินค้าทั้งหมด</a>
       <div class="dropdown-divider"></div>
-      <h6 class="px-3 mt-2 mb-1 text-muted">หมวดหมู่สินค้า</h6>
+      <h6 class="px-3 mt-2 mb-1 text-muted">ประเภทสินค้า</h6>
       <?php
       // --- โค้ดสำหรับแสดงผลใน Sidebar ---
       // ใช้ข้อมูล $product_structure ที่ดึงมาแล้วจากด้านบน หรือจะดึงใหม่ก็ได้
@@ -403,6 +425,5 @@
         }
       });
     });
-
   });
 </script>

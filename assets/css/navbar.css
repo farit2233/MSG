@@ -283,13 +283,11 @@
 }
 
 @media (max-width: 1368px) {
-.expanding-search {
-
-  width: 240px;
-
+  .expanding-search {
+    width: 240px;
+  }
 }
 
-}
 .expanding-search input[type="text"] {
   width: 100%;
   height: 100%;
@@ -338,18 +336,17 @@
 }
 
 
-.ndc {
-  left: 0;
-  right: 0;
-  top: 100%;
-  border-radius: 13px;
-  padding: 1rem 2rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  width: 50vw;
-  background: white;
-  z-index: 10;
+/* ทำให้ Dropdown Container กว้างเต็มที่และสวยงาม */
+.navbar-nav .dropdown-menu.ndc {
+    width: 80vw;
+    max-width: 1140px;
+    left: 260% !important;
+    transform: translateX(-50%);
+    padding: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid #eee;
+    margin-top: 10px;
 }
-
 .ndi {
   white-space: normal;
   break-inside: avoid;
@@ -400,27 +397,61 @@
 
 /* === CSS สำหรับเมนูย่อยบนเดสก์ท็อป (Flyout Menu) === */
 /* ไม่เปลี่ยน display ของ dropdown-menu โดยตรง */
-.dropdown-menu.ndc {
-  padding: 0;
-  border: none;
-  min-width: 400px;
-}
-
-/* ใช้ wrapper ภายในจัด layout */
+/* เปลี่ยน Wrapper ให้เป็น Grid Layout */
 .dropdown-columns-wrapper {
-  display: grid;
-  grid-template-columns: 1fr; /* แนวตั้งปกติ */
-  grid-auto-rows: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0;
+    padding: 1rem;
 }
 
-/* ถ้ามีมากกว่า 3 ให้แสดงหลายคอลัมน์ */
-.dropdown-columns-wrapper.multi-columns {
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-}
-
-/* กล่องแต่ละประเภทสินค้า */
+/* จัดสไตล์ให้แต่ละคอลัมน์ (ประเภทสินค้า) */
 .dropdown-column {
-  padding: 0.5rem 1rem;
+    padding: 0.5rem 1rem;
+    border-right: 1px solid #f0f0f0; 
+}
+.dropdown-column:last-child {
+    border-right: none;
+}
+/* === Mega Dropdown Styles === */
+
+
+/* 4. ปรับปรุงสไตล์ของรายการเมนูให้ชัดเจนขึ้น */
+
+/* ชื่อประเภทสินค้า (หัวข้อหลักของแต่ละคอลัมน์) */
+.dropdown-column > .submenu-wrapper > .d-flex > .dropdown-item {
+    font-weight: 600; /* ทำให้เป็นตัวหนา */
+    color: #f57421; /* ใช้สีหลักของเว็บ */
+    font-size: 16px;
+    padding-left: 0; /* ไม่ต้องย่อหน้า */
+}
+/* กรณีไม่มีหมวดหมู่ย่อย */
+.dropdown-column > a.dropdown-item {
+     font-weight: 600;
+     color: #333;
+     font-size: 16px;
+}
+
+
+/* เมนูย่อย (หมวดหมู่) */
+.submenu-items .dropdown-item.sub-item {
+    font-size: 14px;
+    color: #555;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    padding-left: 0.5rem; /* ย่อหน้าเล็กน้อย */
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+}
+
+.submenu-items .dropdown-item.sub-item:hover {
+    background-color: #f5f5f5;
+    color: #f57421;
+}
+
+/* ไม่ให้ dropdown ปิดเมื่อกดเปิด-ปิดเมนูย่อย */
+.dropdown-menu .collapse {
+    transition: height 0.3s ease;
 }
 
 /* ลบเส้นขอบอันสุดท้าย */
@@ -431,7 +462,7 @@
 /* submenu item (optional เพิ่มความสวยงาม) */
 .submenu-items .dropdown-item {
   padding-left: 1.5rem;
-  font-size: 0.95em;
+  font-size: 14px;
 }
 
 html.body-no-scroll,
@@ -608,15 +639,16 @@ body.body-no-scroll {
     font-weight: 500;
 }
 
-.sidebar-menu-group .fa-chevron-down {
+.sidebar-menu-group .toggle-icon {
     transition: transform 0.3s ease;
 }
-
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
 /* ทำให้ลูกศรหมุนเมื่อเมนูถูกเปิด */
-.sidebar-menu-group a[aria-expanded="true"] .fa-chevron-down {
+.sidebar-menu-group a[aria-expanded="true"] .toggle-icon{
     transform: rotate(180deg);
 }
-
 .sidebar-submenu {
     padding-left: 20px; /* ย่อหน้าเมนูย่อย */
     border-left: 2px solid #eee;

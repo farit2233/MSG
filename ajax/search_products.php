@@ -38,6 +38,10 @@ if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
     $cid = intval($_GET['cid']);
     $where_clauses[] = "product_list.category_id = {$cid}";
 }
+if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
+    $tid = intval($_GET['tid']);
+    $where_clauses[] = "product_list.category_id = {$tid}";
+}
 
 /* --- คำค้นหา (search) --- */
 if (isset($_GET['search']) && trim($_GET['search']) !== '') {
