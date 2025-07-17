@@ -391,29 +391,40 @@
 }
 
 /* === CSS สำหรับเมนูย่อยบนเดสก์ท็อป (Flyout Menu) === */
+/* ไม่เปลี่ยน display ของ dropdown-menu โดยตรง */
 .dropdown-menu.ndc {
   padding: 0;
   border: none;
-  min-width: 800px; /* หรือกำหนดความกว้างตามต้องการ */
+  min-width: 400px;
 }
 
+/* ใช้ wrapper ภายในจัด layout */
 .dropdown-columns-wrapper {
-  display: flex;
-  flex-direction: row; /* เรียงคอลัมน์แนวนอน */
+  display: grid;
+  grid-template-columns: 1fr; /* แนวตั้งปกติ */
+  grid-auto-rows: auto;
 }
 
+/* ถ้ามีมากกว่า 5 ให้แสดงหลายคอลัมน์ */
+.dropdown-columns-wrapper.multi-columns {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+/* กล่องแต่ละประเภทสินค้า */
 .dropdown-column {
-  min-width: 383px;
   padding: 0.5rem 1rem;
-  border-right: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
 }
 
+/* ลบเส้นขอบอันสุดท้าย */
 .dropdown-column:last-child {
-  border-right: none;
+  border-bottom: none;
 }
 
-.dropdown-column .dropdown-item {
-  width: 100%;
+/* submenu item (optional เพิ่มความสวยงาม) */
+.submenu-items .dropdown-item {
+  padding-left: 1.5rem;
+  font-size: 0.95em;
 }
 
 html.body-no-scroll,

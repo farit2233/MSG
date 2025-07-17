@@ -11,7 +11,7 @@
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            หมวดหมู่
+            ประเภทสินค้า
           </a>
           <div class="dropdown-menu ndc p-2" aria-labelledby="navbarDropdown">
             <div class="dropdown-columns-wrapper">
@@ -376,19 +376,26 @@
     if (typeof update_guest_cart_badge === "function") {
       update_guest_cart_badge();
     }
+
+    const wrapper = document.querySelector('.dropdown-columns-wrapper');
+    if (wrapper) {
+      const columns = wrapper.querySelectorAll('.dropdown-column');
+      if (columns.length > 5) {
+        wrapper.classList.add('multi-columns');
+      }
+    }
+
+    // ✅ ป้องกัน dropdown ปิดเมื่อคลิก submenu-toggle
     $(document).ready(function() {
-      // ป้องกัน dropdown หลักปิดเมื่อคลิก submenu-toggle
       $('.submenu-toggle').on('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-
         var target = $(this).data('target');
         if (target) {
           $(target).collapse('toggle');
         }
       });
 
-      // ป้องกัน dropdown หลักปิดถ้ามี submenu เปิดอยู่
       $('#navbarDropdown').on('hide.bs.dropdown', function(e) {
         if ($('.collapse.show').length) {
           e.preventDefault();
