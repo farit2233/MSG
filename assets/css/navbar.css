@@ -86,136 +86,118 @@
 }
  
 /* Base and Original Styles */
-  .sbr {
-    font-size: 14px;
-    border-radius: 13px;
-    max-width: 13rem;
-  }
+.sbr {
+  font-size: 14px;
+  border-radius: 13px;
+  max-width: 13rem;
+}
 
-  .fos {
-    font-size: 18px;
-  }
+.fos {
+  font-size: 18px;
+}
 
-  .fos:hover {
-    color: #ffffff;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 255, 255, 0.3);
-  }
+.fos:hover {
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 255, 255, 0.3);
+}
 
-  .icon-size,
-  .icon-acc-size {
-    font-size: 28px;
-    /* ให้เท่ากัน */
-    line-height: 1;
-  }
+.icon-size,
+.icon-acc-size {
+  font-size: 28px;
+  /* ให้เท่ากัน */
+  line-height: 1;
+}
 
-  .icon-alert {
-    cursor: pointer;
-    margin-right: 5px;
-  }
+.icon-alert {
+  cursor: pointer;
+  margin-right: 5px;
+}
 
-  .user-img {
-    height: 27px;
-    width: 27px;
-    object-fit: cover;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
+.user-img {
+  height: 27px;
+  width: 27px;
+  object-fit: cover;
+  margin-right: 8px;
+  vertical-align: middle;
+}
 
-  .user-dd:hover {
-    color: #fffa !important
-  }
+.user-dd:hover {
+  color: #fffa !important
+}
 
-  .user-img-nav {
-    width: 38px;
-    /* ปรับขนาดให้พอดีกับไอคอนอื่น */
-    height: 38px;
-    object-fit: cover;
-    border-radius: 50%;
-    vertical-align: middle;
-    /* กึ่งกลางแนวกับไอคอน */
-    display: inline-block;
-    /* ป้องกัน block-level */
-  }
+.user-img-nav {
+  width: 38px;
+  /* ปรับขนาดให้พอดีกับไอคอนอื่น */
+  height: 38px;
+  object-fit: cover;
+  border-radius: 50%;
+  vertical-align: middle;
+  /* กึ่งกลางแนวกับไอคอน */
+  display: inline-block;
+  /* ป้องกัน block-level */
+}
 
-  .user-img-mobile {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 0.6rem;
-  }
+.user-img-mobile {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 0.6rem;
+}
 
-  .user-mobile-btn {
-    text-align: left;
-    cursor: pointer;
-  }
+.user-mobile-btn {
+  text-align: left;
+  cursor: pointer;
+}
 
-  .user-name {
-    flex: 1;
-    min-width: 0;
-    overflow-wrap: break-word;
-  }
+.user-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
 
-  .user-display-name {
-    font-size: 18px;
-    font-weight: 600;
-    color: #222;
-    line-height: 1.2;
-    white-space: normal;
-  }
+.user-display-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+  line-height: 1.2;
+  white-space: normal;
+}
 
 
-  .user-dd-toggle {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    color: white;
-    padding: 0;
-    margin: 0;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    gap: 0.5rem;
-  }
-
-  .user-dd-toggle:focus {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .user-name {
-    white-space: nowrap;
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .user-dropdown-menu {
-    border-radius: 12px !important;
-    min-width: 180px;
-  }
-  .dropdown-menu.ndc {
+.user-dd-toggle {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: white;
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
   display: flex;
-  flex-direction: row; /* เรียงคอลัมน์แนวนอน */
-  padding: 0;          /* ลบ padding default */
-  border: none;        /* ลบ border default */
+  align-items: center;
+  cursor: pointer;
+  gap: 0.5rem;
 }
 
-.dropdown-column {
-  min-width: 383px;           /* กำหนดความกว้างแต่ละคอลัมน์ */
-  padding: 0.5rem 1rem;
-  border-right: 1px solid #dee2e6; /* เส้นแบ่งคอลัมน์ */
+.user-dd-toggle:focus {
+  outline: none;
+  box-shadow: none;
 }
 
-.dropdown-column:last-child {
-  border-right: none;         /* ไม่ให้เส้นคั่นคอลัมน์สุดท้าย */
+.user-name {
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.dropdown-column .dropdown-item {
-  width: 100%;                /* ให้ dropdown-item กินพื้นที่เต็มคอลัมน์ */
+.user-dropdown-menu {
+  border-radius: 12px !important;
+  min-width: 180px;
 }
+
 .navbar {
+  /* ปรับ padding ตามความสูงที่ต้องการ เช่น 1rem (16px) บน-ล่าง */
   padding-top: 5px;
   padding-bottom: 5px;
   font-size: 14px;
@@ -229,12 +211,14 @@
   width: 100%;
   z-index: 999;
   transition: top 0.3s ease-in-out;
+
 }
 
 .navbar .container-wide {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* จัดให้พื้นที่ด้านซ้ายและขวาห่างกัน */
+  justify-content: space-between;
+  /* <-- เพิ่มบรรทัดนี้เข้าไป */
   height: 100%;
   padding-left: 0;
   padding-right: 0;
@@ -246,10 +230,11 @@
 }
 
 .navbar-brand img {
-  height: 60px;
-  width: 60px;
   margin: 0;
   padding: 0;
+  height: 60px;
+  width: 60px;
+  /* หรือสูงตามต้องการ */
 }
 
 .navbar-brand,
@@ -257,410 +242,433 @@
   display: flex;
   align-items: center;
   height: 100%;
+  /* เต็มความสูงของ navbar */
 }
 
+
+/* --- Navbar Styles --- */
 .navbar-msg {
-  /* ซ้ำกับ .navbar แต่ก็ไม่มีปัญหา */
+  background: linear-gradient(135deg, #16542b 0%, #2f6828 40%, #3f7b25 60%, #f57421 95%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  /* ทำให้ Navbar อยู่ด้านบนสุดและยึดตำแหน่ง */
   position: fixed;
   top: 0;
   width: 100%;
   z-index: 999;
+  /* เพิ่ม transition เพื่อให้การซ่อน/แสดง плавный */
   transition: top 0.3s ease-in-out;
 }
 
 .navbar-hidden {
-  top: -100px; /* ซ่อน navbar โดยดันขึ้นไปนอกจอ */
+  /* ย้าย Navbar ออกไปนอกจอ (ซ่อนด้านบน) */
+  top: -100px;
+  /* ควรมากกว่าหรือเท่ากับความสูงของ Navbar */
+}
+
+.expanding-search {
+  position: relative;
+  width: 42px;
+  height: 40px;
+  background-color: #fff;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  overflow: hidden;
+  transition: width 0.4s ease;
+}
+
+.expanding-search:hover,
+.expanding-search:focus-within {
+  width: 220px;
+}
+
+.expanding-search input[type="text"] {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 42px 0 12px;
+  font-size: 14px;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+.expanding-search button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 42px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: #f57421;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.expanding-search button:hover {
+  opacity: 1;
+}
+
+.modal-content {
+  background-color: #222;
+}
+
+.form-control {
+  font-size: 1.2rem;
+}
+
+.bg-foot-msg {
+  background: #16542b !important;
 }
 
 
-  .expanding-search {
-    position: relative;
-    width: 42px;
-    height: 40px;
-    background-color: #fff;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    overflow: hidden;
-    transition: width 0.4s ease;
-  }
+.ndc {
+  left: 0;
+  right: 0;
+  top: 100%;
+  border-radius: 13px;
+  padding: 1rem 2rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  width: 50vw;
+  background: white;
+  z-index: 10;
+}
 
-  .expanding-search:hover,
-  .expanding-search:focus-within {
-    width: 220px;
-  }
+.ndi {
+  white-space: normal;
+  break-inside: avoid;
+  width: 33.33%;
+  padding: 1rem;
+}
 
-  .expanding-search input[type="text"] {
-    width: 100%;
-    height: 100%;
-    border: none;
-    outline: none;
-    background: transparent;
-    padding: 0 42px 0 12px;
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: #f57421;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+#toTopBtn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 999;
+  background-color: #f57421;
+  color: white;
+  border: none;
+  outline: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+  visibility: hidden;
+}
+
+#toTopBtn.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+#toTopBtn:hover {
+  background-color: #d85f1a;
+}
+
+/* === CSS สำหรับเมนูย่อยบนเดสก์ท็อป (Flyout Menu) === */
+.dropdown-menu.ndc {
+  padding: 0;
+  border: none;
+  min-width: 800px; /* หรือกำหนดความกว้างตามต้องการ */
+}
+
+.dropdown-columns-wrapper {
+  display: flex;
+  flex-direction: row; /* เรียงคอลัมน์แนวนอน */
+}
+
+.dropdown-column {
+  min-width: 383px;
+  padding: 0.5rem 1rem;
+  border-right: 1px solid #dee2e6;
+}
+
+.dropdown-column:last-child {
+  border-right: none;
+}
+
+.dropdown-column .dropdown-item {
+  width: 100%;
+}
+
+html.body-no-scroll,
+body.body-no-scroll {
+  overflow: hidden;
+  /* position: relative; อาจช่วยในบางกรณี */
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 311.5px;
+  background: #fff;
+  z-index: 1050;
+  transform: translateX(100%);
+  /* <-- เปลี่ยนเป็นค่าบวก */
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-sidebar.show {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  padding: 23px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #16542b 0%, #2f6828 100%);
+  color: white;
+}
+
+.sidebar-header h5 {
+  margin: 0;
+}
+
+.sidebar-close-btn {
+  font-size: 2rem;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.sidebar-body {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.sidebar-body .sidebar-search-form {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar-body .sidebar-search-form .form-control {
+  border-radius: 13px;
+}
+
+.sidebar-body .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  color: #333;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.sidebar-body .nav-link i {
+  width: 20px;
+  text-align: center;
+  color: #f57421;
+}
+
+.sidebar-body .nav-link:hover {
+  background-color: #f8f9fa;
+}
+
+.sidebar-body .dropdown-divider {
+  margin: 0.5rem 0;
+}
+
+/* ทำให้กรอบ Modal โปร่งใส ไม่มีสี ไม่มีเงา ไม่มีเส้นขอบ */
+.minimalist-search-modal {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.minimalist-search-modal .modal-body {
+  padding: 1rem;
+  position: relative;
+}
+
+
+.search-form-wrapper {
+  position: relative;
+}
+
+/* ไอคอนแว่นขยายสีขาว */
+.search-icon {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  /* <-- ไอคอนสีขาว */
+  pointer-events: none;
+}
+
+/* --- จุดสำคัญ: สไตล์ของ Input ให้เป็นแค่เส้นใต้ --- */
+.search-input {
+  background-color: transparent !important;
+  color: #fff;
+  border: none;
+  border-bottom: 2px solid #fff;
+  border-radius: 0;
+  padding: 0.5rem 0.5rem 0.5rem 35px;
+  font-size: 1.5rem;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  /* Safari/Chrome บางเวอร์ชัน */
+}
+
+/* ทำให้ placeholder เป็นสีเทาจางๆ */
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* เอาเงาเรืองแสงสีฟ้าออกตอนกดที่ช่องค้นหา */
+.search-input:focus {
+  background-color: transparent !important;
+  color: #fff !important;
+  border-color: #fff !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.modal-dialog {
+  margin-top: 190px !important;
+}
+
+
+/* === CSS สำหรับเมนูพับใน Sidebar มือถือ === */
+
+.sidebar-menu-group .nav-link {
+    font-weight: 500;
+}
+
+.sidebar-menu-group .fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+/* ทำให้ลูกศรหมุนเมื่อเมนูถูกเปิด */
+.sidebar-menu-group a[aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.sidebar-submenu {
+    padding-left: 20px; /* ย่อหน้าเมนูย่อย */
+    border-left: 2px solid #eee;
+    margin-left: 0.75rem;
+}
+
+.sidebar-submenu .nav-link {
+    font-size: 0.9rem;
+    color: #6c757d; /* สีของเมนูย่อย */
+}
+
+.sidebar-submenu .nav-link:hover {
+    color: #007bff;
+}
+
+
+@media (max-width: 1200px) {
+  .navbar-nav .nav-link {
     font-size: 14px;
-    display: inline-block;
-    box-sizing: border-box;
+    padding: 0.5rem 0.75rem;
   }
 
-  .expanding-search button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 42px;
-    height: 100%;
-    border: none;
-    background: transparent;
-    color: #f57421;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
-  }
-
-  .expanding-search button:hover {
-    opacity: 1;
-  }
-
-  .modal-content {
-    background-color: #222;
-  }
-
-  .form-control {
-    font-size: 1.2rem;
-  }
-
-  .bg-foot-msg {
-    background: #16542b !important;
-  }
-
-
-  .ndc {
-    left: 0;
-    right: 0;
-    top: 100%;
+  .sbr {
+    font-size: 14px;
     border-radius: 13px;
-    padding: 1rem 2rem;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    width: 50vw;
-    background: white;
-    z-index: 10;
+    max-width: 12rem;
   }
 
-  .ndi {
-    white-space: normal;
-    break-inside: avoid;
-    width: 33.33%;
+  .container-wide {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .dropdown-menu {
+    width: 100%;
+    min-width: unset;
+    font-size: 1rem;
+    /* เพิ่มขนาดตัวอักษร */
     padding: 1rem;
+  }
+
+  .dropdown-menu-notify {
+    display: none;
+  }
+
+  .user-dropdown-menu {
+    width: 12rem;
+    right: 0 !important;
+    left: auto !important;
+  }
+
+  .user-dropdown-wrapper {
+    margin-left: auto !important;
+  }
+
+  .icon-size {
+    font-size: 20px !important;
+    margin-top: 0.5rem !important;
+    margin-left: 4px;
+    margin-right: 0px;
   }
 
   .cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -10px;
-    background-color: #f57421;
-    color: white;
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    border-radius: 50%;
-    font-weight: bold;
+    font-size: 12px;
+    margin-left: 1rem;
+    margin-top: 0.5rem;
   }
-
-  #toTopBtn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 999;
-    background-color: #f57421;
-    color: white;
-    border: none;
-    outline: none;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: opacity 0.3s ease-in-out;
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  #toTopBtn.show {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  #toTopBtn:hover {
-    background-color: #d85f1a;
-  }
-
-  html.body-no-scroll {
-    overflow: hidden;
-  }
-
-  body.body-no-scroll {
-    overflow: hidden;
-  }
-
-  .sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1040;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-  }
-
-  .sidebar-overlay.show {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .mobile-sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 311.5px;
-    background: #fff;
-    z-index: 1050;
-    transform: translateX(100%);
-    /* <-- เปลี่ยนเป็นค่าบวก */
-    transition: transform 0.3s ease-in-out;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  }
-
-  .mobile-sidebar.show {
-    transform: translateX(0);
-  }
-
-  .sidebar-header {
-    padding: 23px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e9ecef;
-    background: linear-gradient(135deg, #16542b 0%, #2f6828 100%);
-    color: white;
-  }
-
-  .sidebar-header h5 {
-    margin: 0;
-  }
-
-  .sidebar-close-btn {
-    font-size: 2rem;
-    color: white;
-    background: none;
-    border: none;
-    cursor: pointer;
-    line-height: 1;
-  }
-
-  .sidebar-body {
-    flex-grow: 1;
-    overflow-y: auto;
-  }
-
-  .sidebar-body .sidebar-search-form {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #e9ecef;
-  }
-
-  .sidebar-body .sidebar-search-form .form-control {
-    border-radius: 13px;
-  }
-
-  .sidebar-body .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1.5rem;
-    color: #333;
-    font-size: 1rem;
-    text-decoration: none;
-    transition: background-color 0.2s;
-  }
-
-  .sidebar-body .nav-link i {
-    width: 20px;
-    text-align: center;
-    color: #f57421;
-  }
-
-  .sidebar-body .nav-link:hover {
-    background-color: #f8f9fa;
-  }
-
-  .sidebar-body .dropdown-divider {
-    margin: 0.5rem 0;
-  }
-
-  /* ทำให้กรอบ Modal โปร่งใส ไม่มีสี ไม่มีเงา ไม่มีเส้นขอบ */
-  .minimalist-search-modal {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-  }
-
-  .minimalist-search-modal .modal-body {
-    padding: 1rem;
-    position: relative;
-  }
-
-
-  .search-form-wrapper {
-    position: relative;
-  }
-
-  /* ไอคอนแว่นขยายสีขาว */
-  .search-icon {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fff;
-    /* <-- ไอคอนสีขาว */
-    pointer-events: none;
-  }
-
-  /* --- จุดสำคัญ: สไตล์ของ Input ให้เป็นแค่เส้นใต้ --- */
-  .search-input {
-    background-color: transparent !important;
-    color: #fff;
-    border: none;
-    border-bottom: 2px solid #fff;
-    border-radius: 0;
-    padding: 0.5rem 0.5rem 0.5rem 35px;
-    font-size: 1.5rem;
-    outline: none !important;
-    box-shadow: none !important;
-    -webkit-appearance: none;
-    /* Safari/Chrome บางเวอร์ชัน */
-  }
-
-  /* ทำให้ placeholder เป็นสีเทาจางๆ */
-  .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  /* เอาเงาเรืองแสงสีฟ้าออกตอนกดที่ช่องค้นหา */
-  .search-input:focus {
-    background-color: transparent !important;
-    color: #fff !important;
-    border-color: #fff !important;
-    outline: none !important;
-    box-shadow: none !important;
-  }
-
-  .modal-dialog {
-    margin-top: 190px !important;
-  }
-  /* จัดการ Layout ของแต่ละรายการใน Dropdown */
-  .submenu-wrapper {
-      border-bottom: 1px solid #eee; /* เส้นคั่นระหว่างประเภท */
-  }
-  .submenu-wrapper:last-child {
-      border-bottom: none;
-  }
-
-  /* ทำให้ dropdown-item และปุ่ม > อยู่ในบรรทัดเดียวกัน */
-  .submenu-wrapper .d-flex {
-      padding-right: 0.5rem; /* เพิ่มช่องว่างทางขวาเล็กน้อย */
-  }
-
-  /* สไตล์ของปุ่ม > */
-  .submenu-toggle {
-      color: #6c757d;
-      padding: 0.25rem 1rem; /* ขนาดพื้นที่ให้กดง่ายขึ้น */
-      text-decoration: none;
-      border-radius: 0.25rem;
-      transition: background-color 0.15s ease-in-out;
-  }
-  .submenu-toggle:hover {
-      background-color: #f8f9fa;
-      color: #000;
-  }
-
-  /* ปรับ dropdown-item ไม่ให้ชิดปุ่ม > เกินไป */
-  .submenu-wrapper a.dropdown-item.flex-grow-1 {
-      padding-right: 0.5rem;
-  }
-
-  /* สไตล์สำหรับรายการ "หมวดหมู่" (Sub-item) */
-  .submenu-items .sub-item {
-      padding-left: 2rem; /* ย่อหน้าเข้ามาเพื่อให้รู้ว่าเป็นเมนูย่อย */
-      background-color: #f8f9fa; /* ใส่สีพื้นหลังเล็กน้อยให้ดูต่าง */
-      font-size: 0.9em; /* ลดขนาดฟอนต์เล็กน้อย */
-  }
-  .submenu-items .sub-item:hover {
-      background-color: #e9ecef;
-  }
-
-  @media (max-width: 1200px) {
-    .navbar-nav .nav-link {
-      font-size: 14px;
-      padding: 0.5rem 0.75rem;
-    }
-
-    .sbr {
-      font-size: 14px;
-      border-radius: 13px;
-      max-width: 12rem;
-    }
-
-    .container-wide {
-      max-width: 100%;
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-
-    .dropdown-menu {
-      width: 100%;
-      min-width: unset;
-      font-size: 1rem;
-      /* เพิ่มขนาดตัวอักษร */
-      padding: 1rem;
-    }
-
-    .dropdown-menu-notify {
-      display: none;
-    }
-
-    .user-dropdown-menu {
-      width: 12rem;
-      right: 0 !important;
-      left: auto !important;
-    }
-
-    .user-dropdown-wrapper {
-      margin-left: auto !important;
-    }
-
-    .icon-size {
-      font-size: 20px !important;
-      margin-top: 0.5rem !important;
-      margin-left: 4px;
-      margin-right: 0px;
-    }
-
-    .cart-badge {
-      font-size: 12px;
-      margin-left: 1rem;
-      margin-top: 0.5rem;
-    }
-    
     .column {
     width: 100%;
     height: auto;
-    }
   }
+}

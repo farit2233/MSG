@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-msg navbar-shown">
+<nav class="navbar navbar-expand-lg navbar-dark navbar-msg navbar-shown">
   <div class="container container-wide px-0 px-lg-0">
 
     <a class="navbar-brand" href="./">
@@ -14,50 +14,45 @@
             หมวดหมู่
           </a>
           <div class="dropdown-menu ndc p-2" aria-labelledby="navbarDropdown">
-            <?php
-            $type_qry = $conn->query("SELECT * FROM `product_type` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
-            $counter = 0;
-            $total_types = $type_qry->num_rows;
-
-            if ($total_types > 0) echo '<div class="dropdown-column d-flex flex-wrap">';
-
-            while ($type_row = $type_qry->fetch_assoc()):
-              if ($counter > 0 && $counter % 5 == 0) echo '</div><div class="dropdown-column d-flex flex-wrap">';
-              $tid = $type_row['id'];
-              $category_qry = $conn->query("SELECT * FROM `category_list` WHERE `status` = 1 AND `delete_flag` = 0 AND `product_type_id` = {$tid} ORDER BY `date_created` ASC");
-            ?>
-              <div class="w-100 px-2">
-                <?php if ($category_qry->num_rows > 0): ?>
-                  <div class="submenu-wrapper">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <a class="dropdown-item flex-grow-1" href="<?= base_url . "?p=products&tid={$tid}" ?>"><?= $type_row['name'] ?></a>
-                      <a class="submenu-toggle" href="#" data-toggle="collapse" data-target="#collapse-cat-<?= $tid ?>" role="button" aria-expanded="false" aria-controls="collapse-cat-<?= $tid ?>">
-                        &gt;
-                      </a>
-                    </div>
-                    <div class="collapse" id="collapse-cat-<?= $tid ?>">
-                      <div class="submenu-items pl-3">
-                        <?php while ($cat_row = $category_qry->fetch_assoc()): ?>
-                          <a class="dropdown-item sub-item" href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
-                            <?= $cat_row['name'] ?>
-                          </a>
-                        <?php endwhile; ?>
+            <div class="dropdown-columns-wrapper">
+              <?php
+              $type_qry = $conn->query("SELECT * FROM `product_type` WHERE `status`=1 AND `delete_flag`=0 ORDER BY `date_created` ASC");
+              while ($type_row = $type_qry->fetch_assoc()):
+                $tid = $type_row['id'];
+                $category_qry = $conn->query("SELECT * FROM `category_list` WHERE `status`=1 AND `delete_flag`=0 AND `product_type_id`={$tid} ORDER BY `date_created` ASC");
+              ?>
+                <div class="dropdown-column">
+                  <?php if ($category_qry->num_rows > 0): ?>
+                    <div class="submenu-wrapper">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <a class="dropdown-item flex-grow-1" href="<?= base_url . "?p=products&tid={$tid}" ?>">
+                          <?= htmlspecialchars($type_row['name']) ?>
+                        </a>
+                        <a class="submenu-toggle" href="#" data-toggle="collapse" data-target="#collapse-cat-<?= $tid ?>" role="button" aria-expanded="false" aria-controls="collapse-cat-<?= $tid ?>">
+                          &gt;
+                        </a>
+                      </div>
+                      <div class="collapse" id="collapse-cat-<?= $tid ?>">
+                        <div class="submenu-items pl-3">
+                          <?php while ($cat_row = $category_qry->fetch_assoc()): ?>
+                            <a class="dropdown-item sub-item" href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
+                              <?= htmlspecialchars($cat_row['name']) ?>
+                            </a>
+                          <?php endwhile; ?>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                <?php else: ?>
-                  <a class="dropdown-item" href="<?= base_url . "?p=products&tid={$tid}" ?>"><?= $type_row['name'] ?></a>
-                <?php endif; ?>
-              </div>
-            <?php
-              $counter++;
-            endwhile;
-
-            if ($total_types > 0) echo '</div>';
-            ?>
+                  <?php else: ?>
+                    <a class="dropdown-item" href="<?= base_url . "?p=products&tid={$tid}" ?>">
+                      <?= htmlspecialchars($type_row['name']) ?>
+                    </a>
+                  <?php endif; ?>
+                </div>
+              <?php endwhile; ?>
+            </div>
           </div>
-        </li>
 
+        </li>
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li>
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
       </ul>
@@ -239,11 +234,29 @@
       <div class="dropdown-divider"></div>
       <h6 class="px-3 mt-2 mb-1 text-muted">หมวดหมู่สินค้า</h6>
       <?php
-      $category_qry_side = $conn->query("SELECT * FROM `category_list` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `name` ASC");
-      while ($row = $category_qry_side->fetch_assoc()):
+      // --- โค้ดสำหรับแสดงผลใน Sidebar ---
+      // ใช้ข้อมูล $product_structure ที่ดึงมาแล้วจากด้านบน หรือจะดึงใหม่ก็ได้
+      // ในที่นี้จะใช้ข้อมูลเดิมเพื่อประสิทธิภาพ
+      foreach ($product_structure as $type_id => $type_data):
+        if (!empty($type_data['categories'])):
       ?>
-        <a class="nav-link" href="<?= base_url . "?p=products&cid={$row['id']}" ?>"><?= $row['name'] ?></a>
-      <?php endwhile; ?>
+          <div class="sidebar-menu-group">
+            <a class="nav-link d-flex justify-content-between align-items-center" data-toggle="collapse" href="#collapse-<?= $type_id ?>" role="button" aria-expanded="false" aria-controls="collapse-<?= $type_id ?>">
+              <span><?= htmlspecialchars($type_data['name']) ?></span>
+              <i class="fas fa-chevron-down fa-xs"></i>
+            </a>
+            <div class="collapse" id="collapse-<?= $type_id ?>">
+              <div class="sidebar-submenu">
+                <?php foreach ($type_data['categories'] as $category): ?>
+                  <a class="nav-link" href="<?= base_url . "?p=products&cid={$category['id']}" ?>"><?= htmlspecialchars($category['name']) ?></a>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+      <?php
+        endif;
+      endforeach;
+      ?>
       <div class="dropdown-divider"></div>
       <a class="nav-link" href="./?p=help"><i class="fa fa-question-circle"></i> ช่วยเหลือ</a>
       <a class="nav-link" href="./?p=about"><i class="fa fa-info-circle"></i> เกี่ยวกับเรา</a>
@@ -363,5 +376,25 @@
     if (typeof update_guest_cart_badge === "function") {
       update_guest_cart_badge();
     }
+    $(document).ready(function() {
+      // ป้องกัน dropdown หลักปิดเมื่อคลิก submenu-toggle
+      $('.submenu-toggle').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var target = $(this).data('target');
+        if (target) {
+          $(target).collapse('toggle');
+        }
+      });
+
+      // ป้องกัน dropdown หลักปิดถ้ามี submenu เปิดอยู่
+      $('#navbarDropdown').on('hide.bs.dropdown', function(e) {
+        if ($('.collapse.show').length) {
+          e.preventDefault();
+        }
+      });
+    });
+
   });
 </script>
