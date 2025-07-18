@@ -245,58 +245,57 @@ while ($type_row = $type_qry->fetch_assoc()) {
       </div>
     </div>
 
+    <div class="sidebar-panels-wrapper">
+      <div class="sidebar-panel sidebar-main-panel">
+        <nav class="nav flex-column pt-3">
+          <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
+            <a class="nav-link" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-shopping-cart"></i> ตะกร้าของฉัน</a>
+            <a class="nav-link" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
+            <div class="dropdown-divider"></div>
+          <?php endif; ?>
+          <h6 class="px-3 mt-2 mb-1 text-muted">ประเภทสินค้า</h6>
+          <?php foreach ($product_structure as $type_id => $type_data): ?>
+            <?php if (!empty($type_data['categories'])): ?>
+              <a href="#" class="nav-link d-flex justify-content-between align-items-center type-item" data-type-id="<?= $type_id ?>">
+                <span><?= htmlspecialchars($type_data['name']) ?></span>
+                <i class=" fas fa-chevron-right fa-xs"></i>
+              </a>
+            <?php endif; ?>
+          <?php endforeach; ?>
 
-    <nav class="nav flex-column pt-3">
-      <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
-        <a class="nav-link" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-shopping-cart"></i> ตะกร้าของฉัน</a>
-        <a class="nav-link" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
-        <div class="dropdown-divider"></div>
-      <?php endif; ?>
-      <a class="nav-link" href="./"><i class="fa fa-home"></i> หน้าหลัก</a>
-      <a class="nav-link" href="./?p=products"><i class="fa fa-box-open"></i> สินค้าทั้งหมด</a>
-      <div class="dropdown-divider"></div>
-      <h6 class="px-3 mt-2 mb-1 text-muted">ประเภทสินค้า</h6>
-      <?php
-      // --- โค้ดสำหรับแสดงผลใน Sidebar ---
-      // ใช้ข้อมูล $product_structure ที่ดึงมาแล้วจากด้านบน หรือจะดึงใหม่ก็ได้
-      // ในที่นี้จะใช้ข้อมูลเดิมเพื่อประสิทธิภาพ
-      foreach ($product_structure as $type_id => $type_data):
-        if (!empty($type_data['categories'])):
-      ?>
-          <div class="sidebar-menu-group">
-            <a class="nav-link d-flex justify-content-between align-items-center" data-toggle="collapse" href="#collapse-<?= $type_id ?>" role="button" aria-expanded="false" aria-controls="collapse-<?= $type_id ?>">
-              <span><?= htmlspecialchars($type_data['name']) ?></span>
-              <i class="fas fa-chevron-down fa-xs"></i>
+          <div class="dropdown-divider"></div>
+          <a class="nav-link" href="./?p=help"><i class="fa fa-question-circle"></i> ช่วยเหลือ</a>
+          <a class="nav-link" href="./?p=about"><i class="fa fa-info-circle"></i> เกี่ยวกับเรา</a>
+          <a class="nav-link" href="./?p=contact"><i class="fa fa-envelope"></i> ติดต่อเรา</a>
+          <div class="dropdown-divider"></div>
+          <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
+            <a class="nav-link" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>">
+              <i class="fa fa-sign-out-alt"></i> ออกจากระบบ
             </a>
-            <div class="collapse" id="collapse-<?= $type_id ?>">
-              <div class="sidebar-submenu">
-                <?php foreach ($type_data['categories'] as $category): ?>
-                  <a class="nav-link" href="<?= base_url . "?p=products&cid={$category['id']}" ?>"><?= htmlspecialchars($category['name']) ?></a>
-                <?php endforeach; ?>
-              </div>
-            </div>
+          <?php endif; ?>
+        </nav>
+      </div>
+
+      <div class="sidebar-panel sidebar-submenu-panel">
+        <nav class="nav flex-column pt-3">
+          <a href="#" class="nav-link back-to-main-menu"><i class="fas fa-arrow-left me-2"></i> กลับไปเมนูหลัก</a>
+          <div class="dropdown-divider"></div>
+          <h6 class="px-3 mt-2 mb-1 text-muted submenu-title"></h6>
+          <div class="submenu-list">
           </div>
-      <?php
-        endif;
-      endforeach;
-      ?>
-      <div class="dropdown-divider"></div>
-      <a class="nav-link" href="./?p=help"><i class="fa fa-question-circle"></i> ช่วยเหลือ</a>
-      <a class="nav-link" href="./?p=about"><i class="fa fa-info-circle"></i> เกี่ยวกับเรา</a>
-      <a class="nav-link" href="./?p=contact"><i class="fa fa-envelope"></i> ติดต่อเรา</a>
-      <div class="dropdown-divider"></div>
-      <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
-        <a class="nav-link" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>">
-          <i class="fa fa-sign-out-alt"></i> ออกจากระบบ
-        </a>
-      <?php endif; ?>
-    </nav>
+        </nav>
+      </div>
+    </div>
   </div>
 </div>
-
+<script id="product-data-json" type="application/json">
+  <?= json_encode($product_structure); ?>
+</script>
 <button id="toTopBtn" title="กลับขึ้นบน"><i class="fas fa-chevron-up"></i></button>
 
 <script>
+  let scrollPosition = 0;
+
   function goToUserPage() {
     window.location.href = "<?= base_url . '?p=user' ?>";
   }
@@ -352,8 +351,8 @@ while ($type_row = $type_qry->fetch_assoc()) {
         mobileSidebar.classList.add('show');
         sidebarOverlay.classList.add('show');
         // เพิ่มคลาสทั้งที่ html และ body
-        document.documentElement.classList.add('body-no-scroll'); // <html>
         document.body.classList.add('body-no-scroll');
+        document.body.style.top = `-${scrollPosition}px`;
       });
     }
 
@@ -361,8 +360,9 @@ while ($type_row = $type_qry->fetch_assoc()) {
       mobileSidebar.classList.remove('show');
       sidebarOverlay.classList.remove('show');
       // ลบคลาสทั้งจาก html และ body
-      document.documentElement.classList.remove('body-no-scroll'); // <html>
       document.body.classList.remove('body-no-scroll');
+      document.body.style.top = '';
+      window.scrollTo(0, scrollPosition);
     };
 
     if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
@@ -424,6 +424,54 @@ while ($type_row = $type_qry->fetch_assoc()) {
           e.preventDefault();
         }
       });
+    });
+
+    const productData = JSON.parse(document.getElementById('product-data-json').textContent);
+
+    // 2. ดึง Element ที่เกี่ยวข้อง
+    const panelsWrapper = document.querySelector('.sidebar-panels-wrapper');
+    const typeItems = document.querySelectorAll('.type-item');
+    const backToMainMenuBtn = document.querySelector('.back-to-main-menu');
+    const submenuTitle = document.querySelector('.submenu-title');
+    const submenuList = document.querySelector('.submenu-list');
+
+    // 3. สร้าง Event Listener ให้กับทุก "ประเภทสินค้า"
+    typeItems.forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // หา ID ของประเภทที่ถูกคลิก
+        const typeId = this.dataset.typeId;
+        const typeData = productData[typeId];
+
+        if (typeData && typeData.categories) {
+          // อัปเดตชื่อหัวข้อของ Submenu
+          submenuTitle.innerHTML = `<a href="${_base_url_}?p=products&tid=${typeId}" class="text-dark font-weight-bold text-decoration-none d-block" style ="font-size : 20px">${typeData.name}</a>`;
+
+
+          // เคลียร์รายการหมวดหมู่เดิมทิ้ง
+          submenuList.innerHTML = '';
+
+          // สร้างรายการหมวดหมู่ใหม่
+          typeData.categories.forEach(category => {
+            const link = document.createElement('a');
+            link.href = `${_base_url_}?p=products&cid=${category.id}`;
+            link.className = 'nav-link';
+            link.textContent = category.name;
+            submenuList.appendChild(link);
+          });
+
+          // สั่งให้ panel สไลด์โดยการเพิ่ม class
+          panelsWrapper.classList.add('show-submenu');
+        }
+      });
+    });
+
+    // 4. สร้าง Event Listener ให้กับปุ่ม "กลับ"
+    backToMainMenuBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      // สั่งให้ panel สไลด์กลับโดยการลบ class
+      panelsWrapper.classList.remove('show-submenu');
     });
   });
 </script>

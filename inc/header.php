@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="<?php echo base_url ?>plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <!-- Ionicons -->
   <!-- <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> -->
   <!-- Tempusdominus Bootstrap 4 -->
@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/summernote/summernote-bs4.min.css">
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 
 
   <style type="text/css">
@@ -146,114 +146,6 @@
 
     footer {
       margin-top: auto;
-    }
-
-    .kanit-thin {
-      font-family: "Kanit", sans-serif;
-      font-weight: 100;
-      font-style: normal;
-    }
-
-    .kanit-extralight {
-      font-family: "Kanit", sans-serif;
-      font-weight: 200;
-      font-style: normal;
-    }
-
-    .kanit-light {
-      font-family: "Kanit", sans-serif;
-      font-weight: 300;
-      font-style: normal;
-    }
-
-    .kanit-regular {
-      font-family: "Kanit", sans-serif;
-      font-weight: 400;
-      font-style: normal;
-    }
-
-    .kanit-medium {
-      font-family: "Kanit", sans-serif;
-      font-weight: 500;
-      font-style: normal;
-    }
-
-    .kanit-semibold {
-      font-family: "Kanit", sans-serif;
-      font-weight: 600;
-      font-style: normal;
-    }
-
-    .kanit-bold {
-      font-family: "Kanit", sans-serif;
-      font-weight: 700;
-      font-style: normal;
-    }
-
-    .kanit-extrabold {
-      font-family: "Kanit", sans-serif;
-      font-weight: 800;
-      font-style: normal;
-    }
-
-    .kanit-black {
-      font-family: "Kanit", sans-serif;
-      font-weight: 900;
-      font-style: normal;
-    }
-
-    .kanit-thin-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 100;
-      font-style: italic;
-    }
-
-    .kanit-extralight-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 200;
-      font-style: italic;
-    }
-
-    .kanit-light-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 300;
-      font-style: italic;
-    }
-
-    .kanit-regular-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 400;
-      font-style: italic;
-    }
-
-    .kanit-medium-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 500;
-      font-style: italic;
-    }
-
-    .kanit-semibold-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 600;
-      font-style: italic;
-    }
-
-    .kanit-bold-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 700;
-      font-style: italic;
-    }
-
-    .kanit-extrabold-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 800;
-      font-style: italic;
-    }
-
-    .kanit-black-italic {
-      font-family: "Kanit", sans-serif;
-      font-weight: 900;
-      font-style: italic;
     }
   </style>
 

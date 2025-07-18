@@ -464,12 +464,14 @@
   font-size: 14px;
 }
 
-html.body-no-scroll,
 body.body-no-scroll {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   overflow: hidden;
-  /* position: relative; อาจช่วยในบางกรณี */
+  width: 100%;
 }
-
 .sidebar-overlay {
   position: fixed;
   top: 0;
@@ -551,7 +553,7 @@ body.body-no-scroll {
   gap: 1rem;
   padding: 0.75rem 1.5rem;
   color: #333;
-  font-size: 1rem;
+  font-size: 16px;
   text-decoration: none;
   transition: background-color 0.2s;
 }
@@ -661,6 +663,46 @@ body.body-no-scroll {
 
 .sidebar-submenu .nav-link:hover {
     color: #007bff;
+}
+.sidebar-panels-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebar-panel {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-main-panel {
+  transform: translateX(0);
+  z-index: 2;
+}
+
+.sidebar-submenu-panel {
+  transform: translateX(100%);
+  z-index: 1;
+}
+
+/* เมื่อต้องการสไลด์แสดง submenu */
+.sidebar-panels-wrapper.show-submenu .sidebar-main-panel {
+  transform: translateX(-100%);
+  z-index: 1;
+}
+
+.sidebar-panels-wrapper.show-submenu .sidebar-submenu-panel {
+  transform: translateX(0);
+  z-index: 2;
+}
+
+.back-to-main {
+  margin: 1rem 0;
 }
 
 
