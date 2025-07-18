@@ -11,7 +11,7 @@
 <?php endif; ?>
 <link rel="stylesheet" href="assets/css/navbar.css">
 
-<body>
+<body class="d-flex flex-column min-vh-100">
   <?php require_once('inc/topBarNav.php') ?>
   <?php
   // ตรวจสอบว่าเป็นการค้นหาหรือไม่

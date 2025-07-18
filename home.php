@@ -170,7 +170,7 @@
         }
     }
 </style>
-<section class="py-3">
+<section class="py-3 flex-fill">
 
     <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">

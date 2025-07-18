@@ -105,20 +105,117 @@ while ($type_row = $type_qry->fetch_assoc()) {
           </a>
         </li>
         <li class="nav-item position-relative me-2">
+          <!--alert-->
           <?php
-          $has_new_notif = false;
-          if ($_settings->userdata('id') && $_settings->userdata('login_type') == 2) {
-            $check_unseen = $conn->query("SELECT 1 FROM order_list WHERE customer_id = '{$_settings->userdata('id')}' AND is_seen = 0 LIMIT 1");
-            $has_new_notif = $check_unseen->num_rows > 0;
+          $is_logged_in = $_settings->userdata('id') && $_settings->userdata('login_type') == 2;
+          $customer_id = $_settings->userdata('id');
+
+          // เตรียม query แจ้งเตือน (หากล็อกอินแล้ว)
+          if ($is_logged_in) {
+            $notif_qry = $conn->query("
+              SELECT 
+                o.code, o.id, o.date_updated, o.payment_status, o.delivery_status,
+                
+                -- สินค้าชิ้นที่ 1
+                (SELECT p.name 
+                FROM order_items oi1 
+                INNER JOIN product_list p ON p.id = oi1.product_id 
+                WHERE oi1.order_id = o.id 
+                ORDER BY oi1.product_id ASC 
+                LIMIT 1 OFFSET 0) AS product_name,
+
+                -- สินค้าชิ้นที่ 2 (ถ้ามี)
+                (SELECT p.name 
+                FROM order_items oi2 
+                INNER JOIN product_list p ON p.id = oi2.product_id 
+                WHERE oi2.order_id = o.id 
+                ORDER BY oi2.product_id ASC 
+                LIMIT 1 OFFSET 1) AS more_product_name,
+
+                -- รูปภาพจากสินค้าชิ้นแรก
+                (SELECT p.image_path 
+                FROM order_items oi3 
+                INNER JOIN product_list p ON p.id = oi3.product_id 
+                WHERE oi3.order_id = o.id 
+                ORDER BY oi3.product_id ASC 
+                LIMIT 1 OFFSET 0) AS image_path
+
+              FROM order_list o
+              WHERE o.customer_id = '{$customer_id}'
+              ORDER BY o.date_updated DESC
+              LIMIT 5
+            ");
           }
           ?>
-          <a href="/?p=orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน">
-            <i class="fa fa-bell icon-size position-relative">
-              <?php if ($has_new_notif): ?>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-              <?php endif; ?>
-            </i>
-          </a>
+          <div class="position-relative">
+            <div class="dropdown">
+              <?php
+              // เช็กว่ามีแจ้งเตือนที่ยังไม่อ่าน
+              $has_new_notif = false;
+              if ($is_logged_in) {
+                $check_unseen = $conn->query("SELECT 1 FROM order_list WHERE customer_id = '{$customer_id}' AND is_seen = 0 LIMIT 1");
+                $has_new_notif = $check_unseen->num_rows > 0;
+              }
+              ?>
+              <a href="/?p=orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน" data-toggle="dropdown" id="notifDropdown">
+                <i class="fa fa-bell icon-size position-relative">
+                  <?php if ($has_new_notif): ?>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                    </span>
+                  <?php endif; ?>
+                </i>
+              </a>
+              <div class="dropdown-menu-notify">
+                <div class="dropdown-menu dropdown-menu-right ">
+                  <?php if (!$is_logged_in): ?>
+                    <div class="dropdown-item text-muted text-center small">
+                      กรุณาเข้าสู่ระบบเพื่อดูแจ้งเตือน
+                    </div>
+
+                  <?php elseif ($notif_qry->num_rows == 0): ?>
+                    <div class="dropdown-item text-muted text-center small">
+                      คุณยังไม่ได้สั่งสินค้า<br>
+                      <a href="./?p=products" class="text-decoration-underline">ไปสั่งซื้อเลย!</a>
+                    </div>
+
+                  <?php else: ?>
+                    <?php
+                    function get_payment_text($status)
+                    {
+                      return ['ยังไม่ชำระ', 'รอตรวจสอบ', 'ชำระแล้ว', 'ชำระล้มเหลว', 'คืนเงินแล้ว'][$status] ?? 'N/A';
+                    }
+                    function get_delivery_text($status)
+                    {
+                      return ['ตรวจสอบคำสั่งซื้อ', 'เตรียมของ', 'แพ็คของแล้ว', 'กำลังจัดส่ง', 'จัดส่งสำเร็จ', 'ส่งไม่สำเร็จ', 'คืนของระหว่างทาง', 'คืนของสำเร็จ'][$status] ?? 'N/A';
+                    }
+                    while ($notif = $notif_qry->fetch_assoc()): ?>
+
+                      <a class="dropdown-item d-flex align-items-start gap-2" href=" ./?p=orders">
+                        <div class="d-flex align-items-center gap-2">
+                          <img src="<?= validate_image($notif['image_path']) ?>" class="notif-thumb" alt="product">
+                          <div class="">
+                            <h6 class="mb-0">เลขที่คำสั่งซื้อ: <?= $notif['code'] ?></h6>
+                            <small class="text-truncate">
+                              <?= htmlentities($notif['product_name']) ?>
+                              <?php if (!empty($notif['more_product_name'])): ?>
+                                , <?= htmlentities($notif['more_product_name']) ?>
+                              <?php endif; ?>
+                            </small><br>
+                            <small class="text-muted">
+                              สถานะการชำระเงิน: <b><?= get_payment_text($notif['payment_status']) ?></b> |
+                              สถานะการจัดส่ง: <b><?= get_delivery_text($notif['delivery_status']) ?></b>
+                            </small>
+                          </div>
+                        </div>
+                      </a>
+                      <div class="dropdown-divider"></div>
+                    <?php endwhile; ?>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- end alert-->
         </li>
         <li class="nav-item dropdown">
           <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
@@ -299,6 +396,26 @@ while ($type_row = $type_qry->fetch_assoc()) {
   function goToUserPage() {
     window.location.href = "<?= base_url . '?p=user' ?>";
   }
+  $(function() {
+    $('#notifDropdown').on('click', function() {
+      $.ajax({
+        url: './ajax/mark_notifications_seen.php',
+        method: 'POST',
+        success: function(resp) {
+          console.log("Marked as seen");
+          $('.fa-bell .position-absolute').remove();
+        }
+      });
+    });
+
+    // ถ้าเป็นมือถือ → redirect ไป orders ทันที
+    document.querySelector(".notif-bell").addEventListener("click", function(e) {
+      if (window.innerWidth <= 768) {
+        e.preventDefault(); // กัน dropdown เด้ง
+        window.location.href = "./?p=orders";
+      }
+    });
+  });
   document.addEventListener('DOMContentLoaded', function() {
 
     // --- Navbar Scroll Behavior ---
@@ -348,6 +465,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     if (openSidebarBtn) {
       openSidebarBtn.addEventListener('click', () => {
+        scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
         mobileSidebar.classList.add('show');
         sidebarOverlay.classList.add('show');
         // เพิ่มคลาสทั้งที่ html และ body
