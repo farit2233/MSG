@@ -19,7 +19,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
 }
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-dark navbar-msg navbar-shown">
+<nav class="navbar navbar-expand-lg navbar-dark navbar-msg">
   <div class="container container-wide px-0 px-lg-0">
 
     <a class="navbar-brand" href="./">
@@ -253,7 +253,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
     <div class="d-flex d-lg-none align-items-center justify-content-end flex-nowrap">
       <ul class="navbar-nav flex-row align-items-center mb-0" style="gap: 0.8rem;">
         <!-- icons -->
-        <li class="nav-item d-flex d-md-none align-items-center">
+        <li class="nav-item d-flex d-none align-items-center">
           <a class="nav-link text-white p-0" href="#" data-toggle="modal" data-target="#mobileSearchModal" title="ค้นหาสินค้า">
             <i class="fas fa-search icon-size"></i>
           </a>
@@ -299,7 +299,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
 </nav>
 
 <!-- Modal ช่องค้นหา -->
-<div class="modal fade" id="mobileSearchModal" tabindex="-1" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
+<div class="modal fade" id="mobileSearchModal" tabindex="-5" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm mt-5">
     <div class="modal-content minimalist-search-modal">
       <div class="modal-body">
