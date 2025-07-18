@@ -611,7 +611,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 												<?php endif; ?>
 											</div>
 											<div class="mb-3">
-												<?php if ($slow_prepare = 1): ?>
+												<?php if ($slow_prepare == 1): ?>
 													<div class="small-text text-danger">* ขนส่งนานกว่าปกติ</div>
 												<?php endif; ?>
 											</div>

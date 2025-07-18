@@ -140,7 +140,7 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
         $page_description = $pdt_result['description'];
         $current_tid = $_GET['tid'];
         // ถ้ามี CID และพบหมวดหมู่ ให้ Breadcrumb เส้นที่ 2 เป็นลิงก์ไปยังหมวดนั้น
-        $breadcrumb_item_2_html = '<li class="breadcrumb-item"><a href="./?p=products&cid=' . $current_tid . '" class="plain-link">' . $pdt_result['name'] . '</a></li>';
+        $breadcrumb_item_2_html = '<li class="breadcrumb-item"><a href="./?p=products&tid=' . $current_tid . '" class="plain-link">' . $pdt_result['name'] . '</a></li>';
         // และอาจจะต้องมีเส้นที่ 3 เป็น active item สำหรับหน้าปัจจุบัน ถ้าเป็นหน้าหมวดหมู่ย่อย
         // แต่ในกรณีนี้คุณต้องการแสดงหน้าหมวดหมู่หลักเลย (products) ดังนั้นเส้นนี้ควร active
         $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">' . $pdt_result['name'] . '</li>';
@@ -210,6 +210,7 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
 <script>
     // เก็บค่า category ID ปัจจุบันจาก PHP เพื่อใช้ใน JavaScript
     var currentCid = "<?= $current_cid ?>";
+    var currentTid = "<?= $current_tid ?>";
 
     function sortProducts() {
         var sortBy = $('#sort_by').val(); // ดึงค่าที่เลือกจาก dropdown
@@ -225,7 +226,8 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
             method: 'GET',
             data: {
                 sort: sortBy,
-                cid: currentCid // ส่ง category ID ไปด้วย
+                cid: currentCid,
+                tid: currentTid
             },
             success: function(response) {
                 // ซ่อน loading spinner

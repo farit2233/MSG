@@ -11,12 +11,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 		// ตั้งค่าหมวดหมู่หลักแยกชัดเจน
 		$main_category_id = $category_id;
-
-		// ดึงหมวดหมู่เพิ่มเติม (product_categories)
-		$res = $conn->query("SELECT category_id FROM product_categories WHERE product_id = '{$_GET['id']}'");
-		while ($row = $res->fetch_assoc()) {
-			$selected_extra_categories[] = $row['category_id'];
-		}
 	}
 }
 
@@ -95,20 +89,7 @@ function get_platform_link($conn, $product_id, $platform)
 							<input type="text" name="brand" class="form-control" value="<?= isset($brand) ? $brand : '' ?>">
 						</div>
 					</div>
-					<div class="form-group">
-						<label>หมวดหมู่เพิ่มเติม (เฉพาะตามอายุ)</label>
-						<div class="row">
-							<?php $extra_q = $conn->query("SELECT * FROM category_list WHERE delete_flag = 0 AND status = 1 AND name LIKE 'ของเล่นหมวดหมู่%' ORDER BY name ASC");
-							while ($row = $extra_q->fetch_assoc()): ?>
-								<div class="col-md-4">
-									<div class="form-check">
-										<input type="checkbox" class="form-check-input" name="extra_categories[]" value="<?= $row['id'] ?>" <?= in_array($row['id'], $selected_extra_categories) ? 'checked' : '' ?>>
-										<label class="form-check-label"><?= $row['name'] ?></label>
-									</div>
-								</div>
-							<?php endwhile; ?>
-						</div>
-					</div>
+
 					<div class="form-group">
 						<label>รายละเอียดสินค้า</label>
 						<textarea name="description" rows="3" class="form-control"><?= isset($description) ? $description : '' ?></textarea>

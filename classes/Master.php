@@ -319,20 +319,7 @@ class Master extends DBConnection
 			return json_encode(['status' => 'failed', 'err' => $this->conn->error . " [{$sql}]"]);
 		}
 
-		// ลบหมวดหมู่เพิ่มเติมเดิม
-		$this->conn->query("DELETE FROM product_categories WHERE product_id = {$product_id}");
 
-		// เพิ่มหมวดหมู่เพิ่มเติมใหม่
-		if (!empty($_POST['extra_categories'])) {
-			foreach ($_POST['extra_categories'] as $cat_id) {
-				$cat_id = intval($cat_id);
-				$sql = "INSERT INTO product_categories (product_id, category_id) VALUES ({$product_id}, {$cat_id})";
-				$ins = $this->conn->query($sql);
-				if (!$ins) {
-					file_put_contents("insert_err_log.txt", "Error: " . $this->conn->error . "\nSQL: " . $sql . "\n", FILE_APPEND);
-				}
-			}
-		}
 
 		// Flash message
 		if ($resp['status'] == 'success' && isset($resp['msg']))

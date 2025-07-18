@@ -421,7 +421,6 @@
 /* ชื่อประเภทสินค้า (หัวข้อหลักของแต่ละคอลัมน์) */
 .dropdown-column > .submenu-wrapper > .d-flex > .dropdown-item {
     font-weight: 600; /* ทำให้เป็นตัวหนา */
-    color: #f57421; /* ใช้สีหลักของเว็บ */
     font-size: 16px;
     padding-left: 0; /* ไม่ต้องย่อหน้า */
 }

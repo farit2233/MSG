@@ -37,10 +37,10 @@ while ($type_row = $type_qry->fetch_assoc()) {
           <div class="dropdown-menu ndc p-2" aria-labelledby="navbarDropdown">
             <div class="dropdown-columns-wrapper">
               <?php
-              $type_qry = $conn->query("SELECT * FROM `product_type` WHERE `status`=1 AND `delete_flag`=0 ORDER BY `date_created` ASC");
+              $type_qry = $conn->query("SELECT * FROM `product_type` WHERE `status`=1 AND `delete_flag`=0");
               while ($type_row = $type_qry->fetch_assoc()):
                 $tid = $type_row['id'];
-                $category_qry = $conn->query("SELECT * FROM `category_list` WHERE `status`=1 AND `delete_flag`=0 AND `product_type_id`={$tid} ORDER BY `date_created` ASC");
+                $category_qry = $conn->query("SELECT * FROM `category_list` WHERE `status`=1 AND `delete_flag`=0 AND `product_type_id`={$tid} ");
               ?>
                 <div class="dropdown-column">
                   <?php if ($category_qry->num_rows > 0): ?>
@@ -65,7 +65,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
                       </div>
                     </div>
                   <?php else: ?>
-                    <a class="dropdown-item" href="<?= base_url . "?p=products&tid={$tid}" ?>">
+                    <a class="dropdown-item" href="<?= base_url . "?p=products&tid={$type_row['id']}" ?>">
                       <?= htmlspecialchars($type_row['name']) ?>
                     </a>
                   <?php endif; ?>

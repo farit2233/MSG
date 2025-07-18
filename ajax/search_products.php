@@ -31,17 +31,23 @@ if (isset($_GET['sort'])) {
 }
 
 /* ---------------- เงื่อนไข WHERE ---------------- */
-$where_clauses = ["status = 1", "delete_flag = 0"];
+$where_clauses = ["product_list.status = 1", "product_list.delete_flag = 0"];
+$join_category = "";  // เริ่มต้นยังไม่ join
+
 
 /* --- หมวดหลักเท่านั้น (ไม่มีหมวดเพิ่มเติม) --- */
 if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
     $cid = intval($_GET['cid']);
     $where_clauses[] = "product_list.category_id = {$cid}";
 }
+$join_category = "";
 if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
     $tid = intval($_GET['tid']);
-    $where_clauses[] = "product_list.category_id = {$tid}";
+    $join_category = "INNER JOIN category_list ON product_list.category_id = category_list.id";
+    $where_clauses[] = "category_list.product_type_id = {$tid}";
 }
+
+
 
 /* --- คำค้นหา (search) --- */
 if (isset($_GET['search']) && trim($_GET['search']) !== '') {
@@ -54,12 +60,13 @@ $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
 
 /* ---------------- ดึงรายการสินค้า ---------------- */
 $qry = $conn->query("
-    SELECT *,
+    SELECT product_list.*,
        (
          COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = product_list.id), 0)
        - COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = product_list.id), 0)
        ) AS available
     FROM product_list
+    {$join_category}
     {$where_sql}
     ORDER BY {$order_by}
 ");
