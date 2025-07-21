@@ -49,9 +49,20 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     <div class="card-footer py-1 text-center">
         <button class="btn btn-success btn-sm btn-flat" form="product-type-form"><i class="fa fa-save"></i> บันทึก</button>
         <a class="btn btn-danger btn-sm border btn-flat" href="./?page=product_type"><i class="fa fa-times"></i> ยกเลิก</a>
+        <a class="btn btn-secondary btn-sm border btn-flat" href="./?page=product_type"><i class="fa-solid fa-angles-left"></i> กลับ</a>
     </div>
 </div>
-
+<style>
+    .arrow-icon {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 20px solid #3498db;
+        /* สีของลูกศร */
+    }
+</style>
 
 <script>
     $(document).ready(function() {
