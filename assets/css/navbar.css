@@ -438,74 +438,6 @@
 }
 
 
-/* === CSS สำหรับเมนูย่อยบนเดสก์ท็อป (Flyout Menu) === */
-/* ไม่เปลี่ยน display ของ dropdown-menu โดยตรง */
-/* เปลี่ยน Wrapper ให้เป็น Grid Layout */
-.dropdown-columns-wrapper {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 0;
-    padding: 1rem;
-}
-
-/* จัดสไตล์ให้แต่ละคอลัมน์ (ประเภทสินค้า) */
-.dropdown-column {
-    padding: 0.5rem 1rem;
-    border-right: 1px solid #f0f0f0; 
-}
-.dropdown-column:last-child {
-    border-right: none;
-}
-/* === Mega Dropdown Styles === */
-
-
-/* 4. ปรับปรุงสไตล์ของรายการเมนูให้ชัดเจนขึ้น */
-
-/* ชื่อประเภทสินค้า (หัวข้อหลักของแต่ละคอลัมน์) */
-.dropdown-column > .submenu-wrapper > .d-flex > .dropdown-item {
-    font-weight: 600; /* ทำให้เป็นตัวหนา */
-    font-size: 16px;
-    padding-left: 0; /* ไม่ต้องย่อหน้า */
-}
-/* กรณีไม่มีหมวดหมู่ย่อย */
-.dropdown-column > a.dropdown-item {
-     font-weight: 600;
-     color: #333;
-     font-size: 16px;
-}
-
-
-/* เมนูย่อย (หมวดหมู่) */
-.submenu-items .dropdown-item.sub-item {
-    font-size: 14px;
-    color: #555;
-    padding-top: 0.4rem;
-    padding-bottom: 0.4rem;
-    padding-left: 0.5rem; /* ย่อหน้าเล็กน้อย */
-    border-radius: 4px;
-    transition: all 0.2s ease-in-out;
-}
-
-.submenu-items .dropdown-item.sub-item:hover {
-    background-color: #f5f5f5;
-    color: #f57421;
-}
-
-/* ไม่ให้ dropdown ปิดเมื่อกดเปิด-ปิดเมนูย่อย */
-.dropdown-menu .collapse {
-    transition: height 0.3s ease;
-}
-
-/* ลบเส้นขอบอันสุดท้าย */
-.dropdown-column:last-child {
-  border-bottom: none;
-}
-
-/* submenu item (optional เพิ่มความสวยงาม) */
-.submenu-items .dropdown-item {
-  padding-left: 1.5rem;
-  font-size: 14px;
-}
 
 body.body-no-scroll {
   position: fixed;
@@ -748,6 +680,48 @@ body.body-no-scroll {
   margin: 1rem 0;
 }
 
+/* --- Mega Menu (Column Style) --- */
+
+/* ทำให้ dropdown เต็มความกว้างและจัดตำแหน่งถูกต้อง */
+.dropdown-menu.megamenu {
+    padding: 1.5rem 1rem;
+    margin-top: 0; /* ลบ margin top เริ่มต้นของ dropdown */
+    border: none;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+/* สไตล์ของ ul ภายในแต่ละคอลัมน์ */
+.megamenu ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+/* สไตล์ของ li ภายในแต่ละคอลัมน์ */
+.megamenu ul li a {
+    display: block;
+    padding: 0.3rem 0.5rem;
+    color: #343a40 !important; /* สีเทาเข้ม */
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.megamenu ul li a:hover {
+    color: var(--primary); /* หรือสีหลักของเว็บคุณ */
+    background-color: #f1f1f1;
+}
+
+/* สไตล์หัวข้อของคอลัมน์ */
+.megamenu .list-header {
+    color: #212529 !important; /* สีดำ */
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.megamenu .list-header:hover {
+    color: var(--primary); /* หรือสีหลักของเว็บคุณ */
+}
 
 @media (max-width: 1200px) {
   .navbar-nav .nav-link {

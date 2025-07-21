@@ -30,50 +30,37 @@ while ($type_row = $type_qry->fetch_assoc()) {
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li>
-        <li class="nav-item dropdown">
+
+        <li class="nav-item dropdown position-static">
           <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             ประเภทสินค้า
           </a>
-          <div class="dropdown-menu ndc p-2" aria-labelledby="navbarDropdown">
-            <div class="dropdown-columns-wrapper">
-              <?php
-              $type_qry = $conn->query("SELECT * FROM `product_type` WHERE `status`=1 AND `delete_flag`=0");
-              while ($type_row = $type_qry->fetch_assoc()):
-                $tid = $type_row['id'];
-                $category_qry = $conn->query("SELECT * FROM `category_list` WHERE `status`=1 AND `delete_flag`=0 AND `product_type_id`={$tid} ");
-              ?>
-                <div class="dropdown-column">
-                  <?php if ($category_qry->num_rows > 0): ?>
-                    <div class="submenu-wrapper">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <a class="dropdown-item flex-grow-1" href="<?= base_url . "?p=products&tid={$tid}" ?>">
-                          <?= htmlspecialchars($type_row['name']) ?>
+          <div class="dropdown-menu megamenu w-100" aria-labelledby="navbarDropdown">
+            <div class="container">
+              <div class="row">
 
-                        </a>
-                        <a class="submenu-toggle collapsed" href="#" data-toggle="collapse" data-target="#collapse-cat-<?= $tid ?>" role="button" aria-expanded="false" aria-controls="collapse-cat-<?= $tid ?>">
-                          <i class="fas fa-chevron-down toggle-icon fa-xs"></i>
-                        </a>
-                      </div>
-                      <div class="collapse" id="collapse-cat-<?= $tid ?>">
-                        <div class="submenu-items pl-3">
-                          <?php while ($cat_row = $category_qry->fetch_assoc()): ?>
-                            <a class="dropdown-item sub-item" href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
-                              <?= htmlspecialchars($cat_row['name']) ?>
-                            </a>
-                          <?php endwhile; ?>
-                        </div>
-                      </div>
-                    </div>
-                  <?php else: ?>
-                    <a class="dropdown-item" href="<?= base_url . "?p=products&tid={$type_row['id']}" ?>">
-                      <?= htmlspecialchars($type_row['name']) ?>
-                    </a>
-                  <?php endif; ?>
-                </div>
-              <?php endwhile; ?>
+                <?php foreach ($product_structure as $tid => $type_data): ?>
+                  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <ul>
+                      <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
+                        <h6 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h6>
+                      </a>
+                      <hr class="mt-1 mb-2">
+
+                      <?php foreach ($type_data['categories'] as $cat_row): ?>
+                        <li>
+                          <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
+                            <?= htmlspecialchars($cat_row['name']) ?>
+                          </a>
+                        </li>
+                      <?php endforeach; ?>
+                    </ul>
+                  </div>
+                <?php endforeach; ?>
+
+              </div>
             </div>
           </div>
-
         </li>
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li>
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
@@ -513,7 +500,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
         }
       }
     }
-    // ตรวจสอบว่ามีฟังก์ชันนี้ก่อนเรียกใช้
+
     if (typeof update_guest_cart_badge === "function") {
       update_guest_cart_badge();
     }
@@ -526,7 +513,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
       }
     }
 
-    // ✅ ป้องกัน dropdown ปิดเมื่อคลิก submenu-toggle
+
     $(document).ready(function() {
       $('.submenu-toggle').on('click', function(e) {
         e.preventDefault();
