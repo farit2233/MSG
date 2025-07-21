@@ -40,23 +40,26 @@ while ($type_row = $type_qry->fetch_assoc()) {
               <div class="row">
 
                 <?php foreach ($product_structure as $tid => $type_data): ?>
-                  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                    <ul>
-                      <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
-                        <h6 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h6>
-                      </a>
-                      <hr class="mt-1 mb-2">
+                  <?php if (!empty($type_data['categories'])): ?>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                      <ul>
+                        <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
+                          <h6 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h6>
+                        </a>
+                        <hr class="mt-1 mb-2">
 
-                      <?php foreach ($type_data['categories'] as $cat_row): ?>
-                        <li>
-                          <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
-                            <?= htmlspecialchars($cat_row['name']) ?>
-                          </a>
-                        </li>
-                      <?php endforeach; ?>
-                    </ul>
-                  </div>
+                        <?php foreach ($type_data['categories'] as $cat_row): ?>
+                          <li>
+                            <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
+                              <?= htmlspecialchars($cat_row['name']) ?>
+                            </a>
+                          </li>
+                        <?php endforeach; ?>
+                      </ul>
+                    </div>
+                  <?php endif; ?>
                 <?php endforeach; ?>
+
 
               </div>
             </div>
