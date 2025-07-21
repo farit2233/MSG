@@ -20,76 +20,78 @@
 	</div>
 	<div class="card-body">
 		<div class="container-fluid">
-			<table class="table table-hover table-striped table-bordered" id="list">
-				<colgroup>
-					<col width="5%">
-					<col width="20%">
-					<col width="25%">
-					<col width="15%">
-					<col width="15%">
-					<col width="10%">
-					<col width="15%">
-				</colgroup>
-				<thead class="text-center">
-					<tr>
-						<th>ที่</th>
+			<div class="table-responsive">
+				<table class="table table-hover table-striped table-bordered" id="list">
+					<colgroup>
+						<col width="5%">
+						<col width="20%">
+						<col width="25%">
+						<col width="15%">
+						<col width="15%">
+						<col width="10%">
+						<col width="15%">
+					</colgroup>
+					<thead class="text-center">
+						<tr>
+							<th>ที่</th>
 
-						<th>ชื่อหมวดหมู่</th>
-						<th>รายละเอียดหมวดหมู่</th>
-						<th>ประเภทสินค้า</th>
-						<th>วันที่สร้าง</th>
-						<th>สถานะ</th>
-						<th>จัดการ</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$i = 1;
-					$qry = $conn->query("SELECT cl.*, pt.name as product_type_name 
+							<th>ชื่อหมวดหมู่</th>
+							<th>รายละเอียดหมวดหมู่</th>
+							<th>ประเภทสินค้า</th>
+							<th>วันที่สร้าง</th>
+							<th>สถานะ</th>
+							<th>จัดการ</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						$i = 1;
+						$qry = $conn->query("SELECT cl.*, pt.name as product_type_name 
                            FROM `category_list` cl
                            LEFT JOIN `product_type` pt ON cl.product_type_id = pt.id 
                            WHERE cl.delete_flag = 0 
                            ORDER BY cl.date_created ASC	");
-					while ($row = $qry->fetch_assoc()):
-					?>
-						<tr>
-							<td class="text-center"><?php echo $i++; ?></td>
-							<td class=""><?= $row['name'] ?></td>
-							<td>
-								<p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
-							</td>
-							<td class="text-center">
-								<?php
-								if (isset($row['product_type_name']) && $row['product_type_name'] != null) {
-									echo '<span class="">' . $row['product_type_name'] . '</span>';
-								} else {
-									echo '<span class="text-muted">-</span>';
-								}
-								?>
-							</td>
-							<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
-							<td class="text-center">
-								<?php if ($row['status'] == 1): ?>
-									<span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
-								<?php else: ?>
-									<span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>
-								<?php endif; ?>
-							</td>
-							<td class="text-center">
-								<button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
-									จัดการ
-									<span class="sr-only">Toggle Dropdown</span>
-								</button>
-								<div class="dropdown-menu" role="menu">
-									<a class="dropdown-item" href="./?page=categories/manage_category&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> แก้ไขหมวดหมู่</a>
-									<div class="dropdown-divider"></div>
-									<a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบหมวดหมู่</a>
-								</div>
-							</td>
-						</tr>
-					<?php endwhile; ?>
-				</tbody>
-			</table>
+						while ($row = $qry->fetch_assoc()):
+						?>
+							<tr>
+								<td class="text-center"><?php echo $i++; ?></td>
+								<td class=""><?= $row['name'] ?></td>
+								<td>
+									<p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
+								</td>
+								<td class="text-center">
+									<?php
+									if (isset($row['product_type_name']) && $row['product_type_name'] != null) {
+										echo '<span class="">' . $row['product_type_name'] . '</span>';
+									} else {
+										echo '<span class="text-muted">-</span>';
+									}
+									?>
+								</td>
+								<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+								<td class="text-center">
+									<?php if ($row['status'] == 1): ?>
+										<span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
+									<?php else: ?>
+										<span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>
+									<?php endif; ?>
+								</td>
+								<td class="text-center">
+									<button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+										จัดการ
+										<span class="sr-only">Toggle Dropdown</span>
+									</button>
+									<div class="dropdown-menu" role="menu">
+										<a class="dropdown-item" href="./?page=categories/manage_category&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> แก้ไขหมวดหมู่</a>
+										<div class="dropdown-divider"></div>
+										<a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบหมวดหมู่</a>
+									</div>
+								</td>
+							</tr>
+						<?php endwhile; ?>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>

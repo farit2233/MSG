@@ -14,154 +14,156 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 	</div>
 	<div class="card-body">
 		<div class="container-fluid">
-			<table class="table table-hover table-striped table-bordered" id="list">
-				<colgroup>
-					<col width="5%">
-					<col width="15%">
-					<col width="15%">
-					<col width="20%">
-					<col width="15%">
-					<col width="10%"> <!-- ชำระ -->
-					<col width="10%"> <!-- จัดส่ง -->
-					<col width="10%">
-				</colgroup>
-				<thead>
-					<tr>
-						<th class="p-1 text-center">#</th>
-						<th class="p-1 text-center">Date Ordered</th>
-						<th class="p-1 text-center">Code</th>
-						<th class="p-1 text-center">Customer</th>
-						<th class="p-1 text-center">Total Amount</th>
-						<th class="p-1 text-center">ชำระเงิน</th>
-						<th class="p-1 text-center">จัดส่ง</th>
-						<th class="p-1 text-center">ดูรายการ</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					$i = 1;
-					$where = "";
-					switch ($payment_status) {
-						case 0:
-							$where = " where o.`payment_status` = 0 ";
-							break;
-						case 1:
-							$where = " where o.`payment_status` = 1 ";
-							break;
-						case 2:
-							$where = " where o.`payment_status` = 2 ";
-							break;
-						case 3:
-							$where = " where o.`payment_status` = 3 ";
-							break;
-						case 4:
-							$where = " where o.`payment_status` = 4 ";
-							break;
-					}
-					switch ($delivery_status) {
-						case 0:
-							$where = " where o.`delivery_status` = 0 ";
-							break;
-						case 1:
-							$where = " where o.`delivery_status` = 1 ";
-							break;
-						case 2:
-							$where = " where o.`delivery_status` = 2 ";
-							break;
-						case 3:
-							$where = " where o.`delivery_status` = 3 ";
-							break;
-						case 4:
-							$where = " where o.`delivery_status` = 4 ";
-							break;
-						case 5:
-							$where = " where o.`delivery_status` = 5 ";
-							break;
-						case 6:
-							$where = " where o.`delivery_status` = 6 ";
-							break;
-						case 7:
-							$where = " where o.`delivery_status` = 7 ";
-							break;
-					}
-					$qry = $conn->query("SELECT o.*, 
+			<div class="table-responsive">
+				<table class="table table-hover table-striped table-bordered" id="list">
+					<colgroup>
+						<col width="5%">
+						<col width="15%">
+						<col width="15%">
+						<col width="20%">
+						<col width="15%">
+						<col width="10%"> <!-- ชำระ -->
+						<col width="10%"> <!-- จัดส่ง -->
+						<col width="10%">
+					</colgroup>
+					<thead>
+						<tr>
+							<th class="p-1 text-center">#</th>
+							<th class="p-1 text-center">Date Ordered</th>
+							<th class="p-1 text-center">Code</th>
+							<th class="p-1 text-center">Customer</th>
+							<th class="p-1 text-center">Total Amount</th>
+							<th class="p-1 text-center">ชำระเงิน</th>
+							<th class="p-1 text-center">จัดส่ง</th>
+							<th class="p-1 text-center">ดูรายการ</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						$i = 1;
+						$where = "";
+						switch ($payment_status) {
+							case 0:
+								$where = " where o.`payment_status` = 0 ";
+								break;
+							case 1:
+								$where = " where o.`payment_status` = 1 ";
+								break;
+							case 2:
+								$where = " where o.`payment_status` = 2 ";
+								break;
+							case 3:
+								$where = " where o.`payment_status` = 3 ";
+								break;
+							case 4:
+								$where = " where o.`payment_status` = 4 ";
+								break;
+						}
+						switch ($delivery_status) {
+							case 0:
+								$where = " where o.`delivery_status` = 0 ";
+								break;
+							case 1:
+								$where = " where o.`delivery_status` = 1 ";
+								break;
+							case 2:
+								$where = " where o.`delivery_status` = 2 ";
+								break;
+							case 3:
+								$where = " where o.`delivery_status` = 3 ";
+								break;
+							case 4:
+								$where = " where o.`delivery_status` = 4 ";
+								break;
+							case 5:
+								$where = " where o.`delivery_status` = 5 ";
+								break;
+							case 6:
+								$where = " where o.`delivery_status` = 6 ";
+								break;
+							case 7:
+								$where = " where o.`delivery_status` = 7 ";
+								break;
+						}
+						$qry = $conn->query("SELECT o.*, 
 						CONCAT(c.firstname, ' ', COALESCE(CONCAT(c.middlename, ' '), ''), c.lastname) as customer 
 					FROM `order_list` o 
 					INNER JOIN customer_list c ON o.customer_id = c.id 
 					{$where} 
 					ORDER BY abs(unix_timestamp(o.date_created)) DESC");
-					while ($row = $qry->fetch_assoc()):
-					?>
-						<tr>
-							<td class="p-1 align-middle text-center"><?= $i++ ?></td>
-							<td class="p-1 align-middle"><?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
-							<td class="p-1 align-middle"><?= $row['code'] ?></td>
-							<td class="p-1 align-middle"><?= $row['customer'] ?></td>
-							<td class="p-1 align-middle text-right"><?= format_num($row['total_amount'], 2) ?></td>
-							<td class="p-1 align-middle text-center">
-								<?php
-								switch ((int)$row['payment_status']) {
-									case 0:
-										echo '<span class="badge bg-secondary">ยังไม่ชำระเงิน</span>';
-										break;
-									case 1:
-										echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
-										break;
-									case 2:
-										echo '<span class="badge bg-success">ชำระแล้ว</span>';
-										break;
-									case 3:
-										echo '<span class="badge bg-danger">ล้มเหลว</span>';
-										break;
-									case 4:
-										echo '<span class="badge bg-dark">คืนเงินแล้ว</span>';
-										break;
-									default:
-										echo '<span class="badge bg-light">N/A</span>';
-										break;
-								}
-								?>
-							</td>
-							<td class="p-1 align-middle text-center">
-								<?php
-								switch ((int)$row['delivery_status']) {
-									case 0:
-										echo '<span class="badge bg-secondary">ตรวจสอบ</span>';
-										break;
-									case 1:
-										echo '<span class="badge bg-info">เตรียมของ</span>';
-										break;
-									case 2:
-										echo '<span class="badge bg-primary">แพ๊กของแล้ว</span>';
-										break;
-									case 3:
-										echo '<span class="badge bg-warning text-dark">กำลังส่ง</span>';
-										break;
-									case 4:
-										echo '<span class="badge bg-success">ส่งสำเร็จ</span>';
-										break;
-									case 5:
-										echo '<span class="badge bg-danger">ส่งไม่สำเร็จ</span>';
-										break;
-									case 6:
-										echo '<span class="badge bg-dark">คืนระหว่างทาง</span>';
-										break;
-									case 7:
-										echo '<span class="badge bg-secondary">คืนของแล้ว</span>';
-										break;
-									default:
-										echo '<span class="badge bg-light">N/A</span>';
-										break;
-								}
-								?>
-							</td>
-							<td class="p-1 align-middle text-center">
-								<a class="btn btn-flat btn-sm btn-light border-gradient-light border view-order" href="./?page=orders/view_order&id=<?= $row['id'] ?>"><i class="fa fa-eye text-dark"></i> View</a>
-							</td>
-						</tr>
-					<?php endwhile; ?>
-				</tbody>
-			</table>
+						while ($row = $qry->fetch_assoc()):
+						?>
+							<tr>
+								<td class="p-1 align-middle text-center"><?= $i++ ?></td>
+								<td class="p-1 align-middle"><?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+								<td class="p-1 align-middle"><?= $row['code'] ?></td>
+								<td class="p-1 align-middle"><?= $row['customer'] ?></td>
+								<td class="p-1 align-middle text-right"><?= format_num($row['total_amount'], 2) ?></td>
+								<td class="p-1 align-middle text-center">
+									<?php
+									switch ((int)$row['payment_status']) {
+										case 0:
+											echo '<span class="badge bg-secondary">ยังไม่ชำระเงิน</span>';
+											break;
+										case 1:
+											echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
+											break;
+										case 2:
+											echo '<span class="badge bg-success">ชำระแล้ว</span>';
+											break;
+										case 3:
+											echo '<span class="badge bg-danger">ล้มเหลว</span>';
+											break;
+										case 4:
+											echo '<span class="badge bg-dark">คืนเงินแล้ว</span>';
+											break;
+										default:
+											echo '<span class="badge bg-light">N/A</span>';
+											break;
+									}
+									?>
+								</td>
+								<td class="p-1 align-middle text-center">
+									<?php
+									switch ((int)$row['delivery_status']) {
+										case 0:
+											echo '<span class="badge bg-secondary">ตรวจสอบ</span>';
+											break;
+										case 1:
+											echo '<span class="badge bg-info">เตรียมของ</span>';
+											break;
+										case 2:
+											echo '<span class="badge bg-primary">แพ๊กของแล้ว</span>';
+											break;
+										case 3:
+											echo '<span class="badge bg-warning text-dark">กำลังส่ง</span>';
+											break;
+										case 4:
+											echo '<span class="badge bg-success">ส่งสำเร็จ</span>';
+											break;
+										case 5:
+											echo '<span class="badge bg-danger">ส่งไม่สำเร็จ</span>';
+											break;
+										case 6:
+											echo '<span class="badge bg-dark">คืนระหว่างทาง</span>';
+											break;
+										case 7:
+											echo '<span class="badge bg-secondary">คืนของแล้ว</span>';
+											break;
+										default:
+											echo '<span class="badge bg-light">N/A</span>';
+											break;
+									}
+									?>
+								</td>
+								<td class="p-1 align-middle text-center">
+									<a class="btn btn-flat btn-sm btn-light border-gradient-light border view-order" href="./?page=orders/view_order&id=<?= $row['id'] ?>"><i class="fa fa-eye text-dark"></i> View</a>
+								</td>
+							</tr>
+						<?php endwhile; ?>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>
