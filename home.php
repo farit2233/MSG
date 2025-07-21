@@ -1,177 +1,4 @@
-<style>
-    /*.carousel-item>img{
-        object-fit:cover !important;
-    }*/
-    .carousel {
-        width: 100% !important;
-        overflow: hidden !important;
-        right: 0 !important;
-    }
-
-    .carousel-inner {
-        aspect-ratio: 1920 / 600;
-        /* หรือ 3.2 */
-    }
-
-    .carousel-item {
-        height: 100%;
-    }
-
-    .carousel-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /*#carouselExampleControls .carousel-inner{
-        height:35em !important;
-    }*/
-    .product-img-holder {
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        /* ทำให้กล่องภาพเป็นจัตุรัส */
-        overflow: hidden;
-        background: #f5f5f5;
-        position: relative;
-    }
-
-    .product-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center center;
-        transition: all .3s ease-in-out;
-    }
-
-    .product-item:hover .product-img {
-        transform: scale(1.1)
-    }
-
-    .bg-gradient-dark-FIXX {
-        background-color: #202020;
-    }
-
-    .banner-wrapper {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-        /* ครอบคลุมทั้งจอ */
-        display: block;
-    }
-
-    .banner-wrapper img {
-        width: 100%;
-        /* เต็มความกว้าง */
-        height: auto;
-        /* รักษาสัดส่วนภาพ */
-        display: block;
-        object-fit: cover;
-        /* หรือ contain แล้วแต่ภาพ */
-    }
-
-    .baby-font {
-        color: white;
-        font-weight: bold;
-        font-size: 20px;
-    }
-
-    .card-title {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        /* จำนวนบรรทัด */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .btn-bb02 {
-        background-color: #fc573b;
-        border: none;
-        color: white;
-        padding: 16px 32px;
-        text-align: center;
-        margin: 4px 2px;
-        transition: 0.3s;
-        display: inline-block;
-        text-decoration: none;
-        cursor: pointer;
-        filter: brightness(100%);
-        transition: all 0.2s ease-in-out;
-    }
-
-    .btn-bb34 {
-        background-color: #be63f9;
-        border: none;
-        color: white;
-        padding: 16px 32px;
-        text-align: center;
-        margin: 4px 2px;
-        transition: 0.3s;
-        display: inline-block;
-        text-decoration: none;
-        cursor: pointer;
-        filter: brightness(100%);
-        transition: all 0.2s ease-in-out;
-    }
-
-    .btn-bb56 {
-        background-color: #ffd200;
-        border: none;
-        color: white;
-        padding: 16px 32px;
-        text-align: center;
-        margin: 4px 2px;
-        transition: 0.3s;
-        display: inline-block;
-        text-decoration: none;
-        cursor: pointer;
-        filter: brightness(100%);
-        transition: all 0.2s ease-in-out;
-    }
-
-    .btn-bb02,
-    .btn-bb34,
-    .btn-bb56 {
-        border-radius: 13px;
-    }
-
-    .btn-bb02:hover,
-    .btn-bb34:hover,
-    .btn-bb56:hover,
-    .btn-product:hover {
-        color: white;
-        filter: brightness(90%);
-    }
-
-    .btn-product {
-        font-size: 20px;
-        color: white;
-        background-color: #f57421;
-        padding: 10px 100px;
-        margin: 1rem;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .banner-price {
-        font-size: 20px;
-        color: #f57421;
-    }
-
-    .badge-sm {
-        font-size: 12px;
-        /* ลดขนาดฟอนต์ */
-        padding: 4px 5px;
-        /* ปรับ padding */
-        background-color: #f79c60;
-    }
-
-    @media only screen and (max-width: 768px) {
-        .btn-product {
-            padding: 10px 80px;
-        }
-    }
-</style>
 <section class="py-3 flex-fill">
-
     <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
             <a href="?p=products">
@@ -208,30 +35,81 @@
         </a>
     </div>
 
-    <div class="container">
-        <div class="container py-5">
-            <h2 class="text-center mb-4"> ของเล่นหมวดหมู่ <span class="text-primary">ตามอายุ</span></h2>
-            <p class="text-center mb-5">"เลือกของเล่นที่ใช่ ตามวัยของลูก"</p>
+    <div class="container py-5">
+        <h2 class="text-center mb-4">ประเภทสินค้า</h2>
+        <p class="text-center mb-5">เลือกหมวดหมู่สินค้าที่คุณสนใจ สำหรับเจ้าตัวเล็กและคุณพ่อคุณแม่</p>
 
-            <div class="row text-center justify-content-center">
-                <div class="col-6 col-md-2  mb-4">
-                    <a href="?p=products&cid=1">
-                        <img src="./uploads/icon/baby0-12.png" alt="0 – 2 ปี" class="img-fluid mb-2">
-                        <button type="button" class="btn baby-font btn-bb02">0 – 2 ปี</button>
-                    </a>
-                </div>
-                <div class="col-6 col-md-2 mb-4">
-                    <a href="?p=products&cid=2">
-                        <img src="./uploads/icon/baby3-4.png" alt="3 – 4 ปี" class="img-fluid mb-2">
-                        <button type="button" class="btn baby-font btn-bb34">3 – 4 ปี</button>
-                    </a>
-                </div>
-                <div class="col-6 col-md-2 mb-4">
-                    <a href="?p=products&cid=3">
-                        <img src="./uploads/icon/baby5-6.png" alt="5 – 6 ปี" class="img-fluid mb-2">
-                        <button type="button" class="btn baby-font btn-bb56">5 – 6 ปี</button>
-                    </a>
-                </div>
+        <div class="row gx-3 gy-4 justify-content-center">
+            <!-- การ์ดที่ 1 -->
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <a href="?p=products&tid=1" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 text-center h-100 hover-card">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="fa-solid fa-puzzle-piece fa-2x mb-2 text-primary"></i>
+                            <h6 class="mb-0">เครื่องเล่น</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- การ์ดที่ 2 -->
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <a href="?p=products&tid=2" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 text-center h-100 hover-card">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="fa-solid fa-gamepad fa-2x mb-2 text-danger"></i>
+                            <h6 class="mb-0">ของเล่น</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- การ์ดที่ 3 -->
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <a href="?p=products&tid=3" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 text-center h-100 hover-card">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="fa-solid fa-book fa-2x mb-2 text-success"></i>
+                            <h6 class="mb-0">หนังสือ</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- การ์ดที่ 4 -->
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <a href="?p=products&tid=4" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 text-center h-100 hover-card">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="fa-solid fa-film fa-2x mb-2 text-warning"></i>
+                            <h6 class="mb-0">สื่อ</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- การ์ดที่ 5 -->
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <a href="?p=products&tid=5" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 text-center h-100 hover-card">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="fa-solid fa-clipboard-check fa-2x mb-2 text-info"></i>
+                            <h6 class="mb-0">ชุดประเมิน</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- การ์ดที่ 6 -->
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <a href="?p=products&tid=6" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 text-center h-100 hover-card">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="fa-solid fa-ellipsis fa-2x mb-2 text-secondary"></i>
+                            <h6 class="mb-0">อื่น ๆ</h6>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
@@ -310,8 +188,100 @@
                             <?php endwhile; ?>
                         </div>
                     </div>
-                    <div class="text-center py-1">
-                        <a href="./?p=products" class="btn btn-product rounded-pill">ดูสินค้าอื่น ๆ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container py-4 text-center">
+        <div class="position-relative d-inline-block">
+            <span class="text-muted px-3 bg-white position-relative z-1" style="font-weight: 500;">
+                หรือดูสินค้าทั้งหมด
+            </span>
+            <div class="position-absolute top-50 start-0 w-100 translate-middle-y" style="height: 1px; background: #ccc; z-index: 0;"></div>
+        </div>
+
+        <div class="pt-3">
+            <a href="./?p=products" class="btn btn-product rounded-pill">
+                ดูสินค้าอื่น ๆ คลิก <span class="arrow-move">&raquo;</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row mt-n3 justify-content-center">
+            <div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
+                <div class="card card-outline rounded-0">
+                    <div class="card-body">
+                        <h1 align="center">สินค้าใหม่</h1>
+                        <div class="row gy-3 gx-3">
+                            <?php
+                            if (!function_exists('format_price_custom')) {
+                                function format_price_custom($price)
+                                {
+                                    $formatted_price = format_num($price, 2);
+                                    if (substr($formatted_price, -3) == '.00') {
+                                        return format_num($price, 0);
+                                    }
+                                    return $formatted_price;
+                                }
+                            }
+
+                            $qry = $conn->query("
+                                SELECT *, 
+                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                    COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+                                FROM `product_list` 
+                                WHERE 
+                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                    COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
+                                ORDER BY 
+                                    `date_created` DESC 
+                                LIMIT 4
+                            ");
+                            while ($row = $qry->fetch_assoc()):
+                            ?>
+                                <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
+
+                                    <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
+                                        <div class="position-relative">
+                                            <div class="img-top position-relative product-img-holder">
+                                                <div class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 small" style="z-index: 1;">
+                                                    ใหม่
+                                                </div>
+                                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div style="line-height:1.5em">
+                                                <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
+                                                <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
+                                                    <div class="w-100">
+                                                        <small class="text-muted" style="line-height: 1.25em; display: block;">
+                                                            <?= $row['brand'] ?>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-end align-items-center">
+                                                    <?php if (!is_null($row['discounted_price']) && $row['discounted_price'] < $row['price']): ?>
+                                                        <?php
+                                                        // คำนวณส่วนลด
+                                                        $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
+                                                        ?>
+
+                                                        <span class="banner-price fw-bold me-2"><?= format_price_custom($row['discounted_price'], 2) ?> ฿</span>
+                                                        <span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
+
+                                                    <?php else: ?>
+                                                        <span class="banner-price"><?= format_price_custom($row['price'], 2) ?> ฿</span>
+                                                    <?php endif; ?>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            <?php endwhile; ?>
+                        </div>
                     </div>
                 </div>
             </div>

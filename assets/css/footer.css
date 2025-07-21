@@ -1,0 +1,21 @@
+    footer a {
+      text-decoration: none;
+      /* ซ่อนเส้นใต้โดยค่าเริ่มต้น */
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+      /* แสดงเส้นใต้เมื่อเมาส์ชี้ */
+    }
+
+    .btn-login {
+      background: #f57421;
+      color: white;
+      padding: 5px 85px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .btn-login:hover {
+      color: white;
+      filter: brightness(90%);
+    }

@@ -10,6 +10,8 @@
   </script>
 <?php endif; ?>
 <link rel="stylesheet" href="assets/css/navbar.css">
+<link rel="stylesheet" href="assets/css/home.css">
+<link rel="stylesheet" href="assets/css/footer.css">
 
 <body class="d-flex flex-column min-vh-100">
   <?php require_once('inc/topBarNav.php') ?>

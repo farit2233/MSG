@@ -58,29 +58,6 @@
       }
     })
   </script>
-  <style>
-    footer a {
-      text-decoration: none;
-      /* ซ่อนเส้นใต้โดยค่าเริ่มต้น */
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-      /* แสดงเส้นใต้เมื่อเมาส์ชี้ */
-    }
-
-    .btn-login {
-      background: #f57421;
-      color: white;
-      padding: 5px 85px;
-      transition: all 0.2s ease-in-out;
-    }
-
-    .btn-login:hover {
-      color: white;
-      filter: brightness(90%);
-    }
-  </style>
   <!-- Footer-->
   <?php if ($_settings->userdata('id') == '' && $_settings->userdata('login_type') != 2): ?>
     <hr class="my-4" style="border-top: 1px solid #ccc; margin: 2rem 0;">
