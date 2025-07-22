@@ -13,9 +13,9 @@
 </style>
 <div class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
-		<h3 class="card-title">List of Users</h3>
+		<h3 class="card-title text-bold">รายชื่อบัญชีสมาชิก</h3>
 		<div class="card-tools">
-			<a href="./?page=user/manage_user" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> Create New</a>
+			<a href="./?page=user/manage_user" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> สร้างบัญชีสมาชิกใหม่</a>
 		</div>
 	</div>
 	<div class="card-body">
@@ -25,21 +25,21 @@
 					<colgroup>
 						<col width="5%">
 						<col width="15%">
+						<col width="20%">
+						<col width="20%">
 						<col width="15%">
-						<col width="25%">
 						<col width="15%">
 						<col width="10%">
-						<col width="15%">
 					</colgroup>
 					<thead>
 						<tr>
-							<th>#</th>
-							<th>Date Updated</th>
-							<th>Avatar</th>
-							<th>Name</th>
-							<th>Username</th>
-							<th>Type</th>
-							<th>Action</th>
+							<th class="text-center">ที่</th>
+							<th class="text-center">รูปโปรไฟล์</th>
+							<th class="text-center">ชื่อ</th>
+							<th class="text-center">Username</th>
+							<th class="text-center">ประเภท</th>
+							<th class="text-center">วันที่สร้าง</th>
+							<th class="text-center">จัดการ</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -50,7 +50,6 @@
 						?>
 							<tr>
 								<td class="text-center"><?php echo $i++; ?></td>
-								<td><?php echo date("Y-m-d H:i", strtotime($row['date_updated'])) ?></td>
 								<td class="text-center">
 									<img src="<?= validate_image($row['avatar']) ?>" alt="" class="img-thumbnail rounded-circle user-avatar">
 								</td>
@@ -65,15 +64,16 @@
 										N/A
 									<?php endif; ?>
 								</td>
-								<td align="center">
+								<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_updated'])) ?></td>
+								<td class="text-center">
 									<button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
-										Action
+										จัดการ
 										<span class="sr-only">Toggle Dropdown</span>
 									</button>
 									<div class="dropdown-menu" role="menu">
-										<a class="dropdown-item" href="./?page=user/manage_user&id=<?= $row['id'] ?>"><span class="fa fa-edit text-dark"></span> Edit</a>
+										<a class="dropdown-item" href="./?page=user/manage_user&id=<?= $row['id'] ?>"><span class="fa fa-edit text-dark"></span> แก้ไข</a>
 										<div class="dropdown-divider"></div>
-										<a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> Delete</a>
+										<a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบ</a>
 									</div>
 								</td>
 							</tr>
