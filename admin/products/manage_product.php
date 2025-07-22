@@ -39,7 +39,7 @@ function get_platform_link($conn, $product_id, $platform)
 		/* จัดกึ่งกลางแนวนอน */
 	}
 </style>
-<div class="card card-outline card-primary rounded-0">
+<div class="card card-outline card-orange rounded-0">
 	<div class="card-header">
 		<h1 class="card-title"><?= isset($id) ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'; ?></h1>
 	</div>
@@ -281,13 +281,13 @@ function get_platform_link($conn, $product_id, $platform)
 					</div>
 				</div>
 			</div>
+		</div>
+		<div class="card-footer py-1 text-center">
+			<button class="btn btn-success btn-sm btn-flat" form="product-form"><i class="fa fa-save"></i> บันทึก</button>
+			<a class="btn btn-danger btn-sm border btn-flat" href="./?page=products"><i class="fa fa-times"></i> ยกเลิก</a>
+			<a class="btn btn-light btn-sm border btn-flat" href="./?page=products"><i class="fa fa-angle-left"></i> กลับ</a>
+		</div>
 	</form>
-
-</div>
-<div class="card-footer py-1 text-center">
-	<button class="btn btn-success btn-sm btn-flat" form="product-form"><i class="fa fa-save"></i> บันทึก</button>
-	<a class="btn btn-danger btn-sm border btn-flat" href="./?page=products"><i class="fa fa-times"></i> ยกเลิก</a>
-	<a class="btn btn-light btn-sm border btn-flat" href="./?page=products"><i class="fa fa-angle-left"></i> กลับ</a>
 </div>
 
 

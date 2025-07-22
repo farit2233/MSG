@@ -12,7 +12,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 	}
 }
 ?>
-<div class="card card-outline card-primary rounded-0">
+<div class="card card-outline card-orange rounded-0">
 	<div class="card-header">
 		<h1 class="card-title"><?= isset($id) ? "แก้ไขหมวดหมู่" : "สร้างหมวดหมู่ใหม่" ?></h1>
 	</div>

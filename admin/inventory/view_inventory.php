@@ -30,7 +30,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 		object-position: center center;
 	}
 </style>
-<div class="card card-outline card-primary rounded-0">
+<div class="card card-outline card-orange rounded-0">
 	<div class="card-header">
 		<h1 class="card-title text-bold">รายละเอียดสต๊อกสินค้า</h1>
 	</div>
