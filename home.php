@@ -202,7 +202,7 @@
 
         <div class="pt-3">
             <a href="./?p=products" class="btn btn-product rounded-pill">
-                ดูสินค้าอื่น ๆ คลิก <span class="arrow-move">&raquo;</span>
+                ดูสินค้าอื่น ๆ คลิก <span class="arrow-move"><i class="fa-solid fa-angles-right"></i></span>
             </a>
         </div>
     </div>
