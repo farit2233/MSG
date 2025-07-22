@@ -10,7 +10,7 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 ?>
 <div class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
-		<h3 class="card-title">List of <?= isset($stat_arr[$payment_status]) ? $stat_arr[$payment_status] : 'All Orders' ?></h3>
+		<h3 class="card-title">รายการคำสั่งซื้อ <?= isset($stat_arr[$payment_status]) ? $stat_arr[$payment_status] : 'ทั้งหมด' ?></h3>
 	</div>
 	<div class="card-body">
 		<div class="container-fluid">
@@ -19,23 +19,23 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 					<colgroup>
 						<col width="5%">
 						<col width="15%">
-						<col width="15%">
 						<col width="20%">
 						<col width="15%">
-						<col width="10%"> <!-- ชำระ -->
-						<col width="10%"> <!-- จัดส่ง -->
+						<col width="15%">
+						<col width="10%">
+						<col width="10%">
 						<col width="10%">
 					</colgroup>
 					<thead>
 						<tr>
-							<th class="p-1 text-center">#</th>
-							<th class="p-1 text-center">Date Ordered</th>
-							<th class="p-1 text-center">Code</th>
-							<th class="p-1 text-center">Customer</th>
-							<th class="p-1 text-center">Total Amount</th>
-							<th class="p-1 text-center">ชำระเงิน</th>
-							<th class="p-1 text-center">จัดส่ง</th>
-							<th class="p-1 text-center">ดูรายการ</th>
+							<th class="p-1 text-center">ที่</th>
+							<th class="p-1 text-center">รหัสคำสั่งซื้อ</th>
+							<th class="p-1 text-center">ชื่อผู้สั่ง</th>
+							<th class="p-1 text-center">ราคารวม</th>
+							<th class="p-1 text-center">วันที่</th>
+							<th class="p-1 text-center">สถานะชำระเงิน</th>
+							<th class="p-1 text-center">การจัดส่ง</th>
+							<th class="p-1 text-center">จัดการคำสั่งซื้อ</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -95,10 +95,11 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 						?>
 							<tr>
 								<td class="p-1 align-middle text-center"><?= $i++ ?></td>
-								<td class="p-1 align-middle"><?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
-								<td class="p-1 align-middle"><?= $row['code'] ?></td>
+
+								<td class="p-1 align-middle text-center"><?= $row['code'] ?></td>
 								<td class="p-1 align-middle"><?= $row['customer'] ?></td>
-								<td class="p-1 align-middle text-right"><?= format_num($row['total_amount'], 2) ?></td>
+								<td class="p-1 align-middle text-center"><?= format_num($row['total_amount'], 2) ?></td>
+								<td class="p-1 align-middle text-center"><?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 								<td class="p-1 align-middle text-center">
 									<?php
 									switch ((int)$row['payment_status']) {
@@ -157,7 +158,7 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 									?>
 								</td>
 								<td class="p-1 align-middle text-center">
-									<a class="btn btn-flat btn-sm btn-light border-gradient-light border view-order" href="./?page=orders/view_order&id=<?= $row['id'] ?>"><i class="fa fa-eye text-dark"></i> View</a>
+									<a class="btn btn-flat btn-sm btn-light border-gradient-light border view-order" href="./?page=orders/view_order&id=<?= $row['id'] ?>"><i class="fa fa-edit text-dark"></i> จัดการ</a>
 								</td>
 							</tr>
 						<?php endwhile; ?>

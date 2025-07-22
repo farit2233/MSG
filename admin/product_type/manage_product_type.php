@@ -49,7 +49,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     <div class="card-footer py-1 text-center">
         <button class="btn btn-success btn-sm btn-flat" form="product-type-form"><i class="fa fa-save"></i> บันทึก</button>
         <a class="btn btn-danger btn-sm border btn-flat" href="./?page=product_type"><i class="fa fa-times"></i> ยกเลิก</a>
-        <a class="btn btn-light btn-sm border btn-flat" href="./?page=product_type"><i class="fa-solid fa-angles-left"></i> กลับ</a>
+        <a class="btn btn-light btn-sm border btn-flat" href="./?page=product_type"><i class="fa fa-angle-left"></i> กลับ</a>
     </div>
 </div>
 <style>

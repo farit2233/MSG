@@ -129,7 +129,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 				</div>
 				<div class="card-footer py-1 text-center">
 					<button class="btn btn-dark btn-sm rounded-0" type="button" id="new_entry"><i class="fa fa-plus-square"></i> เพิ่มสต๊อกสินค้าใหม่</button>
-					<a class="btn btn-light btn-sm border rounded-0" href="./?page=inventory"><i class="fa-solid fa-angles-left"></i> กลับ</a>
+					<a class="btn btn-light btn-sm border rounded-0" href="./?page=inventory"><i class="fa fa-angle-left"></i> กลับ</a>
 				</div>
 			</div>
 		</div>
