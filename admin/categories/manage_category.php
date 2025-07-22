@@ -1,5 +1,4 @@
 <?php
-// --- ดึงข้อมูลประเภทสินค้ามาเตรียมไว้ ---
 $product_types_result = $conn->query("SELECT id, name FROM `product_type` WHERE status = 1 AND delete_flag = 0 ORDER BY name ASC");
 
 
@@ -36,17 +35,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 					<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
 						<label for="product_type_id" class="control-label">เลือกประเภทสินค้า</label>
 						<?php
-						// สมมติว่านี่คือโค้ดเดิมที่ใช้ดึงข้อมูลประเภทสินค้า
-						// $product_types_result = $conn->query("SELECT id, name FROM product_type WHERE status = 1");
-
-						// ให้คุณเพิ่ม 'ORDER BY id ASC' ต่อท้ายเข้าไปใน query ดังนี้
 						$product_types_result = $conn->query("SELECT id, name FROM product_type WHERE status = 1 ORDER BY id ASC");
 						?>
 
 						<select name="product_type_id" id="product_type_id" class="form-control form-control-sm rounded-0" required>
 							<option value="" disabled <?= !isset($product_type_id) ? 'selected' : '' ?>>-- กรุณาเลือก --</option>
 							<?php
-							// วนลูปสร้าง <option> จากข้อมูลที่ดึงมา ซึ่งตอนนี้เรียงตาม id แล้ว
 							while ($pt_row = $product_types_result->fetch_assoc()) :
 							?>
 								<option value="<?= $pt_row['id'] ?>" <?= (isset($product_type_id) && $product_type_id == $pt_row['id']) ? 'selected' : '' ?>>
@@ -74,13 +68,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 	<div class="card-footer py-1 text-center">
 		<button class="btn btn-success btn-sm btn-flat" form="category-form"><i class="fa fa-save"></i> บันทึก</button>
 		<a class="btn btn-danger btn-sm border btn-flat" href="./?page=categories"><i class="fa fa-times"></i> ยกเลิก</a>
+		<a class="btn btn-light btn-sm border btn-flat" href="./?page=categories"><i class="fa-solid fa-angles-left"></i> กลับ</a>
 	</div>
 </div>
 
 <script>
 	$(document).ready(function() {
-		// ไม่ต้องแก้ไขส่วนของ script นี้เลย
-		// FormData จะรวบรวมข้อมูลจากฟอร์มทั้งหมด (รวมถึง product_type_id) ไปให้เอง
 		$('#category-form').submit(function(e) {
 			e.preventDefault();
 			var _this = $(this)

@@ -13,7 +13,7 @@
 </style>
 <div class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
-		<h3 class="card-title">Inventory</h3>
+		<h3 class="card-title text-bold">สต๊อกสินค้า</h3>
 	</div>
 	<div class="card-body">
 		<div class="container-fluid">
@@ -21,22 +21,22 @@
 				<table class="table table-hover table-striped table-bordered" id="list">
 					<colgroup>
 						<col width="5%">
-						<col width="20%">
 						<col width="10%">
 						<col width="20%">
-						<col width="20%">
+						<col width="30%">
+						<col width="10%">
 						<col width="15%">
 						<col width="10%">
 					</colgroup>
-					<thead>
+					<thead class="text-center">
 						<tr>
-							<th>#</th>
-							<th>Date Created</th>
-							<th>Image</th>
-							<th>Brand</th>
-							<th>Name</th>
-							<th>Available</th>
-							<th>Action</th>
+							<th>ที่</th>
+							<th>รูปภาพสินค้า</th>
+							<th>แบรนด์</th>
+							<th>ชื่อสินค้า</th>
+							<th>มีอยู่ (ชิ้น)</th>
+							<th>วันที่สร้าง</th>
+							<th>จัดการ</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -47,7 +47,7 @@
 						?>
 							<tr>
 								<td class="text-center"><?php echo $i++; ?></td>
-								<td><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+
 								<td class="text-center">
 									<img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
 								</td>
@@ -58,9 +58,10 @@
 										<div><small class="text-muted"><?= $row['dose'] ?></small></div>
 									</div>
 								</td>
-								<td class="text-right"><?= format_num($row['available'], 0) ?></td>
-								<td align="center">
-									<a class="btn btn-sm btn-flat btn-light bg-gradient-light border" href="./?page=inventory/view_inventory&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> View</a>
+								<td class="text-center"><?= format_num($row['available'], 0) ?></td>
+								<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+								<td class="text-center">
+									<a class="btn btn-sm btn-flat btn-light bg-gradient-light border" href="./?page=inventory/view_inventory&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-dark"></span> แก้ไขสต๊อก</a>
 								</td>
 							</tr>
 						<?php endwhile; ?>
@@ -78,7 +79,21 @@
 				orderable: false,
 				targets: [2, 6]
 			}],
-			order: [0, 'asc']
+			order: [0, 'asc'],
+			language: {
+				lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
+				zeroRecords: "ไม่พบข้อมูล",
+				info: "แสดงหน้าที่ _PAGE_ จากทั้งหมด _PAGES_ หน้า",
+				infoEmpty: "ไม่มีข้อมูลที่จะแสดง",
+				infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+				search: "ค้นหา:",
+				paginate: {
+					first: "หน้าแรก",
+					last: "หน้าสุดท้าย",
+					next: "ถัดไป",
+					previous: "ก่อนหน้า"
+				}
+			}
 		});
 		$('.dataTable td,.dataTable th').addClass('py-1 px-2 align-middle')
 	})

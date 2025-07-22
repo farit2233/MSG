@@ -9,7 +9,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 }
 ?>
 <div class="content py-5 px-3 bg-gradient-dark">
-	<h2><b>รายละเอียดหมวดหมู่</b></h2>
+	<h2><b>Category Details</b></h2>
 </div>
 <div class="row mt-lg-n4 mt-md-n4 justify-content-center">
 	<div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
@@ -17,25 +17,25 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 			<div class="card-body">
 				<div class="container-fluid">
 					<dl>
-						<dt class="text-muted">ชื่อหมวดหมู่</dt>
+						<dt class="text-muted">Category</dt>
 						<dd class="pl-4"><?= isset($name) ? $name : "" ?></dd>
-						<dt class="text-muted">รายละเอียดหมวดหมู่</dt>
+						<dt class="text-muted">Description</dt>
 						<dd class="pl-4"><?= isset($description) ? str_replace(["\n\r", "\n", "\r"], "<br>", $description) : '' ?></dd>
-						<dt class="text-muted">สถานะ</dt>
+						<dt class="text-muted">Status</dt>
 						<dd class="pl-4">
 							<?php if ($status == 1): ?>
-								<span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
+								<span class="badge badge-success px-3 rounded-pill">Active</span>
 							<?php else: ?>
-								<span class="badge badge-dark px-3 rounded-pill">ไม่ได้ใช้งาน</span>
+								<span class="badge badge-dark px-3 rounded-pill">Inactive</span>
 							<?php endif; ?>
 						</dd>
 					</dl>
 				</div>
 			</div>
 			<div class="card-footer py-1 text-center">
-				<button class="btn btn-sm btn-danger rounded-0" type="button" id="delete_data"><i class="fa fa-trash"></i> ลบหมวดหมู่</button>
-				<a class="btn btn-dark btn-sm bg-gradient-dark rounded-0" href="./?page=categories/manage_category&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> แก้ไขหมวดหมู่</a>
-				<a class="btn btn-light btn-sm bg-gradient-light border rounded-0" href="./?page=categories"><i class="fa fa-angle-left"></i> กลับ</a>
+				<button class="btn btn-dark btn-sm bg-gradient-dark rounded-0" type="button" id="delete_data"><i class="fa fa-trash"></i> Delete</button>
+				<a class="btn btn-dark btn-sm bg-gradient-dark rounded-0" href="./?page=categories/manage_category&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-edit"></i> Edit</a>
+				<a class="btn btn-light btn-sm bg-gradient-light border rounded-0" href="./?page=categories"><i class="fa fa-angle-left"></i> Back to List</a>
 			</div>
 		</div>
 	</div>

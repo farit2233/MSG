@@ -3,14 +3,6 @@
         alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
     </script>
 <?php endif; ?>
-<style>
-    .product-type-logo {
-        width: 3em;
-        height: 3em;
-        object-fit: cover;
-        object-position: center center;
-    }
-</style>
 <div class="card card-outline rounded-0 card-dark">
     <div class="card-header">
         <h3 class="card-title text-bold">ประเภทสินค้าทั้งหมด</h3>
@@ -47,32 +39,34 @@
                         while ($row = $qry->fetch_assoc()):
                             $id = $row['id'];
                         ?>
-                            <td class="text-center"><?php echo $i++; ?></td>
-                            <td><?= $row['name'] ?></td>
-                            <td>
-                                <p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
-                            </td>
-                            <td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
-                            <td class="text-center">
-                                <?php if ($row['status'] == 1): ?>
-                                    <span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
-                                <?php else: ?>
-                                    <span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
-                                    จัดการ
-                                    <span class="sr-only">Toggle Dropdown</span>
-                                </button>
-                                <div class="dropdown-menu" role="menu">
-                                    <!--a class="dropdown-item" href="./?page=product_type/view_product_type&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> ดู</a>
-                                <div class="dropdown-divider"></div-->
-                                    <a class="dropdown-item" href="./?page=product_type/manage_product_type&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> แก้ไขหมวดหมู่</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบหมวดหมู่</a>
-                                </div>
-                            </td>
+                            <tr>
+
+                                <td class="text-center"><?php echo $i++; ?></td>
+                                <td><?= $row['name'] ?></td>
+                                <td>
+                                    <p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
+                                </td>
+                                <td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+                                <td class="text-center">
+                                    <?php if ($row['status'] == 1): ?>
+                                        <span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                        จัดการ
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu" role="menu">
+                                        <!--a class="dropdown-item" href="./?page=product_type/view_product_type&id=<?php echo $row['id'] ?>"><span class="fa fa-eye text-dark"></span> ดู</a>
+                                        <div class="dropdown-divider"></div-->
+                                        <a class="dropdown-item" href="./?page=product_type/manage_product_type&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-dark"></span> แก้ประเภทสินค้า</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบประเภทสินค้า</a>
+                                    </div>
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>
@@ -89,10 +83,25 @@
         $('.table').dataTable({
             columnDefs: [{
                 orderable: false,
-                targets: [5]
+                targets: [2, 5]
             }],
-            order: [0, 'asc']
+            order: [0, 'asc'],
+            language: {
+                lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
+                zeroRecords: "ไม่พบข้อมูล",
+                info: "แสดงหน้าที่ _PAGE_ จากทั้งหมด _PAGES_ หน้า",
+                infoEmpty: "ไม่มีข้อมูลที่จะแสดง",
+                infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+                search: "ค้นหา:",
+                paginate: {
+                    first: "หน้าแรก",
+                    last: "หน้าสุดท้าย",
+                    next: "ถัดไป",
+                    previous: "ก่อนหน้า"
+                }
+            }
         });
+
         $('.dataTable td,.dataTable th').addClass('py-1 px-2 align-middle')
     })
 

@@ -82,7 +82,7 @@
 										<span class="sr-only">Toggle Dropdown</span>
 									</button>
 									<div class="dropdown-menu" role="menu">
-										<a class="dropdown-item" href="./?page=categories/manage_category&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-primary"></span> แก้ไขหมวดหมู่</a>
+										<a class="dropdown-item" href="./?page=categories/manage_category&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-black"></span> แก้ไขหมวดหมู่</a>
 										<div class="dropdown-divider"></div>
 										<a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบหมวดหมู่</a>
 									</div>
@@ -103,9 +103,23 @@
 		$('.table').dataTable({
 			columnDefs: [{
 				orderable: false,
-				targets: [5]
+				targets: [2, 6]
 			}],
-			order: [0, 'asc']
+			order: [0, 'asc'],
+			language: {
+				lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
+				zeroRecords: "ไม่พบข้อมูล",
+				info: "แสดงหน้าที่ _PAGE_ จากทั้งหมด _PAGES_ หน้า",
+				infoEmpty: "ไม่มีข้อมูลที่จะแสดง",
+				infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+				search: "ค้นหา:",
+				paginate: {
+					first: "หน้าแรก",
+					last: "หน้าสุดท้าย",
+					next: "ถัดไป",
+					previous: "ก่อนหน้า"
+				}
+			}
 		});
 		$('.dataTable td,.dataTable th').addClass('py-1 px-2 align-middle')
 	})
