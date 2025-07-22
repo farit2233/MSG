@@ -48,7 +48,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 ?>
 
-<div class="card card-outline card-primary rounded-0">
+<div class="card card-outline card-orange rounded-0">
     <div class="card-header">
         <h1 class="card-title"><?php echo isset($id) && $id > 0 ? 'แก้ไขข้อมูลการจัดส่ง' : 'เพิ่มข้อมูลการจัดส่ง'; ?></h1>
     </div>
@@ -177,9 +177,10 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             </div>
 
         </div>
-        <div class="card-footer text-center">
-            <button type="submit" class="btn btn-primary btn-lg mr-2">บันทึก</button>
-            <a href="./?page=shipping_setting" class="btn btn-secondary btn-lg">ยกเลิก</a>
+        <div class="card-footer py-1 text-center">
+            <button class="btn btn-success btn-sm btn-flat" form="shipping-form"><i class="fa fa-save"></i> บันทึก</button>
+            <a class="btn btn-danger btn-sm border btn-flat" href="./?page=shipping_setting"><i class="fa fa-times"></i> ยกเลิก</a>
+            <a class="btn btn-light btn-sm border btn-flat" href="./?page=shipping_setting"><i class="fa fa-angle-left"></i> กลับ</a>
         </div>
     </form>
 </div>
