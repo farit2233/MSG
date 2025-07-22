@@ -135,7 +135,21 @@
                 orderable: false,
                 targets: [2, 6]
             }],
-            order: [0, 'asc']
+            order: [0, 'asc'],
+            language: {
+                lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
+                zeroRecords: "ไม่พบข้อมูล",
+                info: "แสดงหน้าที่ _PAGE_ จากทั้งหมด _PAGES_ หน้า",
+                infoEmpty: "ไม่มีข้อมูลที่จะแสดง",
+                infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+                search: "ค้นหา:",
+                paginate: {
+                    first: "หน้าแรก",
+                    last: "หน้าสุดท้าย",
+                    next: "ถัดไป",
+                    previous: "ก่อนหน้า"
+                }
+            }
         });
         $('.dataTable td,.dataTable th').addClass('py-1 px-2 align-middle')
     })
