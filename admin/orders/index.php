@@ -170,7 +170,7 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 <script>
 	$(document).ready(function() {
 		$('.delete_data').click(function() {
-			_conf("Are you sure to delete this request permanently?", "delete_request", [$(this).attr('data-id')])
+			_conf("คุณแน่ใจหรือไม่ที่จะลบคำสั่งซื้อนี้?", "delete_request", [$(this).attr('data-id')])
 		})
 		$('.table').dataTable({
 			columnDefs: [{

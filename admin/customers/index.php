@@ -76,7 +76,7 @@
 <script>
 	$(document).ready(function() {
 		$('.delete_data').click(function() {
-			_conf("Are you sure to delete this customer permanently?", "delete_customer", [$(this).attr('data-id')])
+			_conf("คุณแน่ใจหรือไม่ที่จะลบรายชื่อลูกค้า", "delete_customer", [$(this).attr('data-id')])
 		})
 		$('.table').dataTable({
 			columnDefs: [{

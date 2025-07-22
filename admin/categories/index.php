@@ -98,7 +98,7 @@
 <script>
 	$(document).ready(function() {
 		$('.delete_data').click(function() {
-			_conf("Are you sure to delete this category permanently?", "delete_category", [$(this).attr('data-id')])
+			_conf("คุณแน่ใจหรือไม่ที่จะลบหมวดหมู่นี้?", "delete_category", [$(this).attr('data-id')])
 		})
 		$('.table').dataTable({
 			columnDefs: [{

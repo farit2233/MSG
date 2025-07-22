@@ -301,7 +301,7 @@ if ($default_shipping_qry && $row = $default_shipping_qry->fetch_assoc()) {
             uni_modal("Assign a Team", 'orders/assign_team.php?id=<?= isset($id) ? $id : '' ?>')
         })
         $('#delete_data').click(function() {
-            _conf("Are you sure to delete this order permanently?", "delete_order", ["<?= isset($id) ? $id : '' ?>"])
+            _conf("คุณแน่ใจหรือไม่ที่จะลบคำสั่งซื้อนี้?", "delete_order", ["<?= isset($id) ? $id : '' ?>"])
         })
         $('#update_status').click(function() {
             uni_modal("Update Status", "orders/update_status.php?id=<?= isset($id) ? $id : '' ?>")

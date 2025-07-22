@@ -54,7 +54,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 										<div class="row">
 											<div class="col-md-3">
 												<dt class="text-muted">ชื่อสินค้า</dt>
-												<a href="./?page=products/view_product&id=<?= isset($id) ? $id : '' ?>" target="_blank"><?= isset($name) ? $name : "" ?></a>
+												<a href="./?page=products/manage_product&id=<?= isset($id) ? $id : '' ?>" target="_blank"><?= isset($name) ? $name : "" ?></a>
 											</div>
 											<div class="col-md-3">
 												<dt class="text-muted">รหัสสินค้า</dt>
@@ -189,7 +189,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 			uni_modal('<i class="fa fa-edit"></i> แก้ไขสต๊อกสินค้า', 'inventory/manage_stock.php?pid=<?= isset($id) ? $id : '' ?>&id=' + $(this).attr('data-id'))
 		})
 		$('.delete_stock').click(function() {
-			_conf("Are you sure to delete this <b>[" + $(this).attr('data-code') + "]</b> Stock Entry permanently?", "delete_stock", [$(this).attr('data-id')])
+			_conf("คุณแน่ใจหรือไม่ที่จะลบสต๊อก <b>[" + $(this).attr('data-code') + "]</b> นี้?", "delete_stock", [$(this).attr('data-id')])
 		})
 		$('#stock-history').dataTable({
 			columnDefs: [{

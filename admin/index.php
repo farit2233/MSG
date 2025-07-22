@@ -41,8 +41,8 @@
             <div class="modal-body">
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-dark rounded-0" id='submit' onclick="$('#uni_modal form').submit()">Save</button>
-              <button type="button" class="btn btn-secondary rounded-0" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-success rounded-0" id='submit' onclick="$('#uni_modal form').submit()">บันทึก</button>
+              <button type="button" class="btn btn-danger rounded-0" data-dismiss="modal">ยกเลิก</button>
             </div>
           </div>
         </div>
@@ -65,14 +65,14 @@
         <div class="modal-dialog modal-md modal-dialog-centered rounded-0" role="document">
           <div class="modal-content rounded-0">
             <div class="modal-header">
-              <h5 class="modal-title">Confirmation</h5>
+              <h5 class="modal-title">ยืนยันการลบ</h5>
             </div>
             <div class="modal-body">
               <div id="delete_content"></div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-dark rounded-0" id='confirm' onclick="">Continue</button>
-              <button type="button" class="btn btn-secondary rounded-0" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger rounded-0" id='confirm' onclick="">ดำเนินการต่อ</button>
+              <button type="button" class="btn btn-secondary rounded-0" data-dismiss="modal">ยกเลิก</button>
             </div>
           </div>
         </div>

@@ -87,7 +87,7 @@
 <script>
 	$(document).ready(function() {
 		$('.delete_data').click(function() {
-			_conf("Are you sure to delete this User permanently?", "delete_user", [$(this).attr('data-id')])
+			_conf("คุณแน่ใจหรือไม่ที่จะลบบัญชีนี้?", "delete_user", [$(this).attr('data-id')])
 		})
 		$('.table').dataTable({
 			columnDefs: [{

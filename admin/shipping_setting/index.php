@@ -128,7 +128,7 @@
 <script>
     $(document).ready(function() {
         $('.delete_data').click(function() {
-            _conf("Are you sure to delete this shipping method permanently?", "delete_shipping", [$(this).attr('data-id')])
+            _conf("คุณแน่ใจหรือไม่ที่จะลบขนส่งนี้?", "delete_shipping", [$(this).attr('data-id')])
         })
         $('.table').dataTable({
             columnDefs: [{
