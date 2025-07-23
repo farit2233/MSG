@@ -51,6 +51,65 @@ function get_platform_link($conn, $product_id, $platform)
 	section {
 		font-size: 16px;
 	}
+
+	/* กำหนดสไตล์สำหรับจอมือถือ (ความกว้างน้อยกว่า 768px) */
+	@media screen and (max-width: 768px) {
+
+		/* ซ่อนหัวตารางแบบปกติ */
+		.table thead {
+			display: none;
+		}
+
+		/* ทำให้แถว (tr) แสดงผลเป็นบล็อกเหมือนการ์ด */
+		.table tr {
+			display: block;
+			margin-bottom: 1rem;
+			border: 1px solid #dee2e6;
+			/* เพิ่มเส้นขอบให้แต่ละการ์ด */
+			border-radius: .25rem;
+		}
+
+		/* ทำให้เซลล์ (td) แสดงผลเป็นบล็อกและจัดเรียงเนื้อหาใหม่ */
+		.table td {
+			display: flex;
+			/* ใช้ Flexbox เพื่อจัดวาง label กับ content */
+			justify-content: space-between;
+			/* ทำให้ label และ content อยู่คนละฝั่ง */
+			align-items: center;
+			text-align: right;
+			/* จัดข้อความของ content ชิดขวา */
+			border: none;
+			border-bottom: 1px solid #eee;
+			/* เพิ่มเส้นคั่นระหว่างข้อมูล */
+			padding: .75rem;
+		}
+
+		/* จัดการกับ input ให้อยู่ในกรอบสวยงาม */
+		.table td input {
+			width: 60%;
+			/* กำหนดความกว้างของ input */
+			text-align: right;
+		}
+
+		.table td h6 {
+			text-align: right;
+			margin-bottom: 0;
+		}
+
+		/* สร้าง Label จาก data-label ที่เราเพิ่มเข้าไปใน HTML */
+		.table td::before {
+			content: attr(data-label);
+			/* ดึงข้อความจาก data-label มาแสดง */
+			font-weight: bold;
+			text-align: left;
+			padding-right: 1rem;
+		}
+
+		/* จัดการแถวสุดท้ายไม่ให้มีเส้นขอบล่าง */
+		.table td:last-child {
+			border-bottom: 0;
+		}
+	}
 </style>
 <div class="card card-outline card-orange rounded-0">
 	<div class="card-header">
@@ -222,60 +281,66 @@ function get_platform_link($conn, $product_id, $platform)
 
 					<hr>
 					<h5>ราคาขนส่ง</h5>
-					<table class="table table-bordered table-responsive-lg">
-						<thead class="thead-light">
-							<tr>
-								<th>ชื่อขนส่ง</th>
-								<th>ราคาขนส่งคงที่</th>
-								<th>ราคาขนส่งตามขนาด</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php
-							// 1) เตรียมน้ำหนักจริง
-							$product_weight = isset($product_weight) ? (float)$product_weight : 0;
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<thead class="thead-light">
+								<tr>
+									<th>ชื่อขนส่ง</th>
+									<th>ราคาขนส่งคงที่</th>
+									<th>ราคาขนส่งตามขนาด</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
+								// 1) เตรียมน้ำหนักจริง
+								$product_weight = isset($product_weight) ? (float)$product_weight : 0;
 
-							// 2) วนขนส่งทั้งหมด
-							$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND is_active = 1");
+								// 2) วนขนส่งทั้งหมด
+								$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND is_active = 1");
 
-							$matched_shipping_price_id = null; // จะเก็บ id ช่วงราคาที่ match จริง
+								$matched_shipping_price_id = null; // จะเก็บ id ช่วงราคาที่ match จริง
 
-							while ($row = $shippings->fetch_assoc()):
-								$method_id = $row['id'];
+								while ($row = $shippings->fetch_assoc()):
+									$method_id = $row['id'];
 
-								// หา rate ตามช่วงน้ำหนัก
-								$qry = $conn->query("SELECT * FROM shipping_prices 
+									// หา rate ตามช่วงน้ำหนัก
+									$qry = $conn->query("SELECT * FROM shipping_prices 
 								WHERE shipping_methods_id = {$method_id} 
 								AND min_weight <= {$product_weight} 
 								AND max_weight >= {$product_weight}
 								ORDER BY min_weight ASC LIMIT 1");
 
-								$matched_row = $qry && $qry->num_rows ? $qry->fetch_assoc() : null;
+									$matched_row = $qry && $qry->num_rows ? $qry->fetch_assoc() : null;
 
-								// ถ้าเจอช่วงแรก เอา id เก็บไว้
-								if ($matched_row && !$matched_shipping_price_id) {
-									$matched_shipping_price_id = $matched_row['id'];
-								}
+									// ถ้าเจอช่วงแรก เอา id เก็บไว้
+									if ($matched_row && !$matched_shipping_price_id) {
+										$matched_shipping_price_id = $matched_row['id'];
+									}
 
-							?>
-								<tr data-method-id="<?= $row['id'] ?>">
-									<td>
-										<h6><?= $row['name'] ?></h6>
-									</td>
-									<td>
-										<input type="text" class="form-control" value="<?= number_format($row['cost'], 2) ?> บาท" readonly>
-									</td>
-									<td>
-										<input type="text" class="form-control dynamic-shipping"
-											value="<?= $matched_row ? "ช่วง {$matched_row['min_weight']}-{$matched_row['max_weight']} g | " . number_format($matched_row['price'], 2) . " บาท" : "น้ำหนักสินค้าสูงเกินขีดจำกัด" ?>"
-											readonly>
-										<div class="weight-error text-danger" style="display: none;"></div> <!-- เพิ่มช่องข้อความเตือน -->
-									</td>
-								</tr>
-							<?php endwhile; ?>
-						</tbody>
+								?>
+									<tr data-method-id="<?= $row['id'] ?>">
 
-					</table>
+										<td data-label="ชื่อขนส่ง">
+											<h6><?= $row['name'] ?></h6>
+										</td>
+
+										<td data-label="ราคาขนส่งคงที่">
+											<input type="text" class="form-control" value="<?= number_format($row['cost'], 2) ?> บาท" readonly>
+										</td>
+
+										<td data-label="ราคาขนส่งตามขนาด">
+											<input type="text" class="form-control dynamic-shipping"
+												value="<?= $matched_row ? "ช่วง {$matched_row['min_weight']}-{$matched_row['max_weight']} g | " . number_format($matched_row['price'], 2) . " บาท" : "น้ำหนักสินค้าสูงเกินขีดจำกัด" ?>"
+												readonly>
+											<div class="weight-error text-danger" style="display: none;"></div>
+										</td>
+
+									</tr>
+								<?php endwhile; ?>
+							</tbody>
+
+						</table>
+					</div>
 					<div class="form-check">
 						<input type="checkbox" name="slow_prepare" id="slow_prepare" class="form-check-input" <?= isset($slow_prepare) && $slow_prepare ? 'checked' : '' ?>>
 						<label class="form-check-label" for="slow_prepare">เตรียมส่งนานกว่าปกติ</label>

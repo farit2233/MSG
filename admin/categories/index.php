@@ -38,12 +38,11 @@
 						<col width="15%">
 						<col width="15%">
 						<col width="10%">
-						<col width="15%">
+						<col width="10%">
 					</colgroup>
 					<thead class="text-center">
 						<tr>
 							<th>ที่</th>
-
 							<th>ชื่อหมวดหมู่</th>
 							<th>รายละเอียดหมวดหมู่</th>
 							<th>ประเภทสินค้า</th>
