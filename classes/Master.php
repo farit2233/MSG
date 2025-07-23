@@ -1097,6 +1097,62 @@ class Master extends DBConnection
 
 		return json_encode(['status' => 'success']);
 	}
+	function save_promotion()
+	{
+		extract($_POST);
+		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
+		$data = "";
+		foreach ($_POST as $k => $v) {
+			if (!in_array($k, array('id'))) {
+				if (!empty($data)) $data .= ",";
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
+			}
+		}
+
+		// ตรวจชื่อซ้ำ (option)
+		$check = $this->conn->query("SELECT * FROM `promotions` WHERE `name` = '{$name}' " . (!empty($id) ? " AND id != {$id} " : ""))->num_rows;
+		if ($this->capture_err())
+			return $this->capture_err();
+
+		if ($check > 0) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "มีโปรโมชั่นชื่อนี้อยู่แล้ว";
+			return json_encode($resp);
+		}
+
+		if (empty($id)) {
+			$sql = "INSERT INTO `promotions` SET {$data}";
+		} else {
+			$sql = "UPDATE `promotions` SET {$data} WHERE id = '{$id}'";
+		}
+
+		$save = $this->conn->query($sql);
+		if ($save) {
+			$pid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['id'] = $pid;
+			$resp['status'] = 'success';
+			$resp['msg'] = empty($id) ? "บันทึกโปรโมชั่นใหม่แล้ว" : "อัปเดตโปรโมชั่นสำเร็จ";
+			$this->settings->set_flashdata('success', $resp['msg']);
+		} else {
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error . "[{$sql}]";
+		}
+		return json_encode($resp);
+	}
+	function delete_promotion()
+	{
+		extract($_POST);
+		$del = $this->conn->query("DELETE FROM `promotions` WHERE id = '{$id}'");
+		if ($del) {
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success', "ลบโปรโมชั่นแล้ว");
+		} else {
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
+		return json_encode($resp);
+	}
 }
 
 $Master = new Master();
@@ -1168,6 +1224,12 @@ switch ($action) {
 		break;
 	case 'migrate_guest_cart':
 		echo $Master->migrate_guest_cart();
+		break;
+	case 'save_promotion':
+		echo $Master->save_promotion();
+		break;
+	case 'delete_inquiry':
+		echo $Master->delete_promotion();
 		break;
 	default:
 		// echo $sysset->index();
