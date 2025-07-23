@@ -8,10 +8,19 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     }
 }
 ?>
+<style>
+    .card-title {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
 
+    section {
+        font-size: 16px;
+    }
+</style>
 <div class="card card-outline card-orange rounded-0">
     <div class="card-header">
-        <h1 class="card-title"><?= isset($id) ? "แก้ไขประเภทสินค้า" : "สร้างประเภทสินค้าใหม่" ?></h1>
+        <div class="card-title"><?= isset($id) ? "แก้ไขประเภทสินค้า" : "สร้างประเภทสินค้าใหม่" ?></div>
     </div>
     <form action="" id="product-type-form">
         <input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
@@ -19,7 +28,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <h3 class="card-title">ข้อมูลประเภทสินค้า</h3>
+                    <div class="card-title" style="font-size: 18px !important;">ข้อมูลประเภทสินค้า</div>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
@@ -34,7 +43,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             </div>
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <h3 class="card-title">สถานะการขาย</h3>
+                    <div class="card-title">สถานะการขาย</div>
                 </div>
                 <div class="card-body">
                     <input type="hidden" name="status" value="0">

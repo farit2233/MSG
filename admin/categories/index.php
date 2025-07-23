@@ -10,10 +10,19 @@
 		object-fit: cover;
 		object-position: center center;
 	}
+
+	.card-title {
+		font-size: 20px !important;
+		font-weight: bold;
+	}
+
+	section {
+		font-size: 16px;
+	}
 </style>
-<div class="card card-outline rounded-0 card-dark">
+<section class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
-		<h3 class="card-title text-bold">หมวดหมู่สินค้าทั้งหมด</h3>
+		<div class="card-title">หมวดหมู่สินค้าทั้งหมด</div>
 		<div class="card-tools">
 			<a href="./?page=categories/manage_category" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> สร้างหมวดหมู่ใหม่</a>
 		</div>
@@ -94,7 +103,7 @@
 			</div>
 		</div>
 	</div>
-</div>
+</section>
 <script>
 	$(document).ready(function() {
 		$('.delete_data').click(function() {

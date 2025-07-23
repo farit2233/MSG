@@ -1,101 +1,112 @@
 <?php
 $date = isset($_GET['date']) ? $_GET['date'] : date("Y-m-d");
 ?>
-<div class="card card-outline card-orange rounded-0">
-    <div class="card-header">
-        <h1 class="card-title text-bold">รายงานการขายประจำวัน</h1>
-    </div>
-    <div class="card-body">
-        <div class="row flex-column justify-content-center align-items-center">
-            <div class="col-lg-11 col-md-11 col-sm-12 col-xs-12">
-                <div class="card card-outline card-dark rounded-0 mb-3">
-                    <div class="card-header">
-                        <h3 class="card-title">วันที่แสดง</h3>
-                    </div>
-                    <div class="card-body">
-                        <form action="" id="filter-form">
-                            <div class="row align-items-end">
-                                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
-                                    <div class="form-group">
-                                        <label for="date" class="control-label">เลือกวันที่</label>
-                                        <input type="date" class="form-control form-control-sm rounded-0" name="date" id="date" value="<?= $date ?>" required="required">
-                                    </div>
-                                </div>
-                                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
-                                    <div class="form-group">
-                                        <button class="btn btn-sm btn-flat btn-dark bg-gradient-dark"><i class="fa fa-filter"></i> ยืนยัน</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+<style>
+    .card-title {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
 
-                <div class="card card-outline card-dark rounded-0 mb-3">
-                    <div class="card-header py-1">
-                        <h3 class="card-title">รายการที่ขายแล้ว</h3>
-                        <div class="card-tools">
-                            <button class="btn btn-flat btn-sm btn-light bg-gradient-light border" type="button" id="print"><i class="fa fa-print"></i> Print</button>
+    .contact-label {
+        font-size: 17px !important;
+    }
+
+    .contact-input {
+        font-size: 16px !important;
+    }
+
+    section {
+        font-size: 16px;
+    }
+</style>
+
+<section class="flex-column justify-content-center align-items-center">
+    <div class="card card-outline card-dark rounded-0 mb-3">
+        <div class="card-header">
+            <div class="card-title">วันที่แสดง</div>
+        </div>
+        <div class="card-body">
+            <form action="" id="filter-form">
+                <div class="row align-items-end">
+                    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label for="date" class="control-label contact-label">เลือกวันที่</label>
+                            <input type="date" class="form-control form-control-sm rounded-0 contact-input" name="date" id="date" value="<?= $date ?>" required="required">
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="container-fluid" id="printout">
-                            <table class="table table-bordered">
-                                <colgroup>
-                                    <col width="5%">
-                                    <col width="20%">
-                                    <col width="25%">
-                                    <col width="20%">
-                                    <col width="10%">
-                                    <col width="20%">
-                                </colgroup>
-                                <thead>
-                                    <tr>
-                                        <th class="px-1 py-1 text-center">ที่</th>
-                                        <th class="px-1 py-1 text-center">รหัสคำสั่งซื้อ</th>
-                                        <th class="px-1 py-1 text-center">ชื่อสินค้า</th>
-                                        <th class="px-1 py-1 text-center">ราคาปัจจุบัน</th>
-                                        <th class="px-1 py-1 text-center">จำนวน</th>
-                                        <th class="px-1 py-1 text-center">รวม</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $g_total = 0;
-                                    $i = 1;
-                                    $requests = $conn->query("SELECT oi.*,o.code, concat(p.brand, ' ', p.name) as product FROM `order_items` oi inner join order_list o on oi.order_id = o.id inner join product_list p on oi.product_id = p.id where date(o.date_created) = '{$date}' order by abs(unix_timestamp(o.date_created)) asc ");
-                                    while ($row = $requests->fetch_assoc()):
-                                        $g_total += $row['price'] * $row['quantity'];
-                                    ?>
-                                        <tr>
-                                            <td class="px-1 py-1 align-middle text-center"><?= $i++ ?></td>
-                                            <td class="px-1 py-1 align-middle"><?= $row['code'] ?></td>
-                                            <td class="px-1 py-1 align-middle"><?= $row['product'] ?></td>
-                                            <td class="px-1 py-1 align-middle text-right"><?= format_num($row['price'], 2) ?></td>
-                                            <td class="px-1 py-1 align-middle text-right"><?= format_num($row['quantity'], 0) ?></td>
-                                            <td class="px-1 py-1 align-middle text-right"><?= format_num($row['price'] * $row['quantity'], 2) ?></td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                    <?php if ($requests->num_rows <= 0): ?>
-                                        <tr>
-                                            <td class="py-1 text-center" colspan="6">No records found</td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="5" class="text-center px-1 py-1 align-middle">รวมทั้งสิน</th>
-                                        <th class="text-right px-1 py-1 align-middle"><?= format_num($g_total, 2) ?></th>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <button class="btn btn-sm btn-flat btn-dark bg-gradient-dark"><i class="fa fa-filter"></i> ยืนยัน</button>
                         </div>
                     </div>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card card-outline card-dark rounded-0 mb-3">
+        <div class="card-header py-1">
+            <div class="card-title">รายการที่ขายแล้ว</div>
+            <div class="card-tools">
+                <button class="btn btn-flat btn-sm btn-light bg-gradient-light border" type="button" id="print"><i class="fa fa-print"></i> Print</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container-fluid" id="printout">
+                <table class="table table-bordered">
+                    <colgroup>
+                        <col width="5%">
+                        <col width="20%">
+                        <col width="25%">
+                        <col width="20%">
+                        <col width="10%">
+                        <col width="20%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="px-1 py-1 text-center">ที่</th>
+                            <th class="px-1 py-1 text-center">รหัสคำสั่งซื้อ</th>
+                            <th class="px-1 py-1 text-center">ชื่อสินค้า</th>
+                            <th class="px-1 py-1 text-center">ราคาปัจจุบัน</th>
+                            <th class="px-1 py-1 text-center">จำนวน</th>
+                            <th class="px-1 py-1 text-center">รวม</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $g_total = 0;
+                        $i = 1;
+                        $requests = $conn->query("SELECT oi.*,o.code, concat(p.brand, ' ', p.name) as product FROM `order_items` oi inner join order_list o on oi.order_id = o.id inner join product_list p on oi.product_id = p.id where date(o.date_created) = '{$date}' order by abs(unix_timestamp(o.date_created)) asc ");
+                        while ($row = $requests->fetch_assoc()):
+                            $g_total += $row['price'] * $row['quantity'];
+                        ?>
+                            <tr>
+                                <td class="px-1 py-1 align-middle text-center"><?= $i++ ?></td>
+                                <td class="px-1 py-1 align-middle"><?= $row['code'] ?></td>
+                                <td class="px-1 py-1 align-middle"><?= $row['product'] ?></td>
+                                <td class="px-1 py-1 align-middle text-right"><?= format_num($row['price'], 2) ?></td>
+                                <td class="px-1 py-1 align-middle text-right"><?= format_num($row['quantity'], 0) ?></td>
+                                <td class="px-1 py-1 align-middle text-right"><?= format_num($row['price'] * $row['quantity'], 2) ?></td>
+                            </tr>
+                        <?php endwhile; ?>
+                        <?php if ($requests->num_rows <= 0): ?>
+                            <tr>
+                                <td class="py-1 text-center" colspan="6">No records found</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="5" class="text-center px-1 py-1 align-middle">รวมทั้งสิน</th>
+                            <th class="text-right px-1 py-1 align-middle"><?= format_num($g_total, 2) ?></th>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
     </div>
-</div>
+</section>
+
 <noscript id="print-header">
     <div>
         <style>

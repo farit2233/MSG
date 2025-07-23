@@ -8,6 +8,16 @@ $payment_status = isset($_GET['payment_status']) ? $_GET['payment_status'] : '';
 $delivery_status = isset($_GET['delivery_status']) ? $_GET['delivery_status'] : '';
 $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจสอบ', 'ชำระเงินแล้ว', 'ชำระล้มเหลว', 'คืนเงินแล้ว']
 ?>
+<style>
+	.card-title {
+		font-size: 20px !important;
+		font-weight: bold;
+	}
+
+	section {
+		font-size: 16px;
+	}
+</style>
 <div class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
 		<h3 class="card-title">รายการคำสั่งซื้อ <?= isset($stat_arr[$payment_status]) ? $stat_arr[$payment_status] : 'ทั้งหมด' ?></h3>

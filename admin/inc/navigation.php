@@ -3,9 +3,13 @@
   [class*="sidebar-light-"] .nav-treeview>.nav-item>.nav-link.active:hover {
     color: #ffffff !important;
   }
+
+  li {
+    font-size: 16px !important;
+  }
 </style>
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-light-dark navbar-light elevation-4 sidebar-no-expand">
+<aside class="main-sidebar sidebar-light-dark navbar-light elevation-4 sidebar-no-expand ">
   <!-- Brand Logo -->
   <a href="<?php echo base_url ?>admin" class="brand-link bg-dark text-sm">
     <img src="<?php echo validate_image($_settings->info('logo')) ?>" alt="Store Logo" class="brand-image img-circle elevation-3" style="opacity: .8;width: 1.5rem;height: 1.5rem;max-height: unset">

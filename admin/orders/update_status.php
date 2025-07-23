@@ -17,8 +17,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             <label for="payment_status" class="control-label">สถานะการชำระเงิน (Payment Status)</label>
             <select class="form-control form-control-sm rounded-0" name="payment_status" id="payment_status" required>
                 <option value="0" <?= isset($payment_status) && $payment_status == 0 ? 'selected' : '' ?>>ยังไม่ชำระเงิน</option>
-                <option value="1" <?= isset($payment_status) && $payment_status == 2 ? 'selected' : '' ?>>รอตรวจสอบ</option>
-                <option value="2" <?= isset($payment_status) && $payment_status == 1 ? 'selected' : '' ?>>ชำระแล้ว</option>
+                <option value="1" <?= isset($payment_status) && $payment_status == 1 ? 'selected' : '' ?>>รอตรวจสอบ</option>
+                <option value="2" <?= isset($payment_status) && $payment_status == 2 ? 'selected' : '' ?>>ชำระแล้ว</option>
                 <option value="3" <?= isset($payment_status) && $payment_status == 3 ? 'selected' : '' ?>>ชำระล้มเหลว</option>
                 <option value="4" <?= isset($payment_status) && $payment_status == 4 ? 'selected' : '' ?>>คืนเงินแล้ว</option>
             </select>

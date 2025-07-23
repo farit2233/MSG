@@ -84,7 +84,7 @@ if (isset($_GET['id'])) {
 </style>
 <div class="card rounded-1">
 	<div class="cart-header-bar">
-		<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลส่วนตัว</h3>
+		<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i><?= isset($id) ? "แก้ไขข้อมูลบัญชี" : "สร้างบัญชีใหม่" ?></h3>
 	</div>
 	<div class="card-body">
 		<form id="update-form" action="" method="post">

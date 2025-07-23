@@ -38,10 +38,23 @@ function get_platform_link($conn, $product_id, $platform)
 		margin: 0 auto;
 		/* จัดกึ่งกลางแนวนอน */
 	}
+
+	.card-title {
+		font-size: 20px !important;
+		font-weight: bold;
+	}
+
+	.head-detail {
+		font-size: 16px;
+	}
+
+	section {
+		font-size: 16px;
+	}
 </style>
 <div class="card card-outline card-orange rounded-0">
 	<div class="card-header">
-		<h1 class="card-title"><?= isset($id) ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'; ?></h1>
+		<div class="card-title"><?= isset($id) ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'; ?></div>
 	</div>
 	<form action="" id="product-form" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
@@ -49,7 +62,7 @@ function get_platform_link($conn, $product_id, $platform)
 
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
-					<h3 class="card-title">รูปภาพสินค้า</h3>
+					<div class="card-title" style="font-size: 18px !important;">รูปภาพสินค้า</div>
 				</div>
 				<div class="card-body">
 					<div class="form-group">
@@ -66,7 +79,7 @@ function get_platform_link($conn, $product_id, $platform)
 			</div>
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
-					<h3 class="card-title h3">ข้อมูลสินค้า</h3>
+					<div class="card-title div">ข้อมูลสินค้า</div>
 				</div>
 				<div class="card-body">
 					<div class="form-row">
@@ -119,7 +132,7 @@ function get_platform_link($conn, $product_id, $platform)
 			</div>
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
-					<h3 class="card-title">ช่องทางจำหน่าย</h3>
+					<div class="card-title">ช่องทางจำหน่าย</div>
 				</div>
 				<div class="card-body">
 					<div class="form-row">
@@ -140,7 +153,7 @@ function get_platform_link($conn, $product_id, $platform)
 			</div>
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
-					<h3 class="card-title">ส่วนลด</h3>
+					<div class="card-title">ส่วนลด</div>
 				</div>
 				<div class="card-body">
 					<div class="custom-control custom-switch mb-3">
@@ -179,7 +192,7 @@ function get_platform_link($conn, $product_id, $platform)
 			</div>
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
-					<h3 class="card-title">การจัดส่ง</h3>
+					<div class="card-title">การจัดส่ง</div>
 				</div>
 				<div class="card-body">
 					<div class="form-row">
@@ -271,7 +284,7 @@ function get_platform_link($conn, $product_id, $platform)
 			</div>
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
-					<h3 class="card-title">สถานะการขาย</h3>
+					<div class="card-title">สถานะการขาย</div>
 				</div>
 				<div class="card-body">
 					<input type="hidden" name="status" value="0">

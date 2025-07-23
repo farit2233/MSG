@@ -29,16 +29,29 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 		object-fit: scale-down;
 		object-position: center center;
 	}
+
+	.card-title {
+		font-size: 20px !important;
+		font-weight: bold;
+	}
+
+	.head-detail {
+		font-size: 16px;
+	}
+
+	section {
+		font-size: 16px;
+	}
 </style>
-<div class="card card-outline card-orange rounded-0">
+<section class="card card-outline card-orange rounded-0">
 	<div class="card-header">
-		<h1 class="card-title text-bold">รายละเอียดสต๊อกสินค้า</h1>
+		<div class="card-title text-bold">รายละเอียดสต๊อกสินค้า</div>
 	</div>
 	<div class="card-body">
 		<div class="flex-column  justify-content-center align-items-center">
 			<div class="card card-outline card-dark rounded-0 mb-3">
 				<div class="card-header">
-					<h3 class="card-title">สินค้า</h3>
+					<div class="card-title" style="font-size: 18px !important;">สินค้า</div>
 				</div>
 				<div class="card-body">
 					<div class="container-fluid">
@@ -179,7 +192,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 			</div>
 		</div>
 	</div>
-</div>
+</section>
 <script>
 	$(function() {
 		$('#new_entry').click(function() {

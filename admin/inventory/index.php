@@ -10,10 +10,19 @@
 		object-fit: cover;
 		object-position: center center;
 	}
+
+	.card-title {
+		font-size: 20px !important;
+		font-weight: bold;
+	}
+
+	section {
+		font-size: 16px;
+	}
 </style>
-<div class="card card-outline rounded-0 card-dark">
+<section class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
-		<h3 class="card-title text-bold">สต๊อกสินค้า</h3>
+		<div class="card-title">สต๊อกสินค้า</div>
 	</div>
 	<div class="card-body">
 		<div class="container-fluid">
@@ -70,7 +79,7 @@
 			</div>
 		</div>
 	</div>
-</div>
+</section>
 <script>
 	$(document).ready(function() {
 

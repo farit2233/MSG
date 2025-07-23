@@ -3,9 +3,23 @@
         alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
     </script>
 <?php endif; ?>
-<div class="card card-outline rounded-0 card-dark">
+<style>
+    .card-title {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
+
+    .head-detail {
+        font-size: 16px;
+    }
+
+    section {
+        font-size: 16px;
+    }
+</style>
+<section class="card card-outline rounded-0 card-dark">
     <div class="card-header">
-        <h3 class="card-title text-bold">ประเภทสินค้าทั้งหมด</h3>
+        <div class="card-title text-bold">ประเภทสินค้าทั้งหมด</div>
         <div class="card-tools">
             <a href="./?page=product_type/manage_product_type" id="create_new" class="btn btn-flat btn-dark"><span class="fas fa-plus"></span> สร้างประเภทสินค้าใหม่</a>
         </div>
@@ -74,7 +88,7 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 <script>
     $(document).ready(function() {
         $('.delete_data').click(function() {

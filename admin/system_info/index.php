@@ -28,6 +28,11 @@
 		overflow-y: auto;
 	}
 
+	.card-title {
+		font-size: 20px !important;
+		font-weight: bold;
+	}
+
 	.head-label {
 		font-size: 17px;
 	}
@@ -35,18 +40,22 @@
 	.text-size-input {
 		font-size: 16px;
 	}
+
+	section {
+		font-size: 16px;
+	}
 </style>
-<div class="card card-outline rounded-0 card-orange">
+<section class="card card-outline rounded-0 card-dark">
 	<div class="card-header">
-		<h4 class=" text-bold">ตั้งค่าหน้าเว็บ</h4>
+		<div class="card-title">ตั้งค่าหน้าเว็บ</div>
 	</div>
 	<div class="card-body">
 		<div class="card card-outline rounded-0 card-dark">
 			<div class="card-header">
-				<h5 class="text-bold">รายละเอียดเว็บ</h5>
-				<!-- <div class="card-tools">
-				<a class="btn btn-block btn-sm btn-default btn-flat border-navy new_department" href="javascript:void(0)"><i class="fa fa-plus"></i> Add New</a>
-			</div> -->
+				<div class="card-title" style="font-size: 18px !important;">รายละเอียดเว็บ</div>
+				<!-- <div class=" card-tools">
+					<a class="btn btn-block btn-sm btn-default btn-flat border-navy new_department" href="javascript:void(0)"><i class="fa fa-plus"></i> Add New</a>
+				</div> -->
 			</div>
 			<div class="card-body">
 				<form action="classes/SystemSettings.php?f=update_settings_info" id="system-frm" method="POST" enctype="multipart/form-data">
@@ -116,7 +125,8 @@
 		<a class="btn btn-danger btn-sm border btn-flat btn-foot" href="./?page=system_info/"><i class="fa fa-times"></i> ยกเลิก</a>
 		<a class="btn btn-light btn-sm border btn-flat btn-foot" href="./?page=home"><i class="fa fa-angle-left"></i> กลับสู่หน้าหลัก</a>
 	</div>
-</div>
+	</div>
+</section>
 <script>
 	function displayImg(input, _this) {
 		if (input.files && input.files[0]) {

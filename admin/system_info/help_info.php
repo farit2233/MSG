@@ -3,16 +3,26 @@
         alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
     </script>
 <?php endif; ?>
-<div class="card card-outline rounded-0 card-orange">
+<style>
+    .card-title {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
+
+    section {
+        font-size: 16px;
+    }
+</style>
+<section class="card card-outline rounded-0 card-dark">
     <div class="card-header">
-        <h4 class=" text-bold">หน้าช่วยเหลือ</h4>
+        <div class="card-title">หน้าช่วยเหลือ</div>
     </div>
     <div class="card-body">
         <div class="card card-outline card-dark rounded-0 mb-3">
             <div class="card-header">
-                <h5 class="text-bold">รายละเอียดหน้าช่วยเหลือ</h5>
+                <div class="card-title" style="font-size: 18px !important;">รายละเอียดหน้าช่วยเหลือ</div>
             </div>
-            <div class="card-body">
+            <div class=" card-body">
                 <div class="container-fluid">
                     <form action="" id="system-frm">
                         <div class="form-group w-100">
@@ -29,7 +39,7 @@
         <a class="btn btn-danger btn-sm border btn-flat btn-foot" href="./?page=system_info/help_info"><i class="fa fa-times"></i> ยกเลิก</a>
         <a class="btn btn-light btn-sm border btn-flat btn-foot" href="./?page=home"><i class="fa fa-angle-left"></i> กลับสู่หน้าหลัก</a>
     </div>
-</div>
+</section>
 
 <script>
     $(document).ready(function() {

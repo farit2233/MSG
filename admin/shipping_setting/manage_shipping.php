@@ -47,17 +47,26 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 }
 
 ?>
+<style>
+    .card-title {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
 
-<div class="card card-outline card-orange rounded-0">
+    section {
+        font-size: 16px;
+    }
+</style>
+<section class="card card-outline card-orange rounded-0">
     <div class="card-header">
-        <h1 class="card-title"><?php echo isset($id) && $id > 0 ? 'แก้ไขข้อมูลการจัดส่ง' : 'เพิ่มข้อมูลการจัดส่ง'; ?></h1>
+        <div class="card-title"><?php echo isset($id) && $id > 0 ? 'แก้ไขข้อมูลการจัดส่ง' : 'เพิ่มข้อมูลการจัดส่ง'; ?></div>
     </div>
     <form action="" id="shipping-form" method="POST">
         <input type="hidden" name="id" value="<?= $id ?>">
         <div class="card-body">
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <h3 class="card-title h3">ข้อมูลการจัดส่ง</h3>
+                    <div class="card-title" style="font-size: 18px !important;">ข้อมูลการจัดส่ง</div>
                 </div>
                 <div class="card-body">
                     <div class="form-group row">
@@ -90,9 +99,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <h3 class="card-title h3">ประเภทค่าจัดส่ง</h3>
+                    <div class="card-title" style="font-size: 18px !important;">ประเภทค่าจัดส่ง</div>
                 </div>
-                <div class="card-body">
+                <div class=" card-body">
                     <div class="form-group" id="fixed_cost_group">
                         <label for="cost">ค่าจัดส่งคงที่ <span class="text-danger">*</span></label>
                         <div class="input-group">
@@ -152,9 +161,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <h3 class="card-title">เก็บเงินปลายทาง</h3>
+                    <div class="card-title" style="font-size: 18px !important;">เก็บเงินปลายทาง</div>
                 </div>
-                <div class="card-body">
+                <div class=" card-body">
                     <input type="hidden" name="cod_enabled" value="0">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="cod_enabled" name="cod_enabled" value="1" <?= isset($cod_enabled) && $cod_enabled == 1 ? 'checked' : '' ?>>
@@ -165,7 +174,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <h3 class="card-title">สถานะการแสดงผล</h3>
+                    <div class="card-title" style="font-size: 18px !important;">สถานะการแสดงผล</div>
                 </div>
                 <div class="card-body">
                     <input type="hidden" name="is_active" value="0">
@@ -183,7 +192,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             <a class="btn btn-light btn-sm border btn-flat" href="./?page=shipping_setting"><i class="fa fa-angle-left"></i> กลับ</a>
         </div>
     </form>
-</div>
+</section>
 
 <script>
     $(function() {

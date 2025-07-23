@@ -65,23 +65,28 @@ if (!empty($shipping_methods_id)) {
         object-position: center center;
     }
 
+    .card-title {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
+
     .head-detail {
         font-size: 16px;
     }
 
-    .text-detail {
-        font-size: 15px;
+    section {
+        font-size: 16px;
     }
 </style>
-<div class="card card-outline card-primary rounded-0">
+<section class="card card-outline card-orange rounded-0">
     <div class="card-header">
-        <h3 class="text-bold">รายละเอียดคำสั่งซื้อ</h3>
+        <div class="card-title">รายละเอียดคำสั่งซื้อ</div>
     </div>
     <div class="card-body">
         <div class="flex-column  justify-content-center align-items-center">
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h4 class="m-0 flex-grow-1">รายละเอียดคำสั่งซื้อหมายเลข : <?= isset($code) ? $code : '' ?></h4>
+                    <div class="card-title m-0 flex-grow-1" style="font-size: 18px !important;">รายละเอียดคำสั่งซื้อหมายเลข : <?= isset($code) ? $code : '' ?></div>
                     <div class="card-tools text-end">
                         <?php if (isset($status) && $status < 4): ?>
                             <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="update_status">
@@ -101,28 +106,27 @@ if (!empty($shipping_methods_id)) {
                 </div>
 
                 <div class="card-body ">
-
                     <div class="container-fluid">
                         <div class=" printout">
                             <div class="row mb-3">
                                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 ">
                                     <div class="mb-3">
                                         <label for="" class="control-label head-detail">หมายเลขคำสั่งซื้อ :</label>
-                                        <div class="pl-4 text-detail"><?= isset($code) ? $code : '' ?></div>
+                                        <div class="pl-4"><?= isset($code) ? $code : '' ?></div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="" class="control-label head-detail">ที่อยู่จัดส่ง :</label>
-                                        <div class="pl-4 text-detail"><?= isset($delivery_address) ? str_replace(["\r\n", "\r", "\n"], "<br>", $delivery_address) : '' ?></div>
+                                        <div class="pl-4"><?= isset($delivery_address) ? str_replace(["\r\n", "\r", "\n"], "<br>", $delivery_address) : '' ?></div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="" class="control-label head-detail">ชื่อผู้รับ :</label>
-                                        <div class="pl-4 text-detail"><?= !empty($customer_name) ? htmlentities($customer_name) : 'ไม่พบข้อมูลลูกค้า' ?></div>
+                                        <div class="pl-4"><?= !empty($customer_name) ? htmlentities($customer_name) : 'ไม่พบข้อมูลลูกค้า' ?></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                     <div class="mb-3">
                                         <label for="" class="control-label head-detail">สถานะการชำระเงิน :</label>
-                                        <div class="pl-4 text-detail">
+                                        <div class="pl-4 ">
                                             <?php
                                             switch ((int)$payment_status) {
                                                 case 0:
@@ -149,7 +153,7 @@ if (!empty($shipping_methods_id)) {
                                     </div>
                                     <div class="mb-3">
                                         <label for="" class="control-label head-detail">สถานะการจัดส่ง :</label>
-                                        <div class="pl-4 text-detail">
+                                        <div class="pl-4 ">
                                             <?php
                                             switch ((int)$delivery_status) {
                                                 case 0:
@@ -186,7 +190,7 @@ if (!empty($shipping_methods_id)) {
 
                                     <div class="mb-3">
                                         <label class="control-label head-detail">บริษัทขนส่ง :</label>
-                                        <div class="pl-4 text-detail">
+                                        <div class="pl-4 ">
                                             <?= htmlentities($shipping_methods_name) ?>
                                             <br>
                                             น้ำหนักรวม: <?= number_format($total_weight, 0) ?> กรัม
@@ -220,8 +224,8 @@ if (!empty($shipping_methods_id)) {
                                                 <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail border p-0 product-logo">
                                             </div>
                                             <div class="col-auto flex-shrink-1 flex-grow-1">
-                                                <div style="line-heigth:1em">
-                                                    <h4 class='mb-0'><?= $row['product'] ?></h4>
+                                                <div style="line-height:1em">
+                                                    <div class='mb-0'><?= $row['product'] ?></div>
                                                     <div class="text-muted"><?= $row['brand'] ?></div>
                                                     <div class="text-muted"><?= $row['category'] ?></div>
                                                     <div class="text-muted d-flex w-100">
@@ -235,7 +239,7 @@ if (!empty($shipping_methods_id)) {
                                                 </div>
                                             </div>
                                             <div class="col-auto">
-                                                <h4><b><?= format_num($item_total, 2) ?></b></h4>
+                                                <div><b><?= format_num($item_total, 2) ?></b></div>
                                             </div>
                                         </div>
                                     </div>
@@ -247,7 +251,7 @@ if (!empty($shipping_methods_id)) {
                             <?php $grand_total = $gt + $shipping_cost; ?>
                             <div class="d-flex justify-content-end py-3">
                                 <div class="col-auto">
-                                    <h3><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h3>
+                                    <h4><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h4>
                                 </div>
                             </div>
                         </div>
@@ -256,28 +260,29 @@ if (!empty($shipping_methods_id)) {
             </div>
         </div>
     </div>
-</div>
+    </div>
 
-<noscript id="print-header">
-    <div>
-        <div class="d-flex w-100 align-items-center">
-            <div class="col-2 text-center">
-                <img src="<?= validate_image($_settings->info('logo')) ?>" alt="" class="rounded-circle border" style="width: 5em;height: 5em;object-fit:cover;object-position:center center">
-            </div>
-            <div class="col-8">
-                <div style="line-height:1em">
-                    <div class="text-center font-weight-bold">
-                        <large><?= $_settings->info('name') ?></large>
-                    </div>
-                    <div class="text-center font-weight-bold">
-                        <large>รายละเอียดคำสั่งซื้อ</large>
+    <noscript id="print-header">
+        <div>
+            <div class="d-flex w-100 align-items-center">
+                <div class="col-2 text-center">
+                    <img src="<?= validate_image($_settings->info('logo')) ?>" alt="" class="rounded-circle border" style="width: 5em;height: 5em;object-fit:cover;object-position:center center">
+                </div>
+                <div class="col-8">
+                    <div style="line-height:1em">
+                        <div class="text-center font-weight-bold">
+                            <large><?= $_settings->info('name') ?></large>
+                        </div>
+                        <div class="text-center font-weight-bold">
+                            <large>รายละเอียดคำสั่งซื้อ</large>
+                        </div>
                     </div>
                 </div>
             </div>
+            <hr>
         </div>
-        <hr>
-    </div>
-</noscript>
+    </noscript>
+</section>
 <script>
     function print_t() {
         var h = $('head').clone()

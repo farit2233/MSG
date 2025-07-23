@@ -9,20 +9,29 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     }
 }
 ?>
-<div class="container-fluid">
+<style>
+    .text-size-input {
+        font-size: 16px;
+    }
+
+    section {
+        font-size: 16px;
+    }
+</style>
+<section class="container-fluid">
     <form action="" id="stock-form">
         <input type="hidden" name="id" value='<?= isset($id) ? $id : '' ?>'>
         <input type="hidden" name="product_id" value='<?= isset($product_id) ? $product_id : (isset($_GET['pid']) ? $_GET['pid'] : '') ?>'>
         <div class="form-group">
             <label for="code" class="control-label">รหัสสต๊อกสินค้า</label>
-            <input type="text" class="form-control form-control-sm rounded-0" name="code" id="code" required="required" value="<?= isset($code) ? $code : '' ?>">
+            <input type="text" class="form-control form-control-sm rounded-0 text-size-input" name="code" id="code" required="required" value="<?= isset($code) ? $code : '' ?>">
         </div>
         <div class="form-group">
             <label for="quantity" class="control-label">จำนวน</label>
-            <input type="number" class="form-control form-control-sm rounded-0 text-right" name="quantity" id="quantity" required="required" value="<?= isset($quantity) ? $quantity : '' ?>">
+            <input type="number" class="form-control form-control-sm rounded-0 text-right text-size-input" name="quantity" id="quantity" required="required" value="<?= isset($quantity) ? $quantity : '' ?>">
         </div>
     </form>
-</div>
+</section>
 <script>
     $(function() {
         $('#stock-form').submit(function(e) {
