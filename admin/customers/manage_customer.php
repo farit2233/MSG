@@ -152,6 +152,37 @@ if (isset($_GET['id'])) {
 					</div>
 				</div>
 			</div>
+			<div class="section-title-with-line mb-4">
+				<h3>ที่อยู่จัดส่ง</h3>
+			</div>
+			<div class="row">
+				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+					<div class="form-group">
+						<label for="address" class="control-label">บ้านเลขที่ ถนน</label>
+						<input type="text" class="form-control form-control-sm" name="address" id="address" value="<?= isset($address) ? $address : '' ?>">
+					</div>
+
+					<div class="form-group">
+						<label for="city" class="control-label">ตำบล</label>
+						<input type="text" class="form-control form-control-sm" name="sub_district" id="sub_district" value="<?= isset($sub_district) ? $sub_district : '' ?>">
+					</div>
+					<div class="form-group">
+						<label for="city" class="control-label">อำเภอ</label>
+						<input type="text" class="form-control form-control-sm" name="district" id="district" value="<?= isset($district) ? $district : '' ?>">
+					</div>
+				</div>
+
+				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+					<div class="form-group">
+						<label for="state_province" class="control-label">จังหวัด</label>
+						<input type="text" class="form-control form-control-sm" name="province" id="province" value="<?= isset($province) ? $province : '' ?>">
+					</div>
+					<div class="form-group">
+						<label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
+						<input type="text" class="form-control form-control-sm" name="postal_code" id="postal_code" value="<?= isset($postal_code) ? $postal_code : '' ?>">
+					</div>
+				</div>
+			</div>
 			<div class="row">
 				<div class="col-md-8 col-12 text-md-left text-center mb-2 mb-md-0">
 				</div>
