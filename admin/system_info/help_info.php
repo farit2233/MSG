@@ -3,33 +3,34 @@
         alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
     </script>
 <?php endif; ?>
-<div class="content py-5 px-3 bg-gradient-dark">
-    <h2><b>Contact information</b></h2>
-</div>
-<div class="row mt-lg-n4 mt-md-n4 justify-content-center">
-    <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12">
-        <div class="card rounded-0 shadow">
+<div class="card card-outline rounded-0 card-orange">
+    <div class="card-header">
+        <h4 class=" text-bold">หน้าช่วยเหลือ</h4>
+    </div>
+    <div class="card-body">
+        <div class="card card-outline card-dark rounded-0 mb-3">
+            <div class="card-header">
+                <h5 class="text-bold">รายละเอียดหน้าช่วยเหลือ</h5>
+            </div>
             <div class="card-body">
-                <form action="" id="system-frm">
-                    <div class="form-group w-100">
-                        <label class="control-label">Help_info</label>
-                        <a href="<?php echo base_url ?>./?p=help" class="btn btn-sm btn-secondary ml-2" target="_blank">ดูหน้า Help</a>
-                        <textarea name="content[help]" cols="30" rows="6" class="form-control summernote"><?php echo  is_file(base_app . 'help.html') ? file_get_contents(base_app . 'help.html') : "" ?></textarea>
-                    </div>
-            </div>
-            </form>
-        </div>
-        <div class="card-footer">
-            <div class="col-md-12">
-                <div class="row">
-                    <button class="btn btn-sm btn-dark" form="system-frm">Update Prices</button>
+                <div class="container-fluid">
+                    <form action="" id="system-frm">
+                        <div class="form-group w-100">
+                            <a href="<?php echo base_url ?>./?p=help" class="text-dark ml-2" target="_blank"><i class="fa-solid fa-eye"></i> ดูหน้าช่วยเหลือ</a>
+                            <textarea name="content[help]" cols="30" rows="6" class="form-control summernote"><?php echo  is_file(base_app . 'help.html') ? file_get_contents(base_app . 'help.html') : "" ?></textarea>
+                        </div>
                 </div>
+                </form>
             </div>
         </div>
-
+    </div>
+    <div class="card-footer py-1 text-center">
+        <button class="btn btn-success btn-sm btn-flat" form="system-frm"><i class="fa fa-save"></i> บันทึก</button>
+        <a class="btn btn-danger btn-sm border btn-flat btn-foot" href="./?page=system_info/help_info"><i class="fa fa-times"></i> ยกเลิก</a>
+        <a class="btn btn-light btn-sm border btn-flat btn-foot" href="./?page=home"><i class="fa fa-angle-left"></i> กลับสู่หน้าหลัก</a>
     </div>
 </div>
-</div>
+
 <script>
     $(document).ready(function() {
         $('.summernote').summernote({
