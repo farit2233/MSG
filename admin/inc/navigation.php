@@ -68,6 +68,14 @@
                 </ul>
               </li>
               <li class="nav-item dropdown">
+                <a href="./?page=promotions" class="nav-link nav-promotions">
+                  <i class="nav-icon fas fa-boxes"></i>
+                  <p>
+                    โปรโมชั่นสินค้า
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item dropdown">
                 <a href="./?page=products" class="nav-link nav-products">
                   <i class="nav-icon fas fa-boxes"></i>
                   <p>
