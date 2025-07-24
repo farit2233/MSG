@@ -1155,6 +1155,62 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+	function save_promotion_products()
+	{
+		$resp = [];
+
+		if (empty($_POST['id'])) {
+			return json_encode(['status' => 'failed', 'msg' => 'ไม่พบ ID ของโปรโมชั่น']);
+		}
+
+		$promotion_id = (int) $_POST['id'];
+		$promotion_type = $_POST['promotion_type'] ?? '';
+		$product_ids = $_POST['category_ids_products'] ?? [];
+		$category_ids = $_POST['category_ids_categories'] ?? [];
+
+		$this->conn->begin_transaction();
+
+		try {
+			// 1) ลบข้อมูลเก่าทิ้งก่อน
+			$stmt1 = $this->conn->prepare("DELETE FROM promotion_products WHERE promotion_id = ?");
+			$stmt1->bind_param("i", $promotion_id);
+			$stmt1->execute();
+
+			$stmt2 = $this->conn->prepare("DELETE FROM promotion_category WHERE promotion_id = ?");
+			$stmt2->bind_param("i", $promotion_id);
+			$stmt2->execute();
+
+			// 2) เพิ่มใหม่ตามประเภท
+			if ($promotion_type === 'by_product' && is_array($product_ids)) {
+				$stmt_insert_product = $this->conn->prepare("INSERT INTO promotion_products (promotion_id, product_id) VALUES (?, ?)");
+				foreach ($product_ids as $pid) {
+					$pid = (int) $pid;
+					$stmt_insert_product->bind_param("ii", $promotion_id, $pid);
+					$stmt_insert_product->execute();
+				}
+			}
+
+			if ($promotion_type === 'by_category' && is_array($category_ids)) {
+				$stmt_insert_cat = $this->conn->prepare("INSERT INTO promotion_category (promotion_id, category_id) VALUES (?, ?)");
+				foreach ($category_ids as $cid) {
+					$cid = (int) $cid;
+					$stmt_insert_cat->bind_param("ii", $promotion_id, $cid);
+					$stmt_insert_cat->execute();
+				}
+			}
+
+			$this->conn->commit();
+			$resp['status'] = 'success';
+			$resp['redirect_url'] = './?page=promotions/view_promotion&id=' . $promotion_id;
+			$this->settings->set_flashdata('success', "บันทึกข้อมูลสินค้าในโปรโมชั่นสำเร็จ");
+		} catch (Exception $e) {
+			$this->conn->rollback();
+			$resp['status'] = 'failed';
+			$resp['msg'] = "เกิดข้อผิดพลาด: " . $e->getMessage();
+		}
+
+		return json_encode($resp);
+	}
 }
 
 $Master = new Master();
@@ -1230,8 +1286,11 @@ switch ($action) {
 	case 'save_promotion':
 		echo $Master->save_promotion();
 		break;
-	case 'delete_inquiry':
+	case 'delete_promotion':
 		echo $Master->delete_promotion();
+		break;
+	case 'save_promotion_products':
+		echo $Master->save_promotion_products();
 		break;
 	default:
 		// echo $sysset->index();
