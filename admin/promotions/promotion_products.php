@@ -203,6 +203,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             <?php endif; ?>
         </div>
 
+        <input type="hidden" name="id" value="1">
+        <input type="hidden" name="promotion_type" value="by_product">
     </form>
 </section>
 
@@ -444,8 +446,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 
             $.ajax({
-                url: _base_url_ + "classes/Master.php?f=save_promotion",
-                data: formData,
+                url: _base_url_ + "classes/Master.php?f=save_promotion_products",
+                data: new FormData(this),
                 method: 'POST',
                 cache: false,
                 contentType: false,
