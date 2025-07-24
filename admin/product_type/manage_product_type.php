@@ -18,7 +18,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         font-size: 16px;
     }
 </style>
-<div class="card card-outline card-orange rounded-0">
+<section class="card card-outline card-orange rounded-0">
     <div class="card-header">
         <div class="card-title"><?= isset($id) ? "แก้ไขประเภทสินค้า" : "สร้างประเภทสินค้าใหม่" ?></div>
     </div>
@@ -60,19 +60,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         <a class="btn btn-danger btn-sm border btn-flat" href="./?page=product_type"><i class="fa fa-times"></i> ยกเลิก</a>
         <a class="btn btn-light btn-sm border btn-flat" href="./?page=product_type"><i class="fa fa-angle-left"></i> กลับ</a>
     </div>
-</div>
-<style>
-    .arrow-icon {
-        display: inline-block;
-        width: 0;
-        height: 0;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 20px solid #3498db;
-        /* สีของลูกศร */
-    }
-</style>
-
+</section>
 <script>
     $(document).ready(function() {
         $('#product-type-form').submit(function(e) {

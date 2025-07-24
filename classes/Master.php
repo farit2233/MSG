@@ -570,10 +570,10 @@ class Master extends DBConnection
 				p.discount_type,
 				p.discount_value,
 				p.discounted_price
-			FROM `cart_list` c 
-			INNER JOIN product_list p ON c.product_id = p.id 
-			WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
-		");
+				FROM `cart_list` c 
+				INNER JOIN product_list p ON c.product_id = p.id 
+				WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
+			");
 
 			$backend_total = 0;
 			$cart_data = [];
@@ -645,9 +645,9 @@ class Master extends DBConnection
 			$this->conn->query("COMMIT");
 
 			$items = $this->conn->query("SELECT oi.*, p.name 
-		FROM order_items oi 
-		INNER JOIN product_list p ON oi.product_id = p.id 
-		WHERE oi.order_id = {$oid}");
+			FROM order_items oi 
+			INNER JOIN product_list p ON oi.product_id = p.id 
+			WHERE oi.order_id = {$oid}");
 
 			$mail = new PHPMailer(true);
 			try {
@@ -677,46 +677,47 @@ class Master extends DBConnection
 
 				$body = "
 				<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
-				<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
-				<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
-				<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
-				<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
-				<p><strong>ขนส่ง:</strong> {$shipping_methods_name}</p>
-				<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
-				<thead style='background:#16542b; color:white;'>
-				<tr>
-					<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
-					<th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
-					<th style='padding:8px; border:1px solid #ddd;'>ราคาต่อชิ้น</th>
-					<th style='padding:8px; border:1px solid #ddd;'>รวม</th>
-				</tr>
-				</thead>
-				<tbody>";
+					<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
+					<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
+					<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
+					<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
+					<p><strong>ขนส่ง:</strong> {$shipping_methods_name}</p>
+					<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
+						<thead style='background:#16542b; color:white;'>
+							<tr>
+								<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
+								<th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
+								<th style='padding:8px; border:1px solid #ddd;'>ราคาต่อชิ้น</th>
+								<th style='padding:8px; border:1px solid #ddd;'>รวม</th>
+							</tr>
+						</thead>
+						<tbody>";
 
 				while ($row = $items->fetch_assoc()) {
 					$subtotal = $row['price'] * $row['quantity'];
 					$body .= "
-				<tr>
-				<td style='padding:8px; border:1px solid #ddd;'>{$row['name']}</td>
-				<td style='padding:8px; border:1px solid #ddd; text-align:center;'>{$row['quantity']}</td>
-				<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($row['price'], 2) . "</td>
-				<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($subtotal, 2) . "</td>
-				</tr>";
+							<tr>
+								<td style='padding:8px; border:1px solid #ddd;'>{$row['name']}</td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:center;'>{$row['quantity']}</td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($row['price'], 2) . "</td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($subtotal, 2) . "</td>
+							</tr>";
 				}
 
 				$body .= "
-				<tr>
-					<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
-					<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
-				</tr>
-				<tr>
-					<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
-					<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
-				</tr>
-				</tbody></table>
-			<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$delivery_address}</div></p>
-			<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
-			</div>";
+							<tr>
+								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
+							</tr>
+							<tr>
+								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
+							</tr>
+						</tbody>
+					</table>
+					<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$delivery_address}</div></p>
+					<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+				</div>";
 
 				$mail->Body = $body;
 				$mail->send();
@@ -748,24 +749,24 @@ class Master extends DBConnection
 
 				// สร้างเนื้อหาของอีเมล
 				$admin_body = "
-    <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
-        <h2 style='color: #16542b; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
-        <p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
-        <p><strong>ลูกค้า:</strong> $customer_name</p>
-        <p><strong>ที่อยู่จัดส่ง:</strong> {$delivery_address}</p>
-        <p><strong>ยอดรวม:</strong> " . number_format($grand_total, 2) . " บาท</p>
-        <p><strong>ขนส่ง:</strong> $shipping_methods_name</p>
-        <h3>รายการสินค้า</h3>
-        <table style='width:100%; border-collapse: collapse; margin-top:10px;'>
-            <thead style='background:#16542b; color:white;'>
-                <tr>
-                    <th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
-                    <th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
-                    <th style='padding:8px; border:1px solid #ddd;'>ราคาต่อชิ้น</th>
-                    <th style='padding:8px; border:1px solid #ddd;'>รวม</th>
-                </tr>
-            </thead>
-            <tbody>";
+				<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
+					<h2 style='color: #16542b; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
+					<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
+					<p><strong>ลูกค้า:</strong> $customer_name</p>
+					<p><strong>ที่อยู่จัดส่ง:</strong> {$delivery_address}</p>
+					<p><strong>ยอดรวม:</strong> " . number_format($grand_total, 2) . " บาท</p>
+					<p><strong>ขนส่ง:</strong> $shipping_methods_name</p>
+					<h3>รายการสินค้า</h3>
+					<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
+						<thead style='background:#16542b; color:white;'>
+							<tr>
+								<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
+								<th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
+								<th style='padding:8px; border:1px solid #ddd;'>ราคาต่อชิ้น</th>
+								<th style='padding:8px; border:1px solid #ddd;'>รวม</th>
+							</tr>
+						</thead>
+						<tbody>";
 
 				// รายการสินค้า
 				$items = $this->conn->query("SELECT oi.*, p.name 
@@ -776,25 +777,26 @@ class Master extends DBConnection
 				while ($row = $items->fetch_assoc()) {
 					$subtotal = $row['price'] * $row['quantity'];
 					$admin_body .= "
-            <tr>
-                <td style='padding:8px; border:1px solid #ddd;'>{$row['name']}</td>
-                <td style='padding:8px; border:1px solid #ddd; text-align:center;'>{$row['quantity']}</td>
-                <td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($row['price'], 2) . "</td>
-                <td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($subtotal, 2) . "</td>
-            </tr>";
+							<tr>
+								<td style='padding:8px; border:1px solid #ddd;'>{$row['name']}</td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:center;'>{$row['quantity']}</td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($row['price'], 2) . "</td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($subtotal, 2) . "</td>
+							</tr>";
 				}
 
 				$admin_body .= "
-            <tr>
-                <td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
-                <td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
-            </tr>
-            <tr>
-                <td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
-                <td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
-            </tr>
-            </tbody></table>
-        </div>";
+							<tr>
+								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
+							</tr>
+							<tr>
+								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>";
 
 				$mail_admin->Body = $admin_body;
 				$mail_admin->send();

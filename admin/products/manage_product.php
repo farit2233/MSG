@@ -296,7 +296,7 @@ function get_platform_link($conn, $product_id, $platform)
 								$product_weight = isset($product_weight) ? (float)$product_weight : 0;
 
 								// 2) วนขนส่งทั้งหมด
-								$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND is_active = 1");
+								$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND status = 1");
 
 								$matched_shipping_price_id = null; // จะเก็บ id ช่วงราคาที่ match จริง
 
