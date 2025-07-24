@@ -883,7 +883,7 @@ class Master extends DBConnection
         SET 
             `payment_status` = '{$payment_status}',
             `delivery_status` = '{$delivery_status}',
-			`is_seen` = 0  
+			`status` = 0  
         WHERE id = '{$id}'");
 
 		if ($update) {
@@ -973,7 +973,7 @@ class Master extends DBConnection
 		$description = $this->conn->real_escape_string($description ?? '');
 		$cost = floatval($cost ?? 0);
 		$cod_enabled = ($_POST['cod_enabled'] == '1') ? 1 : 0;
-		$is_active = ($_POST['is_active'] == '1') ? 1 : 0;
+		$status = ($_POST['status'] == '1') ? 1 : 0;
 
 		// ตรวจสอบข้อมูลที่สำคัญ
 		if (!$provider_id || !$name) {
@@ -988,13 +988,13 @@ class Master extends DBConnection
             description = '{$description}',
             cost = '{$cost}',
             cod_enabled = '{$cod_enabled}',
-            is_active = '{$is_active}'
+            status = '{$status}'
             WHERE id = {$id}";
 		} else {
 			$sql = "INSERT INTO `shipping_methods` 
-        (provider_id, name, description, cost, cod_enabled, is_active)
+        (provider_id, name, description, cost, cod_enabled, status)
         VALUES 
-        ('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$is_active}')";
+        ('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$status}')";
 		}
 
 		// บันทึกข้อมูลใน shipping_methods
@@ -1045,7 +1045,7 @@ class Master extends DBConnection
 				'description' => $description,
 				'cost' => $cost,
 				'cod_enabled' => $cod_enabled,
-				'is_active' => $is_active
+				'status' => $status
 			]);
 		} else {
 			return json_encode(['status' => 'failed', 'msg' => $this->conn->error]);

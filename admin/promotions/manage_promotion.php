@@ -54,8 +54,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             </div>
             <div class="form-group">
                 <label>สถานะ</label><br>
-                <input type="hidden" name="active" value="0">
-                <input type="checkbox" name="active" value="1" <?= (isset($active) && $active == 1) ? 'checked' : '' ?>> ใช้งานโปรโมชั่น
+                <input type="hidden" name="status" value="0">
+                <input type="checkbox" name="status" value="1" <?= (isset($status) && $status == 1) ? 'checked' : '' ?>> ใช้งานโปรโมชั่น
             </div>
         </div>
     </form>
