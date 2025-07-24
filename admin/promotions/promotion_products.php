@@ -12,51 +12,6 @@
     section {
         font-size: 16px;
     }
-
-    a {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    a:hover {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .info-box:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-    }
-
-    .info-box {
-        transition: transform 0.5s ease, box-shadow 0.5s ease;
-        display: inline-flex !important;
-        width: 100%;
-        max-width: 240px;
-        padding: 0.4rem 0.6rem;
-        min-height: auto;
-        border-radius: 0.35rem;
-        margin: 8px;
-    }
-
-    .info-box-content {
-        padding-left: 0.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .info-box-text {
-        font-size: 16px;
-        color: #444;
-        margin-bottom: 0.2rem;
-    }
-
-    .info-box-number {
-        font-size: 16px;
-        font-weight: bold;
-        color: #000;
-    }
 </style>
 
 <section class="card card-outline card-dark rounded-0">
@@ -68,40 +23,16 @@
             </a>
         </div>
     </div>
-    <div class="d-flex flex-wrap justify-content-center mt-3">
-        <?php
-        //$boxes = [
-        //  ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-primary', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
-        //  ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-info', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
-        //  ['link' => '?page=inventory', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-secondary', 'icon' => 'fas fa-warehouse'],
-        //];
-        $boxes = [
-            ['link' => '?page=product_type', 'label' => 'ประเภทสินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-layer-group', 'query' => "SELECT * FROM product_type where delete_flag = 0"],
-            ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
-            ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
-        ];
-
-        foreach ($boxes as $box):
-            $bg = $box['bg'] ?? 'bg-light';
-        ?>
-            <a href="<?= $box['link'] ?>">
-                <div class="info-box <?= $bg ?> text-white">
-                    <span class="info-box-icon"><i class="<?= $box['icon'] ?>"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text text-bold"><?= $box['label'] ?></span>
-                        <?php if (isset($box['query'])): ?>
-                            <?php $result = $conn->query($box['query']); ?>
-                            <span class="info-box-number text-right h5"><?= format_num($result->num_rows ?? 0) ?></span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </a>
-
-        <?php endforeach; ?>
-    </div>
-
     <div class="card-body">
         <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="card-title" style="font-size: 18px !important;">รายการโปรโมชั่น</div>
+                <div class="card-tools">
+                    <a href="./?page=promotions/manage_promotion" class="btn btn-flat btn-dark">
+                        <i class="fas fa-plus"></i> เพิ่มสินค้าหรือหมวดหมู่
+                    </a>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped table-bordered" id="list">
                     <colgroup>
@@ -167,10 +98,6 @@
                                         </button>
 
                                         <div class="dropdown-menu" role="menu">
-                                            <a class="dropdown-item" href="./?page=promotions/view_promotion&id=<?php echo $row['id'] ?>">
-                                                <span class="fa fa-eye text-dark"></span> ดู
-                                            </a>
-                                            <div class="dropdown-divider"></div>
                                             <a class="dropdown-item" href="./?page=promotions/manage_promotion&id=<?php echo $row['id'] ?>">
                                                 <span class="fa fa-edit text-dark"></span> แก้โปรโมชั่น
                                             </a>
