@@ -1,6 +1,6 @@
 <?php
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $qry = $conn->query("SELECT * from `promotions` where id = '{$_GET['id']}' and delete_flag = 0 ");
+    $qry = $conn->query("SELECT * FROM promotions WHERE id = '{$_GET['id']}' and delete_flag = 0 ");
     if ($qry->num_rows > 0) {
         foreach ($qry->fetch_assoc() as $k => $v) {
             $$k = $v;
@@ -74,7 +74,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="row">
                         <div class="col-md-3">
                             <dt class="text-muted">ชื่อโปรโมชั่น</dt>
-                            <dd class="pl-4"><?= isset($name) ? $name : "" ?></dd>
+                            <dd><?= isset($name) ? $name : "" ?></dd>
                         </div>
                         <div class="col-md-3">
                             <dt class="text-muted">รายละเอียดโปรโมชั่น</dt>
@@ -84,7 +84,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                             <dt class="text-muted">ประเภท</dt>
                             <dd>
                                 <?php
-                                switch ($row['type']) {
+                                switch ($type ?? '') {
                                     case 'fixed':
                                         echo 'ลดราคา (บาท)';
                                         break;
@@ -100,63 +100,22 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                                     default:
                                         echo '-';
                                 }
-                                ?></dd>
-                        </div>
-                        <div class="col-md-3">&nbsp;</div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3">
-                            <dt class="text-muted">หมวดหมู่</dt>
-                            <dd><?= $category ?? '' ?></dd>
-                        </div>
-                        <div class="col-md-3">
-                            <dt class="text-muted">ประเภทสินค้า</dt>
-                            <dd><?= $product_type ?? '' ?></dd>
-                        </div>
-                        <div class="col-md-3">&nbsp;</div>
-                        <div class="col-md-3">&nbsp;</div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3">
-                            <dt class="text-muted">ราคา</dt>
-                            <dd><?= isset($price) ? format_num($price, 2) . ' ฿' : '' ?></dd>
-                        </div>
-                        <div class="col-md-3">
-                            <dt class="text-muted">ราคาปัจจุบัน</dt>
-                            <dd>
-                                <?php
-                                $final_price = $price ?? 0;
-                                if (!empty($discount_type) && !empty($discount_value)) {
-                                    if ($discount_type === 'percent') {
-                                        $final_price = $price - ($price * ($discount_value / 100));
-                                    } elseif ($discount_type === 'amount') {
-                                        $final_price = $price - $discount_value;
-                                    }
-                                    if ($final_price < 0) $final_price = 0;
-                                }
-
-                                if (isset($price) && $final_price < $price) {
-                                    echo '<span class="text-danger font-weight-bold">' . format_num($final_price, 2) . ' ฿</span>';
-                                } else {
-                                    echo format_num($price, 2) . ' ฿';
-                                }
                                 ?>
                             </dd>
                         </div>
                         <div class="col-md-3">&nbsp;</div>
-                        <div class="col-md-3">&nbsp;</div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-3">
-                            <dt class="text-muted h6 mb-0">จำนวนสินค้าที่มี</dt>
-                            <dd class="h5"><?= isset($available) ? format_num($available, 0) : "0" ?></dd>
+                            <dt class="text-muted">มูลค่าส่วนลด</dt>
+                            <dd><?= $discount_value ?? '' ?></dd>
                         </div>
-                        <div class="col-md-3">&nbsp;</div>
-                        <div class="col-md-3">&nbsp;</div>
-                        <div class="col-md-3">&nbsp;</div>
+                        <div class="col-md-4">
+                            <dt class="text-muted">ช่วงเวลา</dt>
+                            <?= date("Y-m-d", strtotime($start_date ?? '')) ?> ถึง
+                            <?= date("Y-m-d", strtotime($end_date ?? '')) ?>
+                        </div>
                     </div>
                 </div>
 
@@ -164,11 +123,15 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         </div>
         <div class="card card-outline card-dark rounded-0 mb-3">
             <div class="card-header">
-                <div class="card-title">โปรโมชั่นทั้งหมด</div>
+                <div class="card-title">สินค้าที่มีโปรโมชั่น</div>
                 <div class="card-tools">
-                    <a href="./?page=promotions/manage_promotion" class="btn btn-flat btn-dark">
-                        <i class="fas fa-plus"></i> สร้างโปรโมชั่นใหม่
-                    </a>
+                    <?php if (isset($_GET['id']) && $_GET['id'] > 0): ?>
+                        <div class="card-tools">
+                            <a href="./?page=promotions/promotion_products&id=<?= $_GET['id'] ?>" class="btn btn-flat btn-dark">
+                                <i class="fas fa-plus"></i> เพิ่มสินค้า
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="card-body">
@@ -177,82 +140,52 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                         <table class="table table-hover table-striped table-bordered" id="list">
                             <colgroup>
                                 <col width="5%">
-                                <col width="20%">
+                                <col width="10%">
+                                <col width="15%">
                                 <col width="25%">
                                 <col width="10%">
-                                <col width="10%">
-                                <col width="20%">
                                 <col width="10%">
                             </colgroup>
                             <thead class="text-center">
                                 <tr>
                                     <th>ที่</th>
-                                    <th>ชื่อโปรโมชั่น</th>
-                                    <th>รายละเอียด</th>
-                                    <th>ประเภท</th>
-                                    <th>มูลค่าส่วนลด</th>
-                                    <th>ช่วงเวลา</th>
+                                    <th>รูปภาพสินค้า</th>
+                                    <th>แบรนด์</th>
+                                    <th>ชื่อสินค้า</th>
+                                    <th>ราคา</th>
                                     <th>จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
                                 $i = 1;
-                                $qry = $conn->query("SELECT * FROM `promotions` ORDER BY `date_created`  ASC, `name` ASC");
+                                $qry = $conn->query("
+                                    SELECT 
+                                        pp.id as pp_id,
+                                        p.id as product_id,
+                                        p.name as product_name,
+                                        p.brand,
+                                        p.price,
+                                        p.image_path
+                                    FROM promotion_products pp
+                                    INNER JOIN product_list p ON pp.product_id = p.id
+                                ");
                                 while ($row = $qry->fetch_assoc()):
                                 ?>
                                     <tr>
                                         <td class="text-center"><?= $i++ ?></td>
-                                        <td><?= $row['name'] ?></td>
-                                        <td><?= $row['description'] ?></td>
                                         <td class="text-center">
-                                            <?php
-                                            switch ($row['type']) {
-                                                case 'fixed':
-                                                    echo 'ลดราคา (บาท)';
-                                                    break;
-                                                case 'percent':
-                                                    echo 'ลดเปอร์เซ็นต์';
-                                                    break;
-                                                case 'free_shipping':
-                                                    echo 'ส่งฟรี';
-                                                    break;
-                                                case 'code':
-                                                    echo 'โค้ดส่วนลด';
-                                                    break;
-                                                default:
-                                                    echo '-';
-                                            }
-                                            ?>
-                                        </td>
-                                        <td class="text-right"><?= number_format($row['discount_value'], 2) ?></td>
-                                        <td class="text-center">
-                                            <?= date("Y-m-d", strtotime($row['start_date'])) ?> ถึง<br>
-                                            <?= date("Y-m-d", strtotime($row['end_date'])) ?>
-                                        </td>
-                                        <td class="text-center">
-                                            <?php if ($_settings->userdata('type') == 1): ?>
-                                                <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
-                                                    จัดการ
-                                                    <span class="sr-only">Toggle Dropdown</span>
-                                                </button>
-
-                                                <div class="dropdown-menu" role="menu">
-                                                    <a class="dropdown-item" href="./?page=promotions/view_promotion&id=<?php echo $row['id'] ?>">
-                                                        <span class="fa fa-eye text-dark"></span> ดู
-                                                    </a>
-                                                    <div class="dropdown-divider"></div>
-                                                    <a class="dropdown-item" href="./?page=promotions/manage_promotion&id=<?php echo $row['id'] ?>">
-                                                        <span class="fa fa-edit text-dark"></span> แก้โปรโมชั่น
-                                                    </a>
-                                                    <div class="dropdown-divider"></div>
-                                                    <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">
-                                                        <span class="fa fa-trash text-danger"></span> ลบโปรโมชั่น
-                                                    </a>
-                                                </div>
-                                            <?php else : ?>
-                                                <span class="text-center"> - </span>
+                                            <?php if (!empty($row['image_path']) && file_exists('uploads/products/' . $row['image_path'])): ?>
+                                                <img src="uploads/products/<?= $row['image_path'] ?>" alt="" class="img-thumbnail" style="max-height: 75px;">
+                                            <?php else: ?>
+                                                <span class="text-muted">ไม่มีรูป</span>
                                             <?php endif; ?>
+                                        </td>
+                                        <td><?= htmlspecialchars($row['brand']) ?></td>
+                                        <td><?= htmlspecialchars($row['product_name']) ?></td>
+                                        <td class="text-right"><?= number_format($row['price'], 2) ?> ฿</td>
+                                        <td class="text-center">
+                                            <a href="./?page=products/view_product&id=<?= $row['product_id'] ?>" class="btn btn-sm btn-primary">ดู</a>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -262,6 +195,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 </div>
             </div>
         </div>
+    </div>
+    <div class="card-footer py-1 text-center">
+        <a class="btn btn-light btn-sm border btn-flat" href="./?page=promotions"><i class="fa fa-angle-left"></i> กลับ</a>
     </div>
 </section>
 <script>

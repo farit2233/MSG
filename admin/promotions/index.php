@@ -18,15 +18,6 @@
         text-decoration: none;
     }
 
-    a:hover {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .info-box:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-    }
 
     .info-box {
         transition: transform 0.5s ease, box-shadow 0.5s ease;
@@ -57,6 +48,11 @@
         font-weight: bold;
         color: #000;
     }
+
+    .no-link {
+        cursor: default;
+        text-decoration: none;
+    }
 </style>
 
 <section class="card card-outline card-dark rounded-0">
@@ -70,35 +66,28 @@
     </div>
     <div class="d-flex flex-wrap justify-content-center mt-3">
         <?php
-        //$boxes = [
-        //  ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-primary', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
-        //  ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-info', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
-        //  ['link' => '?page=inventory', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-secondary', 'icon' => 'fas fa-warehouse'],
-        //];
         $boxes = [
-            ['link' => '?page=product_type', 'label' => 'ประเภทสินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-layer-group', 'query' => "SELECT * FROM product_type where delete_flag = 0"],
-            ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
-            ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
+            ['label' => 'ยอดขาย', 'bg' => 'bg-white', 'icon' => 'fas fa-layer-group', 'query' => "SELECT * FROM product_type where delete_flag = 0"],
+            ['label' => 'จำนวนคำสั่งซื้อ', 'bg' => 'bg-white', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
+            ['label' => 'จำนวนสินค้า', 'bg' => 'bg-white', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
         ];
 
         foreach ($boxes as $box):
             $bg = $box['bg'] ?? 'bg-light';
         ?>
-            <a href="<?= $box['link'] ?>">
-                <div class="info-box <?= $bg ?> text-white">
-                    <span class="info-box-icon"><i class="<?= $box['icon'] ?>"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text text-bold"><?= $box['label'] ?></span>
-                        <?php if (isset($box['query'])): ?>
-                            <?php $result = $conn->query($box['query']); ?>
-                            <span class="info-box-number text-right h5"><?= format_num($result->num_rows ?? 0) ?></span>
-                        <?php endif; ?>
-                    </div>
+            <div class="info-box <?= $bg ?> text-white" style="cursor: default;">
+                <span class="info-box-icon"><i class="<?= $box['icon'] ?>"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text text-bold"><?= $box['label'] ?></span>
+                    <?php if (isset($box['query'])): ?>
+                        <?php $result = $conn->query($box['query']); ?>
+                        <span class="info-box-number text-right h5"><?= format_num($result->num_rows ?? 0) ?></span>
+                    <?php endif; ?>
                 </div>
-            </a>
-
+            </div>
         <?php endforeach; ?>
     </div>
+
 
     <div class="card-body">
         <div class="container-fluid">
