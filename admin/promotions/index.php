@@ -87,8 +87,6 @@
             </div>
         <?php endforeach; ?>
     </div>
-
-
     <div class="card-body">
         <div class="container-fluid">
             <div class="table-responsive">
