@@ -149,14 +149,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             <a class="btn btn-light btn-sm border btn-flat" href="./?page=promotions"><i class="fa fa-angle-left"></i> กลับ</a>
         </div>
     </form>
-    <!-- ปุ่มเปิด Modal -->
-    <div class="form-group">
-        <label>สินค้าที่ร่วมรายการ</label>
-        <input type="text" name="promo_code" class="form-control" value="<?= isset($promo_code) ? $promo_code : '' ?>" disabled>
-        <button type="button" id="selectProductsBtn" class="btn btn-primary">
-            เลือกสินค้า
-        </button>
-    </div>
 
     <!-- Modal สำหรับเลือกสินค้า -->
     <div class="modal fade" id="selectProductsModal" tabindex="-1" role="dialog" aria-labelledby="selectProductsModalLabel" aria-hidden="true">
