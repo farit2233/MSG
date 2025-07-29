@@ -99,7 +99,7 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
-                                    <?php if ($row['status'] == 1): ?>
+                                    <?php if ($row['is_active'] == 1): ?>
                                         <span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
                                     <?php else: ?>
                                         <span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>
