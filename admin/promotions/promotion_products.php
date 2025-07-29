@@ -183,24 +183,23 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                         <table class="table table-hover table-striped table-bordered" id="list">
                             <colgroup>
                                 <col width="5%">
-                                <col width="5%">
-                                <col width="10%">
-                                <col width="20%">
-                                <col width="25%">
                                 <col width="15%">
+                                <col width="25%">
+                                <col width="25%">
+                                <col width="10%">
                                 <col width="10%">
                                 <col width="10%">
                             </colgroup>
+                            </colgroup>
                             <thead class="text-center">
                                 <tr>
-                                    <th>ลบ</th>
                                     <th>ที่</th>
                                     <th>รูปภาพสินค้า</th>
                                     <th>แบรนด์</th>
                                     <th>ชื่อสินค้า</th>
                                     <th>ราคา</th>
                                     <th>สถานะ</th>
-                                    <th></th>
+                                    <th>ลบ</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -282,9 +281,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                                 data-dose="<?= htmlspecialchars($row['dose'], ENT_QUOTES) ?>"
                                 data-price="<?= $row['price'] ?>"
                                 data-image_path="<?= validate_image($row['image_path']) ?>"
-                                data-status="<?= $row['status'] ?>">
-
-                                <label class="w-100 mb-0" style="cursor:pointer;">
+                                data-status="<?= $row['status'] ?>"
+                                data-category="<?= $row['category_id'] ?>"> <label class="w-100 mb-0" style="cursor:pointer;">
                                     <input type="checkbox" class="form-check-input product-checkbox" value="<?= $row['id'] ?>">
                                     <div>
                                         <span class="font-weight-bold"><?= $row['name'] ?></span>
@@ -323,8 +321,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         // ฟังก์ชันสำหรับอัปเดตเลขลำดับในตารางหลัก
         function updateRowNumbers() {
             $('#list tbody tr').each(function(index) {
-                // คอลัมน์ที่ 2 คือลำดับที่
-                $(this).find('td:nth-child(2)').text(index + 1);
+                // คอลัมน์ที่ 1 คือลำดับที่
+                $(this).find('td:nth-child(1)').text(index + 1);
             });
         }
 
@@ -333,17 +331,17 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             var selectedCount = $('#productList .product-checkbox:checked').length;
             $('#selectedItemsCount').text(selectedCount);
         }
-
         // ฟังก์ชันค้นหาสินค้า และกรองตามหมวดหมู่ใน Modal (จากสคริปเก่า)
         function filterProducts() {
             var searchQuery = $('#productSearch').val().toLowerCase();
-            var categoryFilter = $('#categoryFilter').val();
+            var categoryFilter = $('#categoryFilter').val(); // ค่า string ของ category_id หรือ ""
 
             $('#productList .product-item').each(function() {
                 var productName = $(this).text().toLowerCase();
-                var productCategory = $(this).data('category').toString();
+                var productCategory = $(this).data('category').toString(); // ดึงค่า data-category ที่เพิ่มไป
 
                 var isSearchMatch = productName.indexOf(searchQuery) > -1;
+                // ตรวจสอบว่า filter เป็นค่าว่าง หรือตรงกับหมวดหมู่สินค้า
                 var isCategoryMatch = (categoryFilter === "" || productCategory === categoryFilter);
 
                 if (isSearchMatch && isCategoryMatch) {
@@ -352,11 +350,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     $(this).hide();
                 }
             });
+            updateSelectedCount(); // อัปเดตจำนวนสินค้าที่เลือกทุกครั้งที่มีการกรอง
         }
-
-
-
-
         // --- Event Handlers สำหรับ Modal ---
 
         // เมื่อคลิกปุ่ม "เลือกสินค้า" เพื่อเปิด Modal
@@ -406,11 +401,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 <tr data-id="${product.id}">
                     <td class="text-center">
                         <input type="hidden" name="product_id[]" value="${product.id}">
-                        <button type="button" class="btn btn-danger btn-sm btn-flat remove-product-btn" title="ลบรายการนี้">
-                            <i class="fa fa-times"></i>
-                        </button>
                     </td>
-                    <td class="text-center"></td>
                     <td class="text-center">
                         <img src="${product.image_path}" alt="" class="img-thumbnail p-0 border product-img">
                     </td>
@@ -427,6 +418,11 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                             ? '<span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>' 
                             : '<span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>'}
                     </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-flat remove-product-btn" title="ลบรายการนี้">
+                            <i class="fa fa-trash text-danger"></i>
+                        </button>
+                    </td>
                 </tr>
             `;
                 tableBody.append(newRow);
@@ -437,7 +433,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         });
 
         // Event Handlers อื่นๆ ใน Modal (จากสคริปเก่า)
-        $('#productSearch').on('keyup', filterProducts);
+        $('#productSearch').on('input', filterProducts);
         $('#categoryFilter').on('change', filterProducts);
         $('#productList').on('change', '.product-checkbox', updateSelectedCount);
 
@@ -470,7 +466,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 alert_toast("กรุณาเลือกสินค้าอย่างน้อย 1 รายการ", 'warning');
                 return false;
             }
-
             var _this = $(this);
             start_loader();
             $.ajax({
