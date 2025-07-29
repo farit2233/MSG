@@ -620,7 +620,7 @@ class Master extends DBConnection
 			}
 
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-		(`code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_methods_id`, `status`, `payment_status`, `delivery_status`, `date_created`, `date_updated`) 
+		(`code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_methods_id`, `payment_status`, `delivery_status`, `date_created`, `date_updated`) 
 		VALUES 
 		('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', {$shipping_methods_id}, 0, 0, 0, NOW(), NOW())");
 
@@ -872,8 +872,6 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
-
-
 	function update_order_status()
 	{
 		extract($_POST);
@@ -885,7 +883,6 @@ class Master extends DBConnection
         SET 
             `payment_status` = '{$payment_status}',
             `delivery_status` = '{$delivery_status}',
-			`status` = 0  
         WHERE id = '{$id}'");
 
 		if ($update) {
@@ -1256,11 +1253,8 @@ switch ($action) {
 	case 'get_shipping_cost':
 		$Master->get_shipping_cost();
 		break;
-
 	case 'place_order':
-		$result = $Master->place_order();
-		ob_end_clean();  // เคลียร์ buffer
-		echo $result;
+		echo $Master->place_order();
 		break;
 	case 'save_shipping':
 		echo $Master->save_shipping();

@@ -45,6 +45,7 @@
   <!--Custom css-->
   <link rel="stylesheet" href="assets/css/navbar.css">
   <link rel="stylesheet" href="assets/css/home.css">
+  <link rel="stylesheet" href="assets/css/checkout.css">
   <link rel="stylesheet" href="assets/css/footer.css">
 
   <style type="text/css">

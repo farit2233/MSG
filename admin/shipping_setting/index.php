@@ -63,7 +63,7 @@
                             sm.name AS shipping_method_name,
                             sm.description AS shipping_method_description,
                             sm.cod_enabled AS is_cod_enabled,
-                            sm.status AS status,
+                            sm.is_active AS is_active,
                             sm.delete_flag AS delete_flag,
                             MIN(sp.price) AS min_price,
                             MAX(sp.price) AS max_price
