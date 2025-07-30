@@ -2,6 +2,13 @@
 <!DOCTYPE html>
 <html lang="en" class="" style="height: auto;">
 <?php require_once('inc/header.php') ?>
+<style>
+  #uni_modal_promotion .modal-dialog {
+    max-width: 800px !important;
+    z-index: 1050;
+    /* เพิ่ม z-index เพื่อให้แสดงผลบนสุด */
+  }
+</style>
 
 <body class="sidebar-mini layout-fixed control-sidebar-slide-open layout-navbar-fixed  sidebar-mini-xs text-sm" data-new-gr-c-s-check-loaded="14.991.0" data-gr-ext-installed="" style="height: auto;">
   <div class="wrapper">
@@ -41,12 +48,34 @@
             <div class="modal-body">
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-success rounded-0" id='submit' onclick="$('#uni_modal form').submit()">บันทึก</button>
-              <button type="button" class="btn btn-danger rounded-0" data-dismiss="modal">ยกเลิก</button>
+              <!-- ปุ่มยกเลิก -->
+              <button type="button" class="btn btn-light border rounded shadow-sm" data-dismiss="modal">ยกเลิก</button>
+              <!-- ปุ่มเพิ่มสินค้าที่เลือก -->
+              <button type="button" class="btn btn-primary rounded shadow-sm" id="submit" onclick="$('#uni_modal form').submit()">บันทึก</button>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- /.content -->
+      <div class="modal fade" id="uni_modal_promotion" role='dialog'>
+        <div class="modal-dialog modal-md modal-dialog-centered rounded-0" role="document">
+          <div class="modal-content rounded-0">
+            <div class="modal-header">
+              <h5 class="modal-title"></h5>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+              <!-- ปุ่มยกเลิก -->
+              <button type="button" class="btn btn-light border rounded shadow-sm" data-dismiss="modal">ยกเลิก</button>
+              <!-- ปุ่มเพิ่มสินค้าที่เลือก -->
+              <button type="button" class="btn btn-primary rounded shadow-sm" id="submit" onclick="$('#uni_modal_promotion form').submit()">บันทึก</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="modal fade" id="uni_modal_right" role='dialog'>
         <div class="modal-dialog modal-full-height  modal-md rounded-0" role="document">
           <div class="modal-content rounded-0">

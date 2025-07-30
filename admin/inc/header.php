@@ -41,6 +41,10 @@ require_once('sess_auth.php');
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="assets/css/promotion_products.css">
+
   <style type="text/css">
     /* Chart.js */
     @keyframes chartjs-render-animation {

@@ -1,0 +1,137 @@
+.product-img {
+        width: 4em;
+        height: 4em;
+        object-fit: cover;
+        object-position: center center;
+    }
+
+    .card-title {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
+
+    section {
+        font-size: 16px;
+    }
+
+    .row.mb-3 {
+        margin-bottom: 15px;
+    }
+
+    /* ขนาดของ input field */
+    #productSearch,
+    #categoryFilter {
+        width: 100%;
+    }
+
+    /* รายการสินค้าใน Modal ถ้ามีจำนวนเยอะให้แสดง scroll */
+    #productList {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* ปรับให้ list-group-item มี padding เพิ่ม */
+    #productList .list-group-item {
+        align-items: center;
+    }
+
+    /* ปรับให้ checkbox อยู่ด้านซ้าย */
+    #productList .product-checkbox {
+        margin-right: 10px;
+    }
+
+    /* จัดปุ่มเลือกทั้งหมดและยกเลิกการเลือกทั้งหมดให้ด้านซ้าย ข้อความเลือกจำนวนให้ด้านขวา */
+    #selectedCount .d-flex {
+        justify-content: space-between;
+    }
+
+    /* ให้กรอบรายการสินค้าและ checkbox มีพื้นที่คลิกได้ */
+    #productList .product-item {
+        position: relative;
+        cursor: pointer;
+        /* เปลี่ยนเคอร์เซอร์ให้เป็นมือชี้เมื่อผ่านรายการสินค้า */
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* เมื่อผู้ใช้คลิกหรือ hover */
+    #productList .product-item:hover {
+        background-color: #f1f1f1;
+        /* เปลี่ยนสีพื้นหลังเมื่อ hover */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        /* เพิ่มเงาให้กรอบ */
+    }
+
+    /* เมื่อ checkbox ถูกเลือก */
+    #productList .product-item input:checked+.form-check-label {
+        background-color: #007bff;
+        /* เปลี่ยนพื้นหลังเมื่อเลือก checkbox */
+        color: white;
+        /* เปลี่ยนสีตัวอักษร */
+    }
+
+    /* เพิ่มการจัดการให้ label ครอบทั้งกรอบ */
+    #productList .product-item label {
+        display: block;
+        width: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        /* เปลี่ยนเคอร์เซอร์เป็นมือชี้ */
+        transition: background-color 0.3s ease;
+    }
+
+
+    /* เพิ่มพื้นที่การคลิกให้สะดวกขึ้น */
+    #productList .product-item .form-check-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    /* เพิ่มช่องว่างระหว่างข้อความและ checkbox */
+    #productList .product-item .form-check-label span {
+        margin-left: 10px;
+    }
+
+    /* ปรับ CSS ให้ข้อความและปุ่มกากบาทอยู่ในแถวเดียวกัน */
+    #selectedProductsDisplay .badge {
+        max-width: 100px;
+        /* กำหนดความกว้างสูงสุด */
+        white-space: nowrap;
+        /* ไม่ให้ข้อความไปหลายบรรทัด */
+        overflow: hidden;
+        /* ซ่อนข้อความที่เกิน */
+        text-overflow: ellipsis;
+        /* แสดง ... เมื่อข้อความยาวเกิน */
+        display: inline-flex;
+        /* ใช้ flexbox เพื่อจัดการตำแหน่งของปุ่มและข้อความ */
+        align-items: center;
+        /* จัดแนวแนวนอนให้กับข้อความ */
+        margin-right: 10px;
+        /* เพิ่มช่องว่างระหว่าง badge */
+        padding: 0 10px;
+        /* เพิ่ม padding เพื่อให้ดูสวยงาม */
+    }
+
+    #selectedProductsDisplay .badge .close {
+        margin-left: 5px;
+        /* ให้ปุ่มกากบาทห่างจากชื่อสินค้า */
+        font-size: 1.2rem;
+        /* ปรับขนาดปุ่มกากบาท */
+        cursor: pointer;
+        /* แสดง cursor เป็น pointer */
+    }
+
+    .form-check-input {
+        transform: scale(1.5);
+        /* ปรับขนาดของ checkbox */
+        margin-right: 10px;
+        padding-left: 100px;
+        /* เพิ่มระยะห่างระหว่าง checkbox กับชื่อสินค้า */
+    }

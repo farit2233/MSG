@@ -7,6 +7,19 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         }
     }
 }
+function formatDateThai($date)
+{
+    // แปลงวันที่เป็นตัวแปร timestamp
+    $timestamp = strtotime($date);
+    $day = date("j", $timestamp); // วัน (1-31)
+    $month = date("n", $timestamp); // เดือน (1-12)
+    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+    $hour = date("H", $timestamp); // ชั่วโมง (00-23)
+    $minute = date("i", $timestamp); // นาที (00-59)
+
+    // สร้างวันที่ในรูปแบบไทย
+    return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
 ?>
 <style>
     .card-title {
@@ -113,8 +126,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                         </div>
                         <div class="col-md-4">
                             <dt class="text-muted">ช่วงเวลา</dt>
-                            <?= date("Y-m-d", strtotime($start_date ?? '')) ?> ถึง
-                            <?= date("Y-m-d", strtotime($end_date ?? '')) ?>
+                            <span>เริ่ม: <?= formatDateThai($start_date) ?></span>
+                            <span> ถึง </span><br>
+                            <span>สิ้นสุด: <?= formatDateThai($end_date) ?></span>
                         </div>
                     </div>
                 </div>
@@ -125,13 +139,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             <div class="card-header">
                 <div class="card-title">สินค้าที่มีโปรโมชั่น</div>
                 <div class="card-tools">
-                    <?php if (isset($_GET['id']) && $_GET['id'] > 0): ?>
-                        <div class="card-tools">
-                            <a href="./?page=promotions/promotion_products&id=<?= $_GET['id'] ?>" class="btn btn-flat btn-dark">
-                                <i class="fas fa-plus"></i> เพิ่มสินค้า
-                            </a>
-                        </div>
-                    <?php endif; ?>
+                    <button class="btn btn-flat btn-dark" type="button" id="promotion_products">
+                        <i class="fas fa-plus"></i> เพิ่มสินค้า
+                    </button>
                 </div>
             </div>
             <div class="card-body">
@@ -159,33 +169,43 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                             <tbody>
                                 <?php
                                 $i = 1;
+                                // ======================= แก้ไขจุดที่ 1: เพิ่ม WHERE clause เพื่อกรองสินค้า =======================
                                 $qry = $conn->query("
-                                    SELECT 
-                                        pp.id as pp_id,
-                                        p.id as product_id,
-                                        p.name as product_name,
-                                        p.brand,
-                                        p.price,
-                                        p.image_path
-                                    FROM promotion_products pp
-                                    INNER JOIN product_list p ON pp.product_id = p.id
-                                ");
+                                SELECT 
+                                    pp.id as pp_id,
+                                    p.id as product_id,
+                                    p.name as product_name,
+                                    p.brand,
+                                    p.price,
+                                    p.image_path
+                                FROM promotion_products pp
+                                INNER JOIN product_list p ON pp.product_id = p.id
+                                WHERE pp.promotion_id = '{$id}'
+                            ");
                                 while ($row = $qry->fetch_assoc()):
                                 ?>
                                     <tr>
                                         <td class="text-center"><?= $i++ ?></td>
                                         <td class="text-center">
-                                            <?php if (!empty($row['image_path']) && file_exists('uploads/products/' . $row['image_path'])): ?>
-                                                <img src="uploads/products/<?= $row['image_path'] ?>" alt="" class="img-thumbnail" style="max-height: 75px;">
-                                            <?php else: ?>
-                                                <span class="text-muted">ไม่มีรูป</span>
-                                            <?php endif; ?>
+                                            <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
                                         </td>
                                         <td><?= htmlspecialchars($row['brand']) ?></td>
                                         <td><?= htmlspecialchars($row['product_name']) ?></td>
                                         <td class="text-right"><?= number_format($row['price'], 2) ?> ฿</td>
                                         <td class="text-center">
-                                            <a href="./?page=products/view_product&id=<?= $row['product_id'] ?>" class="btn btn-sm btn-primary">ดู</a>
+                                            <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                                จัดการ
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <div class="dropdown-menu" role="menu">
+                                                <a class="dropdown-item" href="./?page=products/view_product&id=<?= $row['product_id'] ?>">
+                                                    <span class="fa fa-eye text-dark"></span> ดู
+                                                </a>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?= $row['pp_id'] ?>">
+                                                    <span class="fa fa-trash text-danger"></span> ลบรายการ
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -201,16 +221,57 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     </div>
 </section>
 <script>
+    $(document).ready(function() {
+        $('#list').dataTable({
+            columnDefs: [{
+                orderable: false,
+                targets: [2, 5]
+            }],
+            order: [
+                [0, 'asc']
+            ],
+            language: {
+                lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
+                zeroRecords: "ไม่พบข้อมูล",
+                info: "หน้า _PAGE_ จาก _PAGES_ หน้า",
+                infoEmpty: "ไม่มีข้อมูลที่จะแสดง",
+                infoFiltered: "(กรองจาก _MAX_ รายการทั้งหมด)",
+                search: "ค้นหา:",
+                paginate: {
+                    first: "หน้าแรก",
+                    last: "หน้าสุดท้าย",
+                    next: "ถัดไป",
+                    previous: "ก่อนหน้า"
+                }
+            }
+        });
+
+        $('.delete_data').click(function() {
+            const id = $(this).data('id');
+            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชั่นนี้?", "delete_promotion", [id]);
+        });
+    });
     $(function() {
         $('#delete_data').click(function() {
             _conf("Are you sure to delete this product_type permanently?", "delete_product_type", ["<?= isset($id) ? $id : '' ?>"])
         })
     })
 
-    function delete_product_type($id) {
+    $(function() {
+        $('.delete_data').click(function() {
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชั่น?", "delete_promotion_product", [$(this).attr('data-id')])
+        });
+        $('#promotion_products').click(function() {
+            uni_modal_promotion("เพิ่มสินค้า", "promotions/promotion_products.php?id=<?= isset($id) ? $id : '' ?>")
+        })
+    })
+
+    // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชั่น
+    function delete_promotion_product($id) {
         start_loader();
         $.ajax({
-            url: _base_url_ + "classes/Master.php?f=delete_product_type",
+            // ส่งไปที่ฟังก์ชันใหม่ใน Master.php
+            url: _base_url_ + "classes/Master.php?f=delete_promotion_product",
             method: "POST",
             data: {
                 id: $id
@@ -223,7 +284,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             },
             success: function(resp) {
                 if (typeof resp == 'object' && resp.status == 'success') {
-                    location.replace("./?page=product_type");
+                    // เมื่อสำเร็จ ให้รีโหลดหน้าปัจจุบัน
+                    location.reload();
                 } else {
                     alert_toast("An error occured.", 'error');
                     end_loader();

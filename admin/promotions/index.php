@@ -3,6 +3,21 @@
         alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
     </script>
 <?php endif; ?>
+<?php
+function formatDateThai($date)
+{
+    // แปลงวันที่เป็นตัวแปร timestamp
+    $timestamp = strtotime($date);
+    $day = date("j", $timestamp); // วัน (1-31)
+    $month = date("n", $timestamp); // เดือน (1-12)
+    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+    $hour = date("H", $timestamp); // ชั่วโมง (00-23)
+    $minute = date("i", $timestamp); // นาที (00-59)
+
+    // สร้างวันที่ในรูปแบบไทย
+    return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
+?>
 <style>
     .card-title {
         font-size: 20px !important;
