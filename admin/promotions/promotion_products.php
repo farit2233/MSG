@@ -133,7 +133,7 @@ if (isset($id)) {
             $('.err-msg').remove();
             start_loader();
             $.ajax({
-                url: _base_url_ + "classes/Master.php?f=save_promotion_product",
+                url: _base_url_ + "classes/Master.php?f=save_promotion_products",
                 data: new FormData(this),
                 cache: false,
                 contentType: false,
