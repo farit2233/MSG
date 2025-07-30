@@ -1156,63 +1156,69 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
-	function save_promotion_product()
+	function save_promotion_products()
 	{
-		// ใช้ extract เพื่อดึงตัวแปรจาก $_POST มาใช้งานได้ง่ายขึ้น
-		// จะได้ตัวแปร $promotion_id และ $product_id (ซึ่งเป็น array)
+		// Escape and sanitize inputs
+		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
 		extract($_POST);
 
-		$resp = ['status' => 'failed', 'msg' => ''];
-
-		// ตรวจสอบว่ามี promotion_id ส่งมาหรือไม่
-		if (empty($promotion_id)) {
-			$resp['msg'] = "ไม่พบรหัสโปรโมชั่น";
-			return json_encode($resp);
-		}
-
-		// เริ่มต้น Transaction เพื่อความถูกต้องของข้อมูล
-		$this->conn->begin_transaction();
-
-		try {
-			// 1. ลบข้อมูลสินค้าเก่าที่ผูกกับโปรโมชั่นนี้ออกทั้งหมดก่อน
-			// เพื่อรองรับการยกเลิกการเลือกสินค้า
-			$delete_stmt = $this->conn->prepare("DELETE FROM `promotion_products` WHERE `promotion_id` = ?");
-			$delete_stmt->bind_param("i", $promotion_id);
-			$delete_stmt->execute();
-			$delete_stmt->close();
-
-			// 2. ตรวจสอบว่ามีการเลือกสินค้ามาหรือไม่
-			if (isset($product_id) && is_array($product_id) && count($product_id) > 0) {
-				// เตรียมคำสั่ง SQL สำหรับการ INSERT ข้อมูล
-				$insert_sql = "INSERT INTO `promotion_products` (`promotion_id`, `product_id`) VALUES (?, ?)";
-				$insert_stmt = $this->conn->prepare($insert_sql);
-
-				// 3. วนลูปเพื่อเพิ่มข้อมูลสินค้าที่เลือกใหม่ทีละรายการ
-				foreach ($product_id as $p_id) {
-					$insert_stmt->bind_param("ii", $promotion_id, $p_id);
-					if (!$insert_stmt->execute()) {
-						// หากเกิดข้อผิดพลาด ให้โยน Exception เพื่อให้ไปที่ catch block
-						throw new Exception("ไม่สามารถบันทึก Product ID: {$p_id} ได้");
-					}
-				}
-				$insert_stmt->close();
+		// Prepare data for insertion/updating
+		$data = "";
+		foreach ($_POST as $k => $v) {
+			if (!in_array($k, array('id'))) {
+				if (!empty($data)) $data .= ",";
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
 			}
-
-			// 4. ถ้าทุกอย่างเรียบร้อย ให้ Commit Transaction
-			$this->conn->commit();
-
-			// ตั้งค่าสถานะเป็น success และกำหนดข้อความแจ้งเตือน
-			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', 'บันทึกรายการสินค้าในโปรโมชั่นเรียบร้อยแล้ว');
-		} catch (Exception $e) {
-			// 5. หากเกิดข้อผิดพลาด ให้ Rollback Transaction กลับไปสถานะก่อนหน้า
-			$this->conn->rollback();
-			$resp['msg'] = "เกิดข้อผิดพลาด: " . $e->getMessage();
 		}
 
-		// คืนค่าผลลัพธ์เป็น JSON กลับไปให้ AJAX
+		// Check if category name already exists (with proper escaping)
+		$name = $this->conn->real_escape_string($name);
+		$check_query = "SELECT * FROM `promotion_products` WHERE `name` = '{$name}' AND delete_flag = 0";
+		if (!empty($id)) {
+			$check_query .= " AND id != {$id}"; // Exclude current ID from check
+		}
+
+		$check = $this->conn->query($check_query)->num_rows;
+		if ($this->capture_err()) {
+			return $this->capture_err();
+		}
+
+		// Return error if category name already exists
+		if ($check > 0) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "Category already exists.";
+			return json_encode($resp);
+			exit;
+		}
+
+		// Prepare SQL query for insert or update
+		if (empty($id)) {
+			$sql = "INSERT INTO `promotion_products` SET {$data}";
+		} else {
+			$sql = "UPDATE `promotion_products` SET {$data} WHERE id = '{$id}'";
+		}
+
+		// Execute query and handle result
+		$save = $this->conn->query($sql);
+		if ($save) {
+			$cid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['cid'] = $cid;
+			$resp['status'] = 'success';
+			$resp['msg'] = empty($id) ? "New Category successfully saved." : "Category successfully updated.";
+		} else {
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error . "[{$sql}]";
+		}
+
+		// Set flash message and return response
+		if ($resp['status'] == 'success') {
+			$this->settings->set_flashdata('success', $resp['msg']);
+		}
+
 		return json_encode($resp);
 	}
+
 	function delete_promotion_product()
 	{
 		extract($_POST);
@@ -1226,6 +1232,64 @@ class Master extends DBConnection
 		} else {
 			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
 		}
+	}
+
+	function save_promotion_category()
+	{
+		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
+		extract($_POST);
+		$data = "";
+		foreach ($_POST as $k => $v) {
+			if (!in_array($k, array('id'))) {
+				if (!empty($data)) $data .= ",";
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
+			}
+		}
+		$check = $this->conn->query("SELECT * FROM `promotion_category` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
+		if ($this->capture_err())
+			return $this->capture_err();
+		if ($check > 0) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "ประเภท already exists.";
+			return json_encode($resp);
+			exit;
+		}
+		if (empty($id)) {
+			$sql = "INSERT INTO `promotion_category` set {$data} ";
+		} else {
+			$sql = "UPDATE `promotion_category` set {$data} where id = '{$id}' ";
+		}
+		$save = $this->conn->query($sql);
+		if ($save) {
+			$cid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['cid'] = $cid;
+			$resp['status'] = 'success';
+			if (empty($id))
+				$resp['msg'] = "New ประเภท successfully saved.";
+			else
+				$resp['msg'] = " ประเภท successfully updated.";
+		} else {
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error . "[{$sql}]";
+		}
+		if ($resp['status'] == 'success')
+			$this->settings->set_flashdata('success', $resp['msg']);
+		return json_encode($resp);
+	}
+
+	function delete_promotion_category()
+	{
+		extract($_POST);
+		$del = $this->conn->query("UPDATE `promotion_category` set `delete_flag` = 1 where id = '{$id}'");
+		if ($del) {
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success', " ประเภท successfully deleted.");
+		} else {
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
+		return json_encode($resp);
 	}
 }
 
@@ -1305,11 +1369,17 @@ switch ($action) {
 	case 'delete_promotion':
 		echo $Master->delete_promotion();
 		break;
-	case 'save_promotion_product':
-		echo $Master->save_promotion_product();
+	case 'save_promotion_products':
+		echo $Master->save_promotion_products();
 		break;
 	case 'delete_promotion_product':
 		echo $Master->delete_promotion_product();
+		break;
+	case 'save_promotion_category':
+		echo $Master->save_promotion_category();
+		break;
+	case 'delete_promotion_category':
+		echo $Master->delete_promotion_category();
 		break;
 	default:
 		// echo $sysset->index();

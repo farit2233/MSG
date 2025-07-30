@@ -83,13 +83,32 @@
                   </p>
                 </a>
               </li>
-              <li class="nav-item dropdown">
-                <a href="./?page=promotions" class="nav-link nav-promotions">
-                  <i class="nav-icon fas fa-warehouse"></i>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon fas fa-list"></i>
                   <p>
-                    โปรโมชั่นทั้งหมด
+                    โปรโมชั่นสินค้า
+                    <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
+                <ul class="nav nav-treeview" style="display: none;">
+                  <li class="nav-item">
+                    <a href="./?page=promotion_category" class="nav-link nav-promotion_category">
+                      <i class="nav-icon fas fa-th-list"></i>
+                      <p>
+                        หมวดหมู่โปรโมชั่นสินค้า
+                      </p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="./?page=promotions" class="nav-link nav-promotions">
+                      <i class="nav-icon fas fa-th-list"></i>
+                      <p>
+                        โปรโมชั่นสินค้าทั้งหมด
+                      </p>
+                    </a>
+                  </li>
+                </ul>
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
