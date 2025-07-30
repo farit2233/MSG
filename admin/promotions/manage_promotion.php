@@ -260,7 +260,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             </div>
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <div class="card-title">สถานะโปรโมชั่น</div>
+                    <div class="card-title" style="font-size: 18px !important;">สถานะโปรโมชั่น</div>
                 </div>
                 <div class="card-body">
                     <input type="hidden" name="status" value="0">
