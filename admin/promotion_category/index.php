@@ -79,7 +79,7 @@ function formatDateThai($date)
             </a>
         </div>
     </div>
-    <div class="d-flex flex-wrap justify-content-center mt-3">
+    <!--div class="d-flex flex-wrap justify-content-center mt-3">
         <?php
         $boxes = [
             ['label' => 'ยอดขาย', 'bg' => 'bg-white', 'icon' => 'fas fa-layer-group', 'query' => "SELECT * FROM product_type where delete_flag = 0"],
@@ -101,7 +101,7 @@ function formatDateThai($date)
                 </div>
             </div>
         <?php endforeach; ?>
-    </div>
+    </div-->
     <div class="card-body">
         <div class="container-fluid">
             <div class="table-responsive">
