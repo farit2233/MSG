@@ -194,6 +194,8 @@ class Master extends DBConnection
 			$this->settings->set_flashdata('success', $resp['msg']);
 		return json_encode($resp);
 	}
+
+
 	function delete_category()
 	{
 		extract($_POST);
@@ -1099,10 +1101,10 @@ class Master extends DBConnection
 
 		return json_encode(['status' => 'success']);
 	}
-	function save_promotion()
+	function save_promotions()
 	{
-		extract($_POST);
 		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
+		extract($_POST);
 		$data = "";
 		foreach ($_POST as $k => $v) {
 			if (!in_array($k, array('id'))) {
@@ -1111,37 +1113,38 @@ class Master extends DBConnection
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
-
-		// ตรวจชื่อซ้ำ (option)
-		$check = $this->conn->query("SELECT * FROM `promotions` WHERE `name` = '{$name}' " . (!empty($id) ? " AND id != {$id} " : ""))->num_rows;
+		$check = $this->conn->query("SELECT * FROM `promotions` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
 		if ($this->capture_err())
 			return $this->capture_err();
-
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "มีโปรโมชั่นชื่อนี้อยู่แล้ว";
+			$resp['msg'] = "promotions already exists.";
 			return json_encode($resp);
+			exit;
 		}
-
 		if (empty($id)) {
-			$sql = "INSERT INTO `promotions` SET {$data}";
+			$sql = "INSERT INTO `promotions` set {$data} ";
 		} else {
-			$sql = "UPDATE `promotions` SET {$data} WHERE id = '{$id}'";
+			$sql = "UPDATE `promotions` set {$data} where id = '{$id}' ";
 		}
-
 		$save = $this->conn->query($sql);
 		if ($save) {
-			$pid = !empty($id) ? $id : $this->conn->insert_id;
-			$resp['id'] = $pid;
+			$cid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
-			$resp['msg'] = empty($id) ? "บันทึกโปรโมชั่นใหม่แล้ว" : "อัปเดตโปรโมชั่นสำเร็จ";
-			$this->settings->set_flashdata('success', $resp['msg']);
+			if (empty($id))
+				$resp['msg'] = "New promotions successfully saved.";
+			else
+				$resp['msg'] = " promotions successfully updated.";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
 		}
+		if ($resp['status'] == 'success')
+			$this->settings->set_flashdata('success', $resp['msg']);
 		return json_encode($resp);
 	}
+
 	function delete_promotion()
 	{
 		extract($_POST);
@@ -1158,62 +1161,41 @@ class Master extends DBConnection
 
 	function save_promotion_products()
 	{
-		// Escape and sanitize inputs
-		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
-		extract($_POST);
+		// Sanitize and escape inputs
+		$promotion_id = isset($_POST['promotion_id']) ? $_POST['promotion_id'] : null;
+		$product_ids = isset($_POST['product_id']) ? $_POST['product_id'] : [];
 
-		// Prepare data for insertion/updating
-		$data = "";
-		foreach ($_POST as $k => $v) {
-			if (!in_array($k, array('id'))) {
-				if (!empty($data)) $data .= ",";
-				$v = $this->conn->real_escape_string($v);
-				$data .= " `{$k}`='{$v}' ";
-			}
-		}
-
-		// Check if category name already exists (with proper escaping)
-		$name = $this->conn->real_escape_string($name);
-		$check_query = "SELECT * FROM `promotion_products` WHERE `name` = '{$name}' AND delete_flag = 0";
-		if (!empty($id)) {
-			$check_query .= " AND id != {$id}"; // Exclude current ID from check
-		}
-
-		$check = $this->conn->query($check_query)->num_rows;
-		if ($this->capture_err()) {
-			return $this->capture_err();
-		}
-
-		// Return error if category name already exists
-		if ($check > 0) {
+		// Check if promotion_id is provided
+		if (empty($promotion_id)) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "Category already exists.";
+			$resp['msg'] = 'Promotion ID is required.';
 			return json_encode($resp);
-			exit;
 		}
 
-		// Prepare SQL query for insert or update
-		if (empty($id)) {
-			$sql = "INSERT INTO `promotion_products` SET {$data}";
-		} else {
-			$sql = "UPDATE `promotion_products` SET {$data} WHERE id = '{$id}'";
+		if (empty($product_ids)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'At least one product must be selected.';
+			return json_encode($resp);
 		}
 
-		// Execute query and handle result
-		$save = $this->conn->query($sql);
-		if ($save) {
-			$cid = !empty($id) ? $id : $this->conn->insert_id;
-			$resp['cid'] = $cid;
+		// Delete existing products for this promotion (if any)
+		$delete_query = "DELETE FROM `promotion_products` WHERE `promotion_id` = {$promotion_id}";
+		$this->conn->query($delete_query); // Assuming no errors
+
+		// Insert selected products
+		foreach ($product_ids as $product_id) {
+			$product_id = intval($product_id);
+			$sql = "INSERT INTO `promotion_products` (`promotion_id`, `product_id`) VALUES ('{$promotion_id}', '{$product_id}')";
+			$this->conn->query($sql);
+		}
+
+		// Check for errors
+		if ($this->conn->affected_rows > 0) {
 			$resp['status'] = 'success';
-			$resp['msg'] = empty($id) ? "New Category successfully saved." : "Category successfully updated.";
+			$resp['msg'] = 'Products successfully saved to promotion.';
 		} else {
 			$resp['status'] = 'failed';
-			$resp['err'] = $this->conn->error . "[{$sql}]";
-		}
-
-		// Set flash message and return response
-		if ($resp['status'] == 'success') {
-			$this->settings->set_flashdata('success', $resp['msg']);
+			$resp['msg'] = 'Failed to save products.';
 		}
 
 		return json_encode($resp);
@@ -1363,8 +1345,8 @@ switch ($action) {
 	case 'migrate_guest_cart':
 		echo $Master->migrate_guest_cart();
 		break;
-	case 'save_promotion':
-		echo $Master->save_promotion();
+	case 'save_promotions':
+		echo $Master->save_promotions();
 		break;
 	case 'delete_promotion':
 		echo $Master->delete_promotion();

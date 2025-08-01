@@ -44,10 +44,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 					</div>
 					<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
 						<label for="product_type_id" class="control-label">เลือกประเภทสินค้า</label>
-						<?php
-						$product_types_result = $conn->query("SELECT id, name FROM product_type WHERE status = 1 ORDER BY id ASC");
-						?>
-
 						<select name="product_type_id" id="product_type_id" class="form-control form-control-sm rounded-0" required>
 							<option value="" disabled <?= !isset($product_type_id) ? 'selected' : '' ?>>-- กรุณาเลือก --</option>
 							<?php

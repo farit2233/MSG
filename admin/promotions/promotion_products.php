@@ -79,6 +79,8 @@ if (isset($id)) {
         $('.select2').select2({
             width: '100%'
         });
+
+
         // ฟังก์ชันนับจำนวนสินค้าที่เลือก
         function updateSelectedCount() {
             var selectedCount = $('#productList .product-checkbox:checked').length;
@@ -126,6 +128,12 @@ if (isset($id)) {
         // เรียกใช้ฟังก์ชันครั้งแรกเพื่อตั้งค่าจำนวนที่เลือกไว้
         updateSelectedCount();
 
+
+        // เมื่อกดปุ่ม Save ที่ footer modal
+        $('#uni_modal').on('click', '.modal-footer .btn-save', function() {
+            $('#take-action-form').submit();
+        });
+
         // จัดการการ submit ฟอร์ม
         $('#promotion_product').submit(function(e) {
             e.preventDefault();
@@ -153,7 +161,7 @@ if (isset($id)) {
                 },
                 error: function(err) {
                     console.log(err);
-                    alert_toast("An error occurred", 'error');
+                    alert_toast("An error occurredไม่า่", 'error');
                     end_loader();
                 }
             });

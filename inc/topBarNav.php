@@ -17,6 +17,25 @@ while ($type_row = $type_qry->fetch_assoc()) {
     ];
   }
 }
+
+$promotion_structure = [];
+
+$promotion_qry = $conn->query("SELECT * FROM `promotion_category` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
+while ($promotion_row = $promotion_qry->fetch_assoc()) {
+  $pid = $promotion_row['id'];
+  $promotion_structure[$pid] = [
+    'name' => $promotion_row['name'],
+    'categories' => []
+  ];
+
+  $cat_qry = $conn->query("SELECT * FROM `promotions` WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$tid} ORDER BY `date_created` ASC");
+  while ($cat_row = $cat_qry->fetch_assoc()) {
+    $promotion_structure[$tid]['categories'][] = [
+      'id' => $cat_row['id'],
+      'name' => $cat_row['name']
+    ];
+  }
+}
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-dark navbar-msg">
@@ -29,7 +48,41 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-        <li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li>
+        <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li-->
+
+        <li class="nav-item dropdown position-static">
+          <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            โปรโมชั่น
+          </a>
+          <div class="dropdown-menu megamenu w-100" aria-labelledby="navbarDropdown">
+            <div class="container">
+              <div class="row">
+
+                <?php foreach ($promotion_structure as $tid => $type_data): ?>
+                  <?php if (!empty($type_data['categories'])): ?>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                      <ul class="megamenu-list">
+                        <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
+                          <h6 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h6>
+                        </a>
+                        <hr class="mt-1 mb-2">
+
+                        <?php foreach ($type_data['categories'] as $cat_row): ?>
+                          <li class="megamenu-item">
+                            <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>" class="text-decoration-none">
+                              <?= htmlspecialchars($cat_row['name']) ?>
+                            </a>
+                          </li>
+                        <?php endforeach; ?>
+                      </ul>
+                    </div>
+                  <?php endif; ?>
+                <?php endforeach; ?>
+
+              </div>
+            </div>
+          </div>
+        </li>
 
         <li class="nav-item dropdown position-static">
           <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -65,6 +118,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
             </div>
           </div>
         </li>
+
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li>
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
       </ul>

@@ -68,7 +68,7 @@
             </div>
             <div class="modal-footer">
               <!-- ปุ่มยกเลิก -->
-              <button type="button" class="btn btn-light border rounded shadow-sm" data-dismiss="modal">ยกเลิก</button>
+              <button type="button" class="btn btn-light border rounded shadow-sm" data-dismiss="modal">ยกเลิกฟฟฟ</button>
               <!-- ปุ่มเพิ่มสินค้าที่เลือก -->
               <button type="button" class="btn btn-primary rounded shadow-sm" id="submit" onclick="$('#uni_modal_promotion form').submit()">บันทึก</button>
             </div>
