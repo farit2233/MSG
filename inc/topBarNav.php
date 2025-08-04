@@ -20,11 +20,11 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
 $promotion_structure = [];
 
-$promotion_qry = $conn->query("SELECT * FROM `promotion_category` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
-while ($promotion_row = $promotion_qry->fetch_assoc()) {
-  $pid = $promotion_row['id'];
-  $promotion_structure[$pid] = [
-    'name' => $promotion_row['name'],
+$type_qry = $conn->query("SELECT * FROM `promotion_category` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
+while ($type_row = $type_qry->fetch_assoc()) {
+  $tid = $type_row['id'];
+  $promotion_structure[$tid] = [
+    'name' => $type_row['name'],
     'categories' => []
   ];
 
@@ -61,15 +61,15 @@ while ($promotion_row = $promotion_qry->fetch_assoc()) {
                 <?php foreach ($promotion_structure as $tid => $type_data): ?>
                   <?php if (!empty($type_data['categories'])): ?>
                     <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                      <ul class="megamenu-list">
+                      <ul>
                         <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
                           <h6 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h6>
                         </a>
                         <hr class="mt-1 mb-2">
 
                         <?php foreach ($type_data['categories'] as $cat_row): ?>
-                          <li class="megamenu-item">
-                            <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>" class="text-decoration-none">
+                          <li>
+                            <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
                               <?= htmlspecialchars($cat_row['name']) ?>
                             </a>
                           </li>
