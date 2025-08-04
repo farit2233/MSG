@@ -3,7 +3,32 @@
         alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
     </script>
 <?php endif; ?>
+<?php
+// ฟังก์ชันแปลงวันที่เป็น พ.ศ.
+function formatDateThai($date)
+{
+    // ถ้าวันที่ว่างหรือไม่ถูกต้อง
+    if (empty($date)) {
+        return 'ข้อมูลวันที่ไม่ถูกต้อง';
+    }
 
+    // แปลงวันที่เป็น timestamp
+    $timestamp = strtotime($date);
+    if ($timestamp === false) {
+        return 'ข้อมูลวันที่ไม่ถูกต้อง';
+    }
+
+    // ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+    $day = date("j", $timestamp);
+    $month = date("n", $timestamp);
+    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+    $hour = date("H", $timestamp); // ชั่วโมง (00-23)
+    $minute = date("i", $timestamp); // นาที (00-59)
+
+    // ส่งคืนวันที่ในรูปแบบไทย
+    return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
+?>
 <style>
     .card-title {
         font-size: 20px !important;
@@ -124,22 +149,8 @@
                                     <?php
                                     // ตรวจสอบค่าของ date_created ว่ามีข้อมูลหรือไม่
                                     if (!empty($row['date_created'])) {
-                                        // แปลงวันที่เป็น timestamp
-                                        $date = strtotime($row['date_created']);
-
-                                        // ถ้าวันที่ไม่เป็น null หรือไม่ผิดพลาด
-                                        if ($date !== false) {
-                                            $day = date("j", $date); // วัน (1-31)
-                                            $month = date("n", $date); // เดือน (1-12)
-                                            $year = date("Y", $date) + 543; // ปี (พ.ศ.)
-                                            $hour = date("H", $date); // ชั่วโมง (00-23)
-                                            $minute = date("i", $date); // นาที (00-59)
-
-                                            // แสดงวันที่ในรูปแบบไทย (พ.ศ.)
-                                            echo "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
-                                        } else {
-                                            echo 'ข้อมูลวันที่ไม่ถูกต้อง';
-                                        }
+                                        // เรียกใช้ฟังก์ชันแปลงวันที่
+                                        echo formatDateThai($row['date_created']);
                                     } else {
                                         echo 'ไม่มีวันที่';
                                     }
