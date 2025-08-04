@@ -66,37 +66,37 @@ while ($type_row = $type_qry->fetch_assoc()) {
             โปรโมชั่น
           </a>
           <div class="dropdown-menu megamenu w-100" aria-labelledby="navbarDropdown">
-            <div class="container">
-              <div class="row">
+            <div class="mega-box">
+              <div class="content">
+                <div class="row">
 
-                <!-- เริ่มลูป PHP เพื่อแสดงหมวดหมู่ -->
-                <?php foreach ($promotion_structure as $tid => $type_data): ?>
-                  <?php if (!empty($type_data['categories'])): ?>
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                      <ul>
-                        <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
-                          <h6 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h6>
-                        </a>
-                        <hr class="mt-1 mb-2">
+                  <?php foreach ($promotion_structure as $tid => $type_data): ?>
+                    <?php if (!empty($type_data['categories'])): ?>
+                      <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <ul>
+                          <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
+                            <header><?= htmlspecialchars($type_data['name']) ?></header>
+                          </a>
+                          <hr class="mt-1 mb-2">
 
-                        <!-- ลูปเพื่อแสดงชื่อโปรโมชั่นในแต่ละหมวดหมู่ -->
-                        <?php foreach ($type_data['categories'] as $cat_row): ?>
-                          <li>
-                            <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
-                              <?= htmlspecialchars($cat_row['name']) ?>
-                            </a>
-                          </li>
-                        <?php endforeach; ?>
-                      </ul>
-                    </div>
-                  <?php endif; ?>
-                <?php endforeach; ?>
-                <!-- จบลูป PHP -->
+                          <?php foreach ($type_data['categories'] as $cat_row): ?>
+                            <li>
+                              <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
+                                <?= htmlspecialchars($cat_row['name']) ?>
+                              </a>
+                            </li>
+                          <?php endforeach; ?>
+                        </ul>
+                      </div>
+                    <?php endif; ?>
+                  <?php endforeach; ?>
 
+                </div>
               </div>
             </div>
           </div>
         </li>
+
 
         <li class="nav-item dropdown position-static">
           <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
