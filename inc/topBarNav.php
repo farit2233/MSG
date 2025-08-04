@@ -69,19 +69,18 @@ while ($type_row = $type_qry->fetch_assoc()) {
             <div class="mega-box">
               <div class="content">
                 <div class="row">
-
                   <?php foreach ($promotion_structure as $tid => $type_data): ?>
                     <?php if (!empty($type_data['categories'])): ?>
                       <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                         <ul>
-                          <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
-                            <header><?= htmlspecialchars($type_data['name']) ?></header>
+                          <a href="#" onclick="return false;" class="text-decoration-none">
+                            <h5 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h5>
                           </a>
                           <hr class="mt-1 mb-2">
-
                           <?php foreach ($type_data['categories'] as $cat_row): ?>
                             <li>
-                              <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
+                              <a href="<?= base_url . "?p=products&cid=" . $cat_row['id'] ?>" class="text-decoration-none">
+
                                 <?= htmlspecialchars($cat_row['name']) ?>
                               </a>
                             </li>
@@ -90,49 +89,45 @@ while ($type_row = $type_qry->fetch_assoc()) {
                       </div>
                     <?php endif; ?>
                   <?php endforeach; ?>
-
                 </div>
               </div>
             </div>
           </div>
         </li>
 
-
         <li class="nav-item dropdown position-static">
           <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             ประเภทสินค้า
           </a>
           <div class="dropdown-menu megamenu w-100" aria-labelledby="navbarDropdown">
-            <div class="container">
-              <div class="row">
+            <div class="mega-box">
+              <div class="content">
+                <div class="row">
+                  <?php foreach ($product_structure as $tid => $type_data): ?>
+                    <?php if (!empty($type_data['categories'])): ?>
+                      <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <ul>
+                          <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
+                            <h5 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h5>
+                          </a>
+                          <hr class="mt-1 mb-2">
+                          <?php foreach ($type_data['categories'] as $cat_row): ?>
+                            <li>
+                              <a href="<?= base_url . "?p=products&cid=" . $cat_row['id'] ?>" class="text-decoration-none">
 
-                <?php foreach ($product_structure as $tid => $type_data): ?>
-                  <?php if (!empty($type_data['categories'])): ?>
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                      <ul>
-                        <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
-                          <h6 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h6>
-                        </a>
-                        <hr class="mt-1 mb-2">
-
-                        <?php foreach ($type_data['categories'] as $cat_row): ?>
-                          <li>
-                            <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
-                              <?= htmlspecialchars($cat_row['name']) ?>
-                            </a>
-                          </li>
-                        <?php endforeach; ?>
-                      </ul>
-                    </div>
-                  <?php endif; ?>
-                <?php endforeach; ?>
-
-
+                                <?= htmlspecialchars($cat_row['name']) ?>
+                              </a>
+                            </li>
+                          <?php endforeach; ?>
+                        </ul>
+                      </div>
+                    <?php endif; ?>
+                  <?php endforeach; ?>
+                </div>
               </div>
             </div>
           </div>
         </li>
-
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li>
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
       </ul>
