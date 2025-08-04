@@ -118,7 +118,7 @@ function formatDateThai($date)
                             <th>ที่</th>
                             <th>ชื่อโปรโมชั่น</th>
                             <th>รายละเอียด</th>
-                            <th>ช่วงเวลา</th>
+                            <th>วันที่สร้าง</th>
                             <th>จัดการ</th>
                         </tr>
                     </thead>
@@ -135,11 +135,7 @@ function formatDateThai($date)
                                     <p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
                                 </td>
                                 <td class="text-center">
-                                    <?php
-                                    $start_date = $row['date_created'] ? date("Y-m-d", strtotime($row['date_created'])) : '-';
-                                    $end_date = $row['date_updated'] ? date("Y-m-d", strtotime($row['date_updated'])) : '-';
-                                    echo "{$start_date} ถึง {$end_date}";
-                                    ?>
+                                    <?= formatDateThai($date_created) ?>
                                 </td>
                                 <td class="text-center">
                                     <?php if ($_settings->userdata('type') == 1): ?>

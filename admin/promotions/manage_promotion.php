@@ -41,10 +41,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>โค้ดโปรโมชั่น (ถ้ามี)</label>
-                        <input type="text" name="promo_code" class="form-control" value="<?= isset($promo_code) ? $promo_code : '' ?>">
-                    </div>
+
                     <div class="form-group">
                         <label for="description">รายละเอียด</label>
                         <textarea rows="3" name="description" id="description" class="form-control"><?php echo isset($description) ? $description : ''; ?></textarea>
