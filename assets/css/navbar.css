@@ -722,7 +722,22 @@ body.body-no-scroll {
 .megamenu .list-header:hover {
     color: var(--primary); /* หรือสีหลักของเว็บคุณ */
 }
+/* เพิ่มระยะห่างระหว่างคอลัมน์ใน Megamenu */
+.dropdown-menu.megamenu .row > [class*="col-"] {
+    padding-right: 0.75rem; /* ระยะห่างทางขวา */
+    padding-left: 0.75rem;  /* ระยะห่างทางซ้าย */
+}
 
+/* ลบ padding ที่เกินมาของ row ด้านนอก เพื่อไม่ให้เมนูล้น */
+.dropdown-menu.megamenu .row {
+    margin-right: -0.75rem;
+    margin-left: -0.75rem;
+}
+
+/* เพิ่มระยะห่างระหว่างแถว */
+.dropdown-menu.megamenu .row.mt-4 { /* ใช้เฉพาะ row ที่มี mt-4 */
+    margin-top: 1.5rem !important; /* หรือค่าที่คุณต้องการ */
+}
 @media (max-width: 1200px) {
   .navbar-nav .nav-link {
     font-size: 14px;

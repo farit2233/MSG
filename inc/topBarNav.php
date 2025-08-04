@@ -23,17 +23,28 @@ $promotion_structure = [];
 $type_qry = $conn->query("SELECT * FROM `promotion_category` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
 while ($type_row = $type_qry->fetch_assoc()) {
   $tid = $type_row['id'];
-  $promotion_structure[$tid] = [
-    'name' => $type_row['name'],
-    'categories' => []
-  ];
 
+  // ตรวจสอบวันหมดอายุของหมวดหมู่โปรโมชั่น
+  $current_time = time(); // เวลาปัจจุบัน
   $cat_qry = $conn->query("SELECT * FROM `promotions` WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$tid} ORDER BY `date_created` ASC");
+
+  $has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชั่นที่ยังคงใช้งานได้หรือไม่
+
   while ($cat_row = $cat_qry->fetch_assoc()) {
-    $promotion_structure[$tid]['categories'][] = [
-      'id' => $cat_row['id'],
-      'name' => $cat_row['name']
-    ];
+    // ตรวจสอบวันหมดอายุของแต่ละโปรโมชั่น
+    $end_date = strtotime($cat_row['end_date']); // วันหมดอายุ
+    if ($end_date >= $current_time) {
+      // ถ้าโปรโมชั่นยังไม่หมดอายุ ให้เพิ่มลงใน array
+      $promotion_structure[$tid]['categories'][] = [
+        'id' => $cat_row['id'],
+        'name' => $cat_row['name']
+      ];
+      $has_active_promotions = true; // ตั้งค่าถ้ามีโปรโมชั่นที่ยังใช้งานได้
+    }
+  }
+  // ถ้ามีโปรโมชั่นที่ยังใช้งานได้ จะเพิ่มหมวดหมู่
+  if ($has_active_promotions) {
+    $promotion_structure[$tid]['name'] = $type_row['name'];
   }
 }
 ?>
@@ -58,6 +69,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
             <div class="container">
               <div class="row">
 
+                <!-- เริ่มลูป PHP เพื่อแสดงหมวดหมู่ -->
                 <?php foreach ($promotion_structure as $tid => $type_data): ?>
                   <?php if (!empty($type_data['categories'])): ?>
                     <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
@@ -67,6 +79,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
                         </a>
                         <hr class="mt-1 mb-2">
 
+                        <!-- ลูปเพื่อแสดงชื่อโปรโมชั่นในแต่ละหมวดหมู่ -->
                         <?php foreach ($type_data['categories'] as $cat_row): ?>
                           <li>
                             <a href="<?= base_url . "?p=products&cid={$cat_row['id']}" ?>">
@@ -78,6 +91,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
                     </div>
                   <?php endif; ?>
                 <?php endforeach; ?>
+                <!-- จบลูป PHP -->
 
               </div>
             </div>
