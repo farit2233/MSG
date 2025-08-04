@@ -4,17 +4,28 @@
     </script>
 <?php endif; ?>
 <?php
+// ฟังก์ชันแปลงวันที่เป็น พ.ศ.
 function formatDateThai($date)
 {
-    // แปลงวันที่เป็นตัวแปร timestamp
+    // ถ้าวันที่ว่างหรือไม่ถูกต้อง
+    if (empty($date)) {
+        return 'ข้อมูลวันที่ไม่ถูกต้อง';
+    }
+
+    // แปลงวันที่เป็น timestamp
     $timestamp = strtotime($date);
-    $day = date("j", $timestamp); // วัน (1-31)
-    $month = date("n", $timestamp); // เดือน (1-12)
+    if ($timestamp === false) {
+        return 'ข้อมูลวันที่ไม่ถูกต้อง';
+    }
+
+    // ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+    $day = date("j", $timestamp);
+    $month = date("n", $timestamp);
     $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
     $hour = date("H", $timestamp); // ชั่วโมง (00-23)
     $minute = date("i", $timestamp); // นาที (00-59)
 
-    // สร้างวันที่ในรูปแบบไทย
+    // ส่งคืนวันที่ในรูปแบบไทย
     return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
 }
 ?>
@@ -157,38 +168,17 @@ function formatDateThai($date)
                                     ?>
                                 </td>
                                 <td class="text-right"><?= number_format($row['discount_value'], 2) ?></td>
-
                                 <td class="text-center">
                                     <?php
-                                    // ตรวจสอบค่าของ date_created ว่ามีข้อมูลหรือไม่
-                                    if (!empty($row['date_created'])) {
-                                        // แปลงวันที่เป็น timestamp
-                                        $date = strtotime($row['start_date']); ?>ถึง<br>
-                                <?php
-                                        $date = strtotime($row['end_date']);
-                                        // ถ้าวันที่ไม่เป็น null หรือไม่ผิดพลาด
-                                        if ($date !== false) {
-                                            $day = date("j", $date); // วัน (1-31)
-                                            $month = date("n", $date); // เดือน (1-12)
-                                            $year = date("Y", $date) + 543; // ปี (พ.ศ.)
-                                            $hour = date("H", $date); // ชั่วโมง (00-23)
-                                            $minute = date("i", $date); // นาที (00-59)
-
-                                            // แสดงวันที่ในรูปแบบไทย (พ.ศ.)
-                                            echo "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
-                                        } else {
-                                            echo 'ข้อมูลวันที่ไม่ถูกต้อง';
-                                        }
+                                    // เรียกใช้ฟังก์ชันแปลงวันที่
+                                    if (!empty($row['start_date']) && !empty($row['end_date'])) {
+                                        // แปลงวันที่ start_date และ end_date
+                                        echo formatDateThai($row['start_date']) . ' ถึง <br>' . formatDateThai($row['end_date']);
                                     } else {
                                         echo 'ไม่มีวันที่';
                                     }
-                                ?>
-                                <?= date("Y-m-d", strtotime($row['start_date'])) ?> ถึง<br>
-                                <?= date("Y-m-d", strtotime($row['end_date'])) ?>
+                                    ?>
                                 </td>
-
-
-
                                 <td class="text-center">
                                     <?php if ($_settings->userdata('type') == 1): ?>
                                         <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
