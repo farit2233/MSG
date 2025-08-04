@@ -3,21 +3,7 @@
         alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
     </script>
 <?php endif; ?>
-<?php
-function formatDateThai($date)
-{
-    // แปลงวันที่เป็นตัวแปร timestamp
-    $timestamp = strtotime($date);
-    $day = date("j", $timestamp); // วัน (1-31)
-    $month = date("n", $timestamp); // เดือน (1-12)
-    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
-    $hour = date("H", $timestamp); // ชั่วโมง (00-23)
-    $minute = date("i", $timestamp); // นาที (00-59)
 
-    // สร้างวันที่ในรูปแบบไทย
-    return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
-}
-?>
 <style>
     .card-title {
         font-size: 20px !important;
@@ -135,8 +121,31 @@ function formatDateThai($date)
                                     <p class="mb-0 truncate-1"><?php echo ($row['description']) ?></p>
                                 </td>
                                 <td class="text-center">
-                                    <?= formatDateThai($date_created) ?>
+                                    <?php
+                                    // ตรวจสอบค่าของ date_created ว่ามีข้อมูลหรือไม่
+                                    if (!empty($row['date_created'])) {
+                                        // แปลงวันที่เป็น timestamp
+                                        $date = strtotime($row['date_created']);
+
+                                        // ถ้าวันที่ไม่เป็น null หรือไม่ผิดพลาด
+                                        if ($date !== false) {
+                                            $day = date("j", $date); // วัน (1-31)
+                                            $month = date("n", $date); // เดือน (1-12)
+                                            $year = date("Y", $date) + 543; // ปี (พ.ศ.)
+                                            $hour = date("H", $date); // ชั่วโมง (00-23)
+                                            $minute = date("i", $date); // นาที (00-59)
+
+                                            // แสดงวันที่ในรูปแบบไทย (พ.ศ.)
+                                            echo "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+                                        } else {
+                                            echo 'ข้อมูลวันที่ไม่ถูกต้อง';
+                                        }
+                                    } else {
+                                        echo 'ไม่มีวันที่';
+                                    }
+                                    ?>
                                 </td>
+
                                 <td class="text-center">
                                     <?php if ($_settings->userdata('type') == 1): ?>
                                         <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
