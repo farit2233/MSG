@@ -157,10 +157,38 @@ function formatDateThai($date)
                                     ?>
                                 </td>
                                 <td class="text-right"><?= number_format($row['discount_value'], 2) ?></td>
+
                                 <td class="text-center">
-                                    <?= date("Y-m-d", strtotime($row['start_date'])) ?> ถึง<br>
-                                    <?= date("Y-m-d", strtotime($row['end_date'])) ?>
+                                    <?php
+                                    // ตรวจสอบค่าของ date_created ว่ามีข้อมูลหรือไม่
+                                    if (!empty($row['date_created'])) {
+                                        // แปลงวันที่เป็น timestamp
+                                        $date = strtotime($row['start_date']); ?>ถึง<br>
+                                <?php
+                                        $date = strtotime($row['end_date']);
+                                        // ถ้าวันที่ไม่เป็น null หรือไม่ผิดพลาด
+                                        if ($date !== false) {
+                                            $day = date("j", $date); // วัน (1-31)
+                                            $month = date("n", $date); // เดือน (1-12)
+                                            $year = date("Y", $date) + 543; // ปี (พ.ศ.)
+                                            $hour = date("H", $date); // ชั่วโมง (00-23)
+                                            $minute = date("i", $date); // นาที (00-59)
+
+                                            // แสดงวันที่ในรูปแบบไทย (พ.ศ.)
+                                            echo "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+                                        } else {
+                                            echo 'ข้อมูลวันที่ไม่ถูกต้อง';
+                                        }
+                                    } else {
+                                        echo 'ไม่มีวันที่';
+                                    }
+                                ?>
+                                <?= date("Y-m-d", strtotime($row['start_date'])) ?> ถึง<br>
+                                <?= date("Y-m-d", strtotime($row['end_date'])) ?>
                                 </td>
+
+
+
                                 <td class="text-center">
                                     <?php if ($_settings->userdata('type') == 1): ?>
                                         <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
