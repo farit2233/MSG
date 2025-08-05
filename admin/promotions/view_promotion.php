@@ -217,7 +217,7 @@ function formatDateThai($date)
         </div>
     </div>
     <div class="card-footer py-1 text-center">
-        <a class="btn btn-light btn-sm border btn-flat" href="./?page=promotions_list"><i class="fa fa-angle-left"></i> กลับ</a>
+        <a class="btn btn-light btn-sm border btn-flat" href="./?page=promotions"><i class="fa fa-angle-left"></i> กลับ</a>
     </div>
 </section>
 <script>
@@ -262,7 +262,7 @@ function formatDateThai($date)
             _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชั่น?", "delete_promotion_product", [$(this).attr('data-id')])
         });
         $('#promotion_products').click(function() {
-            uni_modal_promotion("เพิ่มสินค้า", "promotions_list/promotion_products.php?id=<?= isset($id) ? $id : '' ?>")
+            uni_modal_promotion("เพิ่มสินค้า", "promotions/promotion_products.php?id=<?= isset($id) ? $id : '' ?>")
         })
     })
 

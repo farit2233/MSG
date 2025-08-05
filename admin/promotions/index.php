@@ -85,7 +85,7 @@ function formatDateThai($date)
     <div class="card-header">
         <div class="card-title">โปรโมชั่นทั้งหมด</div>
         <div class="card-tools">
-            <a href="./?page=promotions_list/manage_promotion" class="btn btn-flat btn-dark">
+            <a href="./?page=promotions/manage_promotion" class="btn btn-flat btn-dark">
                 <i class="fas fa-plus"></i> สร้างโปรโมชั่นใหม่
             </a>
         </div>
@@ -187,11 +187,11 @@ function formatDateThai($date)
                                         </button>
 
                                         <div class="dropdown-menu" role="menu">
-                                            <a class="dropdown-item" href="./?page=promotions_list/view_promotion&id=<?php echo $row['id'] ?>">
+                                            <a class="dropdown-item" href="./?page=promotions/view_promotion&id=<?php echo $row['id'] ?>">
                                                 <span class="fa fa-eye text-dark"></span> ดู
                                             </a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="./?page=promotions_list/manage_promotion&id=<?php echo $row['id'] ?>">
+                                            <a class="dropdown-item" href="./?page=promotions/manage_promotion&id=<?php echo $row['id'] ?>">
                                                 <span class="fa fa-edit text-dark"></span> แก้โปรโมชั่น
                                             </a>
                                             <div class="dropdown-divider"></div>

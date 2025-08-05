@@ -101,7 +101,7 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="./?page=promotions_list" class="nav-link nav-promotions_list">
+                    <a href="./?page=promotions" class="nav-link nav-promotions">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
                         โปรโมชั่นสินค้าทั้งหมด

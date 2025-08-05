@@ -1118,7 +1118,7 @@ class Master extends DBConnection
 			return $this->capture_err();
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "promotions_list already exists.";
+			$resp['msg'] = "promotions already exists.";
 			return json_encode($resp);
 			exit;
 		}
@@ -1133,9 +1133,9 @@ class Master extends DBConnection
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
 			if (empty($id))
-				$resp['msg'] = "New promotions_list successfully saved.";
+				$resp['msg'] = "New promotions successfully saved.";
 			else
-				$resp['msg'] = " promotions_list successfully updated.";
+				$resp['msg'] = " promotions successfully updated.";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
