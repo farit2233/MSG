@@ -44,8 +44,10 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
 // เช็คว่าเลือก promotion_id หรือไม่
 if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
     $pid = intval($_GET['pid']);
+    // เพิ่มเงื่อนไขในการดึงสินค้าที่เชื่อมโยงกับ promotion_id
     $additional_where .= " AND pp.promotion_id = {$pid}";
 }
+
 
 // ดึงรายการสินค้า พร้อม JOIN ตาราง category_list เพื่อใช้ product_type_id
 $qry = $conn->query("
@@ -59,6 +61,7 @@ $qry = $conn->query("
     LEFT JOIN promotion_products pp ON pp.product_id = pl.id
     WHERE pl.status = 1 AND pl.delete_flag = 0
     {$additional_where}
+    GROUP BY pl.id  -- Group by product id
     ORDER BY {$order_by}
 ");
 
