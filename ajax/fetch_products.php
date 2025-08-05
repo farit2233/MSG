@@ -40,10 +40,7 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
     $tid = intval($_GET['tid']);
     $additional_where .= " AND cl.product_type_id = {$tid}";
 }
-if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
-    $pid = intval($_GET['pid']);
-    $additional_where .= " AND pd.product_id  = {$pid}";
-}
+
 // ดึงรายการสินค้า พร้อม JOIN ตาราง category_list เพื่อใช้ product_type_id
 $qry = $conn->query("
     SELECT pl.*,

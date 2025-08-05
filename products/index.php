@@ -101,12 +101,13 @@
     }
 </style>
 <?php
+// ... (ส่วนโค้ด PHP ที่อยู่ด้านบนของ products.php เหมือนเดิม) ...
 
 $page_title = "สินค้าทั้งหมด"; // ตั้งชื่อหน้าเริ่มต้น
 $page_description = "";
 $current_cid = '';
 $current_tid = '';
-$current_pid = '';
+
 $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">สินค้าทั้งหมด</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
 
 if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
@@ -148,24 +149,7 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
     }
 }
 
-if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
-    $promotion_qry = $conn->query("SELECT * FROM `promotion_products` where `id` = '{$_GET['pid']}' and `status` = 1 and `delete_flag` = 0");
-    if ($promotion_qry->num_rows > 0) {
-        $pmt_result = $promotion_qry->fetch_assoc();
-        $page_title = $pmt_result['name'];
-        $page_description = $pmt_result['description'];
-        $current_pid = $_GET['pid'];
-        $breadcrumb_item_2_html = '<li class="breadcrumb-item"><a href="./?p=promotions&pid=' . $current_pid . '" class="plain-link">' . $pmt_result['name'] . '</a></li>';
-        $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">' . $pmt_result['name'] . '</li>';
-    } else {
-        $page_title = "ไม่พบหมวดหมู่";
-        $page_description = "หมวดหมู่ที่คุณระบุไม่ถูกต้องหรือไม่สามารถใช้งานได้";
-        $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบหมวดหมู่</li>';
-    }
-}
-
 ?>
-
 
 <section class="py-3">
     <div class="container">
@@ -220,7 +204,6 @@ if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
     // เก็บค่า category ID ปัจจุบันจาก PHP เพื่อใช้ใน JavaScript
     var currentCid = "<?= $current_cid ?>";
     var currentTid = "<?= $current_tid ?>";
-    var currentPid = "<?= $current_pid ?>";
 
     function sortProducts() {
         var sortBy = $('#sort_by').val(); // ดึงค่าที่เลือกจาก dropdown
@@ -237,8 +220,7 @@ if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
             data: {
                 sort: sortBy,
                 cid: currentCid,
-                tid: currentTid,
-                pid: currentPid
+                tid: currentTid
             },
             success: function(response) {
                 // ซ่อน loading spinner

@@ -20,16 +20,16 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
 $promotion_structure = [];
 
-// ดึงข้อมูลหมวดหมู่โปรโมชั่น
+// Query เพื่อดึงข้อมูลของหมวดหมู่โปรโมชั่น
 $type_qry = $conn->query("SELECT * FROM `promotion_category` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
 while ($type_row = $type_qry->fetch_assoc()) {
   $pcid = $type_row['id'];
 
-  // ตรวจสอบวันหมดอายุของหมวดหมู่โปรโมชั่น
+  // ตรวจสอบวันหมดอายุของโปรโมชั่น
   $current_time = time(); // เวลาปัจจุบัน
   $pro_qry = $conn->query("SELECT * FROM `promotions_list` 
-                             WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
-                             ORDER BY `date_created` ASC");
+                           WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
+                           ORDER BY `date_created` ASC");
 
   $has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชั่นที่ยังคงใช้งานได้หรือไม่
 
@@ -68,6 +68,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
         <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li-->
 
+        <!-- HTML Navbar ที่แสดงโปรโมชั่น -->
         <li class="nav-item dropdown position-static">
           <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             โปรโมชั่น
@@ -86,6 +87,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
                           <hr class="mt-1 mb-2">
                           <?php foreach ($type_data['categories'] as $cat_row): ?>
                             <li>
+                              <!-- ลิงก์ไปยังหน้ารายการสินค้าตาม promotion_id -->
                               <a href="<?= base_url . "?p=products&pid=" . $cat_row['id'] ?>" class="text-decoration-none">
                                 <?= htmlspecialchars($cat_row['name']) ?>
                               </a>
