@@ -1113,19 +1113,19 @@ class Master extends DBConnection
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
-		$check = $this->conn->query("SELECT * FROM `promotions` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
+		$check = $this->conn->query("SELECT * FROM `promotions_list` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
 		if ($this->capture_err())
 			return $this->capture_err();
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "promotions already exists.";
+			$resp['msg'] = "promotions_list already exists.";
 			return json_encode($resp);
 			exit;
 		}
 		if (empty($id)) {
-			$sql = "INSERT INTO `promotions` set {$data} ";
+			$sql = "INSERT INTO `promotions_list` set {$data} ";
 		} else {
-			$sql = "UPDATE `promotions` set {$data} where id = '{$id}' ";
+			$sql = "UPDATE `promotions_list` set {$data} where id = '{$id}' ";
 		}
 		$save = $this->conn->query($sql);
 		if ($save) {
@@ -1133,9 +1133,9 @@ class Master extends DBConnection
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
 			if (empty($id))
-				$resp['msg'] = "New promotions successfully saved.";
+				$resp['msg'] = "New promotions_list successfully saved.";
 			else
-				$resp['msg'] = " promotions successfully updated.";
+				$resp['msg'] = " promotions_list successfully updated.";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
@@ -1148,7 +1148,7 @@ class Master extends DBConnection
 	function delete_promotion()
 	{
 		extract($_POST);
-		$del = $this->conn->query("DELETE FROM `promotions` WHERE id = '{$id}'");
+		$del = $this->conn->query("DELETE FROM `promotions_list` WHERE id = '{$id}'");
 		if ($del) {
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success', "ลบโปรโมชั่นแล้ว");
