@@ -457,10 +457,10 @@ INSERT INTO `product_type` (`id`, `name`, `description`, `status`, `delete_flag`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `promotions`
+-- Table structure for table `promotions_list`
 --
 
-CREATE TABLE `promotions` (
+CREATE TABLE `promotions_list` (
   `id` int NOT NULL,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
@@ -477,10 +477,10 @@ CREATE TABLE `promotions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `promotions`
+-- Dumping data for table `promotions_list`
 --
 
-INSERT INTO `promotions` (`id`, `name`, `description`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `promo_code`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
+INSERT INTO `promotions_list` (`id`, `name`, `description`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `promo_code`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
 (1, 'ทดสอบ1', '1', 'free_shipping', 1, 1, '2025-07-23 07:56:00', '2025-07-30 07:59:00', '1', 1, 0, '2025-07-23 15:56:25', '2025-07-24 09:34:20'),
 (2, '2', '2', 'fixed', 90, 100, '2025-07-24 10:09:00', '2025-07-25 10:09:00', '', 1, 0, '2025-07-24 10:09:08', '2025-07-24 10:09:08');
 
@@ -797,9 +797,9 @@ ALTER TABLE `product_type`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `promotions`
+-- Indexes for table `promotions_list`
 --
-ALTER TABLE `promotions`
+ALTER TABLE `promotions_list`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -906,9 +906,9 @@ ALTER TABLE `product_type`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT for table `promotions`
+-- AUTO_INCREMENT for table `promotions_list`
 --
-ALTER TABLE `promotions`
+ALTER TABLE `promotions_list`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
@@ -1011,14 +1011,14 @@ ALTER TABLE `product_list`
 -- Constraints for table `promotion_categories`
 --
 ALTER TABLE `promotion_categories`
-  ADD CONSTRAINT `promotion_categories_ibfk_1` FOREIGN KEY (`promotion_id`) REFERENCES `promotions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `promotion_categories_ibfk_1` FOREIGN KEY (`promotion_id`) REFERENCES `promotions_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `promotion_categories_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category_list` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `promotion_products`
 --
 ALTER TABLE `promotion_products`
-  ADD CONSTRAINT `promotion_products_ibfk_1` FOREIGN KEY (`promotion_id`) REFERENCES `promotions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `promotion_products_ibfk_1` FOREIGN KEY (`promotion_id`) REFERENCES `promotions_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `promotion_products_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product_list` (`id`) ON DELETE CASCADE;
 
 --
