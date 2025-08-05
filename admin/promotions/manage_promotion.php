@@ -95,8 +95,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         </div>
         <div class="card-footer py-1 text-center">
             <button class="btn btn-success btn-sm btn-flat" form="promotion-form"><i class="fa fa-save"></i> บันทึก</button>
-            <a class="btn btn-danger btn-sm border btn-flat" href="./?page=promotions_list"><i class="fa fa-times"></i> ยกเลิก</a>
-            <a class="btn btn-light btn-sm border btn-flat" href="./?page=promotions_list"><i class="fa fa-angle-left"></i> กลับ</a>
+            <a class="btn btn-danger btn-sm border btn-flat" href="./?page=promotions"><i class="fa fa-times"></i> ยกเลิก</a>
+            <a class="btn btn-light btn-sm border btn-flat" href="./?page=promotions"><i class="fa fa-angle-left"></i> กลับ</a>
         </div>
     </form>
 
@@ -131,7 +131,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     },
                     success: function(resp) {
                         if (typeof resp == 'object' && resp.status == 'success') {
-                            location.replace('./?page=promotions_list/manage_promotion&id=' + resp.cid)
+                            location.replace('./?page=promotions/manage_promotion&id=' + resp.cid)
                         } else if (resp.status == 'failed' && !!resp.msg) {
                             var el = $('<div>')
                             el.addClass("alert alert-danger err-msg").text(resp.msg)

@@ -81,9 +81,9 @@ while ($type_row = $type_qry->fetch_assoc()) {
                     <?php if (!empty($type_data['categories'])): ?>
                       <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                         <ul>
-                          <a href="#" onclick="return false;" class="text-decoration-none">
+                          <div onclick="return false;" class="text-decoration-none">
                             <h5 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h5>
-                          </a>
+                          </div>
                           <hr class="mt-1 mb-2">
                           <?php foreach ($type_data['categories'] as $cat_row): ?>
                             <li>
