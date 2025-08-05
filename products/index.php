@@ -107,6 +107,7 @@ $page_title = "สินค้าทั้งหมด"; // ตั้งชื�
 $page_description = "";
 $current_cid = '';
 $current_tid = '';
+$current_pid = '';
 
 $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">สินค้าทั้งหมด</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
 
@@ -149,6 +150,24 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
     }
 }
 
+// ตรวจสอบการเลือกโปรโมชั่น
+if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
+    $current_pid = $_GET['pid'];
+    // ดึงข้อมูลโปรโมชั่น
+    $promotion_qry = $conn->query("SELECT * FROM `promotions_list` WHERE `id` = '{$current_pid}' AND `status` = 1 AND `delete_flag` = 0");
+    if ($promotion_qry->num_rows > 0) {
+        $promotion_result = $promotion_qry->fetch_assoc();
+        $page_title = $promotion_result['name'];
+        $page_description = $promotion_result['description'];
+        $breadcrumb_item_2_html = '<li class="breadcrumb-item"><a href="./?p=products&pid=' . $current_pid . '" class="plain-link">' . $promotion_result['name'] . '</a></li>';
+        $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">' . $promotion_result['name'] . '</li>';
+    } else {
+        // กรณีไม่พบโปรโมชั่น
+        $page_title = "ไม่พบโปรโมชั่น";
+        $page_description = "โปรโมชั่นที่คุณระบุไม่ถูกต้องหรือไม่สามารถใช้งานได้";
+        $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบโปรโมชั่น</li>';
+    }
+}
 ?>
 
 <section class="py-3">
@@ -204,6 +223,7 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
     // เก็บค่า category ID ปัจจุบันจาก PHP เพื่อใช้ใน JavaScript
     var currentCid = "<?= $current_cid ?>";
     var currentTid = "<?= $current_tid ?>";
+    var currentPid = "<?= $current_pid ?>"
 
     function sortProducts() {
         var sortBy = $('#sort_by').val(); // ดึงค่าที่เลือกจาก dropdown
@@ -220,7 +240,8 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
             data: {
                 sort: sortBy,
                 cid: currentCid,
-                tid: currentTid
+                tid: currentTid,
+                pid: currentPid
             },
             success: function(response) {
                 // ซ่อน loading spinner
