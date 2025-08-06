@@ -83,7 +83,7 @@ if ($default_shipping_qry && $row = $default_shipping_qry->fetch_assoc()) {
 
 
 // ==========================================================
-// PHP: [ใหม่] ส่วนคำนวณโปรโมชั่นทั้งหมด (ย้ายจากข้างล่างขึ้นมา)
+// PHP: [แก้ไข] ส่วนคำนวณโปรโมชั่นทั้งหมด (เพิ่มการตรวจสอบ minimum_order)
 // ==========================================================
 $cart_promotions = [];
 $product_has_promo_status = [];
@@ -92,7 +92,8 @@ $applied_promo = null; // ตัวแปรเก็บข้อมูลโป
 
 // --- วนลูปเพื่อรวบรวมข้อมูลโปรโมชั่นทั้งหมดก่อน ---
 foreach ($cart_items as $item) {
-    $promo_query = "SELECT p.id, p.name, p.description, p.type, p.discount_value FROM promotion_products pp
+    // [แก้ไข] เพิ่ม p.minimum_order ใน query
+    $promo_query = "SELECT p.id, p.name, p.description, p.type, p.discount_value, p.minimum_order FROM promotion_products pp
                     JOIN promotions_list p ON pp.promotion_id = p.id
                     WHERE pp.product_id = {$item['product_id']} AND pp.status = 1 AND pp.delete_flag = 0";
     $promo_result = $conn->query($promo_query);
@@ -114,24 +115,36 @@ if (count($unique_promo_ids) === 1 && !in_array(false, $product_has_promo_status
     $is_promo_applicable = true;
 }
 
-// --- คำนวณส่วนลดถ้าโปรโมชั่นใช้งานได้ ---
-$final_shipping_cost = $default_shipping_cost; // ตั้งค่าส่งเริ่มต้น
+// --- [แก้ไข] คำนวณส่วนลดถ้าโปรโมชั่นใช้งานได้ และ ตรวจสอบ minimum_order ---
+$final_shipping_cost = $default_shipping_cost;
+$promo_suggestion_message = null; // [เพิ่ม] ตัวแปรสำหรับเก็บข้อความแนะนำ
+$is_discount_applied = false; // [เพิ่ม] ตัวแปรเพื่อตรวจสอบว่าส่วนลดถูกใช้จริงหรือไม่
 
 if ($is_promo_applicable) {
-    $applied_promo = reset($cart_promotions); // ดึงโปรโมชั่นที่ใช้ได้ออกมา
+    $applied_promo = reset($cart_promotions);
 
-    switch ($applied_promo['type']) {
-        case 'fixed':
-            $promotion_discount = floatval($applied_promo['discount_value']);
-            break;
-        case 'percent':
-            $promotion_discount = $cart_total * (floatval($applied_promo['discount_value']) / 100);
-            break;
-        case 'free_shipping':
-            // ส่วนลดคือค่าส่ง แต่ค่าส่งที่จะนำไปบวกคือ 0
-            $promotion_discount = $default_shipping_cost;
-            $final_shipping_cost = 0;
-            break;
+    // ตรวจสอบยอดสั่งซื้อขั้นต่ำ
+    if ($cart_total >= $applied_promo['minimum_order']) {
+        // --- ยอดซื้อถึงเกณฑ์ ---
+        $is_discount_applied = true;
+
+        switch ($applied_promo['type']) {
+            case 'fixed':
+                $promotion_discount = floatval($applied_promo['discount_value']);
+                break;
+            case 'percent':
+                $promotion_discount = $cart_total * (floatval($applied_promo['discount_value']) / 100);
+                break;
+            case 'free_shipping':
+                $promotion_discount = $default_shipping_cost;
+                $final_shipping_cost = 0;
+                break;
+        }
+    } else {
+        // --- ยอดซื้อไม่ถึงเกณฑ์ ---
+        $is_discount_applied = false;
+        $needed_amount = $applied_promo['minimum_order'] - $cart_total;
+        $promo_suggestion_message = "ซื้อเพิ่มอีก " . number_format($needed_amount, 2) . " บาท เพื่อรับโปรโมชั่นนี้";
     }
 }
 
@@ -239,7 +252,8 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
 
                                             <?php
                                             if (!empty($cart_promotions)) :
-                                                $promo_class = $is_promo_applicable ? 'promo-active' : 'promo-inactive';
+                                                // [แก้ไข] เงื่อนไขใหม่: โปรโมชั่นต้องใช้ได้ และ ส่วนลดต้องถูกใช้จริง
+                                                $promo_class = ($is_promo_applicable && $is_discount_applied) ? 'promo-active' : 'promo-inactive';
                                                 foreach ($cart_promotions as $promo) :
                                             ?>
                                                     <tr class="<?= $promo_class ?>">
@@ -270,12 +284,23 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                                                 <?php
                                                 endforeach;
 
-                                                // --- แสดงหมายเหตุ ถ้าโปรโมชั่นใช้ไม่ได้ ---
-                                                if (!$is_promo_applicable) :
+                                                // --- แสดงหมายเหตุ ถ้าโปรโมชั่นใช้ไม่ได้ (เพราะเลือกของไม่ครบ) ---
+                                                if (!$is_promo_applicable && !empty($cart_promotions)) :
                                                 ?>
                                                     <tr class="promo-note">
                                                         <td colspan="5" class="text-danger text-center" style="font-size: 0.9em;">
                                                             * กรุณาเลือกสินค้าทั้งหมดที่อยู่ในโปรโมชั่นเดียวกันเพื่อรับส่วนลด
+                                                        </td>
+                                                    </tr>
+                                                <?php
+                                                endif;
+
+                                                // [เพิ่ม] โค้ดใหม่: แสดงข้อความแนะนำให้ซื้อเพิ่ม
+                                                if (isset($promo_suggestion_message)):
+                                                ?>
+                                                    <tr class="promo-note">
+                                                        <td colspan="5" class="text-info text-center" style="font-size: 0.9em; font-weight: bold;">
+                                                            <i class="fa fa-info-circle"></i> <?= $promo_suggestion_message ?>
                                                         </td>
                                                     </tr>
                                             <?php
@@ -391,9 +416,9 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
 </section>
 
 <script>
-    // [ใหม่] ส่งข้อมูลจาก PHP มาให้ JS
+    // [แก้ไข] ส่งข้อมูลจาก PHP มาให้ JS
     const cartTotal = parseFloat(<?= json_encode($cart_total) ?>) || 0;
-    const appliedPromo = <?= json_encode($applied_promo) ?>; // จะเป็น null ถ้าไม่มีโปรโมชั่น
+    const appliedPromo = <?= json_encode($applied_promo) ?>; // จะมีข้อมูล minimum_order มาด้วย
 
     // ============================
     // JS: จัดการฟอร์มสั่งซื้อ (โค้ดเดิม)
@@ -406,6 +431,11 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
             method: 'POST',
             data: $(this).serialize(),
             dataType: 'json',
+            error: err => {
+                console.log(err);
+                alert_toast("An error occurred", "error");
+                end_loader();
+            },
             success: function(resp) {
                 if (resp.status == 'success') {
                     location.replace('./');
@@ -435,14 +465,16 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
     let selectedShipping = null;
 
     // ============================
-    // JS: [ใหม่] ฟังก์ชันกลางสำหรับคำนวณยอดรวมสุทธิ
+    // JS: [แก้ไข] ฟังก์ชันกลางสำหรับคำนวณยอดรวมสุทธิ
     // ============================
     function updateGrandTotal(shippingCost) {
         let promoDiscount = 0;
         let finalShippingCost = parseFloat(shippingCost) || 0;
         let originalShippingCost = finalShippingCost; // เก็บค่าส่งดั้งเดิมไว้
 
-        if (appliedPromo) {
+        // [แก้ไข] เพิ่มการตรวจสอบ minimum_order ในฝั่ง JS
+        if (appliedPromo && cartTotal >= parseFloat(appliedPromo.minimum_order)) {
+            // ถ้ายอดซื้อถึงเกณฑ์ ถึงจะคำนวณส่วนลด
             switch (appliedPromo.type) {
                 case 'fixed':
                     promoDiscount = parseFloat(appliedPromo.discount_value);
@@ -457,6 +489,7 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                     break;
             }
         }
+        // ถ้ายอดซื้อไม่ถึง หรือไม่มีโปรโมชั่น promoDiscount จะยังคงเป็น 0
 
         // คำนวณยอดรวมใหม่
         const grandTotal = (cartTotal - promoDiscount) + finalShippingCost;
@@ -504,7 +537,7 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                     document.getElementById('shipping_methods_name_display').innerText = name;
                     document.getElementById('shipping_methods_name_input').value = name;
 
-                    // [ใหม่] เรียกใช้ฟังก์ชันคำนวณกลาง
+                    // เรียกใช้ฟังก์ชันคำนวณกลาง
                     updateGrandTotal(newShippingCost);
 
                     selectedShipping = {
@@ -545,7 +578,7 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                 success: function(resp) {
                     if (resp.status === 'success') {
                         const initialCost = parseFloat(resp.price) || 0;
-                        // [ใหม่] เรียกใช้ฟังก์ชันคำนวณกลางเมื่อหน้าโหลดเสร็จ
+                        // เรียกใช้ฟังก์ชันคำนวณกลางเมื่อหน้าโหลดเสร็จ
                         updateGrandTotal(initialCost);
                     } else {
                         alert('ไม่สามารถคำนวณค่าขนส่งเริ่มต้นได้');
