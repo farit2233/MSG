@@ -65,10 +65,11 @@
               <h5 class="modal-title"></h5>
             </div>
             <div class="modal-body">
+
             </div>
             <div class="modal-footer">
               <!-- ปุ่มยกเลิก -->
-              <button type="button" class="btn btn-light border rounded shadow-sm" data-dismiss="modal">ยกเลิกฟฟฟ</button>
+              <button type="button" class="btn btn-light border rounded shadow-sm" data-dismiss="modal">ยกเลิก</button>
               <!-- ปุ่มเพิ่มสินค้าที่เลือก -->
               <button type="button" class="btn btn-primary rounded shadow-sm" id="submit" onclick="$('#uni_modal_promotion form').submit()">บันทึก</button>
             </div>

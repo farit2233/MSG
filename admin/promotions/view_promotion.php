@@ -93,6 +93,10 @@ function formatDateThai($date)
                             <dt class="text-muted">รายละเอียดโปรโมชั่น</dt>
                             <dd><?= $description ?? '' ?></dd>
                         </div>
+                        <div class="col-md-3">&nbsp;</div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-3">
                             <dt class="text-muted">ประเภท</dt>
                             <dd>
@@ -116,10 +120,6 @@ function formatDateThai($date)
                                 ?>
                             </dd>
                         </div>
-                        <div class="col-md-3">&nbsp;</div>
-                    </div>
-
-                    <div class="row">
                         <div class="col-md-3">
                             <dt class="text-muted">มูลค่าส่วนลด</dt>
                             <dd><?= $discount_value ?? '' ?></dd>

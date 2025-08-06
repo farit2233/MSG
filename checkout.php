@@ -176,6 +176,47 @@ HTML: แสดงรายการสินค้าในตะกร้า �
                                                 </td>
                                             </tr>
 
+                                            <?php
+                                            // ดึงข้อมูลโปรโมชั่นจากฐานข้อมูล
+                                            $promo_query = "SELECT p.name, p.description, p.type, p.discount_value FROM promotion_products pp
+                                            JOIN promotions_list p ON pp.promotion_id = p.id
+                                            WHERE pp.product_id = {$item['product_id']} AND pp.status = 1 AND pp.delete_flag = 0";
+                                            $promo_result = $conn->query($promo_query);
+
+                                            // เช็คว่าได้ข้อมูลโปรโมชั่นหรือไม่
+                                            $promo = null;
+                                            if ($promo_result && $promo_result->num_rows > 0) {
+                                                $promo = $promo_result->fetch_assoc(); // ดึงข้อมูลโปรโมชั่นแรกที่พบ
+                                            }
+
+                                            // ถ้ามีโปรโมชั่น แสดงตารางโปรโมชั่น
+                                            if ($promo) {
+                                            ?>
+                                                <tr>
+                                                    <th>
+                                                        โปรโมชั่น
+                                                        <span class="text-danger" style="font-size: 0.8em;">* รายการสินค้านี้มีโปรโมชั่น <?= htmlspecialchars($promo['name']) ?></span>
+                                                    </th>
+                                                    <td colspan="3">
+                                                        <em><?= htmlspecialchars($promo['description']) ?></em>
+                                                    </td>
+                                                    <td colspan="">
+                                                        <?php
+                                                        // แสดงโปรโมชั่นในรูปแบบ fix หรือ percent
+                                                        if ($promo['type'] == 'fixed') {
+                                                            echo "ลด " . number_format($promo['discount_value'], 2) . " บาท";
+                                                        } elseif ($promo['type'] == 'percent') {
+                                                            echo "ลด " . number_format($promo['discount_value'], 2) . "%";
+                                                        } elseif ($promo['type'] == 'free_shipping') {
+                                                            echo "ฟรีค่าจัดส่ง";
+                                                        }
+                                                        ?>
+                                                    </td>
+                                                </tr>
+                                            <?php
+                                            } // หากไม่มีโปรโมชั่น จะไม่แสดงตารางนี้
+                                            ?>
+
                                             <!-- รวมทั้งหมด -->
                                             <tr>
                                                 <th><strong>รวม</strong></th>
