@@ -250,7 +250,7 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                                                 $promo_class = ($is_promo_applicable && $is_discount_applied) ? 'promo-active' : 'promo-inactive';
                                                 foreach ($cart_promotions as $promo) :
                                             ?>
-                                                    <tr class="<?= $promo_class ?>">
+                                                    <tr class="no-border <?= $promo_class ?>">
                                                         <th>
                                                             โปรโมชั่น
                                                             <span class="text-danger" style="font-size: 0.9em; display: block; font-weight: normal;">
