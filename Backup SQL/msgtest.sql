@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 05, 2025 at 09:21 AM
+-- Generation Time: Aug 06, 2025 at 09:30 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -39,7 +39,11 @@ CREATE TABLE `cart_list` (
 --
 
 INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
-(174, 19, 14, 2);
+(183, 19, 33, 1),
+(184, 19, 20, 2),
+(185, 19, 24, 1),
+(186, 19, 14, 1),
+(187, 19, 25, 1);
 
 -- --------------------------------------------------------
 
@@ -153,6 +157,15 @@ CREATE TABLE `order_items` (
   `price` float(12,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`) VALUES
+(93, 33, 2, 199.00),
+(94, 14, 2, 11731.00),
+(94, 33, 2, 199.00);
+
 -- --------------------------------------------------------
 
 --
@@ -173,6 +186,14 @@ CREATE TABLE `order_list` (
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_list`
+--
+
+INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_methods_id`, `payment_status`, `delivery_status`, `status`, `is_seen`, `date_created`, `date_updated`) VALUES
+(93, '2025080500001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 438.00, 3, 1, 1, 0, 1, '2025-08-05 16:30:14', '2025-08-05 16:33:19'),
+(94, '2025080500002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 23935.00, 3, 0, 0, 0, 1, '2025-08-05 16:39:28', '2025-08-05 16:39:38');
 
 -- --------------------------------------------------------
 
@@ -336,15 +357,8 @@ CREATE TABLE `promotions_list` (
 --
 
 INSERT INTO `promotions_list` (`id`, `promotion_category_id`, `name`, `description`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(1, 2, 'ทดสอบ1', '1', 'free_shipping', 1, 1, '2025-07-23 07:56:00', '2025-07-30 07:59:00', 1, 0, '2025-07-23 15:56:25', '2025-08-01 09:39:19'),
-(2, 3, '2', '2', 'fixed', 90, 100, '2025-07-24 10:09:00', '2025-07-25 10:09:00', 1, 0, '2025-07-24 10:09:08', '2025-08-01 11:28:02'),
-(3, 4, 'ทดสอบ', 'ทดสอบ', 'percent', 50, 20, '2025-07-29 12:06:00', '2025-08-09 13:07:00', 1, 0, '2025-07-29 13:07:22', '2025-08-01 11:30:14'),
-(4, 5, 'ทดสอบ4', 'ทดสอบ4', 'fixed', 50, 50, '2025-08-01 11:30:00', '2025-08-01 11:30:00', 1, 0, '2025-08-01 11:30:36', '2025-08-01 11:30:36'),
-(5, 6, 'ทดสอบ5', 'ทดสอบ5', 'fixed', 100, 20, '2025-08-01 11:31:00', '2025-08-01 11:31:00', 1, 0, '2025-08-01 11:31:35', '2025-08-01 11:31:35'),
-(6, 7, 'ทดสอบ6', 'ทดสอบ6', 'fixed', 100, 20, '2025-08-01 11:37:00', '2025-08-01 11:37:00', 1, 0, '2025-08-01 11:37:10', '2025-08-01 11:37:10'),
-(7, 8, 'ทดสอบ7', 'ทดสอบ7', 'fixed', 100, 20, '2025-08-01 11:37:00', '2025-08-01 11:37:00', 1, 0, '2025-08-01 11:37:27', '2025-08-01 11:37:27'),
-(8, 9, 'ทดสอบ8', 'ทดสอบ8', 'fixed', 100, 20, '2025-08-01 11:37:00', '2025-08-01 11:37:00', 1, 0, '2025-08-01 11:37:45', '2025-08-01 11:37:45'),
-(9, 3, 'ทดสอบเวลา', 'ทดสอบเวลา', 'fixed', 1, 1, '2025-08-04 09:24:00', '2025-08-06 16:10:00', 1, 0, '2025-08-04 09:24:21', '2025-08-05 16:13:20');
+(10, 10, 'โปรโมชั่น 8.8 !', 'สั่งซื้อครบ 300 บาท', 'percent', 30, 300, '2025-08-06 09:18:00', '2025-08-21 09:18:00', 1, 0, '2025-08-06 09:18:27', '2025-08-06 11:23:38'),
+(11, 10, 'ลดล้างสต๊อก', 'ลดล้างสต๊อก', 'percent', 90, 0, '2025-08-06 16:01:00', '2025-08-07 16:01:00', 1, 0, '2025-08-06 16:01:33', '2025-08-06 16:01:33');
 
 -- --------------------------------------------------------
 
@@ -374,7 +388,8 @@ INSERT INTO `promotion_category` (`id`, `name`, `description`, `status`, `delete
 (6, 'ทดสอบ5', 'ทดสอบ5', 1, 0, '2025-08-01 04:31:20', '2025-08-01 04:31:20'),
 (7, 'ทดสอบ6', 'ทดสอบ6', 1, 0, '2025-08-01 04:36:29', '2025-08-01 04:36:29'),
 (8, 'ทดสอบ7', 'ทดสอบ7', 1, 0, '2025-08-01 04:36:35', '2025-08-01 04:36:35'),
-(9, 'ทดสอบ8', 'ทดสอบ8', 1, 0, '2025-08-01 04:36:44', '2025-08-01 04:36:44');
+(9, 'ทดสอบ8', 'ทดสอบ8', 1, 0, '2025-08-01 04:36:44', '2025-08-01 04:36:44'),
+(10, 'โปรโมชั่นยอดฮิท !', 'โปรโมชั่นยอดฮิท!', 1, 0, '2025-08-06 02:17:40', '2025-08-06 02:17:40');
 
 -- --------------------------------------------------------
 
@@ -397,15 +412,21 @@ CREATE TABLE `promotion_products` (
 --
 
 INSERT INTO `promotion_products` (`id`, `promotion_id`, `product_id`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(7, 1, 30, 1, 0, '2025-08-05 11:37:35', '2025-08-05 11:37:35'),
-(8, 1, 27, 1, 0, '2025-08-05 11:37:35', '2025-08-05 11:37:35'),
-(9, 1, 14, 1, 0, '2025-08-05 11:37:35', '2025-08-05 11:37:35'),
-(10, 1, 25, 1, 0, '2025-08-05 11:37:35', '2025-08-05 11:37:35'),
-(11, 1, 23, 1, 0, '2025-08-05 11:37:35', '2025-08-05 11:37:35'),
-(15, 9, 30, 1, 0, '2025-08-05 16:08:35', '2025-08-05 16:08:35'),
-(16, 9, 27, 1, 0, '2025-08-05 16:08:35', '2025-08-05 16:08:35'),
-(17, 9, 14, 1, 0, '2025-08-05 16:08:35', '2025-08-05 16:08:35'),
-(18, 9, 23, 1, 0, '2025-08-05 16:08:35', '2025-08-05 16:08:35');
+(25, 10, 33, 1, 0, '2025-08-06 09:19:58', '2025-08-06 09:19:58'),
+(26, 11, 30, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(27, 11, 27, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(28, 11, 14, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(29, 11, 25, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(30, 11, 23, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(31, 11, 32, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(32, 11, 22, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(33, 11, 21, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(34, 11, 26, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(35, 11, 24, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(36, 11, 20, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(37, 11, 31, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(38, 11, 29, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
+(39, 11, 34, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51');
 
 -- --------------------------------------------------------
 
@@ -771,7 +792,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=178;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=188;
 
 --
 -- AUTO_INCREMENT for table `category_list`
@@ -789,7 +810,7 @@ ALTER TABLE `customer_list`
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
 
 --
 -- AUTO_INCREMENT for table `product_list`
@@ -807,19 +828,19 @@ ALTER TABLE `product_type`
 -- AUTO_INCREMENT for table `promotions_list`
 --
 ALTER TABLE `promotions_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `promotion_category`
 --
 ALTER TABLE `promotion_category`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `promotion_products`
 --
 ALTER TABLE `promotion_products`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `shipping_methods`
