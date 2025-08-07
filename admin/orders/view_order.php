@@ -1,6 +1,7 @@
 <?php
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $qry = $conn->query("SELECT * from `order_list` where id = '{$_GET['id']}' ");
+    // สมมติว่าตาราง order_list มีคอลัมน์ promotion_id
+    $qry = $conn->query("SELECT ol.*, ol.promotion_id FROM `order_list` ol where ol.id = '{$_GET['id']}' ");
     if ($qry->num_rows > 0) {
         foreach ($qry->fetch_assoc() as $k => $v) {
             $$k = $v;
@@ -130,22 +131,22 @@ if (!empty($shipping_methods_id)) {
                                             <?php
                                             switch ((int)$payment_status) {
                                                 case 0:
-                                                    echo '<span class="badge bg-secondary">ยังไม่ชำระเงิน</span>';
+                                                    echo '<span>ยังไม่ชำระเงิน</span>';
                                                     break;
                                                 case 1:
-                                                    echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
+                                                    echo '<span>รอตรวจสอบ</span>';
                                                     break;
                                                 case 2:
-                                                    echo '<span class="badge bg-success">ชำระแล้ว</span>';
+                                                    echo '<span>ชำระแล้ว</span>';
                                                     break;
                                                 case 3:
-                                                    echo '<span class="badge bg-danger">ล้มเหลว</span>';
+                                                    echo '<span>ล้มเหลว</span>';
                                                     break;
                                                 case 4:
-                                                    echo '<span class="badge bg-dark">คืนเงินแล้ว</span>';
+                                                    echo '<span>คืนเงินแล้ว</span>';
                                                     break;
                                                 default:
-                                                    echo '<span class="badge bg-light">N/A</span>';
+                                                    echo '<span>N/A</span>';
                                                     break;
                                             }
                                             ?>
@@ -157,31 +158,31 @@ if (!empty($shipping_methods_id)) {
                                             <?php
                                             switch ((int)$delivery_status) {
                                                 case 0:
-                                                    echo '<span class="badge bg-secondary">ตรวจสอบคำสั่งซื้อ</span>';
+                                                    echo '<span>ตรวจสอบคำสั่งซื้อ</span>';
                                                     break;
                                                 case 1:
-                                                    echo '<span class="badge bg-info">เตรียมของ</span>';
+                                                    echo '<span>เตรียมของ</span>';
                                                     break;
                                                 case 2:
-                                                    echo '<span class="badge bg-primary">แพ๊กของแล้ว</span>';
+                                                    echo '<span>แพ๊กของแล้ว</span>';
                                                     break;
                                                 case 3:
-                                                    echo '<span class="badge bg-warning text-dark">กำลังจัดส่ง</span>';
+                                                    echo '<span>กำลังจัดส่ง</span>';
                                                     break;
                                                 case 4:
-                                                    echo '<span class="badge bg-success">จัดส่งสำเร็จ</span>';
+                                                    echo '<span>จัดส่งสำเร็จ</span>';
                                                     break;
                                                 case 5:
-                                                    echo '<span class="badge bg-danger">ส่งไม่สำเร็จ</span>';
+                                                    echo '<span>ส่งไม่สำเร็จ</span>';
                                                     break;
                                                 case 6:
-                                                    echo '<span class="badge bg-dark">คืนของระหว่างทาง</span>';
+                                                    echo '<span>คืนของระหว่างทาง</span>';
                                                     break;
                                                 case 7:
-                                                    echo '<span class="badge bg-secondary">คืนของสำเร็จ</span>';
+                                                    echo '<span>คืนของสำเร็จ</span>';
                                                     break;
                                                 default:
-                                                    echo '<span class="badge bg-light">N/A</span>';
+                                                    echo '<span>N/A</span>';
                                                     break;
                                             }
                                             ?>
@@ -248,10 +249,76 @@ if (!empty($shipping_methods_id)) {
                             <?php if ($order_items->num_rows <= 0): ?>
                                 <h5 class="text-center text-muted">Order Items is empty.</h5>
                             <?php endif; ?>
-                            <?php $grand_total = $gt + $shipping_cost; ?>
+
+                            <div id="item_list" class="list-group">
+                                <?php
+                                $gt = 0;
+                                $order_items = $conn->query("SELECT o.*, p.name as product, p.brand as brand, p.price, p.discounted_price, cc.name as category, p.image_path, COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) as `available` FROM `order_items` o inner join product_list p on o.product_id = p.id inner join category_list cc on p.category_id = cc.id where order_id = '{$id}' ");
+                                while ($row = $order_items->fetch_assoc()):
+                                    $price = $row['price'];
+                                    $discounted_price = $row['discounted_price'];
+                                    $has_discount = isset($discounted_price) && $discounted_price > 0;
+                                    $effective_price = $has_discount ? $discounted_price : $price;
+                                    $item_total = $effective_price * $row['quantity'];
+                                    $gt += $item_total; // $gt คือยอดรวมราคาสินค้าทั้งหมด (Subtotal)
+                                ?>
+                                <?php endwhile; ?>
+                            </div>
+                            <?php if ($order_items->num_rows <= 0): ?>
+                                <h5 class="text-center text-muted">Order Items is empty.</h5>
+                            <?php endif; ?>
+
+                            <?php
+                            // START MODIFICATION: ส่วนคำนวณโปรโมชั่น
+                            $discount_amount = 0;
+                            $promotion_name = '';
+                            $original_shipping_cost = $shipping_cost; // เก็บค่าส่งเดิมไว้
+
+                            // ตรวจสอบว่ามี promotion_id หรือไม่
+                            if (!empty($promotion_id)) {
+                                $promo_qry = $conn->query("SELECT * FROM `promotions_list` WHERE id = '{$promotion_id}' AND status = 1");
+                                if ($promo_qry->num_rows > 0) {
+                                    $promo_data = $promo_qry->fetch_assoc();
+
+                                    // ตรวจสอบว่ายอดสั่งซื้อถึงขั้นต่ำหรือไม่
+                                    if ($gt >= $promo_data['minimum_order']) {
+                                        $promotion_name = $promo_data['name'];
+                                        switch ($promo_data['type']) {
+                                            case 'percent':
+                                                $discount_amount = ($gt * $promo_data['discount_value']) / 100;
+                                                break;
+                                            case 'fixed':
+                                                $discount_amount = $promo_data['discount_value'];
+                                                break;
+                                            case 'free_shipping':
+                                                $discount_amount = $shipping_cost;
+                                                $shipping_cost = 0; // ทำให้ค่าส่งเป็น 0
+                                                break;
+                                                // สามารถเพิ่ม case 'code' ได้ถ้ามีเงื่อนไขเพิ่มเติม
+                                        }
+                                    }
+                                }
+                            }
+
+                            // คำนวณยอดรวมสุทธิใหม่
+                            $grand_total = ($gt - $discount_amount) + $shipping_cost;
+                            // END MODIFICATION
+                            ?>
+
                             <div class="d-flex justify-content-end py-3">
                                 <div class="col-auto">
-                                    <h4><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h4>
+                                    <div class="text-right">
+                                        <h5>ยอดรวม: <?= format_num($gt, 2) ?> บาท</h5>
+                                        <h5>ค่าจัดส่ง: <?= format_num($original_shipping_cost, 2) ?> บาท</h5>
+
+                                        <?php if ($discount_amount > 0): ?>
+                                            <h5>
+                                                ส่วนลด : <?= htmlspecialchars($promotion_name) ?> (-<?= format_num($discount_amount, 2) ?> บาท)
+                                            </h5>
+                                        <?php endif; ?>
+                                        <hr>
+                                        <h4><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -263,24 +330,22 @@ if (!empty($shipping_methods_id)) {
     </div>
 
     <noscript id="print-header">
-        <div>
-            <div class="d-flex w-100 align-items-center">
-                <div class="col-2 text-center">
-                    <img src="<?= validate_image($_settings->info('logo')) ?>" alt="" class="rounded-circle border" style="width: 5em;height: 5em;object-fit:cover;object-position:center center">
-                </div>
-                <div class="col-8">
-                    <div style="line-height:1em">
-                        <div class="text-center font-weight-bold">
-                            <large><?= $_settings->info('name') ?></large>
-                        </div>
-                        <div class="text-center font-weight-bold">
-                            <large>รายละเอียดคำสั่งซื้อ</large>
-                        </div>
+        <div class="d-flex w-100 align-items-center">
+            <div class="col-2 text-center">
+                <img src="<?= validate_image($_settings->info('logo')) ?>" alt="" class="rounded-circle border" style="width: 5em;height: 5em;object-fit:cover;object-position:center center">
+            </div>
+            <div class="col-8">
+                <div style="line-height:1em">
+                    <div class="text-center font-weight-bold">
+                        <large><?= $_settings->info('name') ?></large>
+                    </div>
+                    <div class="text-center font-weight-bold">
+                        <large>รายละเอียดคำสั่งซื้อ</large>
                     </div>
                 </div>
             </div>
-            <hr>
         </div>
+        <hr>
     </noscript>
 </section>
 <script>
