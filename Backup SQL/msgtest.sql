@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 06, 2025 at 09:30 AM
+-- Generation Time: Aug 07, 2025 at 04:54 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -39,9 +39,6 @@ CREATE TABLE `cart_list` (
 --
 
 INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
-(183, 19, 33, 1),
-(184, 19, 20, 2),
-(185, 19, 24, 1),
 (186, 19, 14, 1),
 (187, 19, 25, 1);
 
@@ -153,6 +150,7 @@ INSERT INTO `customer_list` (`id`, `firstname`, `middlename`, `lastname`, `gende
 CREATE TABLE `order_items` (
   `order_id` int NOT NULL,
   `product_id` int NOT NULL,
+  `promotion_id` int DEFAULT NULL,
   `quantity` int NOT NULL DEFAULT '0',
   `price` float(12,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -161,10 +159,24 @@ CREATE TABLE `order_items` (
 -- Dumping data for table `order_items`
 --
 
-INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`) VALUES
-(93, 33, 2, 199.00),
-(94, 14, 2, 11731.00),
-(94, 33, 2, 199.00);
+INSERT INTO `order_items` (`order_id`, `product_id`, `promotion_id`, `quantity`, `price`) VALUES
+(93, 33, NULL, 2, 199.00),
+(94, 14, NULL, 2, 11731.00),
+(94, 33, NULL, 2, 199.00),
+(95, 33, NULL, 2, 199.00),
+(95, 24, NULL, 1, 490.00),
+(96, 33, NULL, 1, 199.00),
+(97, 33, NULL, 1, 199.00),
+(98, 33, 10, 2, 199.00),
+(99, 33, 10, 2, 199.00),
+(100, 33, 10, 2, 199.00),
+(101, 33, 10, 2, 199.00),
+(102, 33, 10, 2, 199.00),
+(103, 33, 10, 2, 199.00),
+(104, 33, 10, 2, 199.00),
+(105, 33, 10, 2, 199.00),
+(106, 33, 10, 2, 199.00),
+(107, 33, NULL, 1, 199.00);
 
 -- --------------------------------------------------------
 
@@ -178,7 +190,9 @@ CREATE TABLE `order_list` (
   `customer_id` int NOT NULL,
   `delivery_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `total_amount` float(12,2) NOT NULL DEFAULT '0.00',
+  `promotion_discount` decimal(10,2) NOT NULL DEFAULT '0.00',
   `shipping_methods_id` int DEFAULT NULL,
+  `promotion_id` int DEFAULT NULL,
   `payment_status` tinyint(1) NOT NULL DEFAULT '0',
   `delivery_status` tinyint(1) NOT NULL DEFAULT '0',
   `status` tinyint(1) NOT NULL DEFAULT '0',
@@ -191,9 +205,22 @@ CREATE TABLE `order_list` (
 -- Dumping data for table `order_list`
 --
 
-INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_methods_id`, `payment_status`, `delivery_status`, `status`, `is_seen`, `date_created`, `date_updated`) VALUES
-(93, '2025080500001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 438.00, 3, 1, 1, 0, 1, '2025-08-05 16:30:14', '2025-08-05 16:33:19'),
-(94, '2025080500002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 23935.00, 3, 0, 0, 0, 1, '2025-08-05 16:39:28', '2025-08-05 16:39:38');
+INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `shipping_methods_id`, `promotion_id`, `payment_status`, `delivery_status`, `status`, `is_seen`, `date_created`, `date_updated`) VALUES
+(93, '2025080500001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 438.00, 0.00, 3, NULL, 1, 1, 0, 1, '2025-08-05 16:30:14', '2025-08-05 16:33:19'),
+(94, '2025080500002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 23935.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-05 16:39:28', '2025-08-05 16:39:38'),
+(95, '2025080600001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 928.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-06 16:36:24', '2025-08-06 16:36:38'),
+(96, '2025080700001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 239.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-07 09:04:32', '2025-08-07 09:04:43'),
+(97, '2025080700002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 239.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-07 10:36:37', '2025-08-07 10:47:40'),
+(98, '2025080700003', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 10:53:54', '2025-08-07 10:53:57'),
+(99, '2025080700004', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:04:47', '2025-08-07 11:05:27'),
+(100, '2025080700005', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:05:46', '2025-08-07 11:10:54'),
+(101, '2025080700006', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:11:01', '2025-08-07 11:41:25'),
+(102, '2025080700007', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:36:48', '2025-08-07 11:41:25'),
+(103, '2025080700008', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:38:33', '2025-08-07 11:41:25'),
+(104, '2025080700009', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:39:41', '2025-08-07 11:41:25'),
+(105, '2025080700010', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:41:34', '2025-08-07 11:43:51'),
+(106, '2025080700011', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:43:54', '2025-08-07 11:46:48'),
+(107, '2025080700012', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 239.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-07 11:50:01', '2025-08-07 11:52:34');
 
 -- --------------------------------------------------------
 
@@ -682,7 +709,8 @@ ALTER TABLE `customer_list`
 --
 ALTER TABLE `order_items`
   ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `fk_promotion_id` (`promotion_id`);
 
 --
 -- Indexes for table `order_list`
@@ -792,7 +820,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=188;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=200;
 
 --
 -- AUTO_INCREMENT for table `category_list`
@@ -810,7 +838,7 @@ ALTER TABLE `customer_list`
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
 
 --
 -- AUTO_INCREMENT for table `product_list`
@@ -905,6 +933,7 @@ ALTER TABLE `category_list`
 -- Constraints for table `order_items`
 --
 ALTER TABLE `order_items`
+  ADD CONSTRAINT `fk_promotion_id` FOREIGN KEY (`promotion_id`) REFERENCES `promotions_list` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `order_id_fk_oi` FOREIGN KEY (`order_id`) REFERENCES `order_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `product_id_fk_oi` FOREIGN KEY (`product_id`) REFERENCES `product_list` (`id`) ON DELETE CASCADE;
 
