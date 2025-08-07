@@ -63,7 +63,7 @@ class Login extends DBConnection
 			$resp['status'] = 'success';
 		} else {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "<i class='fa fa-exclamation-triangle'></i> หรือรหัสผ่านไม่ถูกต้อง";
+			$resp['msg'] = "<i class='fa fa-exclamation-triangle'></i> บัญชี หรือรหัสผ่านไม่ถูกต้อง";
 		}
 		if ($this->conn->error) {
 			$resp['status'] = 'failed';
