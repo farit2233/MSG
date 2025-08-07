@@ -365,6 +365,7 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                                 <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
 
+                                <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
                                 <div class="py-1 text-center">
                                     <button class="btn addcart rounded-pill" <?= empty($full_address) ? 'disabled' : '' ?>>
                                         ยืนยันคำสั่งซื้อ

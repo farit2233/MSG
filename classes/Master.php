@@ -550,6 +550,7 @@ class Master extends DBConnection
 		$this->conn->query("START TRANSACTION");
 
 		try {
+			// --- สร้างรหัส Order Code ---
 			while (true) {
 				$check = $this->conn->query("SELECT id FROM `order_list` WHERE `code` = '{$pref}{$code}'")->num_rows;
 				if ($check > 0) {
@@ -560,24 +561,20 @@ class Master extends DBConnection
 				}
 			}
 
+			// --- ดึงข้อมูลสินค้าในตะกร้า ---
 			$selected_ids = !empty($selected_items) ? array_filter(array_map('intval', explode(',', $selected_items))) : [];
 			if (empty($selected_ids)) throw new Exception('ไม่มีรายการสินค้าสำหรับชำระสินค้า');
 			$ids_str = implode(',', $selected_ids);
 
 			$cart = $this->conn->query("
-			SELECT 
-				c.*, 
-				p.name as product, 
-				p.price,
-				p.discount_type,
-				p.discount_value,
-				p.discounted_price
-				FROM `cart_list` c 
-				INNER JOIN product_list p ON c.product_id = p.id 
-				WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
-			");
+            SELECT c.*, p.name as product, p.price, p.discount_type, p.discount_value, p.discounted_price
+            FROM `cart_list` c 
+            INNER JOIN product_list p ON c.product_id = p.id 
+            WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
+        ");
 
-			$backend_total = 0;
+			// --- คำนวณยอดรวมราคาสินค้า (ยังไม่รวมโปรโมชั่น) ---
+			$backend_subtotal = 0; // ยอดรวมก่อนหักโปรโมชั่น
 			$cart_data = [];
 			while ($row = $cart->fetch_assoc()) {
 				$original_price = $row['price'];
@@ -592,15 +589,57 @@ class Master extends DBConnection
 				}
 
 				$row['final_price'] = $final_price;
-				$backend_total += $final_price * $row['quantity'];
+				$backend_subtotal += $final_price * $row['quantity'];
 				$cart_data[] = $row;
 			}
 
 			if (empty($cart_data)) throw new Exception('ไม่พบรายการสินค้าที่ตรงกันในตะกร้า');
 
+			// ======================= START: ส่วนจัดการโปรโมชั่น =======================
+			$promotion_id = isset($_POST['promotion_id']) ? intval($_POST['promotion_id']) : 0;
+			$promotion_discount = 0;
+
+			if ($promotion_id > 0) {
+				$promo_qry = $this->conn->query("SELECT * FROM `promotions_list` WHERE id = {$promotion_id} AND status = 1 AND delete_flag = 0");
+				if ($promo_qry->num_rows > 0) {
+					$promo_data = $promo_qry->fetch_assoc();
+
+					// ตรวจสอบยอดสั่งซื้อขั้นต่ำ
+					if ($backend_subtotal >= $promo_data['minimum_order']) {
+						switch ($promo_data['type']) {
+							case 'fixed':
+								$promotion_discount = floatval($promo_data['discount_value']);
+								break;
+							case 'percent':
+								$promotion_discount = $backend_subtotal * (floatval($promo_data['discount_value']) / 100);
+								break;
+							case 'free_shipping':
+								$promotion_discount = floatval($_POST['shipping_cost']); // ส่วนลดเท่ากับค่าส่ง
+								break;
+						}
+					} else {
+						throw new Exception('ยอดสั่งซื้อไม่ถึงเกณฑ์ขั้นต่ำสำหรับโปรโมชั่นนี้');
+					}
+				} else {
+					throw new Exception('ไม่พบโปรโมชั่นที่ส่งมา หรือโปรโมชั่นไม่พร้อมใช้งาน');
+				}
+			}
+			// ======================= END: ส่วนจัดการโปรโมชั่น =========================
+
+			// --- คำนวณยอดรวมสุดท้าย และตรวจสอบความถูกต้อง ---
 			$shipping_cost = isset($_POST['shipping_cost']) ? floatval($_POST['shipping_cost']) : 0;
+			$grand_total = ($backend_subtotal - $promotion_discount) + $shipping_cost;
+
+			// ตรวจสอบยอดเงินที่ส่งมาจาก Frontend กับ Backend
+			if (round($total_amount, 2) != round($grand_total, 2)) {
+				throw new Exception("ยอดรวมที่คำนวณไม่ตรงกัน (Frontend: {$total_amount}, Backend: {$grand_total})");
+			}
+
+			// --- เตรียมข้อมูลสำหรับบันทึก ---
 			$shipping_methods_id = isset($_POST['shipping_methods_id']) ? intval($_POST['shipping_methods_id']) : 'NULL';
-			$grand_total = $backend_total + $shipping_cost;
+			$delivery_address = $this->conn->real_escape_string($delivery_address);
+			$applied_promo_id = ($promotion_discount > 0) ? "'{$promotion_id}'" : "NULL"; // ID โปรโมชั่นสำหรับตาราง order_list และ order_items
+
 
 			if (round($total_amount, 2) != round($grand_total, 2)) {
 				throw new Exception('ยอดรวมสินค้า + ค่าส่งไม่ตรงกัน');
@@ -621,29 +660,33 @@ class Master extends DBConnection
 				}
 			}
 
+			// --- บันทึกข้อมูลลง order_list ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-		(`code`, `customer_id`, `delivery_address`, `total_amount`, `shipping_methods_id`, `status`, `payment_status`, `delivery_status`, `date_created`, `date_updated`) 
-		VALUES 
-		('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', {$shipping_methods_id}, 0, 0, 0, NOW(), NOW())");
+            (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `shipping_methods_id`, `promotion_id`, `status`, `payment_status`, `delivery_status`) 
+            VALUES 
+            ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount}', {$shipping_methods_id}, {$applied_promo_id}, 0, 0, 0)");
+
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
-
 			$oid = $this->conn->insert_id;
 
+			// --- บันทึกข้อมูลลง order_items ---
 			$data = "";
 			foreach ($cart_data as $row) {
 				if (!empty($data)) $data .= ", ";
 				$product_id = intval($row['product_id']);
 				$quantity = intval($row['quantity']);
 				$price = floatval($row['final_price']);
-				$data .= "('{$oid}', '{$product_id}', '{$quantity}', '{$price}')";
+				// เพิ่ม promotion_id ในแต่ละรายการ
+				$data .= "('{$oid}', '{$product_id}', '{$quantity}', '{$price}', {$applied_promo_id})";
 			}
 
-			$save = $this->conn->query("INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`) VALUES {$data}");
+			// แก้ไข Query ให้รับ promotion_id
+			$save = $this->conn->query("INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`, `promotion_id`) VALUES {$data}");
 			if (!$save) throw new Exception('ไม่สามารถบันทึกรายการสินค้า: ' . $this->conn->error);
 
+			// --- ลบสินค้าออกจากตะกร้าและ Commit ---
 			$this->conn->query("DELETE FROM `cart_list` WHERE customer_id = '{$customer_id}' AND id IN ($ids_str)");
-
 			$this->conn->query("COMMIT");
 
 			$items = $this->conn->query("SELECT oi.*, p.name 
@@ -674,53 +717,62 @@ class Master extends DBConnection
 
 				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
 				$mail->addAddress($customer['email'], $customer_name);
-
-
-
 				$body = "
-				<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
-					<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
-					<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
-					<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
-					<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
-					<p><strong>ขนส่ง:</strong> {$shipping_methods_name}</p>
-					<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
-						<thead style='background:#16542b; color:white;'>
-							<tr>
-								<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
-								<th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
-								<th style='padding:8px; border:1px solid #ddd;'>ราคาต่อชิ้น</th>
-								<th style='padding:8px; border:1px solid #ddd;'>รวม</th>
-							</tr>
-						</thead>
-						<tbody>";
+						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
+							<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
+							<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
+							<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
+							<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
+							<p><strong>ขนส่ง:</strong> {$shipping_methods_name}</p>
+							<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
+								<thead style='background:#16542b; color:white;'>
+									<tr>
+										<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
+										<th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
+										<th style='padding:8px; border:1px solid #ddd;'>ราคาต่อชิ้น</th>
+										<th style='padding:8px; border:1px solid #ddd;'>รวม</th>
+									</tr>
+								</thead>
+								<tbody>";
 
+				// สร้างรายการสินค้า
 				while ($row = $items->fetch_assoc()) {
 					$subtotal = $row['price'] * $row['quantity'];
 					$body .= "
-							<tr>
-								<td style='padding:8px; border:1px solid #ddd;'>{$row['name']}</td>
-								<td style='padding:8px; border:1px solid #ddd; text-align:center;'>{$row['quantity']}</td>
-								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($row['price'], 2) . "</td>
-								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($subtotal, 2) . "</td>
-							</tr>";
+									<tr>
+										<td style='padding:8px; border:1px solid #ddd;'>{$row['name']}</td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:center;'>{$row['quantity']}</td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($row['price'], 2) . "</td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($subtotal, 2) . "</td>
+									</tr>";
+				}
+
+				// แสดงค่าส่งและยอดรวม
+				$body .= "
+									<tr>
+										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
+									</tr>";
+				// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
+				if ($promotion_discount > 0) {
+					$promo_row_html = "
+									<tr>
+										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ส่วนลดโปรโมชั่น</strong></td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:right; color: red;'>- " . number_format($promotion_discount, 2) . "</td>
+									</tr>";
+					$body .= $promo_row_html;  // เพิ่มส่วนของโปรโมชั่นในเนื้อหาของลูกค้า
 				}
 
 				$body .= "
-							<tr>
-								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
-								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
-							</tr>
-							<tr>
-								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
-								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
-							</tr>
-						</tbody>
-					</table>
-					<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$delivery_address}</div></p>
-					<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
-				</div>";
-
+									<tr>
+										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
+									</tr>
+								</tbody>
+							</table>
+							<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$delivery_address}</div></p>
+							<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+						</div>";
 				$mail->Body = $body;
 				$mail->send();
 			} catch (Exception $e) {
@@ -792,7 +844,19 @@ class Master extends DBConnection
 								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
 								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
 							</tr>
+							<tr>";
+
+				// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
+				if ($promotion_discount > 0) {
+					$promo_row_html = "
 							<tr>
+								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ส่วนลดโปรโมชั่น</strong></td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right; color: red;'>- " . number_format($promotion_discount, 2) . "</td>
+							</tr>";
+					$admin_body .= $promo_row_html;  // เพิ่มส่วนของโปรโมชั่นในเนื้อหาของลูกค้า
+				}
+
+				$admin_body .= "
 								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
 								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
 							</tr>
@@ -842,10 +906,8 @@ class Master extends DBConnection
 			- ที่อยู่จัดส่ง: $delivery_address
 			- ยอดรวม: " . number_format($grand_total, 2) . " บาท
 			- ขนส่ง: $shipping_methods_name
-
-			รายละเอียดสินค้า:
-			";
-
+			
+			รายละเอียดสินค้า:";
 			// รายการสินค้า
 			$items = $this->conn->query("SELECT oi.*, p.name 
                             FROM order_items oi 
@@ -855,15 +917,23 @@ class Master extends DBConnection
 			while ($row = $items->fetch_assoc()) {
 				$subtotal = $row['price'] * $row['quantity'];
 				$telegram_message .= "
-			- {$row['name']} x{$row['quantity']} = " . number_format($subtotal, 2) . " บาท
-			";
+			- {$row['name']} x{$row['quantity']} = " . number_format($subtotal, 2) . " บาท";
 			}
 			$telegram_message .= "
-			ค่าส่ง: " . number_format($shipping_cost, 2) . " บาท
+			
+			ค่าส่ง: " . number_format($shipping_cost, 2) . " บาท";
+			// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
+			if ($promotion_discount > 0) {
+				$promo_row_html = "
+			ส่วนลดโปรโมชั่น: " . number_format($promotion_discount, 2) . " บาท";
+				$telegram_message .= $promo_row_html;  // เพิ่มข้อความโปรโมชั่นลงในข้อความหลัก
+			}
+			$telegram_message .= "
 			รวมทั้งสิ้น: " . number_format($grand_total, 2) . " บาท
 			";
 			// ส่งข้อความ Telegram
 			sendTelegramNotification($telegram_message);
+
 
 			$this->settings->set_flashdata('success', 'ชำระสินค้าสำเร็จ');
 			$resp = ['status' => 'success'];
