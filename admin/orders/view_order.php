@@ -66,6 +66,12 @@ if (!empty($shipping_methods_id)) {
         object-position: center center;
     }
 
+    .product-logo {
+        width: 7em;
+        object-fit: cover;
+        object-position: center center;
+    }
+
     .card-title {
         font-size: 20px !important;
         font-weight: bold;
@@ -240,7 +246,7 @@ if (!empty($shipping_methods_id)) {
                                                 </div>
                                             </div>
                                             <div class="col-auto">
-                                                <div><b><?= format_num($item_total, 2) ?></b></div>
+                                                <h5 class="text-bold"><?= format_num($item_total, 2) ?></h5>
                                             </div>
                                         </div>
                                     </div>
