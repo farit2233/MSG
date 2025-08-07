@@ -565,16 +565,16 @@ class Master extends DBConnection
 			$selected_ids = !empty($selected_items) ? array_filter(array_map('intval', explode(',', $selected_items))) : [];
 			if (empty($selected_ids)) throw new Exception('ไม่มีรายการสินค้าสำหรับชำระสินค้า');
 			$ids_str = implode(',', $selected_ids);
-
 			$cart = $this->conn->query("
-            SELECT c.*, p.name as product, p.price, p.discount_type, p.discount_value, p.discounted_price
-            FROM `cart_list` c 
-            INNER JOIN product_list p ON c.product_id = p.id 
-            WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
-        ");
+				SELECT c.*, p.name as product, p.price, p.discount_type, p.discount_value, p.discounted_price, p.product_weight
+				FROM `cart_list` c 
+				INNER JOIN product_list p ON c.product_id = p.id 
+				WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
+			");
 
 			// --- คำนวณยอดรวมราคาสินค้า (ยังไม่รวมโปรโมชั่น) ---
 			$backend_subtotal = 0; // ยอดรวมก่อนหักโปรโมชั่น
+			$total_weight = 0;
 			$cart_data = [];
 			while ($row = $cart->fetch_assoc()) {
 				$original_price = $row['price'];
@@ -590,10 +590,40 @@ class Master extends DBConnection
 
 				$row['final_price'] = $final_price;
 				$backend_subtotal += $final_price * $row['quantity'];
+				$total_weight += ($row['product_weight'] ?? 0) * $row['quantity'];
 				$cart_data[] = $row;
 			}
 
 			if (empty($cart_data)) throw new Exception('ไม่พบรายการสินค้าที่ตรงกันในตะกร้า');
+
+			// ======================= START: คำนวณค่าขนส่งตามน้ำหนักรวม (Backend) =======================
+			$shipping_cost = 0;
+
+			// <<<< เพิ่ม: รับ ID ของวิธีการจัดส่งที่ลูกค้าเลือกจาก Frontend
+			$selected_shipping_method_id = isset($_POST['shipping_methods_id']) ? intval($_POST['shipping_methods_id']) : 0;
+			if ($selected_shipping_method_id <= 0) {
+				throw new Exception('กรุณาเลือกวิธีการจัดส่ง');
+			}
+
+			if ($total_weight > 0) {
+				// <<<< แก้ไข: Query ไปที่ตาราง shipping_prices
+				$shipping_qry = $this->conn->query("
+                SELECT price 
+                FROM `shipping_prices` 
+                WHERE `shipping_methods_id` = '{$selected_shipping_method_id}' 
+                  AND '{$total_weight}' >= min_weight 
+                  AND '{$total_weight}' <= max_weight
+                LIMIT 1
+            ");
+
+				if ($shipping_qry->num_rows > 0) {
+					$shipping_data = $shipping_qry->fetch_assoc();
+					$shipping_cost = floatval($shipping_data['price']);
+				} else {
+					throw new Exception("ไม่สามารถคำนวณค่าจัดส่งได้สำหรับน้ำหนักรวม {$total_weight} กรัม กรุณาติดต่อร้านค้า");
+				}
+			}
+			// ======================= END: คำนวณค่าขนส่ง =========================================================
 
 			// ======================= START: ส่วนจัดการโปรโมชั่น =======================
 			$promotion_id = isset($_POST['promotion_id']) ? intval($_POST['promotion_id']) : 0;
@@ -662,9 +692,9 @@ class Master extends DBConnection
 
 			// --- บันทึกข้อมูลลง order_list ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-            (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `shipping_methods_id`, `promotion_id`, `status`, `payment_status`, `delivery_status`) 
-            VALUES 
-            ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount}', {$shipping_methods_id}, {$applied_promo_id}, 0, 0, 0)");
+        (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `shipping_methods_id`, `promotion_id`, `status`, `payment_status`, `delivery_status`) 
+        VALUES 
+        ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount}', {$selected_shipping_method_id}, {$applied_promo_id}, 0, 0, 0)");
 
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
