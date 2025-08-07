@@ -644,7 +644,8 @@ class Master extends DBConnection
 								$promotion_discount = $backend_subtotal * (floatval($promo_data['discount_value']) / 100);
 								break;
 							case 'free_shipping':
-								$promotion_discount = floatval($_POST['shipping_cost']); // ส่วนลดเท่ากับค่าส่ง
+								// ✅ แก้ไข: ใช้ค่าส่ง $shipping_cost ที่คำนวณจาก Backend
+								$promotion_discount = $shipping_cost;
 								break;
 						}
 					} else {
@@ -657,7 +658,6 @@ class Master extends DBConnection
 			// ======================= END: ส่วนจัดการโปรโมชั่น =========================
 
 			// --- คำนวณยอดรวมสุดท้าย และตรวจสอบความถูกต้อง ---
-			$shipping_cost = isset($_POST['shipping_cost']) ? floatval($_POST['shipping_cost']) : 0;
 			$grand_total = ($backend_subtotal - $promotion_discount) + $shipping_cost;
 
 			// ตรวจสอบยอดเงินที่ส่งมาจาก Frontend กับ Backend
@@ -666,7 +666,6 @@ class Master extends DBConnection
 			}
 
 			// --- เตรียมข้อมูลสำหรับบันทึก ---
-			$shipping_methods_id = isset($_POST['shipping_methods_id']) ? intval($_POST['shipping_methods_id']) : 'NULL';
 			$delivery_address = $this->conn->real_escape_string($delivery_address);
 			$applied_promo_id = ($promotion_discount > 0) ? "'{$promotion_id}'" : "NULL"; // ID โปรโมชั่นสำหรับตาราง order_list และ order_items
 
@@ -785,12 +784,20 @@ class Master extends DBConnection
 									</tr>";
 				// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
 				if ($promotion_discount > 0) {
+					// ตรวจสอบว่าเป็นโปรส่งฟรีหรือไม่
+					if (isset($promo_data) && $promo_data['type'] === 'free_shipping') {
+						$discount_display = "<span style='color: green;'>ส่งฟรี</span>";
+						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
+					} else {
+						$discount_display = "<span style='color: red;'>- " . number_format($promotion_discount, 2) . "</span>";
+						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
+					}
 					$promo_row_html = "
 									<tr>
-										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ส่วนลดโปรโมชั่น</strong></td>
-										<td style='padding:8px; border:1px solid #ddd; text-align:right; color: red;'>- " . number_format($promotion_discount, 2) . "</td>
+										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'>{$discount_label}</td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>{$discount_display}</td>
 									</tr>";
-					$body .= $promo_row_html;  // เพิ่มส่วนของโปรโมชั่นในเนื้อหาของลูกค้า
+					$body .= $promo_row_html;
 				}
 
 				$body .= "
@@ -878,12 +885,20 @@ class Master extends DBConnection
 
 				// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
 				if ($promotion_discount > 0) {
+					if (isset($promo_data) && $promo_data['type'] === 'free_shipping') {
+						$discount_display = "<span style='color: green;'>ส่งฟรี</span>";
+						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
+					} else {
+						$discount_display = "<span style='color: red;'>- " . number_format($promotion_discount, 2) . "</span>";
+						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
+					}
+
 					$promo_row_html = "
 							<tr>
-								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ส่วนลดโปรโมชั่น</strong></td>
-								<td style='padding:8px; border:1px solid #ddd; text-align:right; color: red;'>- " . number_format($promotion_discount, 2) . "</td>
+								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'>{$discount_label}</td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>{$discount_display}</td>
 							</tr>";
-					$admin_body .= $promo_row_html;  // เพิ่มส่วนของโปรโมชั่นในเนื้อหาของลูกค้า
+					$admin_body .= $promo_row_html;
 				}
 
 				$admin_body .= "
@@ -954,9 +969,14 @@ class Master extends DBConnection
 			ค่าส่ง: " . number_format($shipping_cost, 2) . " บาท";
 			// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
 			if ($promotion_discount > 0) {
-				$promo_row_html = "
-			ส่วนลดโปรโมชั่น: " . number_format($promotion_discount, 2) . " บาท";
-				$telegram_message .= $promo_row_html;  // เพิ่มข้อความโปรโมชั่นลงในข้อความหลัก
+				if (isset($promo_data) && $promo_data['type'] === 'free_shipping') {
+					$promo_text = "
+			ส่วนลดโปรโมชั่น: ส่งฟรี";
+				} else {
+					$promo_text = "
+			ส่วนลดโปรโมชั่น: -" . number_format($promotion_discount, 2) . " บาท";
+				}
+				$telegram_message .= $promo_text;
 			}
 			$telegram_message .= "
 			รวมทั้งสิ้น: " . number_format($grand_total, 2) . " บาท
@@ -973,8 +993,6 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
-
-
 
 	function update_order_status()
 	{

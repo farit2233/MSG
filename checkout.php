@@ -135,7 +135,6 @@ if ($is_promo_applicable) {
                 $promotion_discount = $cart_total * (floatval($applied_promo['discount_value']) / 100);
                 break;
             case 'free_shipping':
-                $promotion_discount = $default_shipping_cost;
                 $final_shipping_cost = 0;
                 break;
         }
@@ -357,15 +356,14 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                                 <h3 class="d-inline mb-0">รูปแบบการชำระเงิน</h3>
                             </div>
                             <form action="" id="order-form">
+
                                 <input type="hidden" name="total_amount" id="total_amount" value="<?= $grand_total ?>">
                                 <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
-                                <input type="hidden" name="shipping_cost" id="shipping_cost_input" value="<?= $final_shipping_cost ?>">
                                 <input type="hidden" name="shipping_methods_id" id="shipping_methods_id" value="<?= $default_shipping_id ?>">
-                                <input type="hidden" name="shipping_methods_name" id="shipping_methods_name_input" value="<?= $default_shipping_name ?>">
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                                 <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
-
                                 <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
+
                                 <div class="py-1 text-center">
                                     <button class="btn addcart rounded-pill" <?= empty($full_address) ? 'disabled' : '' ?>>
                                         ยืนยันคำสั่งซื้อ
@@ -389,10 +387,14 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                         $cost = floatval($row['cost']);
                     ?>
                         <div class="shipping-option"
-                            onclick="selectShipping('<?= $row['id'] ?>', '<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>', this)">
+                            data-id="<?= $row['id'] ?>"
+                            data-name="<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>"
+                            data-cost="<?= $cost ?>"
+                            onclick="selectShipping(this)">
 
                             <div>
                                 <strong><?= $row['name'] ?></strong>
+                                <span style="float:right;"><?= number_format($cost, 2) ?> บาท</span>
                                 <span class="checkmark">&#10003;</span>
                             </div>
                             <div class="desc text-muted" style="font-size: 0.9em;"><?= htmlspecialchars($row['description']) ?></div>
@@ -454,6 +456,11 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
 
     function confirmShipping() {
         if (!selectedShipping) return;
+
+        document.getElementById('shipping_methods_id').value = selectedShipping.id;
+        document.getElementById('shipping_methods_name_display').innerText = selectedShipping.name;
+
+        updateGrandTotal(selectedShipping.cost);
         closeShippingModal();
     }
     let selectedShipping = null;
@@ -463,11 +470,9 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
     // ============================
     function updateGrandTotal(shippingCost) {
         let promoDiscount = 0;
-        let finalShippingCost = parseFloat(shippingCost) || 0;
-        let originalShippingCost = finalShippingCost; // เก็บค่าส่งดั้งเดิมไว้
+        let finalShippingCostForDisplay = parseFloat(shippingCost) || 0;
 
         if (appliedPromo && cartTotal >= parseFloat(appliedPromo.minimum_order)) {
-            // ถ้ายอดซื้อถึงเกณฑ์ ถึงจะคำนวณส่วนลด
             switch (appliedPromo.type) {
                 case 'fixed':
                     promoDiscount = parseFloat(appliedPromo.discount_value);
@@ -476,78 +481,42 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                     promoDiscount = cartTotal * (parseFloat(appliedPromo.discount_value) / 100);
                     break;
                 case 'free_shipping':
-                    // ส่วนลดเท่ากับค่าส่ง และค่าส่งที่จะบวกเพิ่มเป็น 0
-                    promoDiscount = originalShippingCost;
-                    finalShippingCost = 0;
+                    // ถึงโปรฟรีค่าส่ง ก็ยังแสดงราคาเต็มให้ผู้ใช้เห็น แต่ยอดรวมจะถูก
                     break;
             }
         }
-        // ถ้ายอดซื้อไม่ถึง หรือไม่มีโปรโมชั่น promoDiscount จะยังคงเป็น 0
 
-        // คำนวณยอดรวมใหม่
-        const grandTotal = (cartTotal - promoDiscount) + finalShippingCost;
+        // คำนวณยอดรวมสำหรับแสดงผล
+        const grandTotal = (cartTotal - promoDiscount) + (appliedPromo?.type === 'free_shipping' ? 0 : finalShippingCostForDisplay);
 
-        // อัปเดตค่าที่แสดงบนหน้าจอ
-        document.getElementById('shipping-cost').innerText = originalShippingCost.toLocaleString('th-TH', {
+        // อัปเดตการแสดงผล
+        document.getElementById('shipping-cost').innerText = finalShippingCostForDisplay.toLocaleString('th-TH', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }) + ' บาท';
-        document.getElementById('shipping_cost_input').value = finalShippingCost;
-
         document.getElementById('order-total-text').innerText = grandTotal.toLocaleString('th-TH', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
         document.getElementById('total_amount').value = grandTotal;
+
+        // *** ไม่มีบรรทัดอัปเดต shipping_cost_input แล้ว ***
     }
 
 
     // ============================
     // ฟังก์ชันเลือกขนส่ง
     // ============================
-    function selectShipping(id, name, element) {
+    function selectShipping(element) {
         if (!element) return;
         document.querySelectorAll('.shipping-option').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
 
-        const totalWeight = parseInt(document.getElementById('total_weight').value) || 0;
-
-        start_loader(); // เริ่ม loader
-        $.ajax({
-            url: _base_url_ + 'classes/Master.php?f=get_shipping_cost',
-            method: 'POST',
-            data: {
-                shipping_methods_id: id,
-                total_weight: totalWeight
-            },
-            dataType: 'json',
-            success: function(resp) {
-                if (resp.status === 'success') {
-                    const newShippingCost = parseFloat(resp.price) || 0;
-
-                    // อัปเดตค่าใน hidden inputs และที่แสดงผล
-                    document.getElementById('shipping_methods_id').value = id;
-                    document.getElementById('shipping_methods_name_display').innerText = name;
-                    document.getElementById('shipping_methods_name_input').value = name;
-
-                    // เรียกใช้ฟังก์ชันคำนวณกลาง
-                    updateGrandTotal(newShippingCost);
-
-                    selectedShipping = {
-                        id,
-                        name,
-                        cost: newShippingCost
-                    };
-                } else {
-                    alert('ไม่สามารถคำนวณค่าขนส่งได้');
-                }
-                end_loader(); // หยุด loader
-            },
-            error: function() {
-                alert('เกิดข้อผิดพลาดขณะคำนวณค่าขนส่ง');
-                end_loader(); // หยุด loader
-            }
-        });
+        selectedShipping = {
+            id: element.dataset.id,
+            name: element.dataset.name,
+            cost: parseFloat(element.dataset.cost) || 0
+        };
     }
 
 
@@ -555,41 +524,7 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
     // โค้ดที่ทำงานเมื่อหน้าเว็บโหลดเสร็จ
     // ============================
     $(document).ready(function() {
-        const totalWeight = parseInt(document.getElementById('total_weight').value) || 0;
-        const initialShippingId = $('#shipping_methods_id').val();
-
-        if (totalWeight > 0 && initialShippingId) {
-            start_loader();
-            $.ajax({
-                url: _base_url_ + 'classes/Master.php?f=get_shipping_cost',
-                method: 'POST',
-                data: {
-                    shipping_methods_id: initialShippingId,
-                    total_weight: totalWeight
-                },
-                dataType: 'json',
-                success: function(resp) {
-                    if (resp.status === 'success') {
-                        const initialCost = parseFloat(resp.price) || 0;
-                        // เรียกใช้ฟังก์ชันคำนวณกลางเมื่อหน้าโหลดเสร็จ
-                        updateGrandTotal(initialCost);
-                    } else {
-                        alert('ไม่สามารถคำนวณค่าขนส่งเริ่มต้นได้');
-                        // ถ้าเกิด error ก็ยังต้องคำนวณยอดรวมโดยใช้ค่าส่งเป็น 0
-                        updateGrandTotal(0);
-                    }
-                    end_loader();
-                },
-                error: function() {
-                    alert('เกิดข้อผิดพลาดขณะคำนวณค่าขนส่งเริ่มต้น');
-                    updateGrandTotal(0); // คำนวณด้วยค่าส่ง 0
-                    end_loader();
-                }
-            });
-        } else {
-            // ถ้าไม่มีน้ำหนัก ก็คำนวณด้วยค่าส่งเริ่มต้น (อาจเป็น 0)
-            const initialCost = parseFloat(document.getElementById('shipping_cost_input').value) || 0;
-            updateGrandTotal(initialCost);
-        }
+        const initialCost = parseFloat(<?= json_encode($default_shipping_cost) ?>) || 0;
+        updateGrandTotal(initialCost);
     });
 </script>
