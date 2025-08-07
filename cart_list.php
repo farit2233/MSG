@@ -7,24 +7,24 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 }
 
 
-//if ($_settings->userdata('id') == '' || $_settings->userdata('login_type') != 2) {
-// echo "<script>
-//    Swal.fire({
-//      icon: 'warning',
-//    title: 'คุณยังไม่ได้เข้าสู่ระบบ',
-//  text: 'โปรดเข้าสู่ระบบก่อนใช้งาน',
-//confirmButtonText: 'เข้าสู่ระบบ',
-//allowOutsideClick: false,
-//allowEscapeKey: false
-//}).then((result) => {
-//   if (result.isConfirmed) {
-//     window.location.replace('./login.php');
-//}
-// });
-//
-//</script>";
-//exit;
-//}
+/*if ($_settings->userdata('id') == '' || $_settings->userdata('login_type') != 2) {
+ echo "<script>
+    Swal.fire({
+      icon: 'warning',
+    title: 'คุณยังไม่ได้เข้าสู่ระบบ',
+  text: 'โปรดเข้าสู่ระบบก่อนใช้งาน',
+confirmButtonText: 'เข้าสู่ระบบ',
+allowOutsideClick: false,
+allowEscapeKey: false
+}).then((result) => {
+   if (result.isConfirmed) {
+     window.location.replace('./login.php');
+}
+ });
+
+</script>";
+exit;
+}*/
 ?>
 <style>
     /* ปรับให้ทันสมัย */
