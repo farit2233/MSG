@@ -32,6 +32,7 @@
           <!-- Sidebar Menu -->
           <nav class="mt-0">
             <ul class="nav nav-pills nav-sidebar flex-column text-sm nav-compact nav-flat nav-child-indent nav-collapse-hide-child" data-widget="treeview" role="menu" data-accordion="false">
+
               <li class="nav-item dropdown">
                 <a href="./" class="nav-link nav-home">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -40,6 +41,7 @@
                   </p>
                 </a>
               </li>
+
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-list"></i>
@@ -48,26 +50,31 @@
                     <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
-                <ul class="nav nav-treeview" style="display: none;">
+
+                <ul class="nav-treeview">
+
                   <li class="nav-item">
-                    <a href="./?page=product_type" class="nav-link nav-product_type">
+                    <a href="./?page=product_type" class="nav-link tree-item nav-product_type">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
                         ประเภทสินค้าทั้งหมด
                       </p>
                     </a>
                   </li>
+
                   <li class="nav-item">
-                    <a href="./?page=categories" class="nav-link nav-categories">
+                    <a href="./?page=categories" class="nav-link tree-item nav-categories">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
                         หมวดหมู่สินค้าทั้งหมด
                       </p>
                     </a>
                   </li>
+
                 </ul>
               </li>
-              <li class="nav-item dropdown">
+
+              <li class="nav-item">
                 <a href="./?page=products" class="nav-link nav-products">
                   <i class="nav-icon fas fa-boxes"></i>
                   <p>
@@ -75,7 +82,8 @@
                   </p>
                 </a>
               </li>
-              <li class="nav-item dropdown">
+
+              <li class="nav-item">
                 <a href="./?page=inventory" class="nav-link nav-inventory">
                   <i class="nav-icon fas fa-warehouse"></i>
                   <p>
@@ -83,7 +91,9 @@
                   </p>
                 </a>
               </li>
+
               <li class="nav-item">
+
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-list"></i>
                   <p>
@@ -91,26 +101,42 @@
                     <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
-                <ul class="nav nav-treeview" style="display: none;">
+
+                <ul class="nav-treeview" style="display: none;">
+
                   <li class="nav-item">
-                    <a href="./?page=promotion_category" class="nav-link nav-promotion_category">
+                    <a href="./?page=promotion_category" class="nav-link tree-item  nav-promotion_category">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
                         หมวดหมู่โปรโมชั่นสินค้า
                       </p>
                     </a>
                   </li>
+
                   <li class="nav-item">
-                    <a href="./?page=promotions" class="nav-link nav-promotions">
+                    <a href="./?page=promotions" class="nav-link tree-item nav-promotions">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
                         โปรโมชั่นสินค้าทั้งหมด
                       </p>
                     </a>
                   </li>
+
                 </ul>
               </li>
+
               <li class="nav-item">
+                <a href="./?page=coupon_code" class="nav-link nav-coupon_code">
+                  <i class="nav-icon fa-solid fa-ticket"></i>
+                  <p>
+                    คูปองส่วนลด
+                  </p>
+                </a>
+              </li>
+
+
+              <li class="nav-item">
+
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-table"></i>
                   <p>
@@ -118,97 +144,119 @@
                     <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
-                <ul class="nav nav-treeview" style="display: none;">
+
+                <ul class="nav-treeview">
+
                   <li class="nav-item">
                     <a href="./?page=orders" class="nav-link tree-item nav-orders">
                       <i class="far fa-circle nav-icon"></i>
                       <p>รายการคำสั่งซื้อทั้งหมด</p>
                     </a>
                   </li>
+
                   <li class="nav-header text-xs pl-3 pt-2 text-muted">สถานะการชำระเงิน</li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&payment_status=0" class="nav-link tree-item nav-payment_status_0">
                       <i class="far fa-circle nav-icon"></i>
                       <p>ยังไม่ชำระเงิน</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&payment_status=1" class="nav-link tree-item nav-payment_status_1">
                       <i class="far fa-circle nav-icon"></i>
                       <p>รอตรวจสอบ</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&payment_status=2" class="nav-link tree-item nav-payment_status_2">
                       <i class="far fa-circle nav-icon"></i>
                       <p>ชำระเงินแล้ว</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&payment_status=3" class="nav-link tree-item nav-payment_status_3">
                       <i class="far fa-circle nav-icon"></i>
                       <p>ชำระล้มเหลว</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&payment_status=4" class="nav-link tree-item nav-payment_status_4">
                       <i class="far fa-circle nav-icon"></i>
                       <p>คืนเงินแล้ว</p>
                     </a>
                   </li>
+
                 </ul>
-                <ul class="nav nav-treeview" style="display: none;">
+
+                <ul class="nav-treeview">
+
                   <li class="nav-header text-xs pl-3 pt-2 text-muted">สถานะการจัดส่ง</li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=0" class="nav-link tree-item nav-delivery_status_0">
                       <i class="far fa-circle nav-icon"></i>
                       <p>ตรวจสอบคำสั่งซื้อ</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=1" class="nav-link tree-item nav-delivery_status_1">
                       <i class="far fa-circle nav-icon"></i>
                       <p>กำลังเตรียมของ</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=2" class="nav-link tree-item nav-delivery_status_2">
                       <i class="far fa-circle nav-icon"></i>
                       <p>แพ็กของแล้ว</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=3" class="nav-link tree-item nav-delivery_status_3">
                       <i class="far fa-circle nav-icon"></i>
                       <p>กำลังจัดส่ง</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=4" class="nav-link tree-item nav-delivery_status_4">
                       <i class="far fa-circle nav-icon"></i>
                       <p>จัดส่งสำเร็จ</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=5" class="nav-link tree-item nav-delivery_status_5">
                       <i class="far fa-circle nav-icon"></i>
                       <p>จัดส่งไม่สำเร็จ</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=6" class="nav-link tree-item nav-delivery_status_6">
                       <i class="far fa-circle nav-icon"></i>
                       <p>คืนของระหว่างทาง</p>
                     </a>
                   </li>
+
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=7" class="nav-link tree-item nav-delivery_status_7">
                       <i class="far fa-circle nav-icon"></i>
                       <p>คืนของสำเร็จ</p>
                     </a>
                   </li>
+
                 </ul>
+
               </li>
+
               <li class="nav-item dropdown">
                 <a href="./?page=customers" class="nav-link nav-customers">
                   <i class="nav-icon fas fa-user-friends"></i>
