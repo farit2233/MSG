@@ -517,6 +517,8 @@ class Master extends DBConnection
 
 	function get_shipping_cost()
 	{
+
+
 		extract($_POST);
 		$shipping_methods_id = isset($shipping_methods_id) ? intval($shipping_methods_id) : 0;
 		$total_weight = isset($total_weight) ? floatval($total_weight) : 0;
@@ -691,9 +693,9 @@ class Master extends DBConnection
 
 			// --- บันทึกข้อมูลลง order_list ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-        (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `shipping_methods_id`, `promotion_id`, `status`, `payment_status`, `delivery_status`) 
-        VALUES 
-        ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount}', {$selected_shipping_method_id}, {$applied_promo_id}, 0, 0, 0)");
+			(`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `shipping_methods_id`, `promotion_id`, `status`, `payment_status`, `delivery_status`) 
+			VALUES 
+			('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount}', {$selected_shipping_method_id}, {$applied_promo_id}, 0, 0, 0)");
 
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
@@ -984,6 +986,11 @@ class Master extends DBConnection
 			// ส่งข้อความ Telegram
 			sendTelegramNotification($telegram_message);
 
+			if ($promotion_discount > 0) {
+				// บันทึกการใช้งานโปรโมชั่น
+				$this->log_promotion_usage($promotion_id, $customer_id, $oid, $promotion_discount, count($cart_data));
+			}
+
 
 			$this->settings->set_flashdata('success', 'ชำระสินค้าสำเร็จ');
 			$resp = ['status' => 'success'];
@@ -993,6 +1000,22 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+
+	function log_promotion_usage($promotion_id, $customer_id, $order_id, $discount_amount, $items_in_order)
+	{
+		$query = "
+        INSERT INTO `promotion_usage_logs` (`promotion_id`, `customer_id`, `order_id`, `discount_amount`, `items_in_order`, `used_at`)
+        VALUES ('{$promotion_id}', '{$customer_id}', '{$order_id}', '{$discount_amount}', '{$items_in_order}', NOW())
+    ";
+
+		// บันทึกข้อมูลการใช้งานโปรโมชั่น
+		if ($this->conn->query($query)) {
+			return true;
+		} else {
+			throw new Exception("ไม่สามารถบันทึกข้อมูลการใช้โปรโมชั่นได้: " . $this->conn->error);
+		}
+	}
+
 
 	function update_order_status()
 	{
@@ -1441,6 +1464,11 @@ switch ($action) {
 		$result = $Master->place_order();
 		ob_end_clean();  // เคลียร์ buffer
 		echo $result;
+		break;
+	case 'log_promotion_usage':
+		if (isset($promotion_id) && isset($customer_id) && isset($oid) && isset($promotion_discount) && isset($cart_data)) {
+			echo $Master->log_promotion_usage($promotion_id, $customer_id, $oid, $promotion_discount, count($cart_data));
+		}
 		break;
 	case 'save_shipping_methods':
 		echo $Master->save_shipping_methods();
