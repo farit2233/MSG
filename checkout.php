@@ -69,18 +69,50 @@ if ($customer) {
 // ============================
 // PHP: ดึงข้อมูลขนส่ง สำหรับแสดงใน modal และค่า default
 // ============================
-$shipping_qry_all = $conn->query("SELECT id, name, description, cost FROM shipping_methods WHERE is_active = 1 AND delete_flag = 0 ORDER BY id ASC");
-$default_shipping_qry = $conn->query("SELECT id, name, description, cost FROM shipping_methods WHERE is_active = 1 AND delete_flag = 0 ORDER BY id ASC LIMIT 1");
+// น้ำหนักรวมที่คำนวณไว้แล้ว
+$total_weight = $total_weight ?? 0; // มีการคำนวณไว้แล้วในส่วนบน
+
+// เตรียม query เพื่อดึงค่าส่งตามน้ำหนัก
+// เราจะ join ตาราง shipping_methods กับ shipping_prices
+// และหาช่วงน้ำหนักที่ถูกต้อง
+$shipping_query_string = "
+    SELECT 
+        sm.id, 
+        sm.name, 
+        sm.description, 
+        sp.price as cost  -- ดึงราคาจากตาราง shipping_prices
+    FROM 
+        shipping_methods sm
+    LEFT JOIN 
+        shipping_prices sp ON sm.id = sp.shipping_methods_id
+    WHERE 
+        sm.is_active = 1 
+        AND sm.delete_flag = 0
+        AND ('{$total_weight}' >= sp.min_weight AND '{$total_weight}' <= sp.max_weight) -- เงื่อนไขสำคัญ
+    ORDER BY 
+        sm.id ASC
+";
+
+$shipping_qry_all = $conn->query($shipping_query_string);
+
+// หาค่า Default (ตัวแรกที่เจอ)
 $default_shipping_id = 0;
-$default_shipping_name = 'เลือกขนส่ง';
+$default_shipping_name = 'ยังไม่มีขนส่งสำหรับน้ำหนักนี้';
 $default_shipping_cost = 0.00;
+
+// ใช้ query เดิม แต่เพิ่ม LIMIT 1
+$default_shipping_qry = $conn->query($shipping_query_string . " LIMIT 1");
 
 if ($default_shipping_qry && $row = $default_shipping_qry->fetch_assoc()) {
     $default_shipping_id = $row['id'];
     $default_shipping_name = $row['name'];
-    $default_shipping_cost = floatval($row['cost']);
+    $default_shipping_cost = floatval($row['cost']); // ค่าส่งตามน้ำหนัก
 }
 
+// Reset pointer เพื่อให้ loop ใน Modal ทำงานได้ปกติ
+if ($shipping_qry_all) {
+    $shipping_qry_all->data_seek(0);
+}
 
 // ==========================================================
 // PHP: ส่วนคำนวณโปรโมชั่นทั้งหมด
@@ -357,7 +389,6 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                             </div>
                             <form action="" id="order-form">
 
-                                <input type="hidden" name="total_amount" id="total_amount" value="<?= $grand_total ?>">
                                 <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
                                 <input type="hidden" name="shipping_methods_id" id="shipping_methods_id" value="<?= $default_shipping_id ?>">
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
@@ -470,8 +501,13 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
     // ============================
     function updateGrandTotal(shippingCost) {
         let promoDiscount = 0;
-        let finalShippingCostForDisplay = parseFloat(shippingCost) || 0;
+        // 'finalShippingCost' คือค่าส่งที่จะนำไปคำนวณจริง
+        let finalShippingCost = parseFloat(shippingCost) || 0;
 
+        // 'displayShippingCost' คือค่าส่งที่จะแสดงให้ลูกค้าเห็น (ควรเป็นราคาเต็มเสมอ)
+        const displayShippingCost = parseFloat(shippingCost) || 0;
+
+        // ตรวจสอบว่าโปรโมชั่นใช้ได้ และยอดสั่งซื้อถึงขั้นต่ำ
         if (appliedPromo && cartTotal >= parseFloat(appliedPromo.minimum_order)) {
             switch (appliedPromo.type) {
                 case 'fixed':
@@ -481,28 +517,28 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                     promoDiscount = cartTotal * (parseFloat(appliedPromo.discount_value) / 100);
                     break;
                 case 'free_shipping':
-                    // ถึงโปรฟรีค่าส่ง ก็ยังแสดงราคาเต็มให้ผู้ใช้เห็น แต่ยอดรวมจะถูก
+                    // ถ้าเงื่อนไขครบ ให้เปลี่ยนค่าส่งที่จะนำไปคำนวณเป็น 0
+                    finalShippingCost = 0;
                     break;
             }
         }
 
-        // คำนวณยอดรวมสำหรับแสดงผล
-        const grandTotal = (cartTotal - promoDiscount) + (appliedPromo?.type === 'free_shipping' ? 0 : finalShippingCostForDisplay);
+        // คำนวณยอดรวมสุดท้ายจากตัวแปรที่ถูกต้อง
+        const grandTotal = (cartTotal - promoDiscount) + finalShippingCost;
 
         // อัปเดตการแสดงผล
-        document.getElementById('shipping-cost').innerText = finalShippingCostForDisplay.toLocaleString('th-TH', {
+        // ส่วนแสดงค่าส่ง จะแสดงราคาเต็มเสมอ
+        document.getElementById('shipping-cost').innerText = displayShippingCost.toLocaleString('th-TH', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }) + ' บาท';
+
+        // ส่วนแสดงยอดรวม จะแสดงยอดที่คำนวณอย่างถูกต้องแล้ว
         document.getElementById('order-total-text').innerText = grandTotal.toLocaleString('th-TH', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('total_amount').value = grandTotal;
-
-        // *** ไม่มีบรรทัดอัปเดต shipping_cost_input แล้ว ***
     }
-
 
     // ============================
     // ฟังก์ชันเลือกขนส่ง

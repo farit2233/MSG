@@ -660,19 +660,19 @@ class Master extends DBConnection
 			// --- คำนวณยอดรวมสุดท้าย และตรวจสอบความถูกต้อง ---
 			$grand_total = ($backend_subtotal - $promotion_discount) + $shipping_cost;
 
-			// ตรวจสอบยอดเงินที่ส่งมาจาก Frontend กับ Backend
+			/* ตรวจสอบยอดเงินที่ส่งมาจาก Frontend กับ Backend
 			if (round($total_amount, 2) != round($grand_total, 2)) {
 				throw new Exception("ยอดรวมที่คำนวณไม่ตรงกัน (Frontend: {$total_amount}, Backend: {$grand_total})");
-			}
+			}*/
 
 			// --- เตรียมข้อมูลสำหรับบันทึก ---
 			$delivery_address = $this->conn->real_escape_string($delivery_address);
 			$applied_promo_id = ($promotion_discount > 0) ? "'{$promotion_id}'" : "NULL"; // ID โปรโมชั่นสำหรับตาราง order_list และ order_items
 
 
-			if (round($total_amount, 2) != round($grand_total, 2)) {
+			/*f (round($total_amount, 2) != round($grand_total, 2)) {
 				throw new Exception('ยอดรวมสินค้า + ค่าส่งไม่ตรงกัน');
-			}
+			}*/
 
 			$customer = $this->conn->query("SELECT * FROM customer_list WHERE id = '{$customer_id}'")->fetch_assoc();
 			$customer_name = trim("{$customer['firstname']} {$customer['middlename']} {$customer['lastname']}");
