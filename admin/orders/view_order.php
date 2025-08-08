@@ -273,12 +273,11 @@ if (!empty($shipping_methods_id)) {
                             <?php if ($order_items->num_rows <= 0): ?>
                                 <h5 class="text-center text-muted">Order Items is empty.</h5>
                             <?php endif; ?>
-
                             <?php
-                            // START MODIFICATION: ส่วนคำนวณโปรโมชั่น
                             $discount_amount = 0;
+                            $shipping_discount = 0; // เพิ่มตัวแปรสำหรับส่วนลดค่าส่ง
                             $promotion_name = '';
-                            $original_shipping_cost = $shipping_cost; // เก็บค่าส่งเดิมไว้
+                            $original_shipping_cost = $shipping_cost;
 
                             // ตรวจสอบว่ามี promotion_id หรือไม่
                             if (!empty($promotion_id)) {
@@ -297,8 +296,9 @@ if (!empty($shipping_methods_id)) {
                                                 $discount_amount = $promo_data['discount_value'];
                                                 break;
                                             case 'free_shipping':
-                                                $discount_amount = $shipping_cost;
-                                                $shipping_cost = 0; // ทำให้ค่าส่งเป็น 0
+                                                // แก้ไข: ไม่ได้หักจาก $gt แต่ให้เป็นส่วนลดค่าส่ง
+                                                $shipping_discount = $shipping_cost; // ส่วนลดค่าส่งจะเท่ากับค่าส่งทั้งหมด
+                                                $shipping_cost = 0; // ตั้งค่าส่งเป็น 0
                                                 break;
                                                 // สามารถเพิ่ม case 'code' ได้ถ้ามีเงื่อนไขเพิ่มเติม
                                         }
@@ -306,22 +306,34 @@ if (!empty($shipping_methods_id)) {
                                 }
                             }
 
+                            // คำนวณส่วนลดทั้งหมด
+                            $total_discount = $discount_amount + $shipping_discount;
+
                             // คำนวณยอดรวมสุทธิใหม่
+                            // ยอดรวม = (ยอดรวมราคาสินค้า - ส่วนลดราคาสินค้า) + ค่าส่งที่ลดแล้ว
                             $grand_total = ($gt - $discount_amount) + $shipping_cost;
-                            // END MODIFICATION
                             ?>
 
                             <div class="d-flex justify-content-end py-3">
                                 <div class="col-auto">
                                     <div class="text-right">
                                         <h5>ยอดรวม: <?= format_num($gt, 2) ?> บาท</h5>
-                                        <h5>ค่าจัดส่ง: <?= format_num($original_shipping_cost, 2) ?> บาท</h5>
+
+                                        <?php if ($shipping_discount > 0): ?>
+                                            <h5>ค่าจัดส่ง: <span><?= format_num($original_shipping_cost, 2) ?></span> บาท</h5>
+                                            <h5>
+                                                ส่วนลด : <?= htmlspecialchars($promotion_name) ?> (-<?= format_num($shipping_discount, 2) ?> บาท)
+                                            </h5>
+                                        <?php else: ?>
+                                            <h5>ค่าจัดส่ง: <?= format_num($original_shipping_cost, 2) ?> บาท</h5>
+                                        <?php endif; ?>
 
                                         <?php if ($discount_amount > 0): ?>
                                             <h5>
                                                 ส่วนลด : <?= htmlspecialchars($promotion_name) ?> (-<?= format_num($discount_amount, 2) ?> บาท)
                                             </h5>
                                         <?php endif; ?>
+
                                         <hr>
                                         <h4><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h4>
                                     </div>
