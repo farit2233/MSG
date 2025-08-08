@@ -1414,6 +1414,64 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+
+	function save_coupon_code()
+	{
+		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
+		extract($_POST);
+		$data = "";
+		foreach ($_POST as $k => $v) {
+			if (!in_array($k, array('id'))) {
+				if (!empty($data)) $data .= ",";
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
+			}
+		}
+		$check = $this->conn->query("SELECT * FROM `coupon_code_list` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
+		if ($this->capture_err())
+			return $this->capture_err();
+		if ($check > 0) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "promotions already exists.";
+			return json_encode($resp);
+			exit;
+		}
+		if (empty($id)) {
+			$sql = "INSERT INTO `coupon_code_list` set {$data} ";
+		} else {
+			$sql = "UPDATE `coupon_code_list` set {$data} where id = '{$id}' ";
+		}
+		$save = $this->conn->query($sql);
+		if ($save) {
+			$cid = !empty($id) ? $id : $this->conn->insert_id;
+			$resp['cid'] = $cid;
+			$resp['status'] = 'success';
+			if (empty($id))
+				$resp['msg'] = "New promotions successfully saved.";
+			else
+				$resp['msg'] = " promotions successfully updated.";
+		} else {
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error . "[{$sql}]";
+		}
+		if ($resp['status'] == 'success')
+			$this->settings->set_flashdata('success', $resp['msg']);
+		return json_encode($resp);
+	}
+
+	function delete_coupon_code()
+	{
+		extract($_POST);
+		$del = $this->conn->query("DELETE FROM `coupon_code_list` WHERE id = '{$id}'");
+		if ($del) {
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success', "ลบโปรโมชั่นแล้ว");
+		} else {
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
+		return json_encode($resp);
+	}
 }
 
 $Master = new Master();
@@ -1508,6 +1566,12 @@ switch ($action) {
 		break;
 	case 'delete_promotion_category':
 		echo $Master->delete_promotion_category();
+		break;
+	case 'save_coupon_code':
+		echo $Master->save_coupon_code();
+		break;
+	case 'delete_coupon_code':
+		echo $Master->delete_coupon_code();
 		break;
 	default:
 		// echo $sysset->index();

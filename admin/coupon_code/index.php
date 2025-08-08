@@ -83,10 +83,10 @@ function formatDateThai($date)
 
 <section class="card card-outline card-dark rounded-0">
     <div class="card-header">
-        <div class="card-title">โปรโมชั่นทั้งหมด</div>
+        <div class="card-title">คูปองส่วนลดทั้งหมด</div>
         <div class="card-tools">
-            <a href="./?page=promotions/manage_promotion" class="btn btn-flat btn-dark">
-                <i class="fas fa-plus"></i> สร้างโปรโมชั่นใหม่
+            <a href="./?page=coupon_code/manage_coupon_code" class="btn btn-flat btn-dark">
+                <i class="fas fa-plus"></i> สร้างคูปองส่วนลดใหม่
             </a>
         </div>
     </div>
@@ -129,7 +129,7 @@ function formatDateThai($date)
                     <thead class="text-center">
                         <tr>
                             <th>ที่</th>
-                            <th>ชื่อโปรโมชั่น</th>
+                            <th>ชื่อคูปองส่วนลด</th>
                             <th>รายละเอียด</th>
                             <th>ประเภท</th>
                             <th>มูลค่าส่วนลด</th>
@@ -140,7 +140,7 @@ function formatDateThai($date)
                     <tbody>
                         <?php
                         $i = 1;
-                        $qry = $conn->query("SELECT * FROM `promotions_list` ORDER BY `date_created`  ASC, `name` ASC");
+                        $qry = $conn->query("SELECT * FROM `coupon_code_list` ORDER BY `date_created`  ASC, `name` ASC");
                         while ($row = $qry->fetch_assoc()):
                         ?>
                             <tr>
@@ -187,11 +187,11 @@ function formatDateThai($date)
                                         </button>
 
                                         <div class="dropdown-menu" role="menu">
-                                            <a class="dropdown-item" href="./?page=promotions/view_promotion&id=<?php echo $row['id'] ?>">
+                                            <a class="dropdown-item" href="./?page=coupon_code/view_coupon_code&id=<?php echo $row['id'] ?>">
                                                 <span class="fa fa-eye text-dark"></span> ดู
                                             </a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="./?page=promotions/manage_promotion&id=<?php echo $row['id'] ?>">
+                                            <a class="dropdown-item" href="./?page=coupon_code/manage_coupon_code&id=<?php echo $row['id'] ?>">
                                                 <span class="fa fa-edit text-dark"></span> แก้โปรโมชั่น
                                             </a>
                                             <div class="dropdown-divider"></div>
@@ -240,14 +240,14 @@ function formatDateThai($date)
 
         $('.delete_data').click(function() {
             const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชั่นนี้?", "delete_promotion", [id]);
+            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชั่นนี้?", "delete_coupon_code", [id]);
         });
     });
 
-    function delete_promotion(id) {
+    function delete_coupon_code(id) {
         start_loader();
         $.ajax({
-            url: _base_url_ + "classes/Master.php?f=delete_promotion",
+            url: _base_url_ + "classes/Master.php?f=delete_coupon_code",
             method: "POST",
             data: {
                 id: id
