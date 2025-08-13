@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 13, 2025 at 02:06 AM
+-- Generation Time: Aug 13, 2025 at 08:52 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -93,6 +93,21 @@ INSERT INTO `category_list` (`id`, `product_type_id`, `name`, `description`, `st
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `coupon_code_customer`
+--
+
+CREATE TABLE `coupon_code_customer` (
+  `id` int NOT NULL,
+  `customer_id` int NOT NULL,
+  `coupon_code_id` int NOT NULL,
+  `delete_flag` tinyint(1) NOT NULL DEFAULT '0',
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `coupon_code_list`
 --
 
@@ -102,8 +117,12 @@ CREATE TABLE `coupon_code_list` (
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `type` enum('fixed','percent','free_shipping','code') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'fixed',
+  `cpromo` tinyint(1) NOT NULL DEFAULT '0',
   `discount_value` float DEFAULT '0',
   `minimum_order` float DEFAULT '0',
+  `limit_coupon` int NOT NULL DEFAULT '0',
+  `coupon_amount` int DEFAULT NULL,
+  `unl_coupon` tinyint(1) NOT NULL DEFAULT '0',
   `start_date` datetime NOT NULL,
   `end_date` datetime NOT NULL,
   `status` tinyint(1) DEFAULT '1',
@@ -116,8 +135,32 @@ CREATE TABLE `coupon_code_list` (
 -- Dumping data for table `coupon_code_list`
 --
 
-INSERT INTO `coupon_code_list` (`id`, `coupon_code`, `name`, `description`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(1, 'TEST-01', 'ทดสอบคูปอง', 'ทดสอบคูปอง', 'percent', 20, 0, '2025-08-08 17:01:00', '2025-08-29 17:01:00', 1, 0, '2025-08-08 17:01:16', '2025-08-08 17:01:16');
+INSERT INTO `coupon_code_list` (`id`, `coupon_code`, `name`, `description`, `type`, `cpromo`, `discount_value`, `minimum_order`, `limit_coupon`, `coupon_amount`, `unl_coupon`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
+(1, 'TEST-01', 'ทดสอบคูปอง', 'ทดสอบคูปอง', 'percent', 0, 20, 0, 0, NULL, 0, '2025-08-08 17:01:00', '2025-08-29 17:01:00', 1, 0, '2025-08-08 17:01:16', '2025-08-08 17:01:16'),
+(2, 'TEST-02', ' ทดสอบคูปอง2', 'ทดสอบคูปอง2', 'free_shipping', 1, 0, 0, 3, 9999, 0, '2025-08-13 14:30:00', '2025-08-27 14:30:00', 1, 0, '2025-08-13 14:31:01', '2025-08-13 14:31:13');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_code_products`
+--
+
+CREATE TABLE `coupon_code_products` (
+  `id` int NOT NULL,
+  `coupon_code_id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `delete_flag` tinyint(1) NOT NULL DEFAULT '0',
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `coupon_code_products`
+--
+
+INSERT INTO `coupon_code_products` (`id`, `coupon_code_id`, `product_id`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
+(1, 2, 27, 1, 0, '2025-08-13 15:33:16', '2025-08-13 15:33:16');
 
 -- --------------------------------------------------------
 
@@ -748,11 +791,27 @@ ALTER TABLE `category_list`
   ADD KEY `fk_category_product_type` (`product_type_id`);
 
 --
+-- Indexes for table `coupon_code_customer`
+--
+ALTER TABLE `coupon_code_customer`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `coupon_code_id` (`coupon_code_id`);
+
+--
 -- Indexes for table `coupon_code_list`
 --
 ALTER TABLE `coupon_code_list`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `coupon_code` (`coupon_code`);
+
+--
+-- Indexes for table `coupon_code_products`
+--
+ALTER TABLE `coupon_code_products`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `coupon_code_id` (`coupon_code_id`),
+  ADD KEY `product_id` (`product_id`);
 
 --
 -- Indexes for table `customer_list`
@@ -900,9 +959,21 @@ ALTER TABLE `category_list`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
+-- AUTO_INCREMENT for table `coupon_code_customer`
+--
+ALTER TABLE `coupon_code_customer`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `coupon_code_list`
 --
 ALTER TABLE `coupon_code_list`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `coupon_code_products`
+--
+ALTER TABLE `coupon_code_products`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
@@ -945,7 +1016,7 @@ ALTER TABLE `promotion_category`
 -- AUTO_INCREMENT for table `promotion_products`
 --
 ALTER TABLE `promotion_products`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `promotion_usage_logs`
@@ -1011,6 +1082,20 @@ ALTER TABLE `cart_list`
 --
 ALTER TABLE `category_list`
   ADD CONSTRAINT `fk_category_product_type` FOREIGN KEY (`product_type_id`) REFERENCES `product_type` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `coupon_code_customer`
+--
+ALTER TABLE `coupon_code_customer`
+  ADD CONSTRAINT `coupon_code_customer_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer_list` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `coupon_code_customer_ibfk_2` FOREIGN KEY (`coupon_code_id`) REFERENCES `coupon_code_list` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_code_products`
+--
+ALTER TABLE `coupon_code_products`
+  ADD CONSTRAINT `coupon_code_products_ibfk_1` FOREIGN KEY (`coupon_code_id`) REFERENCES `coupon_code_list` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `coupon_code_products_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product_list` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `order_items`
