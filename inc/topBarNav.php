@@ -71,7 +71,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
         <!-- HTML Navbar ที่แสดงโปรโมชั่น -->
         <li class="nav-item dropdown position-static">
           <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            โปรโมชั่น
+            ใหม่และโดดเด่น
           </a>
           <div class="dropdown-menu megamenu w-100" aria-labelledby="navbarDropdown">
             <div class="mega-box">
@@ -83,16 +83,16 @@ while ($type_row = $type_qry->fetch_assoc()) {
                         <ul>
                           <div onclick="return false;" class="text-decoration-none">
                             <h5 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h5>
-                          </div>
-                          <hr class="mt-1 mb-2">
-                          <?php foreach ($type_data['categories'] as $cat_row): ?>
-                            <li>
-                              <!-- ลิงก์ไปยังหน้ารายการสินค้าตาม promotion_id -->
-                              <a href="<?= base_url . "?p=products&pid=" . $cat_row['id'] ?>" class="text-decoration-none">
-                                <?= htmlspecialchars($cat_row['name']) ?>
-                              </a>
-                            </li>
-                          <?php endforeach; ?>
+                            </diva>
+                            <hr class="mt-1 mb-2">
+                            <?php foreach ($type_data['categories'] as $cat_row): ?>
+                              <li>
+                                <!-- ลิงก์ไปยังหน้ารายการสินค้าตาม promotion_id -->
+                                <a href="<?= base_url . "?p=products&pid=" . $cat_row['id'] ?>" class="text-decoration-none">
+                                  <?= htmlspecialchars($cat_row['name']) ?>
+                                </a>
+                              </li>
+                            <?php endforeach; ?>
                         </ul>
                       </div>
                     <?php endif; ?>
@@ -136,7 +136,8 @@ while ($type_row = $type_qry->fetch_assoc()) {
             </div>
           </div>
         </li>
-        <li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li>
+        <li class="nav-item"><a class="nav-link text-white fos" href="./?p=promotion">โปรโมชั่น</a></li>
+        <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li-->
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
       </ul>
     </div>
