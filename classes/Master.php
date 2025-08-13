@@ -1417,45 +1417,107 @@ class Master extends DBConnection
 
 	function save_coupon_code()
 	{
-		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
+		// 1. สร้าง "Whitelist" ของคอลัมน์ที่อนุญาตให้บันทึกได้ เพื่อความปลอดภัย
+		$allowed_columns = [
+			'name',
+			'coupon_code',
+			'description',
+			'type',
+			'cpromo',
+			'discount_value',
+			'minimum_order',
+			'limit_coupon',
+			'coupon_amount',
+			'unl_coupon',
+			'start_date',
+			'end_date',
+			'status'
+		];
+
+		// ใช้ extract($_POST) เพื่อให้ง่ายต่อการเรียกใช้ตัวแปร แต่ต้องระมัดระวัง
 		extract($_POST);
-		$data = "";
-		foreach ($_POST as $k => $v) {
-			if (!in_array($k, array('id'))) {
-				if (!empty($data)) $data .= ",";
-				$v = $this->conn->real_escape_string($v);
-				$data .= " `{$k}`='{$v}' ";
+
+		// 2. ตรวจสอบข้อมูลซ้ำซ้อนจาก `coupon_code` (ไม่ใช่ `name`) เพราะเป็น UNIQUE KEY
+		$escaped_coupon_code = $this->conn->real_escape_string($coupon_code);
+		$check_sql = "SELECT id FROM `coupon_code_list` WHERE `coupon_code` = '{$escaped_coupon_code}' AND delete_flag = 0";
+		if (!empty($id)) {
+			$check_sql .= " AND id != '{$id}'";
+		}
+
+		$check = $this->conn->query($check_sql);
+		if ($check && $check->num_rows > 0) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "ไม่สามารถบันทึกได้: รหัสคูปอง '{$coupon_code}' นี้มีอยู่แล้วในระบบ";
+			return json_encode($resp);
+		}
+
+		// 3. สร้างส่วน SET ของคำสั่ง SQL จาก Whitelist ที่กำหนดไว้
+		$data_parts = [];
+		foreach ($allowed_columns as $col) {
+			// ตรวจสอบว่ามีข้อมูลส่งมาจากฟอร์มหรือไม่
+			if (isset($_POST[$col])) {
+				$value = $this->conn->real_escape_string($_POST[$col]);
+
+				// ถ้าค่าที่ส่งมาเป็นสตริงว่าง ให้บันทึกเป็น NULL (ถ้าคอลัมน์อนุญาต)
+				// โดยเฉพาะสำหรับฟิลด์ตัวเลขที่อาจไม่ได้กรอก
+				if ($value === '' && in_array($col, ['discount_value', 'minimum_order', 'coupon_amount'])) {
+					$data_parts[] = "`{$col}` = NULL";
+				} else {
+					$data_parts[] = "`{$col}` = '{$value}'";
+				}
 			}
 		}
-		$check = $this->conn->query("SELECT * FROM `coupon_code_list` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
-		if ($this->capture_err())
-			return $this->capture_err();
-		if ($check > 0) {
-			$resp['status'] = 'failed';
-			$resp['msg'] = "promotions already exists.";
-			return json_encode($resp);
-			exit;
+
+		// 4. จัดการข้อมูลจาก Checkbox และ Radio button เป็นพิเศษ
+		// ถ้า status ไม่ได้ถูกติ๊ก (ไม่ถูกส่งมา) ให้กำหนดค่าเป็น 0
+		if (!isset($_POST['status'])) {
+			$data_parts[] = "`status` = '0'";
 		}
+		// ถ้า unl_coupon ไม่ได้ถูกติ๊ก ให้กำหนดค่าเป็น 0
+		if (!isset($_POST['unl_coupon'])) {
+			$data_parts[] = "`unl_coupon` = '0'";
+		}
+		// ถ้าติ๊ก "ไม่จำกัดจำนวน" (`unl_coupon`=1) ให้ล้างค่า `coupon_amount` เป็น NULL
+		if (isset($_POST['unl_coupon']) && $_POST['unl_coupon'] == 1) {
+			// ค้นหาและลบ `coupon_amount` ที่อาจถูกเพิ่มไปแล้ว
+			$data_parts = array_filter($data_parts, function ($part) {
+				return strpos($part, '`coupon_amount`') === false;
+			});
+			// เพิ่มค่าที่ถูกต้องเข้าไปใหม่
+			$data_parts[] = "`coupon_amount` = NULL";
+		}
+
+		$data = implode(", ", $data_parts);
+
+		// 5. สร้างและรันคำสั่ง SQL النهائية
 		if (empty($id)) {
-			$sql = "INSERT INTO `coupon_code_list` set {$data} ";
+			// สร้างข้อมูลใหม่
+			$sql = "INSERT INTO `coupon_code_list` SET {$data}";
 		} else {
-			$sql = "UPDATE `coupon_code_list` set {$data} where id = '{$id}' ";
+			// อัปเดตข้อมูลเดิม
+			$sql = "UPDATE `coupon_code_list` SET {$data} WHERE id = '{$id}'";
 		}
+
 		$save = $this->conn->query($sql);
+
 		if ($save) {
 			$cid = !empty($id) ? $id : $this->conn->insert_id;
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
-			if (empty($id))
-				$resp['msg'] = "New promotions successfully saved.";
-			else
-				$resp['msg'] = " promotions successfully updated.";
+			if (empty($id)) {
+				$resp['msg'] = "สร้างโปรโมชั่นใหม่สำเร็จ";
+			} else {
+				$resp['msg'] = "อัปเดตข้อมูลโปรโมชั่นสำเร็จ";
+			}
+			// บันทึกข้อความลง session flash
+			$this->settings->set_flashdata('success', $resp['msg']);
 		} else {
 			$resp['status'] = 'failed';
-			$resp['err'] = $this->conn->error . "[{$sql}]";
+			$resp['msg'] = 'เกิดข้อผิดพลาดในการบันทึกข้อมูลลงฐานข้อมูล';
+			$resp['error'] = $this->conn->error; // ส่ง error ของ SQL กลับไปด้วยเพื่อช่วยในการดีบัก
+			$resp['sql'] = $sql; // ส่งคำสั่ง SQL ที่ผิดพลาดกลับไปดูด้วย
 		}
-		if ($resp['status'] == 'success')
-			$this->settings->set_flashdata('success', $resp['msg']);
+
 		return json_encode($resp);
 	}
 
@@ -1471,6 +1533,61 @@ class Master extends DBConnection
 			$resp['error'] = $this->conn->error;
 		}
 		return json_encode($resp);
+	}
+	function save_coupon_code_products()
+	{
+		// Sanitize and escape inputs
+		$coupon_code_id = isset($_POST['coupon_code_id']) ? $_POST['coupon_code_id'] : null;
+		$product_ids = isset($_POST['product_id']) ? $_POST['product_id'] : [];
+
+		// Check if coupon_code_id is provided
+		if (empty($coupon_code_id)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'Coupon Code ID is required.';
+			return json_encode($resp);
+		}
+
+		if (empty($product_ids)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'At least one product must be selected.';
+			return json_encode($resp);
+		}
+
+		// Delete existing products for this promotion (if any)
+		$delete_query = "DELETE FROM `coupon_code_products` WHERE `coupon_code_id` = {$coupon_code_id}";
+		$this->conn->query($delete_query); // Assuming no errors
+
+		// Insert selected products
+		foreach ($product_ids as $product_id) {
+			$product_id = intval($product_id);
+			$sql = "INSERT INTO `coupon_code_products` (`coupon_code_id`, `product_id`) VALUES ('{$coupon_code_id}', '{$product_id}')";
+			$this->conn->query($sql);
+		}
+
+		// Check for errors
+		if ($this->conn->affected_rows > 0) {
+			$resp['status'] = 'success';
+			$resp['msg'] = 'Products successfully saved to promotion.';
+		} else {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'Failed to save products.';
+		}
+
+		return json_encode($resp);
+	}
+	function delete_coupon_code_products()
+	{
+		extract($_POST);
+		$qry = $this->conn->prepare("DELETE FROM `coupon_code_products` where id = ?");
+		$qry->bind_param("i", $id); // "i" for integer
+		$resp = $qry->execute();
+
+		if ($resp) {
+			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโปรโมชั่นเรียบร้อยแล้ว");
+			return json_encode(array('status' => 'success'));
+		} else {
+			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
+		}
 	}
 }
 
@@ -1572,6 +1689,12 @@ switch ($action) {
 		break;
 	case 'delete_coupon_code':
 		echo $Master->delete_coupon_code();
+		break;
+	case 'save_coupon_code_products':
+		echo $Master->save_coupon_code_products();
+		break;
+	case 'delete_coupon_code_products':
+		echo $Master->delete_coupon_code_products();
 		break;
 	default:
 		// echo $sysset->index();

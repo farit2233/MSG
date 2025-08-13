@@ -96,19 +96,19 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="form-group row">
                         <div class="col-md-6">
                             <label>จำกัดสิทธิการใช้คูปอง จำนวน ครั้ง / 1 ลูกค้า <span class="text-danger">*</span></label>
-                            <input type="number" name="limit_coupon" step="0.01" min="0" class="form-control" placeholder="กรุณากำหนดจำนวนสิทธิการใช้คูปอง" value="<?= isset($limit_coupon) ? $limit_coupon : '' ?>" required>
+                            <input type="number" name="limit_coupon" step="1" min="0" class="form-control" placeholder="กรุณากำหนดจำนวนสิทธิการใช้คูปอง" value="<?= isset($limit_coupon) ? $limit_coupon : '' ?>" required>
                         </div>
                         <div class="col-md-6">
                             <label>กำหนดจำนวนคูปอง <span class="text-danger">*</span></label>
                             <div class="form-group row">
                                 <div class="col-md-6">
-                                    <input type="number" name="coupon_amount" step="0.01" min="0" class="form-control" placeholder="กรุณากำหนดจำนวนคูปอง" value="<?= isset($coupon_amount) ? $coupon_amount : '' ?>" id="coupon_amount">
+                                    <input type="number" name="coupon_amount" step="1" min="0" class="form-control" placeholder="กรอกจำนวน" value="<?= isset($coupon_amount) ? $coupon_amount : '' ?>" id="coupon_amount">
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="radio-group">
-                                        <label>
-                                            <input type="radio" id="unl_coupon" name="unl_coupon" value="1" <?= (isset($unl_coupon) && $unl_coupon == 1) ? 'checked' : '' ?> required>
-                                            ไม่จำกัดจำนวนคูปอง
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" id="unl_coupon" name="unl_coupon" value="1" <?= (isset($unl_coupon) && $unl_coupon == 1) ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="unl_coupon">
+                                            ไม่จำกัดจำนวน
                                         </label>
                                     </div>
                                 </div>
@@ -204,32 +204,53 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             }
         });
 
-        document.getElementById('coupon_amount').addEventListener('input', function() {
-            var discountValue = document.getElementById('coupon_amount').value;
-            var noLimitRadio = document.getElementById('unl_coupon');
-            var discountInput = document.getElementById('coupon_amount');
+        const amountInput = document.getElementById('coupon_amount');
+        const unlimitedCheckbox = document.getElementById('unl_coupon');
 
-            // หากกรอกตัวเลข ระบบจะยกเลิกการเลือก radio "ไม่จำกัดจำนวนคูปอง" และเปลี่ยน placeholder กลับ
-            if (discountValue > 0) {
-                noLimitRadio.checked = false; // ยกเลิกการเลือก radio "ไม่จำกัดจำนวนคูปอง"
-                discountInput.placeholder = "จำนวนสิทธิการใช้คูปอง"; // เปลี่ยน placeholder กลับ
-                discountInput.setAttribute('required', 'required'); // ตั้งค่า required กลับ
-            }
-        });
-
-        document.getElementById('unl_coupon').addEventListener('change', function() {
-            var noLimitRadio = document.getElementById('unl_coupon');
-            var discountValue = document.getElementById('coupon_amount');
-
-            // หากเลือก "ไม่จำกัดจำนวนคูปอง" ให้ลบค่าในช่องกรอกและเปลี่ยน placeholder
-            if (noLimitRadio.checked) {
-                discountValue.value = ''; // ลบค่าที่กรอกในช่อง
-                discountValue.removeAttribute('required'); // ลบ attribute required
-                discountValue.placeholder = "ไม่จำกัดจำนวนคูปอง"; // เปลี่ยน placeholder เป็น "ไม่จำกัดจำนวนคูปอง"
+        // ฟังก์ชันกลางสำหรับอัปเดตสถานะ validation
+        const updateValidation = () => {
+            // เงื่อนไข: ถ้าช่องตัวเลข 'ว่าง' และ checkbox 'ไม่ได้ถูกติ๊ก'
+            if (amountInput.value === '' && !unlimitedCheckbox.checked) {
+                // ให้ช่องตัวเลขเป็น 'required' (บังคับกรอก)
+                amountInput.setAttribute('required', 'required');
+                amountInput.placeholder = "กรุณากำหนดจำนวน"; // ตั้งค่า placeholder สำหรับบังคับกรอก
             } else {
-                discountValue.setAttribute('required', 'required'); // ใส่ attribute required กลับ
+                // ถ้ามีข้อมูลอย่างใดอย่างหนึ่งแล้ว ให้เอา 'required' ออก
+                amountInput.removeAttribute('required');
+                if (unlimitedCheckbox.checked) {
+                    amountInput.placeholder = "ไม่จำกัดจำนวน";
+                } else {
+                    amountInput.placeholder = "กรอกจำนวน";
+                }
             }
+        };
+
+        // 1. เมื่อมีการพิมพ์ในช่อง 'จำนวนคูปอง'
+        amountInput.addEventListener('input', function() {
+            // ถ้ามีการกรอกตัวเลขเข้ามา
+            if (this.value !== '') {
+                // ให้ยกเลิกการติ๊ก 'ไม่จำกัดจำนวน' ทันที
+                unlimitedCheckbox.checked = false;
+            }
+            // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่พิมพ์
+            updateValidation();
         });
+
+        // 2. เมื่อมีการติ๊กที่ checkbox 'ไม่จำกัดจำนวน'
+        unlimitedCheckbox.addEventListener('change', function() {
+            // ถ้า checkbox ถูกติ๊ก
+            if (this.checked) {
+                // ให้ลบตัวเลขในช่องกรอกทิ้ง
+                amountInput.value = '';
+            }
+            // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่ติ๊ก
+            updateValidation();
+        });
+
+        // 3. เรียกใช้ฟังก์ชันครั้งแรกเมื่อหน้าเว็บโหลดเสร็จ
+        // เพื่อกำหนดสถานะ required ให้ถูกต้องตั้งแต่แรก (สำคัญมากตอนแก้ไขข้อมูล)
+        updateValidation();
+
 
         // ฟังก์ชัน submit
         $('#coupon-code-form').submit(function(e) {
