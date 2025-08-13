@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 07, 2025 at 04:54 AM
+-- Generation Time: Aug 13, 2025 at 02:06 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -39,8 +39,7 @@ CREATE TABLE `cart_list` (
 --
 
 INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
-(186, 19, 14, 1),
-(187, 19, 25, 1);
+(187, 19, 25, 2);
 
 -- --------------------------------------------------------
 
@@ -90,6 +89,35 @@ INSERT INTO `category_list` (`id`, `product_type_id`, `name`, `description`, `st
 (24, 6, 'อื่น ๆ', 'อื่น ๆ', 1, 0, '2025-07-21 16:01:11', '2025-07-21 16:01:11'),
 (25, 11, 'ทดสอบลบ', '', 1, 0, '2025-07-22 10:00:11', '2025-07-22 10:00:11'),
 (26, 12, 'สมุดโน็ต', '', 1, 0, '2025-07-22 18:38:08', '2025-07-22 18:38:08');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_code_list`
+--
+
+CREATE TABLE `coupon_code_list` (
+  `id` int NOT NULL,
+  `coupon_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `type` enum('fixed','percent','free_shipping','code') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'fixed',
+  `discount_value` float DEFAULT '0',
+  `minimum_order` float DEFAULT '0',
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `status` tinyint(1) DEFAULT '1',
+  `delete_flag` tinyint(1) NOT NULL DEFAULT '0',
+  `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `date_updated` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `coupon_code_list`
+--
+
+INSERT INTO `coupon_code_list` (`id`, `coupon_code`, `name`, `description`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
+(1, 'TEST-01', 'ทดสอบคูปอง', 'ทดสอบคูปอง', 'percent', 20, 0, '2025-08-08 17:01:00', '2025-08-29 17:01:00', 1, 0, '2025-08-08 17:01:16', '2025-08-08 17:01:16');
 
 -- --------------------------------------------------------
 
@@ -160,23 +188,11 @@ CREATE TABLE `order_items` (
 --
 
 INSERT INTO `order_items` (`order_id`, `product_id`, `promotion_id`, `quantity`, `price`) VALUES
-(93, 33, NULL, 2, 199.00),
-(94, 14, NULL, 2, 11731.00),
-(94, 33, NULL, 2, 199.00),
-(95, 33, NULL, 2, 199.00),
-(95, 24, NULL, 1, 490.00),
-(96, 33, NULL, 1, 199.00),
-(97, 33, NULL, 1, 199.00),
-(98, 33, 10, 2, 199.00),
-(99, 33, 10, 2, 199.00),
-(100, 33, 10, 2, 199.00),
-(101, 33, 10, 2, 199.00),
-(102, 33, 10, 2, 199.00),
-(103, 33, 10, 2, 199.00),
-(104, 33, 10, 2, 199.00),
-(105, 33, 10, 2, 199.00),
-(106, 33, 10, 2, 199.00),
-(107, 33, NULL, 1, 199.00);
+(1, 27, 13, 1, 699.00),
+(2, 27, 13, 4, 699.00),
+(3, 33, 10, 2, 199.00),
+(4, 27, 13, 1, 699.00),
+(4, 14, 13, 1, 11731.00);
 
 -- --------------------------------------------------------
 
@@ -206,21 +222,10 @@ CREATE TABLE `order_list` (
 --
 
 INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `shipping_methods_id`, `promotion_id`, `payment_status`, `delivery_status`, `status`, `is_seen`, `date_created`, `date_updated`) VALUES
-(93, '2025080500001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 438.00, 0.00, 3, NULL, 1, 1, 0, 1, '2025-08-05 16:30:14', '2025-08-05 16:33:19'),
-(94, '2025080500002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 23935.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-05 16:39:28', '2025-08-05 16:39:38'),
-(95, '2025080600001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 928.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-06 16:36:24', '2025-08-06 16:36:38'),
-(96, '2025080700001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 239.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-07 09:04:32', '2025-08-07 09:04:43'),
-(97, '2025080700002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 239.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-07 10:36:37', '2025-08-07 10:47:40'),
-(98, '2025080700003', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 10:53:54', '2025-08-07 10:53:57'),
-(99, '2025080700004', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:04:47', '2025-08-07 11:05:27'),
-(100, '2025080700005', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:05:46', '2025-08-07 11:10:54'),
-(101, '2025080700006', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:11:01', '2025-08-07 11:41:25'),
-(102, '2025080700007', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:36:48', '2025-08-07 11:41:25'),
-(103, '2025080700008', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:38:33', '2025-08-07 11:41:25'),
-(104, '2025080700009', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:39:41', '2025-08-07 11:41:25'),
-(105, '2025080700010', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:41:34', '2025-08-07 11:43:51'),
-(106, '2025080700011', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-07 11:43:54', '2025-08-07 11:46:48'),
-(107, '2025080700012', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 239.00, 0.00, 3, NULL, 0, 0, 0, 1, '2025-08-07 11:50:01', '2025-08-07 11:52:34');
+(1, '2025080800001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 639.00, 100.00, 3, 13, 0, 0, 0, 1, '2025-08-08 16:33:52', '2025-08-08 16:45:17'),
+(2, '2025080800002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 2736.00, 100.00, 3, 13, 0, 0, 0, 1, '2025-08-08 16:43:07', '2025-08-08 16:45:17'),
+(3, '2025080800003', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-08 16:44:25', '2025-08-08 16:45:17'),
+(4, '2025080800004', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 12380.00, 100.00, 3, 13, 0, 0, 0, 0, '2025-08-08 16:47:05', '2025-08-08 16:47:05');
 
 -- --------------------------------------------------------
 
@@ -385,7 +390,10 @@ CREATE TABLE `promotions_list` (
 
 INSERT INTO `promotions_list` (`id`, `promotion_category_id`, `name`, `description`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
 (10, 10, 'โปรโมชั่น 8.8 !', 'สั่งซื้อครบ 300 บาท', 'percent', 30, 300, '2025-08-06 09:18:00', '2025-08-21 09:18:00', 1, 0, '2025-08-06 09:18:27', '2025-08-06 11:23:38'),
-(11, 10, 'ลดล้างสต๊อก', 'ลดล้างสต๊อก', 'percent', 90, 0, '2025-08-06 16:01:00', '2025-08-07 16:01:00', 1, 0, '2025-08-06 16:01:33', '2025-08-06 16:01:33');
+(11, 10, 'ลดล้างสต๊อก', 'ลดล้างสต๊อก', 'percent', 90, 0, '2025-08-06 16:01:00', '2025-08-07 16:01:00', 1, 0, '2025-08-06 16:01:33', '2025-08-06 16:01:33'),
+(12, 10, 'ส่งฟรีไม่มีขั้นต่ำ', 'ส่งฟรีไม่มีขั้นต่ำ', 'free_shipping', 0, 0, '2025-08-07 13:56:00', '2025-08-21 13:56:00', 1, 0, '2025-08-07 13:56:10', '2025-08-07 13:56:10'),
+(13, 10, 'ลดราคา 100 บาท', 'สั่งซื้อครบ 20 บาท ลดเลย 100 บาท !', 'fixed', 100, 20, '2025-08-08 09:31:00', '2025-08-22 09:31:00', 1, 0, '2025-08-08 09:31:56', '2025-08-08 09:31:56'),
+(14, 10, 'ส่งฟรีขั้นต่ำ 200 บาท', 'ส่งฟรีขั้นต่ำ 200 บาท', 'free_shipping', 0, 200, '2025-08-08 09:49:00', '2025-08-22 09:49:00', 1, 0, '2025-08-08 09:49:49', '2025-08-08 09:49:49');
 
 -- --------------------------------------------------------
 
@@ -440,20 +448,60 @@ CREATE TABLE `promotion_products` (
 
 INSERT INTO `promotion_products` (`id`, `promotion_id`, `product_id`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
 (25, 10, 33, 1, 0, '2025-08-06 09:19:58', '2025-08-06 09:19:58'),
-(26, 11, 30, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(27, 11, 27, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(28, 11, 14, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(29, 11, 25, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(30, 11, 23, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(31, 11, 32, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(32, 11, 22, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(33, 11, 21, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(34, 11, 26, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(35, 11, 24, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(36, 11, 20, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(37, 11, 31, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(38, 11, 29, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51'),
-(39, 11, 34, 1, 0, '2025-08-06 16:02:51', '2025-08-06 16:02:51');
+(40, 12, 29, 1, 0, '2025-08-07 13:56:49', '2025-08-07 13:56:49'),
+(41, 11, 23, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(42, 11, 32, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(43, 11, 22, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(44, 11, 21, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(45, 11, 26, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(46, 11, 24, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(47, 11, 20, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(48, 11, 31, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(49, 11, 34, 1, 0, '2025-08-08 09:32:26', '2025-08-08 09:32:26'),
+(50, 13, 27, 1, 0, '2025-08-08 09:32:39', '2025-08-08 09:32:39'),
+(51, 13, 14, 1, 0, '2025-08-08 09:32:39', '2025-08-08 09:32:39'),
+(52, 14, 30, 1, 0, '2025-08-08 09:50:05', '2025-08-08 09:50:05'),
+(53, 14, 25, 1, 0, '2025-08-08 09:50:05', '2025-08-08 09:50:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `promotion_summaries`
+--
+
+CREATE TABLE `promotion_summaries` (
+  `promotion_id` int NOT NULL,
+  `used_by_count` int DEFAULT '0',
+  `usage_count` int DEFAULT '0',
+  `ordered_items_count` int DEFAULT '0',
+  `total_discount` decimal(15,2) DEFAULT '0.00',
+  `last_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `promotion_usage_logs`
+--
+
+CREATE TABLE `promotion_usage_logs` (
+  `id` bigint NOT NULL,
+  `promotion_id` int NOT NULL,
+  `customer_id` int NOT NULL,
+  `order_id` int NOT NULL,
+  `discount_amount` decimal(10,2) NOT NULL,
+  `items_in_order` int NOT NULL,
+  `used_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `promotion_usage_logs`
+--
+
+INSERT INTO `promotion_usage_logs` (`id`, `promotion_id`, `customer_id`, `order_id`, `discount_amount`, `items_in_order`, `used_at`) VALUES
+(1, 13, 19, 1, 100.00, 1, '2025-08-08 09:33:59'),
+(2, 10, 19, 3, 119.40, 1, '2025-08-08 09:44:34'),
+(3, 13, 19, 4, 100.00, 2, '2025-08-08 09:47:12');
 
 -- --------------------------------------------------------
 
@@ -603,7 +651,8 @@ INSERT INTO `stock_list` (`id`, `product_id`, `code`, `quantity`, `date_created`
 (29, 20, '12121', 1000.00, '2025-06-30 11:30:45', '2025-06-30 11:30:45'),
 (30, 32, 'CAT', 1.00, '2025-07-08 11:04:43', '2025-07-08 11:04:43'),
 (31, 33, 'SF-00001', 100.00, '2025-07-18 09:24:01', '2025-07-18 09:24:01'),
-(32, 34, 'NTE1-001', 1000.00, '2025-07-22 18:41:19', '2025-07-22 18:41:19');
+(32, 34, 'NTE1-001', 1000.00, '2025-07-22 18:41:19', '2025-07-22 18:41:19'),
+(33, 32, 'CAT002', 10000.00, '2025-08-08 10:03:10', '2025-08-08 10:03:10');
 
 -- --------------------------------------------------------
 
@@ -699,6 +748,13 @@ ALTER TABLE `category_list`
   ADD KEY `fk_category_product_type` (`product_type_id`);
 
 --
+-- Indexes for table `coupon_code_list`
+--
+ALTER TABLE `coupon_code_list`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `coupon_code` (`coupon_code`);
+
+--
 -- Indexes for table `customer_list`
 --
 ALTER TABLE `customer_list`
@@ -766,6 +822,21 @@ ALTER TABLE `promotion_products`
   ADD KEY `product_id` (`product_id`);
 
 --
+-- Indexes for table `promotion_summaries`
+--
+ALTER TABLE `promotion_summaries`
+  ADD PRIMARY KEY (`promotion_id`);
+
+--
+-- Indexes for table `promotion_usage_logs`
+--
+ALTER TABLE `promotion_usage_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `promotion_id` (`promotion_id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `order_id` (`order_id`);
+
+--
 -- Indexes for table `shipping_methods`
 --
 ALTER TABLE `shipping_methods`
@@ -820,13 +891,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=200;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=239;
 
 --
 -- AUTO_INCREMENT for table `category_list`
 --
 ALTER TABLE `category_list`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+
+--
+-- AUTO_INCREMENT for table `coupon_code_list`
+--
+ALTER TABLE `coupon_code_list`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `customer_list`
@@ -838,7 +915,7 @@ ALTER TABLE `customer_list`
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `product_list`
@@ -856,7 +933,7 @@ ALTER TABLE `product_type`
 -- AUTO_INCREMENT for table `promotions_list`
 --
 ALTER TABLE `promotions_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `promotion_category`
@@ -868,7 +945,13 @@ ALTER TABLE `promotion_category`
 -- AUTO_INCREMENT for table `promotion_products`
 --
 ALTER TABLE `promotion_products`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+
+--
+-- AUTO_INCREMENT for table `promotion_usage_logs`
+--
+ALTER TABLE `promotion_usage_logs`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `shipping_methods`
@@ -892,7 +975,7 @@ ALTER TABLE `shipping_providers`
 -- AUTO_INCREMENT for table `stock_list`
 --
 ALTER TABLE `stock_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `stock_out`
@@ -967,6 +1050,20 @@ ALTER TABLE `promotions_list`
 ALTER TABLE `promotion_products`
   ADD CONSTRAINT `promotion_products_ibfk_1` FOREIGN KEY (`promotion_id`) REFERENCES `promotions_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `promotion_products_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product_list` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `promotion_summaries`
+--
+ALTER TABLE `promotion_summaries`
+  ADD CONSTRAINT `promotion_summaries_ibfk_1` FOREIGN KEY (`promotion_id`) REFERENCES `promotions_list` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `promotion_usage_logs`
+--
+ALTER TABLE `promotion_usage_logs`
+  ADD CONSTRAINT `promotion_usage_logs_ibfk_1` FOREIGN KEY (`promotion_id`) REFERENCES `promotions_list` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `promotion_usage_logs_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer_list` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `promotion_usage_logs_ibfk_3` FOREIGN KEY (`order_id`) REFERENCES `order_list` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `shipping_methods`
