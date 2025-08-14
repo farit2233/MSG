@@ -1,117 +1,126 @@
-    /*.carousel-item>img{
-        object-fit:cover !important;
-    }*/
-    .carousel {
-        width: 100% !important;
-        overflow: hidden !important;
-        right: 0 !important;
-    }
+/*.carousel-item>img{
+    object-fit:cover !important;
+}*/
+.carousel {
+    width: 100% !important;
+    overflow: hidden !important;
+    right: 0 !important;
+}
 
-    .carousel-inner {
-        aspect-ratio: 1920 / 600;
-        /* หรือ 3.2 */
-    }
+.carousel-inner {
+    aspect-ratio: 1920 / 600;
+    /* หรือ 3.2 */
+}
 
-    .carousel-item {
-        height: 100%;
-    }
+.carousel-item {
+    height: 100%;
+}
 
-    .carousel-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-    /*#carouselExampleControls .carousel-inner{
-        height:35em !important;
-    }*/
-    .product-img-holder {
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        /* ทำให้กล่องภาพเป็นจัตุรัส */
-        overflow: hidden;
-        background: #f5f5f5;
-        position: relative;
-    }
+/*#carouselExampleControls .carousel-inner{
+    height:35em !important;
+}*/
+.product-img-holder {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    /* ทำให้กล่องภาพเป็นจัตุรัส */
+    overflow: hidden;
+    background: #f5f5f5;
+    position: relative;
+}
 
-    .product-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center center;
-        transition: all .3s ease-in-out;
-    }
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    transition: all .3s ease-in-out;
+}
 
-    .product-item:hover .product-img {
-        transform: scale(1.1)
-    }
+.product-item {
+    cursor: pointer; /* แสดง pointer เมื่อ hover */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* เพิ่ม transition สำหรับ effect */
+}
 
-    .bg-gradient-dark-FIXX {
-        background-color: #202020;
-    }
+/* เมื่อ hover ที่การ์ด จะขยายขนาดเล็กน้อย */
+.product-item:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* เพิ่มเงาเมื่อ hover */
+}
+.product-item:hover .product-img {
+    transform: scale(1.1)
+}   
 
-    .banner-wrapper {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-        /* ครอบคลุมทั้งจอ */
-        display: block;
-    }
+.bg-gradient-dark-FIXX {
+    background-color: #202020;
+}
 
-    .banner-wrapper img {
-        width: 100%;
-        /* เต็มความกว้าง */
-        height: auto;
-        /* รักษาสัดส่วนภาพ */
-        display: block;
-        object-fit: cover;
-        /* หรือ contain แล้วแต่ภาพ */
-    }
+.banner-wrapper {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    /* ครอบคลุมทั้งจอ */
+    display: block;
+}
 
-    .baby-font {
-        color: white;
-        font-weight: bold;
-        font-size: 20px;
-    }
+.banner-wrapper img {
+    width: 100%;
+    /* เต็มความกว้าง */
+    height: auto;
+    /* รักษาสัดส่วนภาพ */
+    display: block;
+    object-fit: cover;
+    /* หรือ contain แล้วแต่ภาพ */
+}
 
-    .card-title {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        /* จำนวนบรรทัด */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
+.baby-font {
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+}
 
-    .btn-product:hover {
-        color: white;
-        filter: brightness(90%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+.card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    /* จำนวนบรรทัด */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 
-    .btn-product {
-        font-size: 18px;
-        color: white;
-        background-color: #f57421;
-        padding: 10px 40px;
-        transition: all 0.2s ease-in-out;
-    }
+.btn-product:hover {
+    color: white;
+    filter: brightness(90%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-    .banner-price {
-        font-size: 20px;
-        color: #f57421;
-    }
+.btn-product {
+    font-size: 18px;
+    color: white;
+    background-color: #f57421;
+    padding: 10px 40px;
+    transition: all 0.2s ease-in-out;
+}
 
-    .badge-sm {
-        font-size: 12px;
-        /* ลดขนาดฟอนต์ */
-        padding: 4px 5px;
-        /* ปรับ padding */
-        background-color: #f79c60;
-    }
-    .hover-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border-radius: 1rem;
+.banner-price {
+    font-size: 20px;
+    color: #f57421;
+}
+
+.badge-sm {
+    font-size: 12px;
+    /* ลดขนาดฟอนต์ */
+    padding: 4px 5px;
+    /* ปรับ padding */
+    background-color: #f79c60;
+}
+.hover-card {
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+border-radius: 1rem;
 }
 
 .hover-card:hover {
@@ -125,12 +134,12 @@
   color: #333;
 }
 
-  .arrow-move {
-        display: inline-block;
-        animation: moveArrow 0.8s infinite alternate;
-    }
+.arrow-move {
+    display: inline-block;
+    animation: moveArrow 0.8s infinite alternate;
+}
 
-    @keyframes moveArrow {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(5px); }
-    }
+@keyframes moveArrow {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(5px); }
+}

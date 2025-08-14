@@ -150,7 +150,7 @@
                             ?>
                                 <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
 
-                                    <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
+                                    <a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
                                         <div class="position-relative">
                                             <div class="img-top position-relative product-img-holder">
                                                 <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
@@ -242,7 +242,7 @@
                             ?>
                                 <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
 
-                                    <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
+                                    <a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
                                         <div class="position-relative">
                                             <div class="img-top position-relative product-img-holder">
                                                 <div class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 small" style="z-index: 1;">

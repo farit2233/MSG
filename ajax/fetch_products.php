@@ -83,7 +83,7 @@ if ($qry->num_rows > 0):
         $stock_class = $in_stock ? '' : 'out-of-stock';
 ?>
         <div class="col-6 col-sm-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
-            <a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= $stock_class ?>"
+            <a class="card rounded-0 product-item text-decoration-none text-reset h-100 <?= $stock_class ?>"
                 href="./?p=products/view_product&id=<?= $row['id'] ?>">
                 <div class="position-relative">
                     <div class="img-top position-relative product-img-holder">

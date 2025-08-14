@@ -31,6 +31,19 @@
         transition: all .3s ease-in-out;
     }
 
+    .product-item {
+        cursor: pointer;
+        /* แสดง pointer เมื่อ hover */
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        /* เพิ่ม transition สำหรับ effect */
+    }
+
+    /* เมื่อ hover ที่การ์ด จะขยายขนาดเล็กน้อย */
+    .product-item:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        /* เพิ่มเงาเมื่อ hover */
+    }
+
     .product-item:hover .product-img {
         transform: scale(1.1)
     }
