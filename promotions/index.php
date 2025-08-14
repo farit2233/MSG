@@ -77,16 +77,105 @@
 
     .container-custom {
         max-width: 1400px;
-        /* กำหนดความกว้างสูงสุด */
         margin: 0 auto;
-        /* จัดให้กลาง */
+    }
+
+    /* ไล่ความมืดจากบนลงล่าง */
+    .card-promotion-holder {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+    }
+
+    .card-promotion-holder img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .card-promotion-holder::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        /* เริ่มที่ด้านบน */
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* ให้ gradient ครอบคลุมทั้งภาพ */
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0.3) 100%);
+        z-index: 1;
+        /* ให้ gradient ซ้อนอยู่เหนือรูปภาพ */
+    }
+
+    .card-title-promotion {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        color: white;
+        padding: 5px;
+        z-index: 2;
+        /* ทำให้ชื่อโปรโมชันอยู่เหนือ gradient */
+        font-size: 20px !important;
+        font-weight: bold;
+    }
+
+    .card-promotion {
+        cursor: pointer;
+        transition: box-shadow 0.3s ease;
+    }
+
+    /* เมื่อ hover ที่การ์ด จะขยายขนาดเล็กน้อย */
+    .card-promotion:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* เพิ่ม hover effect ให้กับรูปภาพเมื่อ hover ที่การ์ด */
+    .card-promotion:hover .card-img-top {
+        transform: scale(1.1);
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        transition: all .3s ease-in-out;
+    }
+
+    .card-body p {
+        margin-bottom: 1rem;
+        /* เพิ่มระยะห่างระหว่างบรรทัด */
+    }
+
+    .coupon-description,
+    .promotion-description {
+        font-size: 16px;
+        min-height: 48px;
+        font-weight: 300;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        /* กำหนดให้แสดงผลสูงสุด 2 บรรทัด */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 </style>
 
 <?php
 $i = 1;
-$qry = $conn->query("SELECT * FROM `coupon_code_list` ORDER BY `date_created`  ASC, `name` ASC");
-$qry_promo = $conn->query("SELECT * FROM `promotions_list` ORDER BY `date_created`  ASC, `name` ASC");
+$qry = $conn->query("SELECT * FROM coupon_code_list ORDER BY date_created ASC, name ASC");
+$qry_promo = $conn->query("SELECT * FROM promotions_list ORDER BY date_created ASC, name ASC");
+
+function formatDateThai($date)
+{
+    // แปลงวันที่เป็นตัวแปร timestamp
+    $timestamp = strtotime($date);
+    $day = date("j", $timestamp); // วัน (1-31)
+    $month = date("n", $timestamp); // เดือน (1-12)
+    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+    $hour = date("H", $timestamp); // ชั่วโมง (00-23)
+    $minute = date("i", $timestamp); // นาที (00-59)
+    // สร้างวันที่ในรูปแบบไทย
+    return "{$day}/{$month}/{$year}";
+}
 ?>
 
 <section class="py-5">
@@ -137,26 +226,8 @@ $qry_promo = $conn->query("SELECT * FROM `promotions_list` ORDER BY `date_create
                                         </div>
                                     </div>
                                     <p class="card-text coupon-code"><?= $row['coupon_code'] ?></p>
-                                    <p class="card-text"><?= $row['description'] ?></p>
+                                    <p class="card-text coupon-description"><?= $row['description'] ?></p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endwhile; ?>
-            </div>
-        </div>
-    </div>
-    <div class="container-custom">
-        <div class="card-group">
-            <div class="row g-4"> <!-- เพิ่มระยะห่างระหว่างคอลัมน์ -->
-                <?php while ($row = $qry_promo->fetch_assoc()): ?>
-                    <div class="col-md-3 mb-4"> <!-- ใช้ col-md-3 เพื่อแสดง 4 คอลัมน์ในแถว -->
-                        <div class="card" style="width: 21rem;">
-                            <img class="card-img-top" src="..." alt="Card image cap">
-                            <div class="card-body">
-                                <h5 class="card-title"><?= $row['name'] ?></h5>
-                                <p class="card-text"><?= $row['description'] ?></p>
-                                <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                             </div>
                         </div>
                     </div>
@@ -166,47 +237,47 @@ $qry_promo = $conn->query("SELECT * FROM `promotions_list` ORDER BY `date_create
     </div>
 </section>
 
+<section class="mx-5">
+    <h3>โปรโมชั่นทั้งหมด</h3>
+    <div class="card rounded-0 pt-4">
+        <div class="container-custom">
+            <div class="card-group">
+                <div class="row g-4">
+                    <?php while ($row = $qry_promo->fetch_assoc()): ?>
+                        <div class="col-md-3 mb-4">
+                            <div class="card card-promotion h-100">
+                                <div class="card-promotion-holder">
+                                    <img class="card-img-top" src=" <?= $row['image_path'] ?>" alt="Card image cap">
+                                    <h5 class="card-title card-title-promotion">
+                                        <?= $row['name'] ?>
+                                    </h5>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <p class="card-text promotion-description"><?= $row['description'] ?></p>
+                                    <p class="card-text mt-auto">
+                                        <small class="text-muted">
+                                            <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
+                                            <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <script>
-    /* HTTPS
     document.addEventListener("DOMContentLoaded", function() {
         const copyButtons = document.querySelectorAll('a[id^="copy-button-"]');
-
         copyButtons.forEach(button => {
             button.addEventListener('click', function(e) {
-                // ป้องกันไม่ให้ลิงก์ทำงาน (ไม่ให้หน้าเว็บเลื่อน)
                 e.preventDefault();
-
                 const couponCode = this.getAttribute('data-code');
                 const tooltip = this.closest('.copy-tooltip').querySelector('.tooltip-text');
-
-                // ใช้ Clipboard API (ทันสมัยและปลอดภัยกว่า) หรือ fallback ไปใช้ execCommand
-                navigator.clipboard.writeText(couponCode).then(() => {
-                    // แสดง tooltip
-                    tooltip.classList.add('show');
-
-                    // ซ่อน tooltip หลังจาก 1.5 วินาที
-                    setTimeout(() => {
-                        tooltip.classList.remove('show');
-                    }, 1500);
-
-                }).catch(err => {
-                    console.error('ไม่สามารถคัดลอกได้: ', err);
-                });
-            });
-        });
-    });*/
-    document.addEventListener("DOMContentLoaded", function() {
-        const copyButtons = document.querySelectorAll('a[id^="copy-button-"]');
-
-        copyButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                // ป้องกันไม่ให้ลิงก์ทำงาน (ไม่ให้หน้าเว็บเลื่อน)
-                e.preventDefault();
-
-                const couponCode = this.getAttribute('data-code');
-                const tooltip = this.closest('.copy-tooltip').querySelector('.tooltip-text');
-
-                // ใช้ execCommand สำหรับ Local (ไม่ต้องใช้ HTTPS)
                 const textArea = document.createElement('textarea');
                 textArea.value = couponCode;
                 document.body.appendChild(textArea);

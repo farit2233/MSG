@@ -1244,48 +1244,98 @@ class Master extends DBConnection
 	}
 	function save_promotions()
 	{
-		$_POST['description'] = addslashes(htmlspecialchars($_POST['description']));
+		// ใช้ real_escape_string กับ description เพื่อความปลอดภัย
+		$_POST['description'] = $this->conn->real_escape_string(htmlspecialchars($_POST['description']));
 		extract($_POST);
+
 		$data = "";
+		// วนลูปสร้าง string สำหรับ SQL query จากข้อมูลที่ส่งมา
 		foreach ($_POST as $k => $v) {
-			if (!in_array($k, array('id'))) {
+			if (!in_array($k, array('id', 'img'))) { // ไม่ต้องนำ id และ img เข้าไปใน data string
 				if (!empty($data)) $data .= ",";
-				$v = $this->conn->real_escape_string($v);
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
+
+		// --- ส่วนจัดการรูปภาพที่ย้ายขึ้นมาและแก้ไขใหม่ ---
+		$image_path_sql = ""; // เตรียมตัวแปรสำหรับเก็บ path รูป
+		if (isset($_FILES['img']) && !empty($_FILES['img']['tmp_name'])) {
+			// ตรวจสอบว่ามีไฟล์ถูกอัปโหลดมาหรือไม่
+			if ($_FILES['img']['error'] != UPLOAD_ERR_OK) {
+				$resp['status'] = 'failed';
+				$resp['msg'] = "An error occurred during file upload.";
+				return json_encode($resp);
+			}
+
+			$upload_dir = "uploads/promotions/";
+			if (!is_dir(base_app . $upload_dir)) {
+				mkdir(base_app . $upload_dir, 0777, true); // ใช้ 0777 เพื่อให้แน่ใจว่าเขียนไฟล์ได้
+			}
+
+			$accept = ['image/jpeg', 'image/png'];
+			if (!in_array($_FILES['img']['type'], $accept)) {
+				$resp['status'] = 'failed';
+				$resp['msg'] = "Invalid image file type. Only JPG and PNG are allowed.";
+				return json_encode($resp);
+			}
+
+			// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำ
+			$file_extension = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
+			$filename = uniqid('promo_') . '_' . time() . '.' . $file_extension;
+			$full_path = base_app . $upload_dir . $filename;
+
+			// ใช้ move_uploaded_file หรือฟังก์ชัน resize ของคุณ
+			// สมมติว่า resize_image จะย้ายไฟล์และคืนค่า true/false
+			$success = $this->resize_image($_FILES['img']['tmp_name'], $full_path, 1000, 600);
+
+			if ($success) {
+				// ถ้าย้าย/resize รูปสำเร็จ ให้เตรียม SQL สำหรับคอลัมน์ image_path
+				$db_path = $this->conn->real_escape_string($upload_dir . $filename);
+				$image_path_sql = ", `image_path` = '{$db_path}?v=" . time() . "'";
+			} else {
+				$resp['status'] = 'failed';
+				$resp['msg'] = "Failed to upload or resize the image.";
+				return json_encode($resp);
+			}
+		}
+		// --- จบส่วนจัดการรูปภาพ ---
+
+		// ต่อสตริงของ path รูปภาพเข้าไปในข้อมูลหลัก
+		if (!empty($image_path_sql)) {
+			$data .= $image_path_sql;
+		}
+
+		// ตรวจสอบข้อมูลซ้ำ
 		$check = $this->conn->query("SELECT * FROM `promotions_list` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
-		if ($this->capture_err())
-			return $this->capture_err();
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "promotions already exists.";
+			$resp['msg'] = "A promotion with the same name already exists.";
 			return json_encode($resp);
-			exit;
 		}
+
+		// สร้างหรืออัปเดตข้อมูลในครั้งเดียว
 		if (empty($id)) {
 			$sql = "INSERT INTO `promotions_list` set {$data} ";
 		} else {
 			$sql = "UPDATE `promotions_list` set {$data} where id = '{$id}' ";
 		}
+
 		$save = $this->conn->query($sql);
 		if ($save) {
 			$cid = !empty($id) ? $id : $this->conn->insert_id;
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
-			if (empty($id))
-				$resp['msg'] = "New promotions successfully saved.";
-			else
-				$resp['msg'] = " promotions successfully updated.";
+			$resp['msg'] = empty($id) ? "New promotion successfully saved." : "Promotion successfully updated.";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
 		}
+
 		if ($resp['status'] == 'success')
 			$this->settings->set_flashdata('success', $resp['msg']);
+
 		return json_encode($resp);
 	}
-
 	function delete_promotion()
 	{
 		extract($_POST);

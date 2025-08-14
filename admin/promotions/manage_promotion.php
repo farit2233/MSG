@@ -10,6 +10,34 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     }
 }
 ?>
+
+<style>
+    #cimg {
+        display: block;
+        /* ทำให้เป็นบล็อกเพื่อใช้ margin auto */
+        max-width: 300px;
+        /* กำหนดความกว้างสูงสุดตามต้องการ */
+        width: 100%;
+        /* ให้ขยายเต็มที่ในกรอบไม่เกิน max-width */
+        height: auto;
+        /* รักษาสัดส่วน */
+        margin: 0 auto;
+        /* จัดกึ่งกลางแนวนอน */
+    }
+
+    .card-title {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
+
+    .head-detail {
+        font-size: 16px;
+    }
+
+    section {
+        font-size: 16px;
+    }
+</style>
 <section class="card card-outline card-orange rounded-0">
     <div class="card-header">
         <div class="card-title"><?= isset($id) ? "แก้ไขโปรโมชั่น" : "สร้างโปรโมชั่นใหม่" ?></div>
@@ -17,6 +45,23 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     <form action="" id="promotion-form">
         <input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
         <div class="card-body">
+            <div class="card card-outline card-dark rounded-0 mb-3">
+                <div class="card-header">
+                    <div class="card-title" style="font-size: 18px !important;">รูปภาพโปรโมชั่น</div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="img">อัปโหลดรูปภาพสินค้า <small>1000x600px</small></label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="img" id="img" onchange="displayImg(this)">
+                            <label class="custom-file-label" for="img">เลือกไฟล์</label>
+                        </div>
+                        <div class="mt-3">
+                            <img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>" id="cimg" class="img-fluid img-thumbnail">
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
                     <div class="card-title" style="font-size: 18px !important;">ข้อมูลโปรโมชั่น</div>
@@ -102,6 +147,19 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 </section>
 <script>
+    function displayImg(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#cimg').attr('src', e.target.result);
+                $(input).siblings('.custom-file-label').html(input.files[0].name);
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            $('#cimg').attr('src', "<?= validate_image(isset($image_path) ? $image_path : '') ?>");
+            $(input).siblings('.custom-file-label').html('Choose file');
+        }
+    }
     $(document).ready(function() {
 
         // ใช้ select2 สำหรับหมวดหมู่
