@@ -1,0 +1,153 @@
+    .promotion-background {
+        background-color: #FAFAFA;
+    }
+
+    .head-promotion {
+        font-size: 50px;
+        color: #ff6f00;
+        padding: 2rem 2rem;
+    }
+
+    .promotion-img {
+        display: block;
+        margin: auto;
+    }
+    .coupon-head {
+        font-size: 22px;
+    }
+    .coupon-code {
+        font-size: 18px;
+    }
+
+    .copy {
+        font-size: 18px !important;
+        font-weight: bold;
+    }
+
+    /* --- CSS ที่เพิ่มเข้ามาสำหรับ Tooltip --- */
+    .copy-tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .copy-tooltip .tooltip-text {
+        visibility: hidden;
+        width: 120px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 150%;
+        /* ตำแหน่งด้านบนของปุ่ม */
+        left: 50%;
+        margin-left: -60px;
+        /* จัดให้อยู่กึ่งกลาง */
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    /* สร้างลูกศรชี้ลง */
+    .copy-tooltip .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #555 transparent transparent transparent;
+    }
+
+    /* คลาสสำหรับแสดง tooltip */
+    .copy-tooltip .tooltip-text.show {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .container-custom {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* ไล่ความมืดจากบนลงล่าง */
+    .card-promotion-holder {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+    }
+
+    .card-promotion-holder img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .card-promotion-holder::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        /* เริ่มที่ด้านบน */
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* ให้ gradient ครอบคลุมทั้งภาพ */
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0.3) 100%);
+        z-index: 1;
+        /* ให้ gradient ซ้อนอยู่เหนือรูปภาพ */
+    }
+
+    .card-title-promotion {
+        font-size: 24px !important;
+        font-weight: bold;
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        color: white;
+        padding: 5px;
+        z-index: 2;
+        /* ทำให้ชื่อโปรโมชันอยู่เหนือ gradient */
+        font-size: 20px !important;
+        font-weight: bold;
+    }
+
+    .card-promotion {
+        cursor: pointer;
+        transition: box-shadow 0.3s ease;
+    }
+
+    /* เมื่อ hover ที่การ์ด จะขยายขนาดเล็กน้อย */
+    .card-promotion:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* เพิ่ม hover effect ให้กับรูปภาพเมื่อ hover ที่การ์ด */
+    .card-promotion:hover .card-img-top {
+        transform: scale(1.1);
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        transition: all .3s ease-in-out;
+    }
+
+    .card-promotion-body p {
+        margin-bottom: 1rem;
+        /* เพิ่มระยะห่างระหว่างบรรทัด */
+    }
+
+    .coupon-description,
+    .promotion-description {
+        font-size: 16px;
+        min-height: 48px;
+        font-weight: 300;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        /* กำหนดให้แสดงผลสูงสุด 2 บรรทัด */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }

@@ -43,11 +43,12 @@
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
 
   <!--Custom css-->
-  <link rel="stylesheet" href="assets/css/navbar.css">
-  <link rel="stylesheet" href="assets/css/home.css">
-
   <link rel="stylesheet" href="assets/css/checkout.css">
   <link rel="stylesheet" href="assets/css/footer.css">
+  <link rel="stylesheet" href="assets/css/home.css">
+  <link rel="stylesheet" href="assets/css/navbar.css">
+  <link rel="stylesheet" href="assets/css/promotions.css">
+
 
   <style type="text/css">
     /* Chart.js */
