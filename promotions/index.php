@@ -35,7 +35,7 @@ function formatDateThai($date)
                             <div class="card" style="width: 16.5rem;">
                                 <div class="card-img" style="position: relative;">
                                     <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
-                                    <div class="card-body card-promotion-body" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; color: white; padding: 10px;">
+                                    <div class="card-body card-coupon-body">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <label class="card-title coupon-head mb-0">
                                                 <?php

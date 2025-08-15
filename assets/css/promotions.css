@@ -15,10 +15,30 @@
     .coupon-head {
         font-size: 22px;
     }
+    .card-coupon-body{
+        position: absolute;
+        top: 0; left: 0;
+        right: 0; bottom: 0;
+        color: white;
+        padding: 10px;
+    }
     .coupon-code {
         font-size: 18px;
     }
-
+    .coupon-description{
+        margin-bottom: 0;  /* ลบระยะห่างด้านล่าง */
+        padding-bottom: 0;
+        font-weight: 300;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        /* กำหนดให้แสดงผลสูงสุด 2 บรรทัด */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .coupon-date{
+        line-height: 0.5;  /* ปรับระยะห่างระหว่างบรรทัด */
+    }
     .copy {
         font-size: 18px !important;
         font-weight: bold;
@@ -70,6 +90,10 @@
     .container-custom {
         max-width: 1400px;
         margin: 0 auto;
+    }
+    .container-coupon {
+        max-width: 1400px;
+        margin-left: 63px;
     }
 
     /* ไล่ความมืดจากบนลงล่าง */
@@ -139,7 +163,6 @@
         /* เพิ่มระยะห่างระหว่างบรรทัด */
     }
 
-    .coupon-description,
     .promotion-description {
         font-size: 16px;
         min-height: 48px;
