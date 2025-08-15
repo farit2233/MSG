@@ -83,16 +83,16 @@ while ($type_row = $type_qry->fetch_assoc()) {
                         <ul>
                           <div onclick="return false;" class="text-decoration-none">
                             <h5 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h5>
-                            </diva>
-                            <hr class="mt-1 mb-2">
-                            <?php foreach ($type_data['categories'] as $cat_row): ?>
-                              <li>
-                                <!-- ลิงก์ไปยังหน้ารายการสินค้าตาม promotion_id -->
-                                <a href="<?= base_url . "?p=products&pid=" . $cat_row['id'] ?>" class="text-decoration-none">
-                                  <?= htmlspecialchars($cat_row['name']) ?>
-                                </a>
-                              </li>
-                            <?php endforeach; ?>
+                          </div>
+                          <hr class="mt-1 mb-2">
+                          <?php foreach ($type_data['categories'] as $cat_row): ?>
+                            <li>
+                              <!-- ลิงก์ไปยังหน้ารายการสินค้าตาม promotion_id -->
+                              <a href="<?= base_url . "?p=products&pid=" . $cat_row['id'] ?>" class="text-decoration-none">
+                                <?= htmlspecialchars($cat_row['name']) ?>
+                              </a>
+                            </li>
+                          <?php endforeach; ?>
                         </ul>
                       </div>
                     <?php endif; ?>
