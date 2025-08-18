@@ -71,7 +71,7 @@ function formatDateThai($date)
                                         <small>
                                             <div class="d-flex justify-content-between">
                                                 <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <a href="./?p=promotions/coupon_codes_list" class="text-white"><u>ดูเพิ่มเติม</u></a>
+                                                <a href="./?p=promotions/coupon_code_more" class="text-white"><u>เงื่อนไข</u></a>
                                             </div>
                                         </small>
                                     </div>
@@ -133,7 +133,7 @@ function formatDateThai($date)
                                         <small>
                                             <div class="d-flex justify-content-between">
                                                 <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <a href="./?p=promotions/coupon_codes_list" class="text-white"><u>ดูเพิ่มเติม</u></a>
+                                                <a href="./?p=promotions/coupon_code_more" class="text-white"><u>เงื่อนไข</u></a>
                                             </div>
                                         </small>
                                     </div>
@@ -195,7 +195,7 @@ function formatDateThai($date)
                                         <small>
                                             <div class="d-flex justify-content-between">
                                                 <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <a href="./?p=promotions/coupon_codes_list" class="text-white"><u>ดูเพิ่มเติม</u></a>
+                                                <a href="./?p=promotions/coupon_code_more" class="text-white"><u>เงื่อนไข</u></a>
                                             </div>
                                         </small>
                                     </div>

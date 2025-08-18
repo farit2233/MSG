@@ -363,7 +363,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
 <!-- Modal ช่องค้นหา -->
 <div class="modal fade" id="mobileSearchModal" tabindex="-5" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm mt-5">
-    <div class="modal-content minimalist-search-modal">
+    <div class="modal-content modal-content-search minimalist-search-modal">
       <div class="modal-body">
         <form method="get" action="./" class="search-form-wrapper">
           <i class="fa fa-search search-icon"></i>

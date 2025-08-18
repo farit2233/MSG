@@ -1,6 +1,6 @@
 <?php
 $i = 1;
-$qry = $conn->query("SELECT * FROM coupon_code_list ORDER BY date_created ASC, name ASC LIMIT 4");
+$qry = $conn->query("SELECT * FROM coupon_code_list ORDER BY date_created ASC, name ASC LIMIT 5");
 $qry_promo = $conn->query("SELECT * FROM promotions_list ORDER BY date_created ASC, name ASC LIMIT 8");
 
 function formatDateThai($date)
@@ -17,21 +17,23 @@ function formatDateThai($date)
 }
 ?>
 <div class="promotion-background">
-    <section class="py-5">
-        <div class="container">
-            <div class="d-flex flex-column justify-content-center align-items-center text-center">
-                <h1 class="text-center head-promotion fw-bold text-orange">
-                    <i class="fa-solid fa-ticket"></i> โปรโมชั่นทั้งหมด
-                </h1>
-            </div>
-            <div class="d-flex justify-content-between mt-3">
-                <h3>คูปอง</h3>
-                <a href="./?p=promotions/coupon_codes_list" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a> <!-- จัดลิงก์ให้ไปขวา -->
-            </div>
-            <div class="container mt-4">
-                <div class="row">
-                    <?php while ($row = $qry->fetch_assoc()): ?>
-                        <div class="col-md-3 mb-4"> <!-- เปลี่ยนจาก col-md-4 เป็น col-md-3 -->
+    <section class="py-5 mx-5">
+        <div class="d-flex flex-column justify-content-center align-items-center text-center">
+            <h1 class="text-center head-promotion fw-bold text-orange">
+                <i class="fa-solid fa-ticket"></i> โปรโมชั่นทั้งหมด
+            </h1>
+        </div>
+        <div class="d-flex justify-content-between mt-3">
+            <h3>คูปอง</h3>
+            <a href="./?p=promotions/coupon_codes_list" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a> <!-- จัดลิงก์ให้ไปขวา -->
+        </div>
+        <div class="container-coupon">
+            <div class="container-custom">
+                <div class="row row-cols-1 row-cols-md-5 g-4">
+                    <?php
+                    mysqli_data_seek($qry, 0);
+                    while ($row = $qry->fetch_assoc()): ?>
+                        <div class="col mb-4">
                             <div class="card" style="width: 16.5rem;">
                                 <div class="card-img" style="position: relative;">
                                     <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
@@ -69,54 +71,72 @@ function formatDateThai($date)
                                         </div>
                                         <p class="card-text coupon-code"><?= $row['coupon_code'] ?></p>
                                         <p class="card-text coupon-description"><?= $row['description'] ?></p>
+                                        <small>
+                                            <div class="d-flex justify-content-between">
+                                                <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
+                                                <!-- ปุ่มที่เรียกเปิด modal -->
+                                                <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
+                                                    เงื่อนไข
+                                                </a>
+
+                                            </div>
+                                        </small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     <?php endwhile; ?>
                 </div>
-
             </div>
         </div>
-    </section>
+</div>
+</section>
 
-    <section class="mx-5">
-        <div class="d-flex justify-content-between mt-3">
-            <h3>โปรโมชั่นทั้งหมด</h3>
-            <a href="#" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a> <!-- จัดลิงก์ให้ไปขวา -->
-        </div>
-        <div class="card rounded-0 pt-4">
-            <div class="container-custom">
-                <div class="card-group">
-                    <div class="row g-4">
-                        <?php while ($row = $qry_promo->fetch_assoc()): ?>
-                            <div class="col-md-3 mb-4">
-                                <div class="card card-promotion h-100">
-                                    <div class="card-promotion-holder">
-                                        <img class="card-img-top promotion-img" src=" <?= $row['image_path'] ?>" alt="Card image cap">
-                                        <h5 class="card-title card-title-promotion">
-                                            <?= $row['name'] ?>
-                                        </h5>
-                                    </div>
-                                    <div class="card-body card-promotion-body d-flex flex-column">
-                                        <p class="card-text promotion-description"><?= $row['description'] ?></p>
-                                        <p class="card-text mt-auto">
-                                            <small class="text-muted">
-                                                <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
-                                                <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
-                                            </small>
-                                        </p>
-                                    </div>
+<section class="mx-5">
+    <div class="d-flex justify-content-between mt-3">
+        <h3>โปรโมชั่นทั้งหมด</h3>
+        <a href="#" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a> <!-- จัดลิงก์ให้ไปขวา -->
+    </div>
+    <div class="card rounded-0 pt-4">
+        <div class="container-custom">
+            <div class="card-group">
+                <div class="row g-4">
+                    <?php while ($row = $qry_promo->fetch_assoc()): ?>
+                        <div class="col-md-3 mb-4">
+                            <div class="card card-promotion h-100">
+                                <div class="card-promotion-holder">
+                                    <img class="card-img-top promotion-img" src=" <?= $row['image_path'] ?>" alt="Card image cap">
+                                    <h5 class="card-title card-title-promotion">
+                                        <?= $row['name'] ?>
+                                    </h5>
+                                </div>
+                                <div class="card-body card-promotion-body d-flex flex-column">
+                                    <p class="card-text promotion-description"><?= $row['description'] ?></p>
+                                    <p class="card-text mt-auto">
+                                        <small class="text-muted">
+                                            <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
+                                            <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
+                                        </small>
+                                    </p>
                                 </div>
                             </div>
-                        <?php endwhile; ?>
-                    </div>
+                        </div>
+                    <?php endwhile; ?>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 </div>
 <script>
+    $(function() {
+        // เมื่อคลิกที่ลิงก์เงื่อนไข
+        $(document).on('click', '#coupon_code_conditions', function() {
+            var coupon_id = $(this).data('coupon-id'); // ดึง id ของคูปอง
+            // เรียก modal พร้อมกับหัวข้อที่กำหนด
+            uni_modal_conditions("เงื่อนไขการใช้งาน ", "promotions/coupon_code_conditions.php?id=" + coupon_id);
+        });
+    });
     document.addEventListener("DOMContentLoaded", function() {
         const copyButtons = document.querySelectorAll('a[id^="copy-button-"]');
         copyButtons.forEach(button => {
