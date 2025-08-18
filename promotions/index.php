@@ -3,6 +3,15 @@ $i = 1;
 $qry = $conn->query("SELECT * FROM coupon_code_list ORDER BY date_created ASC, name ASC LIMIT 5");
 $qry_promo = $conn->query("SELECT * FROM promotions_list ORDER BY date_created ASC, name ASC LIMIT 8");
 
+// ตรวจสอบวันหมดอายุของโปรโมชั่น
+$current_time = time(); // เวลาปัจจุบัน
+$pro_qry = $conn->query("SELECT * FROM `promotions_list` 
+                           WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
+                           ORDER BY `date_created` ASC");
+
+$has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชั่นที่ยังคงใช้งานได้หรือไม่
+
+
 function formatDateThai($date)
 {
     // แปลงวันที่เป็นตัวแปร timestamp
@@ -99,27 +108,48 @@ function formatDateThai($date)
         <div class="container-custom">
             <div class="card-group">
                 <div class="row g-4">
-                    <?php while ($row = $qry_promo->fetch_assoc()): ?>
+                    <?php
+                    $i = 1;
+                    $qry = $conn->query("SELECT * FROM coupon_code_list ORDER BY date_created ASC, name ASC LIMIT 5");
+                    $qry_promo = $conn->query("SELECT * FROM promotions_list ORDER BY date_created ASC, name ASC LIMIT 8");
+
+                    // ตรวจสอบวันหมดอายุของโปรโมชั่น
+                    $current_time = time(); // เวลาปัจจุบัน
+                    $pro_qry = $conn->query("SELECT * FROM `promotions_list` 
+                           WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
+                           ORDER BY `date_created` ASC");
+
+                    $has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชั่นที่ยังคงใช้งานได้หรือไม่
+
+                    ?>
+
+                    <?php
+                    // ใช้ลูปเดียวสำหรับการแสดงข้อมูล
+                    while ($row = $qry_promo->fetch_assoc()): ?>
                         <div class="col-md-3 mb-4">
-                            <div class="card card-promotion h-100">
-                                <div class="card-promotion-holder">
-                                    <img class="card-img-top promotion-img" src=" <?= $row['image_path'] ?>" alt="Card image cap">
-                                    <h5 class="card-title card-title-promotion">
-                                        <?= $row['name'] ?>
-                                    </h5>
+                            <!-- ลิงก์ไปยังหน้าโปรโมชั่น -->
+                            <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
+                                <div class="card card-promotion h-100">
+                                    <div class="card-promotion-holder">
+                                        <img class="card-img-top promotion-img" src="<?= $row['image_path'] ?>" alt="Card image cap">
+                                        <h5 class="card-title card-title-promotion">
+                                            <?= $row['name'] ?>
+                                        </h5>
+                                    </div>
+                                    <div class="card-body card-promotion-body d-flex flex-column">
+                                        <p class="card-text promotion-description text-dark"><?= $row['description'] ?></p>
+                                        <p class="card-text mt-auto">
+                                            <small class="text-muted">
+                                                <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
+                                                <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
+                                            </small>
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="card-body card-promotion-body d-flex flex-column">
-                                    <p class="card-text promotion-description"><?= $row['description'] ?></p>
-                                    <p class="card-text mt-auto">
-                                        <small class="text-muted">
-                                            <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
-                                            <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
-                                        </small>
-                                    </p>
-                                </div>
-                            </div>
+                            </a>
                         </div>
                     <?php endwhile; ?>
+
                 </div>
             </div>
         </div>
