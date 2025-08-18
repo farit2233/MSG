@@ -1479,6 +1479,7 @@ class Master extends DBConnection
 			'limit_coupon',
 			'coupon_amount',
 			'unl_coupon',
+			'all_products_status',
 			'start_date',
 			'end_date',
 			'status'
@@ -1539,7 +1540,7 @@ class Master extends DBConnection
 
 		$data = implode(", ", $data_parts);
 
-		// 5. สร้างและรันคำสั่ง SQL النهائية
+		// 5. สร้างและรันคำสั่ง SQL
 		if (empty($id)) {
 			// สร้างข้อมูลใหม่
 			$sql = "INSERT INTO `coupon_code_list` SET {$data}";

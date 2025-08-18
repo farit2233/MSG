@@ -13,7 +13,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         $description = $coupon['description'];
         $cpromo = $coupon['cpromo'];
         $limit_coupon = $coupon['limit_coupon'];
+        $coupon_amount = $coupon['coupon_amount'];
         $unl_coupon = $coupon['unl_coupon'];
+        $all_products_status = $coupon['all_products_status'];
         $start_date = formatDateThai($coupon['start_date']); // หากต้องการแสดงวันที่แบบไทย
         $end_date = formatDateThai($coupon['end_date']);
         $start_dateConditions = formatDateThaiConditions($coupon['start_date']); // หากต้องการแสดงวันที่แบบไทย
@@ -137,7 +139,14 @@ if ($cpromo == 1) {
     <h5>เงื่อนไขการใช้งานคูปอง</h5>
     <ul>
         <li>
-            <p><?= $description ?></p>
+            <p><?= $description ?>
+                <?php
+                if ($coupon_amount !== null && $coupon_amount > 0) : ?>
+                    *โค้ดมีจำนวนจำกัด
+                <?php endif; ?>
+            </p>
+        </li>
+
         </li>
         <li>
             <p>ลูกค้าจำเป็นต้องเข้าสู่ระบบก่อนใช้งาน</p>
@@ -147,13 +156,17 @@ if ($cpromo == 1) {
             ใช้ได้กับสินค้าที่ร่วมรายการเท่านั้น :
         </li>
         <ul>
-            <?php if (!empty($participating_products)) : ?>
-                <?php foreach ($participating_products as $product_name) : ?>
-                    <li><?= htmlspecialchars($product_name) ?></li>
-                <?php endforeach; ?>
-            <?php else : ?>
-                <li>ไม่มีสินค้าที่ระบุไว้เป็นพิเศษ</li>
-            <?php endif; ?>
+            <?php if ($all_products_status == 1) : ?>
+                <li>สามารถใช้ได้กับสินค้าทุกชนิด</li>
+            <?php else :
+                if (!empty($participating_products)) :
+                    foreach ($participating_products as $product_name) :
+                        echo '<li>' . htmlspecialchars($product_name) . '</li>';
+                    endforeach;
+                else :
+                    echo '<li>ไม่มีสินค้าที่ระบุไว้เป็นพิเศษ</li>';
+                endif;
+            endif; ?>
         </ul>
         <li>
             <p>สามารถใช้ได้ <?= $limit_text ?> ครั้ง / การสั่งซื้อ / บัญชี E-mail</p>

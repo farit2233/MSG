@@ -127,6 +127,19 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     </div>
                 </div>
             </div>
+
+            <div class="card card-outline card-dark rounded-0 mb-3">
+                <div class="card-header">
+                    <div class="card-title" style="font-size: 18px !important;">การใช้คูปองกับสินค้า</div>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" name="all_products_status" value="0">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="all_products_status" name="all_products_status" value="1" <?= (isset($all_products_status) && $all_products_status == 1) ? 'checked' : '' ?>>
+                        <label class="custom-control-label" for="all_products_status">เปิด / ปิดการใช้คูปองกับสินค้าได้ทุกชนิด</label>
+                    </div>
+                </div>
+            </div>
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
                     <div class="card-title" style="font-size: 18px !important;">สถานะโปรโมชั่น</div>

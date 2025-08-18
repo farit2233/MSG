@@ -22,10 +22,10 @@ WHERE p.id = '{$_GET['id']}' AND p.delete_flag = 0");
 			$max_order_qty = max(1, floor($available / 1));
 		}
 	} else {
-		echo "<script>alert('You don’t have access to this page'); location.replace('./');</script>";
+		echo "<script>alert('You don't have access to this page'); location.replace('./');</script>";
 	}
 } else {
-	echo "<script>alert('You don’t have access to this page'); location.replace('./');</script>";
+	echo "<script>alert('You don't have access to this page'); location.replace('./');</script>";
 }
 
 $platform_links = [

@@ -20,23 +20,7 @@ if (isset($id)) {
     }
 }
 
-// ดึงรายการสินค้าทั้งหมดที่อยู่ในคูปอง "อื่น" ที่ยังไม่ถูกลบ
-$products_in_other_coupons = [];
-$current_coupon_id = isset($id) ? $id : 0;
-
-// ======================= FIX: แก้ไข SQL QUERY ตรงนี้ =======================
-// เปลี่ยน INNER JOIN จาก promotions_list เป็น coupon_code_list
-$other_coupon_qry = $conn->query("
-    SELECT DISTINCT pp.product_id 
-    FROM coupon_code_products pp
-    INNER JOIN coupon_code_list ccl ON pp.coupon_code_id = ccl.id
-    WHERE ccl.delete_flag = 0 AND pp.coupon_code_id != {$current_coupon_id}
-");
-// ========================================================================
-
-while ($oc_row = $other_coupon_qry->fetch_assoc()) {
-    $products_in_other_coupons[] = $oc_row['product_id'];
-}
+// ไม่ต้องดึงข้อมูลสินค้าจากคูปองอื่นแล้ว
 ?>
 
 <form action="" id="coupon_code_products_form">
@@ -68,10 +52,10 @@ while ($oc_row = $other_coupon_qry->fetch_assoc()) {
                     <input type="radio" name="product_filter" value="all" id="filter_all" autocomplete="off" checked> ทั้งหมด
                 </label>
                 <label class="btn btn-light btn-sm rounded ">
-                    <input type="radio" name="product_filter" value="available" id="filter_available" autocomplete="off"> ยังไม่ผูกกับคูปอง
+                    <input type="radio" name="product_filter" value="available" id="filter_available" autocomplete="off"> ยังไม่ผูกกับคูปองนี้
                 </label>
                 <label class="btn btn-light btn-sm rounded">
-                    <input type="radio" name="product_filter" value="in_promo" id="filter_in_promo" autocomplete="off"> ผูกกับคูปองแล้ว
+                    <input type="radio" name="product_filter" value="in_promo" id="filter_in_promo" autocomplete="off"> ผูกกับคูปองนี้แล้ว
                 </label>
             </div>
         </div>
@@ -92,26 +76,18 @@ while ($oc_row = $other_coupon_qry->fetch_assoc()) {
         <?php
         $qry = $conn->query("SELECT p.*, c.name AS category_name FROM product_list p INNER JOIN category_list c ON p.category_id = c.id WHERE p.delete_flag = 0 ORDER BY p.brand ASC, p.name ASC");
         while ($row = $qry->fetch_assoc()):
-
-            // ======================= FIX: เปลี่ยนชื่อตัวแปรและ data attribute =======================
             $is_checked = in_array($row['id'], $selected_products) ? "checked" : "";
-            $is_in_other_coupon = in_array($row['id'], $products_in_other_coupons);
-            $is_disabled = !$is_checked && $is_in_other_coupon ? "disabled" : "";
-
-            // ใช้ data-attribute เพื่อใช้ในการกรองด้วย JS
-            $coupon_status = ($is_checked || $is_in_other_coupon) ? 'in_promo' : 'available';
-            // ================================================================================
+            // 'in_promo' หมายถึง ผูกกับคูปอง "ปัจจุบัน" แล้ว
+            $coupon_status = !empty($is_checked) ? 'in_promo' : 'available';
         ?>
-            <div class="list-group-item product-item p-3 <?= !empty($is_disabled) ? 'text-muted' : '' ?>"
+            <div class="list-group-item product-item p-3"
                 data-category="<?= $row['category_id'] ?>"
-                data-coupon-status="<?= $coupon_status ?>"> <label class="w-100 mb-0 d-flex align-items-center" style="<?= !empty($is_disabled) ? 'cursor:not-allowed;' : 'cursor:pointer;' ?>">
-                    <input type="checkbox" name="product_id[]" class="form-check-input product-checkbox mr-3" value="<?= $row['id'] ?>" <?= $is_checked ?> <?= $is_disabled ?>>
+                data-coupon-status="<?= $coupon_status ?>">
+                <label class="w-100 mb-0 d-flex align-items-center" style="cursor:pointer;">
+                    <input type="checkbox" name="product_id[]" class="form-check-input product-checkbox mr-3" value="<?= $row['id'] ?>" <?= $is_checked ?>>
                     <div class="product-info">
                         <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
                         <span class="font-weight-bold"> <?= $row['name'] ?> </span>
-                        <?php if (!empty($is_disabled)): ?>
-                            <span class="badge badge-warning ml-2">อยู่ในคูปองอื่น</span>
-                        <?php endif; ?>
                         <span class="d-block text-muted small">SKU : <?= $row['sku'] ?> | ราคา: <?= number_format($row['price'], 2) ?> บาท | หมวดหมู่: <?= $row['category_name'] ?></span>
                     </div>
                 </label>
@@ -131,29 +107,27 @@ while ($oc_row = $other_coupon_qry->fetch_assoc()) {
             $('#selectedItemsCount').text(selectedCount);
         }
 
-        // ======================= FIX: แก้ไข Logic และชื่อตัวแปรใน Javascript =======================
         function filterProducts() {
             var searchQuery = $('#productSearch').val().toLowerCase();
             var categoryFilter = $('#categoryFilter').val();
-            var couponFilter = $('input[name="product_filter"]:checked').val(); // FIX: เปลี่ยนชื่อตัวแปร
+            var couponFilter = $('input[name="product_filter"]:checked').val();
 
             $('#productList .product-item').each(function() {
                 var productText = $(this).find('.product-info').text().toLowerCase();
                 var productCategory = $(this).data('category').toString();
-                var productCouponStatus = $(this).data('coupon-status'); // FIX: อ่านจาก data-coupon-status
+                var productCouponStatus = $(this).data('coupon-status');
 
                 var isSearchMatch = productText.includes(searchQuery);
                 var isCategoryMatch = (categoryFilter === "" || productCategory === categoryFilter);
-                var isCouponMatch = (couponFilter === "all" || productCouponStatus === couponFilter); // FIX: เปลี่ยนชื่อตัวแปร
+                var isCouponMatch = (couponFilter === "all" || productCouponStatus === couponFilter);
 
-                if (isSearchMatch && isCategoryMatch && isCouponMatch) { // FIX: เปลี่ยนชื่อตัวแปร
+                if (isSearchMatch && isCategoryMatch && isCouponMatch) {
                     $(this).show();
                 } else {
                     $(this).hide();
                 }
             });
         }
-        // =====================================================================================
 
         $('#productSearch').on('input', filterProducts);
         $('#categoryFilter').on('change', filterProducts);
@@ -161,7 +135,8 @@ while ($oc_row = $other_coupon_qry->fetch_assoc()) {
         $('input[name="product_filter"]').on('change', filterProducts);
 
         $('#selectAllBtn').click(function() {
-            $('#productList .product-item:visible .product-checkbox:not(:disabled)').prop('checked', true);
+            // ไม่ต้องเช็ค :disabled แล้ว เพราะเอาออกไปแล้ว
+            $('#productList .product-item:visible .product-checkbox').prop('checked', true);
             updateSelectedCount();
         });
 
@@ -174,10 +149,10 @@ while ($oc_row = $other_coupon_qry->fetch_assoc()) {
         filterProducts();
 
         $('#uni_modal').on('click', '.modal-footer .btn-save', function() {
-            $('#coupon_code_products_form').submit(); // FIX: อ้างอิง ID ของฟอร์มให้ถูกต้อง
+            $('#coupon_code_products_form').submit();
         });
 
-        $('#coupon_code_products_form').submit(function(e) { // FIX: อ้างอิง ID ของฟอร์มให้ถูกต้อง
+        $('#coupon_code_products_form').submit(function(e) {
             e.preventDefault();
             var _this = $(this);
             $('.err-msg').remove();

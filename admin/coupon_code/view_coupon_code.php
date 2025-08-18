@@ -125,6 +125,16 @@ function formatDateThai($date)
                                 <?php endif; ?>
                             </dd>
                         </div>
+                        <div class="col-md-3">
+                            <dt class="text-muted">ใช่ได้กับทุกสินค้า</dt>
+                            <dd>
+                                <?php if ($all_products_status == 1): ?>
+                                    <span class="badge badge-success px-3 rounded-pill">ใช้ได้กับทุกสินค้า</span>
+                                <?php else: ?>
+                                    <span class="badge badge-danger px-3 rounded-pill">ใช้ไม่ได้กับทุกสินค้า</span>
+                                <?php endif; ?>
+                            </dd>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -241,7 +251,7 @@ function formatDateThai($date)
                                                     <span class="fa fa-eye text-dark"></span> ดู
                                                 </a>
                                                 <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?= $row['pp_id'] ?>">
+                                                <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?= $row['ccd_id'] ?>">
                                                     <span class="fa fa-trash text-danger"></span> ลบรายการ
                                                 </a>
                                             </div>
@@ -297,39 +307,59 @@ function formatDateThai($date)
     })
 
     $(function() {
-        $('.delete_data').click(function() {
-            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชั่น?", "delete_coupon_code_product", [$(this).attr('data-id')])
-        });
+        // เมื่อคลิกปุ่ม "เพิ่มสินค้า"
         $('#coupon_code_products').click(function() {
-            uni_modal_promotion("เพิ่มสินค้า", "coupon_code/coupon_code_products.php?id=<?= isset($id) ? $id : '' ?>")
-        })
-    })
+            var all_products_status = <?= $all_products_status ?? 0 ?>; // ค่าของ all_products_status จาก PHP
+
+            // เช็คว่า all_products_status == 1 หรือไม่
+            if (all_products_status == 1) {
+                // ถ้า all_products_status == 1 แสดง alert แจ้งว่าไม่จำเป็นต้องเพิ่มสินค้า
+                Swal.fire({
+                    title: 'คูปองนี้สามารถใช้ได้กับทุกสินค้าแล้ว',
+                    text: 'คุณไม่จำเป็นต้องเพิ่มสินค้าอีก',
+                    icon: 'success',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#3085d6',
+                    onClose: () => {
+                        // เมื่อคลิก "ตกลง" ปิด alert
+                    }
+                });
+            } else {
+                // ถ้า all_products_status == 0 ให้เปิด modal เพิ่มสินค้า
+                uni_modal_promotion("เพิ่มสินค้า", "coupon_code/coupon_code_products.php?id=<?= isset($id) ? $id : '' ?>");
+            }
+        });
+
+        // ฟังก์ชันลบสินค้าออกจากโปรโมชั่น
+        $('.delete_data').click(function() {
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชั่น?", "delete_coupon_code_products", [$(this).attr('data-id')])
+        });
+    });
 
     // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชั่น
-    function delete_coupon_code_products($id) {
+    function delete_coupon_code_products(id) {
         start_loader();
         $.ajax({
-            // ส่งไปที่ฟังก์ชันใหม่ใน Master.php
-            url: _base_url_ + "classes/Master.php?f=delete_coupon_code_product",
+            url: _base_url_ + "classes/Master.php?f=delete_coupon_code_products",
             method: "POST",
             data: {
-                id: $id
+                id: id
             },
             dataType: "json",
-            error: err => {
-                console.log(err)
-                alert_toast("An error occured.", 'error');
+            error: function(err) {
+                console.log(err);
+                alert_toast("เกิดข้อผิดพลาด", 'error');
                 end_loader();
             },
             success: function(resp) {
-                if (typeof resp == 'object' && resp.status == 'success') {
-                    // เมื่อสำเร็จ ให้รีโหลดหน้าปัจจุบัน
+                if (resp.status == 'success') {
+                    alert_toast(resp.message, 'success');
                     location.reload();
                 } else {
-                    alert_toast("An error occured.", 'error');
+                    alert_toast(resp.error, 'error');
                     end_loader();
                 }
             }
-        })
+        });
     }
 </script>
