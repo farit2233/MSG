@@ -18,8 +18,18 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         $end_date = formatDateThai($coupon['end_date']);
         $start_dateConditions = formatDateThaiConditions($coupon['start_date']); // หากต้องการแสดงวันที่แบบไทย
         $end_dateConditions = formatDateThaiConditions($coupon['end_date']);
+
+        $products_qry = $conn->query("SELECT p.name FROM product_list p INNER JOIN coupon_code_products ccp ON p.id = ccp.product_id WHERE ccp.coupon_code_id = '{$_GET['id']}'");
+        $participating_products = [];
+        if ($products_qry->num_rows > 0) {
+            while ($row = $products_qry->fetch_assoc()) {
+                $participating_products[] = $row['name']; // สมมติว่าคอลัมน์ชื่อสินค้าคือ 'name'
+            }
+        }
     }
 }
+
+
 
 // ฟังก์ชันแปลงวันที่เป็นไทย
 function formatDateThai($date)
@@ -57,16 +67,20 @@ if ($cpromo == 1) {
 }
 ?>
 <style>
-    .container ul li {
+    .container-conditions ul li {
         margin-bottom: 8px;
         /* ระยะห่างระหว่างรายการ */
     }
 
-    .container ul li p {
+    .container-conditions ul li p {
         margin: 0;
         /* ลบระยะห่างจาก p */
         padding: 0;
         /* ลบการ padding ของ p */
+    }
+
+    .condintions-f {
+        font-size: 14px;
     }
 
     .head-conditions {
@@ -98,12 +112,12 @@ if ($cpromo == 1) {
                         }
                         ?>
                     </label>
-                    <div class="copy-tooltip">
+                    <!--div class="copy-tooltip">
                         <span class="tooltip-text">คัดลอกแล้ว</span>
                         <a href="#" class="text-white copy" id="copy-button-<?= $coupon['coupon_code'] ?>" data-code="<?= $coupon['coupon_code'] ?>">
                             <u>คัดลอก</u>
                         </a>
-                    </div>
+                    </div-->
                 </div>
                 <p class="card-text coupon-code"><?= $coupon['coupon_code'] ?></p>
                 <p class="card-text coupon-description"><?= $coupon['description'] ?></p>
@@ -119,8 +133,8 @@ if ($cpromo == 1) {
 </div>
 
 <!-- เงื่อนไขการใช้งาน -->
-<div class="container">
-    <h4>เงื่อนไขการใช้งานคูปอง</h4>
+<div class="container container-conditions condintions-f">
+    <h5>เงื่อนไขการใช้งานคูปอง</h5>
     <ul>
         <li>
             <p><?= $description ?></p>
@@ -130,13 +144,16 @@ if ($cpromo == 1) {
         </li>
         <li>ใช้ได้ตั้งแต่ <?= $start_dateConditions ?> ถึง <?= $end_dateConditions ?></li>
         <li>
-            ใช้ได้กับสินค้าที่ร่วมรายการเท่านั้น:
+            ใช้ได้กับสินค้าที่ร่วมรายการเท่านั้น :
         </li>
         <ul>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
+            <?php if (!empty($participating_products)) : ?>
+                <?php foreach ($participating_products as $product_name) : ?>
+                    <li><?= htmlspecialchars($product_name) ?></li>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <li>ไม่มีสินค้าที่ระบุไว้เป็นพิเศษ</li>
+            <?php endif; ?>
         </ul>
         <li>
             <p>สามารถใช้ได้ <?= $limit_text ?> ครั้ง / การสั่งซื้อ / บัญชี E-mail</p>
@@ -151,3 +168,6 @@ if ($cpromo == 1) {
         </li>
     </ul>
 </div>
+<script>
+
+</script>

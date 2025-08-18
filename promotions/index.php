@@ -74,11 +74,9 @@ function formatDateThai($date)
                                         <small>
                                             <div class="d-flex justify-content-between">
                                                 <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <!-- ปุ่มที่เรียกเปิด modal -->
                                                 <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
                                                     เงื่อนไข
                                                 </a>
-
                                             </div>
                                         </small>
                                     </div>
@@ -95,7 +93,7 @@ function formatDateThai($date)
 <section class="mx-5">
     <div class="d-flex justify-content-between mt-3">
         <h3>โปรโมชั่นทั้งหมด</h3>
-        <a href="#" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a> <!-- จัดลิงก์ให้ไปขวา -->
+        <a href="#" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a>
     </div>
     <div class="card rounded-0 pt-4">
         <div class="container-custom">

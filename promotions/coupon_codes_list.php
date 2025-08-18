@@ -71,7 +71,9 @@ function formatDateThai($date)
                                         <small>
                                             <div class="d-flex justify-content-between">
                                                 <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <a href="./?p=promotions/coupon_code_more" class="text-white"><u>เงื่อนไข</u></a>
+                                                <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
+                                                    เงื่อนไข
+                                                </a>
                                             </div>
                                         </small>
                                     </div>
@@ -133,7 +135,9 @@ function formatDateThai($date)
                                         <small>
                                             <div class="d-flex justify-content-between">
                                                 <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <a href="./?p=promotions/coupon_code_more" class="text-white"><u>เงื่อนไข</u></a>
+                                                <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
+                                                    เงื่อนไข
+                                                </a>
                                             </div>
                                         </small>
                                     </div>
@@ -195,7 +199,9 @@ function formatDateThai($date)
                                         <small>
                                             <div class="d-flex justify-content-between">
                                                 <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <a href="./?p=promotions/coupon_code_more" class="text-white"><u>เงื่อนไข</u></a>
+                                                <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
+                                                    เงื่อนไข
+                                                </a>
                                             </div>
                                         </small>
                                     </div>
@@ -209,6 +215,14 @@ function formatDateThai($date)
     </section>
 </div>
 <script>
+    $(function() {
+        // เมื่อคลิกที่ลิงก์เงื่อนไข
+        $(document).on('click', '#coupon_code_conditions', function() {
+            var coupon_id = $(this).data('coupon-id'); // ดึง id ของคูปอง
+            // เรียก modal พร้อมกับหัวข้อที่กำหนด
+            uni_modal_conditions("เงื่อนไขการใช้งาน ", "promotions/coupon_code_conditions.php?id=" + coupon_id);
+        });
+    });
     document.addEventListener("DOMContentLoaded", function() {
         const copyButtons = document.querySelectorAll('a[id^="copy-button-"]');
         copyButtons.forEach(button => {
