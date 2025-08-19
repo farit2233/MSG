@@ -13,14 +13,30 @@ function formatDateThai($date)
     // สร้างวันที่ในรูปแบบไทย
     return "{$day}/{$month}/{$year}";
 }
+
+$page_title = "คูปองทั้งหมด"; // ตั้งชื่อหน้าเริ่มต้น
+$page_description = "";
+
+$breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">คูปองทั้งหมด</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
+
 ?>
 <div class="promotion-background">
     <section class="py-5 mx-5">
         <div class="d-flex flex-column justify-content-center align-items-center text-center">
             <h1 class="text-center head-promotion fw-bold text-orange">
-                <i class="fa-solid fa-ticket"></i> คูปองทั้งหมด
+                <i class="fa-solid fa-ticket"></i> <?= $page_title ?>
             </h1>
+            <?php if (!empty($page_description)): ?>
+                <hr>
+                <p class="m-0"><small><em><?= html_entity_decode($page_description) ?></em></small></p>
+            <?php endif; ?>
         </div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent px-0">
+                <li class="breadcrumb-item"><a href="./?p=promotions" class="plain-link text-dark">โปรโมชั่น</a></li>
+                <?= $breadcrumb_item_2_html ?>
+            </ol>
+        </nav>
         <div class="mt-3">
             <h3>คูปองแนะนำ</h3>
         </div>

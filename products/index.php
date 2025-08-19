@@ -114,8 +114,6 @@
     }
 </style>
 <?php
-// ... (ส่วนโค้ด PHP ที่อยู่ด้านบนของ products.php เหมือนเดิม) ...
-
 $page_title = "สินค้าทั้งหมด"; // ตั้งชื่อหน้าเริ่มต้น
 $page_description = "";
 $current_cid = '';
