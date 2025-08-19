@@ -405,7 +405,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                                             <button type="button" id="apply_coupon_button" class="btn btn-primary btn-sm">ใช้</button>
                                                         </div>
                                                     </div>
-                                                    <small id="coupon_error_message" style="color: red; display: inline-block;"></small>
+                                                    <small id="coupon_error_message" class="text-danger" style="display: inline-block;"></small>
                                                 </th>
                                                 <td class="text-right">
                                                     <p id="discount_type"></p>
