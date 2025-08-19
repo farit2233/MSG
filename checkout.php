@@ -586,9 +586,6 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
     // ============================
     // ฟังก์ชันกลางสำหรับคำนวณยอดรวมสุทธิ
     // ============================
-    // ============================
-    // ฟังก์ชันกลางสำหรับคำนวณยอดรวมสุทธิ (เวอร์ชันอัปเกรด)
-    // ============================
     function updateGrandTotal(shippingCost) {
         let promoDiscount = 0;
         let finalShippingCost = parseFloat(shippingCost) || 0;
@@ -623,16 +620,6 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
         // ยอดรวม = (ราคาสินค้า - ส่วนลดโปรโมชั่น - ส่วนลดคูปอง) + ค่าส่งสุดท้าย
         const grandTotal = (cartTotal - promoDiscount - couponDiscount) + finalShippingCost;
 
-
-        // --- ส่วนที่ 4: อัปเดตการแสดงผล ---
-        // ใช้ ID ที่ถูกต้อง: shipping-cost
-        const shippingCostElem = document.getElementById('shipping-cost');
-        if (finalShippingCost !== shippingCost) {
-            // ถ้าค่าส่งสุดท้ายไม่เท่ากับค่าส่งจริง (แปลว่ามีส่วนลดส่งฟรี) ให้ขีดฆ่า
-            shippingCostElem.innerHTML = `<del>${shippingCost.toFixed(2)}</del> ${finalShippingCost.toFixed(2)} บาท`;
-        } else {
-            shippingCostElem.innerText = `${finalShippingCost.toFixed(2)} บาท`;
-        }
 
         // อัปเดตยอดรวมสุทธิ (ใช้ toLocaleString เหมือนเดิมได้)
         document.getElementById('order-total-text').innerText = grandTotal.toLocaleString('th-TH', {
@@ -687,7 +674,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
 
 
             $.ajax({
-                url: 'check_coupon.php', // ไฟล์นี้ไม่ต้องแก้แล้ว ใช้ตัวเดิมจากคำตอบก่อนได้เลย
+                url: 'check_coupon.php',
                 method: 'POST',
                 data: {
                     coupon_code: coupon_code,
@@ -706,7 +693,13 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
 
                         // 2. อัปเดต UI ที่เกี่ยวกับคูปองโดยเฉพาะ
                         $('#discount_type').text(response.message);
-                        $('#discount_value').html('<strong>-' + appliedCoupon.amount.toFixed(2) + '</strong>');
+
+                        // เช็คว่า type เป็น 'free_shipping' หรือไม่
+                        if (appliedCoupon.type === 'free_shipping') {
+                            $('#discount_value').html('<strong>ส่งฟรี</strong>');
+                        } else {
+                            $('#discount_value').html('<strong>-' + appliedCoupon.amount.toFixed(2) + '</strong>');
+                        }
 
                     } else {
                         errorMessage.text(response.error);
@@ -721,8 +714,8 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
 
                     // 4. ✨ เรียกใช้ฟังก์ชันคำนวณกลางเสมอ!
                     updateGrandTotal(currentShippingCost);
-
                 },
+
                 error: function() {
                     errorMessage.text('เกิดข้อผิดพลาดในการสื่อสารกับ Server');
                 }
