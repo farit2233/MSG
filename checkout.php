@@ -332,6 +332,21 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
                                                 endif;
                                             endif;
                                             ?>
+                                            <tr class="no-border">
+                                                <th>คูปองส่วนลด
+                                                    <input type="text" id="coupon_code_input" class="ml-2" placeholder="กรอกรหัสคูปองส่วนลด">
+                                                    <small id="coupon_error_message" style="color: red; display: block;"></small>
+                                                </th>
+                                                <td colspan="3">
+                                                    <div id="discount_details" style="display: none;">
+                                                        <p id="discount_type"></p>
+                                                        <strong id="discount_value"></strong>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right">
+                                                    <strong id="total_discount"></strong> <!-- แสดงส่วนลดรวม -->
+                                                </td>
+                                            </tr>
 
                                             <tr>
                                                 <th><strong>รวม</strong></th>
@@ -562,5 +577,48 @@ $grand_total = ($cart_total - $promotion_discount) + $final_shipping_cost;
     $(document).ready(function() {
         const initialCost = parseFloat(<?= json_encode($default_shipping_cost) ?>) || 0;
         updateGrandTotal(initialCost);
+        let timeout;
+
+        $('#coupon_code_input').on('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                let coupon_code = $('#coupon_code_input').val().trim();
+                if (coupon_code !== "") {
+                    $.ajax({
+                        url: 'check_coupon.php', // ตรวจสอบคูปอง
+                        type: 'POST',
+                        data: {
+                            coupon_code: coupon_code
+                        },
+                        success: function(response) {
+                            if (response.error) {
+                                $('#coupon_error_message').text(response.error).show();
+                                $('#discount_details').hide();
+                            } else {
+                                $('#coupon_error_message').hide();
+                                $('#discount_details').show();
+
+                                // แสดงประเภทส่วนลด
+                                $('#discount_type').text("ประเภทส่วนลด: " + response.type);
+
+                                if (response.type === "free_shipping") {
+                                    $('#discount_value').text("ส่งฟรี!");
+                                } else if (response.type === "percent") {
+                                    $('#discount_value').text("ลด " + response.discount_value + "%");
+                                } else if (response.type === "fixed") {
+                                    $('#discount_value').text("ลด " + response.discount_value + " บาท");
+                                }
+
+                                // แสดงส่วนลดรวมในตาราง (ถ้ามี)
+                                $('#total_discount').text("ส่วนลด: " + response.discount_value);
+                            }
+                        }
+                    });
+                } else {
+                    $('#coupon_error_message').hide();
+                    $('#discount_details').hide();
+                }
+            }, 1000); //1 วินาที
+        });
     });
 </script>
