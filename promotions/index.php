@@ -139,8 +139,9 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                 </div>
             </div>
         </div>
+    </section>
 </div>
-</section>
+
 <div class="promotion-background">
     <section class="mx-5">
         <div class="d-flex justify-content-between mt-3">
