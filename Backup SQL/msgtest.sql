@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 14, 2025 at 10:02 AM
+-- Generation Time: Aug 19, 2025 at 09:39 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -39,7 +39,10 @@ CREATE TABLE `cart_list` (
 --
 
 INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
-(187, 19, 25, 2);
+(187, 19, 25, 2),
+(240, 19, 29, 1),
+(241, 19, 33, 2),
+(242, 19, 14, 5);
 
 -- --------------------------------------------------------
 
@@ -123,6 +126,7 @@ CREATE TABLE `coupon_code_list` (
   `limit_coupon` int NOT NULL DEFAULT '0',
   `coupon_amount` int DEFAULT NULL,
   `unl_coupon` tinyint(1) NOT NULL DEFAULT '0',
+  `all_products_status` tinyint(1) NOT NULL DEFAULT '0',
   `start_date` datetime NOT NULL,
   `end_date` datetime NOT NULL,
   `status` tinyint(1) DEFAULT '1',
@@ -135,11 +139,12 @@ CREATE TABLE `coupon_code_list` (
 -- Dumping data for table `coupon_code_list`
 --
 
-INSERT INTO `coupon_code_list` (`id`, `coupon_code`, `name`, `description`, `type`, `cpromo`, `discount_value`, `minimum_order`, `limit_coupon`, `coupon_amount`, `unl_coupon`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(1, 'TEST-01', 'ทดสอบคูปอง', 'ทดสอบคูปอง', 'percent', 0, 20, 0, 0, NULL, 0, '2025-08-08 17:01:00', '2025-08-29 17:01:00', 1, 0, '2025-08-08 17:01:16', '2025-08-08 17:01:16'),
-(2, 'TEST-02', ' ทดสอบคูปอง2', 'ทดสอบคูปอง2', 'free_shipping', 1, 0, 0, 3, 9999, 0, '2025-08-13 14:30:00', '2025-08-27 14:30:00', 1, 0, '2025-08-13 14:31:01', '2025-08-13 14:31:13'),
-(3, 'TEST-03', 'ทดสอบ03', 'ทดสอบ03', 'fixed', 1, 1000, 500, 1, 20000, 0, '2025-08-14 11:02:00', '2025-08-21 11:02:00', 1, 0, '2025-08-14 11:02:18', '2025-08-14 11:02:18'),
-(4, 'TEST-04', ' ทดสอบ04', ' ทดสอบ04', 'percent', 1, 15, 500, 1, 5000, 0, '2025-08-14 11:02:00', '2025-08-21 11:03:00', 1, 0, '2025-08-14 11:03:05', '2025-08-14 11:03:05');
+INSERT INTO `coupon_code_list` (`id`, `coupon_code`, `name`, `description`, `type`, `cpromo`, `discount_value`, `minimum_order`, `limit_coupon`, `coupon_amount`, `unl_coupon`, `all_products_status`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
+(1, 'TEST-01', 'สั่งซื้อลดไปเลย 20%!!!', 'ลดกันไปเลยจุก ๆ ไม่มีขั้นต่ำ ลดถึง 20%!!! ใช้ได้ไม่จำกัดครั้ง!!!', 'percent', 0, 20, 0, 0, NULL, 1, 1, '2025-08-08 17:01:00', '2025-08-29 17:01:00', 1, 0, '2025-08-08 17:01:16', '2025-08-18 15:59:08'),
+(2, 'TEST-02', '    ส่งฟรีไม่มีขั้นต่ำ', 'ส่งฟรีไม่มีขั้นต่ำ', 'free_shipping', 1, 0, 0, 3, 9999, 0, 1, '2025-08-13 14:30:00', '2025-08-27 14:30:00', 1, 0, '2025-08-13 14:31:01', '2025-08-18 16:22:28'),
+(3, 'TEST-03', '  สั่งซื้อครบลดไปเลย 1000 บาท!!!', 'สั่งซื้อครบ 500.- รับส่วนลดทันที 1000 บาท!!!', 'fixed', 1, 1000, 500, 1, 20000, 0, 0, '2025-08-14 11:02:00', '2025-08-21 11:02:00', 1, 0, '2025-08-14 11:02:18', '2025-08-18 16:13:34'),
+(4, 'TEST-04', ' ซื้อครบลดไป 15%!!!', 'ซื้อครบ 500.- ลดไป 15%!!!', 'percent', 1, 15, 500, 1, 5000, 0, 0, '2025-08-14 11:02:00', '2025-08-21 11:03:00', 1, 0, '2025-08-14 11:03:05', '2025-08-18 16:13:55'),
+(5, 'FRESHP702025', 'ส่งฟรีมีขั้นต่ำ', 'คูปองส่งฟรีมีขั้นต่ำ 70 บาท.-', 'free_shipping', 1, 0, 0, 1, NULL, 1, 0, '2025-08-15 11:16:00', '2025-08-30 11:16:00', 1, 0, '2025-08-15 11:16:47', '2025-08-18 16:18:52');
 
 -- --------------------------------------------------------
 
@@ -162,7 +167,28 @@ CREATE TABLE `coupon_code_products` (
 --
 
 INSERT INTO `coupon_code_products` (`id`, `coupon_code_id`, `product_id`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(1, 2, 27, 1, 0, '2025-08-13 15:33:16', '2025-08-13 15:33:16');
+(49, 4, 27, 1, 0, '2025-08-19 15:28:35', '2025-08-19 15:28:35'),
+(50, 4, 14, 1, 0, '2025-08-19 15:28:35', '2025-08-19 15:28:35'),
+(51, 4, 23, 1, 0, '2025-08-19 15:28:35', '2025-08-19 15:28:35'),
+(52, 4, 32, 1, 0, '2025-08-19 15:28:35', '2025-08-19 15:28:35'),
+(53, 4, 22, 1, 0, '2025-08-19 15:28:35', '2025-08-19 15:28:35'),
+(54, 4, 21, 1, 0, '2025-08-19 15:28:35', '2025-08-19 15:28:35');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_code_usage_logs`
+--
+
+CREATE TABLE `coupon_code_usage_logs` (
+  `id` bigint NOT NULL,
+  `coupon_code_id` int NOT NULL,
+  `customer_id` int NOT NULL,
+  `order_id` int NOT NULL,
+  `discount_amount` decimal(10,2) NOT NULL,
+  `items_in_order` int NOT NULL,
+  `used_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -237,7 +263,8 @@ INSERT INTO `order_items` (`order_id`, `product_id`, `promotion_id`, `quantity`,
 (2, 27, 13, 4, 699.00),
 (3, 33, 10, 2, 199.00),
 (4, 27, 13, 1, 699.00),
-(4, 14, 13, 1, 11731.00);
+(4, 14, 13, 1, 11731.00),
+(5, 29, 12, 1, 200.00);
 
 -- --------------------------------------------------------
 
@@ -270,7 +297,8 @@ INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `tota
 (1, '2025080800001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 639.00, 100.00, 3, 13, 0, 0, 0, 1, '2025-08-08 16:33:52', '2025-08-08 16:45:17'),
 (2, '2025080800002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 2736.00, 100.00, 3, 13, 0, 0, 0, 1, '2025-08-08 16:43:07', '2025-08-08 16:45:17'),
 (3, '2025080800003', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 318.60, 119.40, 3, 10, 0, 0, 0, 1, '2025-08-08 16:44:25', '2025-08-08 16:45:17'),
-(4, '2025080800004', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 12380.00, 100.00, 3, 13, 0, 0, 0, 1, '2025-08-08 16:47:05', '2025-08-13 16:03:37');
+(4, '2025080800004', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 12380.00, 100.00, 3, 13, 0, 0, 0, 1, '2025-08-08 16:47:05', '2025-08-13 16:03:37'),
+(5, '2025081900001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 200.00, 40.00, 3, 12, 0, 0, 0, 1, '2025-08-19 09:08:06', '2025-08-19 09:09:07');
 
 -- --------------------------------------------------------
 
@@ -435,12 +463,13 @@ CREATE TABLE `promotions_list` (
 --
 
 INSERT INTO `promotions_list` (`id`, `promotion_category_id`, `name`, `description`, `image_path`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(10, 10, 'โปรโมชั่น 8.8 !', 'พบกับส่วนลดพิเศษทั้งร้านค้าต้อนรับ 8.8 ! ลดหนัก ลดกันไปเลย 30 % !', 'uploads/promotions/promo_689db31d6e8fb_1755165469.png?v=1755165469', 'percent', 30, 300, '2025-08-06 09:18:00', '2025-08-21 09:18:00', 1, 0, '2025-08-06 09:18:27', '2025-08-14 16:57:49'),
+(10, 10, 'โปรโมชั่น 8.8 !', 'พบกับส่วนลดพิเศษทั้งร้านค้าต้อนรับ 8.8 ! ลดหนัก ลดกันไปเลย 30 % !', 'uploads/promotions/promo_689db31d6e8fb_1755165469.png?v=1755165469', 'percent', 30, 300, '2025-08-06 09:18:00', '2025-08-21 09:18:00', 1, 0, '2025-08-06 09:18:27', '2025-08-18 16:55:53'),
 (11, 10, 'ลดล้างสต๊อก', 'ลดล้างสต๊อก\r\nลดล้างสต๊อกลดล้างสต๊อกลดล้างสต๊อก', 'uploads/promotions/promo_689daed0bca7e_1755164368.png?v=1755164368', 'percent', 90, 0, '2025-08-06 16:01:00', '2025-08-07 16:01:00', 1, 0, '2025-08-06 16:01:33', '2025-08-14 16:39:28'),
 (12, 10, 'ส่งฟรีไม่มีขั้นต่ำ', 'ส่งฟรีไม่มีขั้นต่ำ', 'uploads/promotions/promo_689db326cfea5_1755165478.png?v=1755165478', 'free_shipping', 0, 0, '2025-08-07 13:56:00', '2025-08-21 13:56:00', 1, 0, '2025-08-07 13:56:10', '2025-08-14 16:57:58'),
 (13, 10, 'ลดราคา 100 บาท', 'สั่งซื้อครบ 20 บาท ลดเลย 100 บาท !', 'uploads/promotions/promo_689db32dcf831_1755165485.png?v=1755165485', 'fixed', 100, 20, '2025-08-08 09:31:00', '2025-08-22 09:31:00', 1, 0, '2025-08-08 09:31:56', '2025-08-14 16:58:05'),
 (14, 10, 'ส่งฟรีขั้นต่ำ 200 บาท', 'ส่งฟรีขั้นต่ำ 200 บาท', 'uploads/promotions/promo_689db33b5db62_1755165499.png?v=1755165499', 'free_shipping', 0, 200, '2025-08-08 09:49:00', '2025-08-22 09:49:00', 1, 0, '2025-08-08 09:49:49', '2025-08-14 16:58:19'),
-(15, 10, 'ลดหนังสือนิทาน การ์ตูน ฯลฯ ทั้งร้าน !', 'ลดหนังสือนิทาน การ์ตูน มังงะ ทั้งร้าน ! ลดหนัก จัดหนักกันไปเลย ! ลดถึง 20 % !', 'uploads/promotions/promo_689db2eceddb6_1755165420.png?v=1755165420', 'percent', 20, 60, '2025-08-14 16:46:00', '2025-08-30 16:46:00', 1, 0, '2025-08-14 16:46:56', '2025-08-14 16:57:00');
+(15, 10, 'ลดหนังสือนิทาน การ์ตูน ฯลฯ ทั้งร้าน !', 'ลดหนังสือนิทาน การ์ตูน มังงะ ทั้งร้าน ! ลดหนัก จัดหนักกันไปเลย ! ลดถึง 20 % !', 'uploads/promotions/promo_689db2eceddb6_1755165420.png?v=1755165420', 'percent', 20, 60, '2025-08-14 16:46:00', '2025-08-30 16:46:00', 1, 0, '2025-08-14 16:46:56', '2025-08-14 16:57:00'),
+(16, 10, 'ลดเลยทันที 40% !!!', 'ลดหนัก ๆ จัดกันจุก ๆ ลดทันที 40% !!!', 'uploads/promotions/promo_68a3ebac39e7f_1755573164.png?v=1755573164', 'percent', 40, 0, '2025-08-19 10:12:00', '2025-08-26 10:12:00', 1, 0, '2025-08-19 10:12:44', '2025-08-19 10:12:44');
 
 -- --------------------------------------------------------
 
@@ -548,7 +577,8 @@ CREATE TABLE `promotion_usage_logs` (
 INSERT INTO `promotion_usage_logs` (`id`, `promotion_id`, `customer_id`, `order_id`, `discount_amount`, `items_in_order`, `used_at`) VALUES
 (1, 13, 19, 1, 100.00, 1, '2025-08-08 09:33:59'),
 (2, 10, 19, 3, 119.40, 1, '2025-08-08 09:44:34'),
-(3, 13, 19, 4, 100.00, 2, '2025-08-08 09:47:12');
+(3, 13, 19, 4, 100.00, 2, '2025-08-08 09:47:12'),
+(4, 12, 19, 5, 40.00, 1, '2025-08-19 02:08:16');
 
 -- --------------------------------------------------------
 
@@ -818,6 +848,15 @@ ALTER TABLE `coupon_code_products`
   ADD KEY `product_id` (`product_id`);
 
 --
+-- Indexes for table `coupon_code_usage_logs`
+--
+ALTER TABLE `coupon_code_usage_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `coupon_code_id` (`coupon_code_id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `order_id` (`order_id`);
+
+--
 -- Indexes for table `customer_list`
 --
 ALTER TABLE `customer_list`
@@ -954,7 +993,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=239;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=243;
 
 --
 -- AUTO_INCREMENT for table `category_list`
@@ -972,13 +1011,19 @@ ALTER TABLE `coupon_code_customer`
 -- AUTO_INCREMENT for table `coupon_code_list`
 --
 ALTER TABLE `coupon_code_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `coupon_code_products`
 --
 ALTER TABLE `coupon_code_products`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+
+--
+-- AUTO_INCREMENT for table `coupon_code_usage_logs`
+--
+ALTER TABLE `coupon_code_usage_logs`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `customer_list`
@@ -990,7 +1035,7 @@ ALTER TABLE `customer_list`
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `product_list`
@@ -1008,7 +1053,7 @@ ALTER TABLE `product_type`
 -- AUTO_INCREMENT for table `promotions_list`
 --
 ALTER TABLE `promotions_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `promotion_category`
@@ -1026,7 +1071,7 @@ ALTER TABLE `promotion_products`
 -- AUTO_INCREMENT for table `promotion_usage_logs`
 --
 ALTER TABLE `promotion_usage_logs`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `shipping_methods`
@@ -1100,6 +1145,14 @@ ALTER TABLE `coupon_code_customer`
 ALTER TABLE `coupon_code_products`
   ADD CONSTRAINT `coupon_code_products_ibfk_1` FOREIGN KEY (`coupon_code_id`) REFERENCES `coupon_code_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `coupon_code_products_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product_list` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_code_usage_logs`
+--
+ALTER TABLE `coupon_code_usage_logs`
+  ADD CONSTRAINT `coupon_code_usage_logs_ibfk_1` FOREIGN KEY (`coupon_code_id`) REFERENCES `coupon_code_list` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `coupon_code_usage_logs_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer_list` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `coupon_code_usage_logs_ibfk_3` FOREIGN KEY (`order_id`) REFERENCES `order_list` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `order_items`
