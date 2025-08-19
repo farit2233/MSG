@@ -138,6 +138,42 @@
         border-radius: 6px;
         color: white;
     }
+    /* ชื่อคลาสใหม่สำหรับจัดการคูปอง */
+/* จัดการคอนเทนเนอร์หลัก */
+.coupon-container {
+    display: flex;
+    align-items: center;
+}
+
+/* จัดการ input-group */
+.coupon-input-group {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* จัดการ input */
+.coupon-input {
+    margin-left: 8px;
+    padding: 5px 10px;
+}
+
+/* ข้อความ error */
+.coupon-error-message {
+    display: block;
+    color: red;
+    margin-top: 5px;
+}
+    /* สไตล์สำหรับโปรโมชั่นที่ใช้ไม่ได้ (ตัวจาง) */
+    .promo-inactive {
+        opacity: 0.5;
+        text-decoration: line-through;
+    }
+
+    /* สไตล์สำหรับหมายเหตุ */
+    .promo-note td {
+        border-top: none !important;
+        padding-top: 0 !important;
+    }
 
     @media only screen and (max-width: 768px) {
         .product-name {
