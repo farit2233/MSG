@@ -96,7 +96,19 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="form-group row">
                         <div class="col-md-6">
                             <label>จำกัดสิทธิการใช้คูปอง จำนวน ครั้ง / 1 ลูกค้า <span class="text-danger">*</span></label>
-                            <input type="number" name="limit_coupon" step="1" min="0" class="form-control" placeholder="กรุณากำหนดจำนวนสิทธิการใช้คูปอง" value="<?= isset($limit_coupon) ? $limit_coupon : '' ?>" required>
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    <input type="number" name="limit_coupon" step="1" min="0" class="form-control" placeholder="กรอกจำนวน" value="<?= isset($limit_coupon) ? $limit_coupon : '' ?>" id="limit_coupon">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" id="unl_coupon" name="unl_coupon" value="1" <?= (isset($unl_coupon) && $unl_coupon == 1) ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="unl_coupon">
+                                            ไม่จำกัดจำนวนครั้ง
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label>กำหนดจำนวนคูปอง <span class="text-danger">*</span></label>
@@ -106,8 +118,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" id="unl_coupon" name="unl_coupon" value="1" <?= (isset($unl_coupon) && $unl_coupon == 1) ? 'checked' : '' ?>>
-                                        <label class="form-check-label" for="unl_coupon">
+                                        <input class="form-check-input" type="radio" id="unl_amount" name="unl_amount" value="1" <?= (isset($unl_amount) && $unl_amount == 1) ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="unl_amount">
                                             ไม่จำกัดจำนวน
                                         </label>
                                     </div>
@@ -217,29 +229,29 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             }
         });
 
-        const amountInput = document.getElementById('coupon_amount');
+        const limitcouponInput = document.getElementById('limit_coupon');
         const unlimitedCheckbox = document.getElementById('unl_coupon');
 
-        // ฟังก์ชันกลางสำหรับอัปเดตสถานะ validation
-        const updateValidation = () => {
+        // ฟังก์ชันสำหรับอัปเดตสถานะ validation ของ unl_amount
+        const updateUnlAmountValidation = () => {
             // เงื่อนไข: ถ้าช่องตัวเลข 'ว่าง' และ checkbox 'ไม่ได้ถูกติ๊ก'
-            if (amountInput.value === '' && !unlimitedCheckbox.checked) {
+            if (limitcouponInput.value === '' && !unlimitedCheckbox.checked) {
                 // ให้ช่องตัวเลขเป็น 'required' (บังคับกรอก)
-                amountInput.setAttribute('required', 'required');
-                amountInput.placeholder = "กรุณากำหนดจำนวน"; // ตั้งค่า placeholder สำหรับบังคับกรอก
+                limitcouponInput.setAttribute('required', 'required');
+                limitcouponInput.placeholder = "กรุณากำหนดจำนวนครั้ง"; // ตั้งค่า placeholder สำหรับบังคับกรอก
             } else {
                 // ถ้ามีข้อมูลอย่างใดอย่างหนึ่งแล้ว ให้เอา 'required' ออก
-                amountInput.removeAttribute('required');
+                limitcouponInput.removeAttribute('required');
                 if (unlimitedCheckbox.checked) {
-                    amountInput.placeholder = "ไม่จำกัดจำนวน";
+                    limitcouponInput.placeholder = "ไม่จำกัดจำนวนครั้ง";
                 } else {
-                    amountInput.placeholder = "กรอกจำนวน";
+                    limitcouponInput.placeholder = "กรอกจำนวนครั้ง";
                 }
             }
         };
 
         // 1. เมื่อมีการพิมพ์ในช่อง 'จำนวนคูปอง'
-        amountInput.addEventListener('input', function() {
+        limitcouponInput.addEventListener('input', function() {
             // ถ้ามีการกรอกตัวเลขเข้ามา
             if (this.value !== '') {
                 // ให้ยกเลิกการติ๊ก 'ไม่จำกัดจำนวน' ทันที
@@ -254,6 +266,53 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             // ถ้า checkbox ถูกติ๊ก
             if (this.checked) {
                 // ให้ลบตัวเลขในช่องกรอกทิ้ง
+                limitcouponInput.value = '';
+            }
+            // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่ติ๊ก
+            updateValidation();
+        });
+
+        // 3. เรียกใช้ฟังก์ชันครั้งแรกเมื่อหน้าเว็บโหลดเสร็จ
+        // เพื่อกำหนดสถานะ required ให้ถูกต้องตั้งแต่แรก (สำคัญมากตอนแก้ไขข้อมูล)
+        updateUnlAmountValidation();
+
+
+        const amountInput = document.getElementById('coupon_amount');
+        const unlimitedamountCheckbox = document.getElementById('unl_amount');
+        // ฟังก์ชันสำหรับอัปเดตสถานะ validation ของ unl_coupon
+        const updateLimitCouponValidation = () => {
+            // เงื่อนไข: ถ้าช่องตัวเลข 'ว่าง' และ checkbox 'ไม่ได้ถูกติ๊ก'
+            if (amountInput.value === '' && !unlimitedamountCheckbox.checked) {
+                // ให้ช่องตัวเลขเป็น 'required' (บังคับกรอก)
+                amountInput.setAttribute('required', 'required');
+                amountInput.placeholder = "กรุณากำหนดจำนวน"; // ตั้งค่า placeholder สำหรับบังคับกรอก
+            } else {
+                // ถ้ามีข้อมูลอย่างใดอย่างหนึ่งแล้ว ให้เอา 'required' ออก
+                amountInput.removeAttribute('required');
+                if (unlimitedamountCheckbox.checked) {
+                    amountInput.placeholder = "ไม่จำกัดจำนวน";
+                } else {
+                    amountInput.placeholder = "กรอกจำนวน";
+                }
+            }
+        };
+
+        // 1. เมื่อมีการพิมพ์ในช่อง 'จำนวนคูปอง'
+        amountInput.addEventListener('input', function() {
+            // ถ้ามีการกรอกตัวเลขเข้ามา
+            if (this.value !== '') {
+                // ให้ยกเลิกการติ๊ก 'ไม่จำกัดจำนวน' ทันที
+                unlimitedamountCheckbox.checked = false;
+            }
+            // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่พิมพ์
+            updateValidation();
+        });
+
+        // 2. เมื่อมีการติ๊กที่ checkbox 'ไม่จำกัดจำนวน'
+        unlimitedamountCheckbox.addEventListener('change', function() {
+            // ถ้า checkbox ถูกติ๊ก
+            if (this.checked) {
+                // ให้ลบตัวเลขในช่องกรอกทิ้ง
                 amountInput.value = '';
             }
             // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่ติ๊ก
@@ -262,7 +321,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
         // 3. เรียกใช้ฟังก์ชันครั้งแรกเมื่อหน้าเว็บโหลดเสร็จ
         // เพื่อกำหนดสถานะ required ให้ถูกต้องตั้งแต่แรก (สำคัญมากตอนแก้ไขข้อมูล)
-        updateValidation();
+        updateLimitCouponValidation();
 
 
         // ฟังก์ชัน submit
@@ -273,8 +332,16 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             start_loader();
 
             // ตรวจสอบให้แน่ใจว่า coupon_amount มีค่า
+            var limitcoupon = document.getElementById('limit_coupon').value;
+            if (!limitcoupon && !document.getElementById('unl_coupon').checked) {
+                alert('กรุณากรอกจำนวนครั้งหรือเลือก "ไม่จำกัดจำนวนครั้ง"');
+                end_loader();
+                return;
+            }
+
+            // ตรวจสอบให้แน่ใจว่า coupon_amount มีค่า
             var couponAmount = document.getElementById('coupon_amount').value;
-            if (!couponAmount && !document.getElementById('unl_coupon').checked) {
+            if (!couponAmount && !document.getElementById('unl_amount').checked) {
                 alert('กรุณากรอกจำนวนคูปองหรือเลือก "ไม่จำกัดจำนวนคูปอง"');
                 end_loader();
                 return;

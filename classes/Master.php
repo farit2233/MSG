@@ -1572,8 +1572,9 @@ class Master extends DBConnection
 			'discount_value',
 			'minimum_order',
 			'limit_coupon',
-			'coupon_amount',
 			'unl_coupon',
+			'coupon_amount',
+			'unl_amount',
 			'all_products_status',
 			'start_date',
 			'end_date',
@@ -1606,7 +1607,7 @@ class Master extends DBConnection
 
 				// ถ้าค่าที่ส่งมาเป็นสตริงว่าง ให้บันทึกเป็น NULL (ถ้าคอลัมน์อนุญาต)
 				// โดยเฉพาะสำหรับฟิลด์ตัวเลขที่อาจไม่ได้กรอก
-				if ($value === '' && in_array($col, ['discount_value', 'minimum_order', 'coupon_amount'])) {
+				if ($value === '' && in_array($col, ['discount_value', 'minimum_order', 'limit_coupon', 'coupon_amount'])) {
 					$data_parts[] = "`{$col}` = NULL";
 				} else {
 					$data_parts[] = "`{$col}` = '{$value}'";
@@ -1619,12 +1620,27 @@ class Master extends DBConnection
 		if (!isset($_POST['status'])) {
 			$data_parts[] = "`status` = '0'";
 		}
+
 		// ถ้า unl_coupon ไม่ได้ถูกติ๊ก ให้กำหนดค่าเป็น 0
 		if (!isset($_POST['unl_coupon'])) {
 			$data_parts[] = "`unl_coupon` = '0'";
 		}
-		// ถ้าติ๊ก "ไม่จำกัดจำนวน" (`unl_coupon`=1) ให้ล้างค่า `coupon_amount` เป็น NULL
+		// ถ้าติ๊ก "ไม่จำกัดจำนวน" (`unl_coupon`=1) ให้ล้างค่า `limit_coupon` เป็น NULL
 		if (isset($_POST['unl_coupon']) && $_POST['unl_coupon'] == 1) {
+			// ค้นหาและลบ `limit_coupon` ที่อาจถูกเพิ่มไปแล้ว
+			$data_parts = array_filter($data_parts, function ($part) {
+				return strpos($part, '`limit_coupon`') === false;
+			});
+			// เพิ่มค่าที่ถูกต้องเข้าไปใหม่
+			$data_parts[] = "`limit_coupon` = NULL";
+		}
+
+		// ถ้า unl_amount ไม่ได้ถูกติ๊ก ให้กำหนดค่าเป็น 0
+		if (!isset($_POST['unl_amount'])) {
+			$data_parts[] = "`unl_amount` = '0'";
+		}
+		// ถ้าติ๊ก "ไม่จำกัดจำนวน" (`unl_amount`=1) ให้ล้างค่า `coupon_amount` เป็น NULL
+		if (isset($_POST['unl_amount']) && $_POST['unl_amount'] == 1) {
 			// ค้นหาและลบ `coupon_amount` ที่อาจถูกเพิ่มไปแล้ว
 			$data_parts = array_filter($data_parts, function ($part) {
 				return strpos($part, '`coupon_amount`') === false;
@@ -1632,7 +1648,6 @@ class Master extends DBConnection
 			// เพิ่มค่าที่ถูกต้องเข้าไปใหม่
 			$data_parts[] = "`coupon_amount` = NULL";
 		}
-
 		$data = implode(", ", $data_parts);
 
 		// 5. สร้างและรันคำสั่ง SQL
