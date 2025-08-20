@@ -1752,7 +1752,6 @@ class Master extends DBConnection
 	}
 	function apply_coupon($conn, $post_data)
 	{
-
 		// รับข้อมูลจาก AJAX
 		$coupon_code = isset($_POST['coupon_code']) ? $_POST['coupon_code'] : '';
 		$cart_items = isset($_POST['cart_items']) ? $_POST['cart_items'] : [];
@@ -1777,20 +1776,42 @@ class Master extends DBConnection
 
 		$coupon = $result->fetch_assoc();
 
-		// 2. ตรวจสอบเงื่อนไขของคูปอง (วันหมดอายุ, ยอดขั้นต่ำ)
-		$current_date = date('Y-m-d H:i:s');
-		if ($coupon['start_date'] > $current_date || $coupon['end_date'] < $current_date) {
-			echo json_encode(['success' => false, 'error' => 'คูปองหมดอายุแล้ว']);
-			exit;
+		// 2. ตรวจสอบจำนวนครั้งที่ลูกค้าใช้คูปองนี้
+		$customer_id = isset($_POST['customer_id']) ? intval($_POST['customer_id']) : 0;
+		$qry_usage_count = $conn->prepare("SELECT COUNT(*) AS usage_count FROM coupon_code_usage_logs WHERE coupon_code_id = ? AND customer_id = ?");
+		$qry_usage_count->bind_param("ii", $coupon['id'], $customer_id);
+		$qry_usage_count->execute();
+		$usage_result = $qry_usage_count->get_result();
+		$usage_data = $usage_result->fetch_assoc();
+
+		// เช็กจำนวนครั้งที่ลูกค้าใช้คูปอง
+		$usage_count = $usage_data['usage_count'];
+
+		// 3. เช็กว่าใช้ได้ไม่จำกัดหรือไม่
+		if ($coupon['unl_coupon'] == 0) { // ถ้าคูปองจำกัดจำนวน
+			if ($usage_count >= $coupon['limit_coupon']) {
+				echo json_encode(['success' => false, 'error' => 'คุณใช้คูปองนี้เกินจำนวนที่กำหนด']);
+				exit;
+			}
 		}
 
-		if ($cart_total < $coupon['minimum_order']) {
-			$needed = number_format($coupon['minimum_order'] - $cart_total, 2);
-			echo json_encode(['success' => false, 'error' => "ยอดสั่งซื้อขั้นต่ำ {$coupon['minimum_order']} บาท (ขาดอีก {$needed} บาท)"]);
-			exit;
+		// 4. เช็กจำนวนคูปองที่เหลือ
+		if ($coupon['unl_amount'] == 0) { // ถ้าคูปองจำกัดจำนวน
+			$qry_coupon_left = $conn->prepare("SELECT (coupon_amount - (SELECT COUNT(*) FROM coupon_code_usage_logs WHERE coupon_code_id = ?)) AS remaining_coupons");
+			$qry_coupon_left->bind_param("i", $coupon['id']);
+			$qry_coupon_left->execute();
+			$coupon_left_result = $qry_coupon_left->get_result();
+			$coupon_left_data = $coupon_left_result->fetch_assoc();
+			$remaining_coupons = $coupon_left_data['remaining_coupons'];
+
+			if ($remaining_coupons <= 0) {
+				echo json_encode(['success' => false, 'error' => 'คูปองนี้หมดแล้ว']);
+				exit;
+			}
 		}
 
-		// 3. คำนวณส่วนลดตามเงื่อนไข all_products_status
+		// (ต่อไปเป็นส่วนที่คุณคำนวณส่วนลดและเช็กเงื่อนไขอื่นๆ)
+		// 5. คำนวณส่วนลดตามประเภทของคูปองและส่งผลลัพธ์
 		$discount_amount = 0;
 		$base_total_for_discount = 0; // ยอดรวมที่จะใช้เป็นฐานในการคำนวณส่วนลด
 
@@ -1829,8 +1850,7 @@ class Master extends DBConnection
 			}
 		}
 
-
-		// 4. คำนวณยอดส่วนลดจากประเภทของคูปอง
+		// 6. คำนวณยอดส่วนลดจากประเภทของคูปอง
 		$message = "";
 		switch ($coupon['type']) {
 			case 'fixed':
@@ -1843,21 +1863,18 @@ class Master extends DBConnection
 				$message = "ส่วนลด {$discount_value}%";
 				break;
 			case 'free_shipping':
-				// ในเคสนี้เราอาจจะคืนค่าส่งเป็นส่วนลด หรือจะให้ frontend จัดการเองก็ได้
-				// สมมติว่าคืนเป็นส่วนลดเท่าค่าส่ง
-				// $discount_amount = $shipping_cost_from_ajax; // ต้องส่งค่าส่งมาด้วย
 				$message = "คูปองส่งฟรี";
-				// สำหรับตัวอย่างนี้ จะไม่คำนวณส่วนลดเป็นตัวเงิน แต่จะส่ง type กลับไป
 				break;
 		}
 
-		// 5. ส่งผลลัพธ์กลับไปเป็น JSON
+		// 7. ส่งผลลัพธ์กลับไปเป็น JSON
 		$response = [
 			'success' => true,
 			'coupon_id' => $coupon['id'],
 			'type' => $coupon['type'],
 			'discount_amount' => round($discount_amount, 2),
-			'message' => $message
+			'message' => $message,
+			'remaining_coupons' => $remaining_coupons ?? null // เพิ่มจำนวนคูปองที่เหลือถ้าเป็นคูปองจำกัดจำนวน
 		];
 
 		echo json_encode($response);
