@@ -476,6 +476,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                                 <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
                                 <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
+                                <input type="hidden" name="coupon_id" id="applied_coupon_id" value="0">
 
                                 <div class="py-1 text-center">
                                     <button class="btn addcart rounded-pill" <?= empty($full_address) ? 'disabled' : '' ?>>
@@ -527,6 +528,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
 
 <script>
     let appliedCoupon = {
+        id: 0,
         amount: 0,
         type: null
     }; // ✨ ตัวแปรใหม่สำหรับจำคูปองที่ใช้
@@ -643,10 +645,6 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
         };
     }
 
-
-    // ============================
-    // โค้ดที่ทำงานเมื่อหน้าเว็บโหลดเสร็จ
-    // ============================
     $(document).ready(function() {
         const initialCost = parseFloat(<?= json_encode($default_shipping_cost) ?>) || 0;
         updateGrandTotal(initialCost);
@@ -654,70 +652,76 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
 
         $('#apply_coupon_button').on('click', function() {
             var coupon_code = $('#coupon_code_input').val().trim();
-            var errorMessage = $('#coupon_error_message');
+            var error_el = $('#coupon_error_message');
+            var discount_val_el = $('#discount_value');
+            var discount_type_el = $('#discount_type');
 
             if (coupon_code === '') {
-                errorMessage.text('กรุณากรอกรหัสคูปอง');
+                error_el.text('กรุณากรอกรหัสคูปอง');
                 return;
             }
 
-            // เราต้องรู้ค่าส่งปัจจุบันเพื่อส่งไปให้ PHP คำนวณ 'free_shipping'
-            // โดยดึงค่าจาก hidden input ที่เก็บ ID ขนส่ง
-            const currentShippingId = $('#shipping_methods_id').val();
-            let currentShippingCost = initialShippingCost; // ใช้ค่าเริ่มต้นไว้ก่อน
+            // เริ่ม loader (ถ้ามี)
+            start_loader();
+            error_el.text('');
 
-            // หาค่าส่งปัจจุบันจริงๆ จาก element ที่เราเลือกไว้ (ถ้ามี)
-            const selectedOption = document.querySelector(`.shipping-option[data-id="${currentShippingId}"]`);
-            if (selectedOption) {
-                currentShippingCost = parseFloat(selectedOption.dataset.cost) || initialShippingCost;
-            }
-
-
+            // ส่งข้อมูลไปตรวจสอบที่หลังบ้าน
             $.ajax({
-                url: 'check_coupon.php',
+                url: _base_url_ + 'classes/Master.php?f=apply_coupon',
                 method: 'POST',
                 data: {
                     coupon_code: coupon_code,
-                    cart_items: <?= json_encode(array_values($cart_items)); ?>,
-                    cart_total: cartTotal,
-                    shipping_cost: currentShippingCost // ส่งค่าส่งปัจจุบัน
+                    cart_items: cartItems, // ตัวแปรนี้ต้องมีข้อมูลสินค้าในตะกร้า
+                    cart_total: cartTotal // ตัวแปรนี้คือยอดรวมราคาสินค้า
                 },
                 dataType: 'json',
-                success: function(response) {
-                    errorMessage.text('');
+                error: function(err) {
+                    console.error(err);
+                    alert_toast("เกิดข้อผิดพลาดในการตรวจสอบคูปอง", "error");
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (resp.success) {
 
-                    if (response.success) {
-                        // 1. อัปเดตตัวแปรกลาง appliedCoupon
-                        appliedCoupon.amount = parseFloat(response.discount_amount);
-                        appliedCoupon.type = response.type;
+                        // === ✅ จุดสำคัญที่สุด ===
+                        // นำ ID ของคูปองมาใส่ใน hidden input
+                        $('#applied_coupon_id').val(resp.coupon_id);
+                        // ======================
 
-                        // 2. อัปเดต UI ที่เกี่ยวกับคูปองโดยเฉพาะ
-                        $('#discount_type').text(response.message);
+                        // อัปเดตตัวแปร appliedCoupon เพื่อใช้ในการคำนวณราคาสุทธิ
+                        appliedCoupon.id = resp.coupon_id;
+                        appliedCoupon.amount = resp.discount_amount;
+                        appliedCoupon.type = resp.type;
 
-                        // เช็คว่า type เป็น 'free_shipping' หรือไม่
-                        if (appliedCoupon.type === 'free_shipping') {
-                            $('#discount_value').html('<strong>ส่งฟรี</strong>');
-                        } else {
-                            $('#discount_value').html('<strong>-' + appliedCoupon.amount.toFixed(2) + '</strong>');
-                        }
+                        // แสดงผลลัพธ์ให้ผู้ใช้เห็น
+                        discount_type_el.text(resp.message).addClass('text-success');
+                        discount_val_el.html('<strong class="text-success">- ' + resp.discount_amount.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }) + ' บาท</strong>');
+                        error_el.text('');
+                        alert_toast("ใช้คูปองสำเร็จ!", "success");
 
                     } else {
-                        errorMessage.text(response.error);
-                        // 3. ถ้า error ให้รีเซ็ตค่าคูปอง
-                        appliedCoupon = {
-                            amount: 0,
-                            type: null
-                        };
-                        $('#discount_type').text('');
-                        $('#discount_value').html('');
+                        // --- กรณีใช้คูปองไม่สำเร็จ ---
+                        // ล้างค่า ID ใน hidden input
+                        $('#applied_coupon_id').val(0);
+
+                        // ล้างค่าในตัวแปร
+                        appliedCoupon.id = 0;
+                        appliedCoupon.amount = 0;
+                        appliedCoupon.type = null;
+
+                        // แสดงข้อผิดพลาด
+                        error_el.text(resp.error);
+                        discount_type_el.text('');
+                        discount_val_el.text('');
+                        alert_toast(resp.error, "error");
                     }
 
-                    // 4. ✨ เรียกใช้ฟังก์ชันคำนวณกลางเสมอ!
-                    updateGrandTotal(currentShippingCost);
-                },
-
-                error: function() {
-                    errorMessage.text('เกิดข้อผิดพลาดในการสื่อสารกับ Server');
+                    // เรียกฟังก์ชันคำนวณยอดรวมใหม่อีกครั้ง
+                    updateGrandTotal(initialShippingCost); // ใช้ค่าส่งเริ่มต้น
+                    end_loader();
                 }
             });
         });

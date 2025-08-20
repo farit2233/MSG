@@ -568,14 +568,14 @@ class Master extends DBConnection
 			if (empty($selected_ids)) throw new Exception('ไม่มีรายการสินค้าสำหรับชำระสินค้า');
 			$ids_str = implode(',', $selected_ids);
 			$cart = $this->conn->query("
-				SELECT c.*, p.name as product, p.price, p.discount_type, p.discount_value, p.discounted_price, p.product_weight
-				FROM `cart_list` c 
-				INNER JOIN product_list p ON c.product_id = p.id 
-				WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
-			");
+            SELECT c.*, p.name as product, p.price, p.discount_type, p.discount_value, p.discounted_price, p.product_weight
+            FROM `cart_list` c 
+            INNER JOIN product_list p ON c.product_id = p.id 
+            WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
+        ");
 
-			// --- คำนวณยอดรวมราคาสินค้า (ยังไม่รวมโปรโมชั่น) ---
-			$backend_subtotal = 0; // ยอดรวมก่อนหักโปรโมชั่น
+			// --- คำนวณยอดรวมราคาสินค้า (ยังไม่รวมโปรโมชั่น/คูปอง) ---
+			$backend_subtotal = 0;
 			$total_weight = 0;
 			$cart_data = [];
 			while ($row = $cart->fetch_assoc()) {
@@ -598,26 +598,21 @@ class Master extends DBConnection
 
 			if (empty($cart_data)) throw new Exception('ไม่พบรายการสินค้าที่ตรงกันในตะกร้า');
 
-			// ======================= START: คำนวณค่าขนส่งตามน้ำหนักรวม (Backend) =======================
+			// --- คำนวณค่าขนส่งตามน้ำหนักรวม (Backend) ---
 			$shipping_cost = 0;
-
-			// <<<< เพิ่ม: รับ ID ของวิธีการจัดส่งที่ลูกค้าเลือกจาก Frontend
 			$selected_shipping_method_id = isset($_POST['shipping_methods_id']) ? intval($_POST['shipping_methods_id']) : 0;
 			if ($selected_shipping_method_id <= 0) {
 				throw new Exception('กรุณาเลือกวิธีการจัดส่ง');
 			}
 
 			if ($total_weight > 0) {
-				// <<<< แก้ไข: Query ไปที่ตาราง shipping_prices
 				$shipping_qry = $this->conn->query("
-                SELECT price 
-                FROM `shipping_prices` 
-                WHERE `shipping_methods_id` = '{$selected_shipping_method_id}' 
-                  AND '{$total_weight}' >= min_weight 
-                  AND '{$total_weight}' <= max_weight
-                LIMIT 1
-            ");
-
+            SELECT price FROM `shipping_prices` 
+            WHERE `shipping_methods_id` = '{$selected_shipping_method_id}' 
+              AND '{$total_weight}' >= min_weight 
+              AND '{$total_weight}' <= max_weight
+            LIMIT 1
+        ");
 				if ($shipping_qry->num_rows > 0) {
 					$shipping_data = $shipping_qry->fetch_assoc();
 					$shipping_cost = floatval($shipping_data['price']);
@@ -625,29 +620,34 @@ class Master extends DBConnection
 					throw new Exception("ไม่สามารถคำนวณค่าจัดส่งได้สำหรับน้ำหนักรวม {$total_weight} กรัม กรุณาติดต่อร้านค้า");
 				}
 			}
-			// ======================= END: คำนวณค่าขนส่ง =========================================================
+
+			// ✨ INITIALIZE: ตัวแปรสำหรับส่วนลดและค่าส่งสุดท้าย
+			$promotion_discount_amount = 0; // ส่วนลดจากราคาสินค้า
+			$coupon_discount_amount = 0; // ส่วนลดจากราคาสินค้า
+			$shipping_discount = 0; // ส่วนลดค่าจัดส่งโดยเฉพาะ
+			$final_shipping_cost = $shipping_cost; // ค่าส่งเริ่มต้น
+			$promo_data = null;
+			$coupon_data = null;
+
 
 			// ======================= START: ส่วนจัดการโปรโมชั่น =======================
 			$promotion_id = isset($_POST['promotion_id']) ? intval($_POST['promotion_id']) : 0;
-			$promotion_discount = 0;
-
 			if ($promotion_id > 0) {
 				$promo_qry = $this->conn->query("SELECT * FROM `promotions_list` WHERE id = {$promotion_id} AND status = 1 AND delete_flag = 0");
 				if ($promo_qry->num_rows > 0) {
 					$promo_data = $promo_qry->fetch_assoc();
-
-					// ตรวจสอบยอดสั่งซื้อขั้นต่ำ
 					if ($backend_subtotal >= $promo_data['minimum_order']) {
 						switch ($promo_data['type']) {
 							case 'fixed':
-								$promotion_discount = floatval($promo_data['discount_value']);
+								$promotion_discount_amount  = floatval($promo_data['discount_value']);
 								break;
 							case 'percent':
-								$promotion_discount = $backend_subtotal * (floatval($promo_data['discount_value']) / 100);
+								$promotion_discount_amount  = $backend_subtotal * (floatval($promo_data['discount_value']) / 100);
 								break;
 							case 'free_shipping':
-								// ✅ แก้ไข: ใช้ค่าส่ง $shipping_cost ที่คำนวณจาก Backend
-								$promotion_discount = $shipping_cost;
+								// ✅ แก้ไข: บันทึกค่าส่งที่ถูกยกเว้นให้เป็นยอดส่วนลด
+								$shipping_discount  = $shipping_cost;
+								$final_shipping_cost = 0; // โปรโมชั่นส่งฟรี
 								break;
 						}
 					} else {
@@ -659,61 +659,96 @@ class Master extends DBConnection
 			}
 			// ======================= END: ส่วนจัดการโปรโมชั่น =========================
 
-			// --- คำนวณยอดรวมสุดท้าย และตรวจสอบความถูกต้อง ---
-			$grand_total = ($backend_subtotal - $promotion_discount) + $shipping_cost;
+			// ======================= ✨ START: ส่วนจัดการคูปอง (เพิ่มใหม่) =======================
+			$coupon_id = isset($_POST['coupon_id']) ? intval($_POST['coupon_id']) : 0;
+			if ($coupon_id > 0) {
+				$coupon_qry = $this->conn->query("SELECT * FROM `coupon_code_list` WHERE id = {$coupon_id} AND status = 1 AND delete_flag = 0");
+				if ($coupon_qry->num_rows > 0) {
+					$coupon_data = $coupon_qry->fetch_assoc();
 
-			/* ตรวจสอบยอดเงินที่ส่งมาจาก Frontend กับ Backend
-			if (round($total_amount, 2) != round($grand_total, 2)) {
-				throw new Exception("ยอดรวมที่คำนวณไม่ตรงกัน (Frontend: {$total_amount}, Backend: {$grand_total})");
-			}*/
+					// ตรวจสอบวันหมดอายุ
+					$current_date = date('Y-m-d H:i:s');
+					if ($coupon_data['start_date'] > $current_date || $coupon_data['end_date'] < $current_date) {
+						throw new Exception('คูปองที่คุณใช้หมดอายุแล้ว');
+					}
+
+					// ตรวจสอบยอดสั่งซื้อขั้นต่ำ
+					if ($backend_subtotal >= $coupon_data['minimum_order']) {
+						switch ($coupon_data['type']) {
+							case 'fixed':
+								$coupon_discount_amount  = floatval($coupon_data['discount_value']);
+								break;
+							case 'percent':
+								$coupon_discount_amount  = $backend_subtotal * (floatval($coupon_data['discount_value']) / 100);
+								break;
+							case 'free_shipping':
+								// ✅ แก้ไข: บันทึกค่าส่งที่ถูกยกเว้นให้เป็นยอดส่วนลด
+								$shipping_discount  = $shipping_cost;
+								$final_shipping_cost = 0; // คูปองส่งฟรี
+								break;
+						}
+					} else {
+						throw new Exception('ยอดสั่งซื้อไม่ถึงเกณฑ์ขั้นต่ำสำหรับคูปองนี้');
+					}
+				} else {
+					throw new Exception('ไม่พบคูปองที่ส่งมา หรือคูปองไม่พร้อมใช้งาน');
+				}
+			}
+			// ======================= END: ส่วนจัดการคูปอง =========================
+
+
+			// --- ✨ คำนวณยอดรวมสุดท้าย (ปรับปรุงใหม่) ---
+			$grand_total = ($backend_subtotal - $promotion_discount_amount - $coupon_discount_amount) + $final_shipping_cost;
 
 			// --- เตรียมข้อมูลสำหรับบันทึก ---
 			$delivery_address = $this->conn->real_escape_string($delivery_address);
-			$applied_promo_id = ($promotion_discount > 0) ? "'{$promotion_id}'" : "NULL"; // ID โปรโมชั่นสำหรับตาราง order_list และ order_items
-
-
-			/*f (round($total_amount, 2) != round($grand_total, 2)) {
-				throw new Exception('ยอดรวมสินค้า + ค่าส่งไม่ตรงกัน');
-			}*/
+			$applied_promo_id = ($promotion_id > 0) ? "'{$promotion_id}'" : "NULL";
+			$applied_coupon_id = ($coupon_id > 0) ? "'{$coupon_id}'" : "NULL";
 
 			$customer = $this->conn->query("SELECT * FROM customer_list WHERE id = '{$customer_id}'")->fetch_assoc();
 			$customer_name = trim("{$customer['firstname']} {$customer['middlename']} {$customer['lastname']}");
-			$delivery_address = $this->conn->real_escape_string($delivery_address);
-			$shipping_methods = $this->conn->query("SELECT * FROM shipping_methods WHERE id = '{$shipping_methods_id}'")->fetch_assoc();
-			$shipping_methods_name = trim("{$shipping_methods['name']}");
-			// 📦 ดึงชื่อขนส่งจาก shipping_methods
+
 			$shipping_methods_name = 'ไม่ระบุ';
-			if (!empty($shipping_methods_id)) {
-				$res = $this->conn->query("SELECT name, cost FROM shipping_methods WHERE id = {$shipping_methods_id}");
+			if (!empty($selected_shipping_method_id)) {
+				$res = $this->conn->query("SELECT name FROM shipping_methods WHERE id = {$selected_shipping_method_id}");
 				if ($res->num_rows > 0) {
 					$ship = $res->fetch_assoc();
-					$shipping_methods_name = $ship['name'] . ' (' . number_format($shipping_cost, 2) . ' บาท)';
+					$shipping_methods_name = $ship['name'];
 				}
 			}
 
-			// --- บันทึกข้อมูลลง order_list ---
+			// --- ✨ บันทึกข้อมูลลง order_list (แก้ไข Query) ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-			(`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `shipping_methods_id`, `promotion_id`, `status`, `payment_status`, `delivery_status`) 
-			VALUES 
-			('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount}', {$selected_shipping_method_id}, {$applied_promo_id}, 0, 0, 0)");
-
+            (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`, `promotion_id`, `coupon_id`, `status`, `payment_status`, `delivery_status`) 
+            VALUES 
+            ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id}, {$applied_promo_id}, {$applied_coupon_id}, 0, 0, 0)");
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
 			$oid = $this->conn->insert_id;
 
-			// --- บันทึกข้อมูลลง order_items ---
+
+			if ($promotion_id > 0) {
+				// ถ้าเป็นโปรส่งฟรี ให้ส่งค่า shipping_discount ไปบันทึก, ถ้าไม่ใช่ส่ง promotion_discount_amount
+				$logged_promo_discount = ($promo_data['type'] === 'free_shipping') ? $shipping_discount : $promotion_discount_amount;
+				$this->log_promotion_usage($promotion_id, $customer_id, $oid, $logged_promo_discount, count($cart_data));
+			}
+			if ($coupon_id > 0) {
+				// ถ้าเป็นคูปองส่งฟรี ให้ส่งค่า shipping_discount ไปบันทึก
+				$logged_coupon_discount = ($coupon_data['type'] === 'free_shipping') ? $shipping_discount : $coupon_discount_amount;
+				$this->log_coupon_usage($coupon_id, $customer_id, $oid, $logged_coupon_discount, count($cart_data));
+			}
+
+			// --- ✨ บันทึกข้อมูลลง order_items (แก้ไข Query) ---
 			$data = "";
 			foreach ($cart_data as $row) {
 				if (!empty($data)) $data .= ", ";
 				$product_id = intval($row['product_id']);
 				$quantity = intval($row['quantity']);
 				$price = floatval($row['final_price']);
-				// เพิ่ม promotion_id ในแต่ละรายการ
-				$data .= "('{$oid}', '{$product_id}', '{$quantity}', '{$price}', {$applied_promo_id})";
+				$data .= "('{$oid}', '{$product_id}', '{$quantity}', '{$price}', {$applied_promo_id}, {$applied_coupon_id})";
 			}
 
-			// แก้ไข Query ให้รับ promotion_id
-			$save = $this->conn->query("INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`, `promotion_id`) VALUES {$data}");
+			$save = $this->conn->query("INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`, `promotion_id`, `coupon_id`) VALUES {$data}");
 			if (!$save) throw new Exception('ไม่สามารถบันทึกรายการสินค้า: ' . $this->conn->error);
 
 			// --- ลบสินค้าออกจากตะกร้าและ Commit ---
@@ -785,21 +820,38 @@ class Master extends DBConnection
 										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
 									</tr>";
 				// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
-				if ($promotion_discount > 0) {
-					// ตรวจสอบว่าเป็นโปรส่งฟรีหรือไม่
-					if (isset($promo_data) && $promo_data['type'] === 'free_shipping') {
+				if (isset($promo_data) && $promotion_id > 0) {
+					if ($promo_data['type'] === 'free_shipping') {
 						$discount_display = "<span style='color: green;'>ส่งฟรี</span>";
 						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
 					} else {
-						$discount_display = "<span style='color: red;'>- " . number_format($promotion_discount, 2) . "</span>";
+						$discount_display = "<span style='color: red;'>- " . number_format($promotion_discount_amount, 2) . "</span>";
 						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
 					}
+
 					$promo_row_html = "
 									<tr>
 										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'>{$discount_label}</td>
 										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>{$discount_display}</td>
 									</tr>";
 					$body .= $promo_row_html;
+				}
+
+				if (isset($coupon_data) && $coupon_id > 0) {
+					if ($coupon_data['type'] === 'free_shipping') {
+						$coupon_display = "<span style='color: green;'>ส่งฟรี</span>";
+						$coupon_label = "<strong>ส่วนลดโค้ดส่วนลด</strong>";
+					} else {
+						$coupon_display = "<span style='color: red;'>- " . number_format($coupon_discount_amount, 2) . "</span>";
+						$coupon_label = "<strong>ส่วนลดโค้ดส่วนลด</strong>";
+					}
+
+					$coupon_row_html = "
+									<tr>
+										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'>{$coupon_label}</td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>{$coupon_display}</td>
+									</tr>";
+					$body .= $coupon_row_html;
 				}
 
 				$body .= "
@@ -886,12 +938,12 @@ class Master extends DBConnection
 							<tr>";
 
 				// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
-				if ($promotion_discount > 0) {
-					if (isset($promo_data) && $promo_data['type'] === 'free_shipping') {
+				if (isset($promo_data) && $promotion_id > 0) {
+					if ($promo_data['type'] === 'free_shipping') {
 						$discount_display = "<span style='color: green;'>ส่งฟรี</span>";
 						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
 					} else {
-						$discount_display = "<span style='color: red;'>- " . number_format($promotion_discount, 2) . "</span>";
+						$discount_display = "<span style='color: red;'>- " . number_format($promotion_discount_amount, 2) . "</span>";
 						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
 					}
 
@@ -901,6 +953,23 @@ class Master extends DBConnection
 								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>{$discount_display}</td>
 							</tr>";
 					$admin_body .= $promo_row_html;
+				}
+
+				if (isset($coupon_data) && $coupon_id > 0) {
+					if ($coupon_data['type'] === 'free_shipping') {
+						$coupon_display = "<span style='color: green;'>ส่งฟรี</span>";
+						$coupon_label = "<strong>ส่วนลดโค้ดส่วนลด</strong>";
+					} else {
+						$coupon_display = "<span style='color: red;'>- " . number_format($coupon_discount_amount, 2) . "</span>";
+						$coupon_label = "<strong>ส่วนลดโค้ดส่วนลด</strong>";
+					}
+
+					$coupon_row_html = "
+							<tr>
+								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'>{$coupon_label}</td>
+								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>{$coupon_display}</td>
+							</tr>";
+					$admin_body .= $coupon_row_html;
 				}
 
 				$admin_body .= "
@@ -970,15 +1039,25 @@ class Master extends DBConnection
 			
 			ค่าส่ง: " . number_format($shipping_cost, 2) . " บาท";
 			// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
-			if ($promotion_discount > 0) {
-				if (isset($promo_data) && $promo_data['type'] === 'free_shipping') {
-					$promo_text = "
-			ส่วนลดโปรโมชั่น: ส่งฟรี";
+			if (isset($promo_data) && $promotion_id > 0) {
+				if ($promo_data['type'] === 'free_shipping') {
+					// ในกรณีส่งฟรี ค่าส่งด้านบน ($final_shipping_cost) จะเป็น 0 อยู่แล้ว
+					// เราอาจจะแสดงให้ชัดเจนว่าค่าส่งเดิมคือเท่าไหร่ และถูกลดไป
+					$promo_text = "ส่วนลดโปรโมชั่น: ส่งฟรี (ประหยัด " . number_format($shipping_cost, 2) . " บาท)";
 				} else {
-					$promo_text = "
-			ส่วนลดโปรโมชั่น: -" . number_format($promotion_discount, 2) . " บาท";
+					$promo_text = "ส่วนลดโปรโมชั่น: -" . number_format($promotion_discount_amount, 2) . " บาท";
 				}
 				$telegram_message .= $promo_text;
+			}
+
+			// ✨ เพิ่มใหม่: ส่วนลดคูปอง (ถ้ามี)
+			if (isset($coupon_data) && $coupon_id > 0) {
+				if ($coupon_data['type'] === 'free_shipping') {
+					$coupon_text = "ส่วนลดคูปอง: ส่งฟรี";
+				} else {
+					$coupon_text = "ส่วนลดคูปอง: -" . number_format($coupon_discount_amount, 2) . " บาท";
+				}
+				$telegram_message .= $coupon_text;
 			}
 			$telegram_message .= "
 			รวมทั้งสิ้น: " . number_format($grand_total, 2) . " บาท
@@ -990,7 +1069,9 @@ class Master extends DBConnection
 				// บันทึกการใช้งานโปรโมชั่น
 				$this->log_promotion_usage($promotion_id, $customer_id, $oid, $promotion_discount, count($cart_data));
 			}
-
+			if ($coupon_discount > 0) {
+				$this->log_coupon_usage($coupon_id, $customer_id, $oid, $coupon_discount, count($cart_data));
+			}
 
 			$this->settings->set_flashdata('success', 'ชำระสินค้าสำเร็จ');
 			$resp = ['status' => 'success'];
@@ -1013,6 +1094,20 @@ class Master extends DBConnection
 			return true;
 		} else {
 			throw new Exception("ไม่สามารถบันทึกข้อมูลการใช้โปรโมชั่นได้: " . $this->conn->error);
+		}
+	}
+	function log_coupon_usage($coupon_id, $customer_id, $order_id, $discount_amount, $items_in_order)
+	{
+		$query = "
+		INSERT INTO `coupon_code_usage_logs` (`coupon_code_id`, `customer_id`, `order_id`, `discount_amount`, `items_in_order`, `used_at`)
+		VALUES ('{$coupon_id}', '{$customer_id}', '{$order_id}', '{$discount_amount}', '{$items_in_order}', NOW())
+		";
+
+		// บันทึกข้อมูลการใช้งานคูปอง
+		if ($this->conn->query($query)) {
+			return true;
+		} else {
+			throw new Exception("ไม่สามารถบันทึกข้อมูลการใช้คูปองได้: " . $this->conn->error);
 		}
 	}
 
@@ -1640,6 +1735,118 @@ class Master extends DBConnection
 			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
 		}
 	}
+	function apply_coupon($conn, $post_data)
+	{
+
+		// รับข้อมูลจาก AJAX
+		$coupon_code = isset($_POST['coupon_code']) ? $_POST['coupon_code'] : '';
+		$cart_items = isset($_POST['cart_items']) ? $_POST['cart_items'] : [];
+		$cart_total = isset($_POST['cart_total']) ? floatval($_POST['cart_total']) : 0; // ยอดรวมเฉพาะสินค้า
+
+		// ตรวจสอบข้อมูลเบื้องต้น
+		if (empty($coupon_code) || empty($cart_items) || $cart_total <= 0) {
+			echo json_encode(['success' => false, 'error' => 'ข้อมูลไม่ครบถ้วน']);
+			exit;
+		}
+
+		// 1. ค้นหาและตรวจสอบคูปอง
+		$qry = $conn->prepare("SELECT * FROM coupon_code_list WHERE coupon_code = ? AND status = 1 AND delete_flag = 0");
+		$qry->bind_param("s", $coupon_code);
+		$qry->execute();
+		$result = $qry->get_result();
+
+		if ($result->num_rows === 0) {
+			echo json_encode(['success' => false, 'error' => 'รหัสคูปองไม่ถูกต้อง']);
+			exit;
+		}
+
+		$coupon = $result->fetch_assoc();
+
+		// 2. ตรวจสอบเงื่อนไขของคูปอง (วันหมดอายุ, ยอดขั้นต่ำ)
+		$current_date = date('Y-m-d H:i:s');
+		if ($coupon['start_date'] > $current_date || $coupon['end_date'] < $current_date) {
+			echo json_encode(['success' => false, 'error' => 'คูปองหมดอายุแล้ว']);
+			exit;
+		}
+
+		if ($cart_total < $coupon['minimum_order']) {
+			$needed = number_format($coupon['minimum_order'] - $cart_total, 2);
+			echo json_encode(['success' => false, 'error' => "ยอดสั่งซื้อขั้นต่ำ {$coupon['minimum_order']} บาท (ขาดอีก {$needed} บาท)"]);
+			exit;
+		}
+
+		// 3. คำนวณส่วนลดตามเงื่อนไข all_products_status
+		$discount_amount = 0;
+		$base_total_for_discount = 0; // ยอดรวมที่จะใช้เป็นฐานในการคำนวณส่วนลด
+
+		if ($coupon['all_products_status'] == 1) {
+			// ---- กรณี 1: ใช้ได้กับสินค้าทุกชิ้น ----
+			$base_total_for_discount = $cart_total;
+		} else {
+			// ---- กรณี 0: ใช้ได้กับสินค้าที่กำหนด ----
+			// ดึง ID สินค้าที่ร่วมรายการของคูปองนี้
+			$product_qry = $conn->prepare("SELECT product_id FROM coupon_code_products WHERE coupon_code_id = ?");
+			$product_qry->bind_param("i", $coupon['id']);
+			$product_qry->execute();
+			$product_result = $product_qry->get_result();
+
+			$eligible_product_ids = [];
+			while ($row = $product_result->fetch_assoc()) {
+				$eligible_product_ids[] = $row['product_id'];
+			}
+
+			if (empty($eligible_product_ids)) {
+				echo json_encode(['success' => false, 'error' => 'คูปองนี้ไม่มีสินค้าที่ร่วมรายการ']);
+				exit;
+			}
+
+			// วนลูปสินค้าในตะกร้า เพื่อหายอดรวมของสินค้าที่ร่วมรายการเท่านั้น
+			foreach ($cart_items as $item) {
+				if (in_array($item['product_id'], $eligible_product_ids)) {
+					// ราคาสินค้าต่อชิ้น * จำนวน
+					$base_total_for_discount += (floatval($item['price']) * intval($item['quantity']));
+				}
+			}
+
+			if ($base_total_for_discount <= 0) {
+				echo json_encode(['success' => false, 'error' => 'ไม่มีสินค้าที่ร่วมรายการในตะกร้าของคุณ']);
+				exit;
+			}
+		}
+
+
+		// 4. คำนวณยอดส่วนลดจากประเภทของคูปอง
+		$message = "";
+		switch ($coupon['type']) {
+			case 'fixed':
+				$discount_amount = floatval($coupon['discount_value']);
+				$message = "ส่วนลด " . number_format($discount_amount, 2) . " บาท";
+				break;
+			case 'percent':
+				$discount_value = floatval($coupon['discount_value']);
+				$discount_amount = $base_total_for_discount * ($discount_value / 100);
+				$message = "ส่วนลด {$discount_value}%";
+				break;
+			case 'free_shipping':
+				// ในเคสนี้เราอาจจะคืนค่าส่งเป็นส่วนลด หรือจะให้ frontend จัดการเองก็ได้
+				// สมมติว่าคืนเป็นส่วนลดเท่าค่าส่ง
+				// $discount_amount = $shipping_cost_from_ajax; // ต้องส่งค่าส่งมาด้วย
+				$message = "คูปองส่งฟรี";
+				// สำหรับตัวอย่างนี้ จะไม่คำนวณส่วนลดเป็นตัวเงิน แต่จะส่ง type กลับไป
+				break;
+		}
+
+		// 5. ส่งผลลัพธ์กลับไปเป็น JSON
+		$response = [
+			'success' => true,
+			'coupon_id' => $coupon['id'],
+			'type' => $coupon['type'],
+			'discount_amount' => round($discount_amount, 2),
+			'message' => $message
+		];
+
+		echo json_encode($response);
+	}
 }
 
 $Master = new Master();
@@ -1746,6 +1953,10 @@ switch ($action) {
 		break;
 	case 'delete_coupon_code_products':
 		echo $Master->delete_coupon_code_products();
+		break;
+	case 'apply_coupon':
+		header('Content-Type: application/json');
+		echo $Master->apply_coupon($conn, $_POST);
 		break;
 	default:
 		// echo $sysset->index();
