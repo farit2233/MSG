@@ -167,13 +167,37 @@
     .promo-inactive {
         opacity: 0.5;
         text-decoration: line-through;
+        color: #dc3545;
     }
 
     /* สไตล์สำหรับหมายเหตุ */
     .promo-note td {
+        font-size: 14px;
         border-top: none !important;
         padding-top: 0 !important;
     }
+   .input-code input {
+        font-size: 14px !important; /* กำหนดขนาดตัวอักษร */
+        padding: 8px 12px; /* เพิ่ม padding เพื่อให้มีระยะห่างจากขอบ input */
+        border: 1px solid #ced4da; /* กำหนดกรอบของ input */
+        border-radius: 4px; /* ทำให้มุมของ input โค้งมน */
+        background-color: #f8f9fa; /* กำหนดพื้นหลัง */
+        transition: all 0.3s ease; /* เพิ่ม transition เพื่อความลื่นไหล */
+    }
+     .input-code button{
+        font-size: 14px !important;
+        background: #f57421;
+		color: white;
+		border: 2px solid #f57421;
+        padding: 8px 12px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .input-code button:hover{
+		color: white;
+        filter: brightness(90%);
+	}
+
 
     @media only screen and (max-width: 768px) {
         .product-name {

@@ -347,16 +347,16 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                             ?>
                                                     <tr class="no-border <?= $promo_class ?>">
                                                         <th>
-                                                            โปรโมชั่น
-                                                            <span class="text-danger" style="font-size: 0.9em; display: block; font-weight: normal;">
+                                                            สินค้ามีโปรโมชั่น
+                                                            <!--span class="text-danger" style="font-size: 0.9em; display: block; font-weight: normal;">
                                                                 <?= htmlspecialchars($promo['name']) ?>
-                                                            </span>
+                                                            </span-->
                                                         </th>
-                                                        <td colspan="3">
-                                                            <!--em><?= htmlspecialchars($promo['description']) ?></em-->
-                                                        </td>
                                                         <td class="text-right">
-                                                            <strong>
+                                                            <p><?= htmlspecialchars($promo['name']) ?></p>
+                                                        </td>
+                                                        <td colspan="2" class="text-right">
+                                                            <strong class="text-danger">
                                                                 <?php
                                                                 // แสดงรายละเอียดส่วนลด
                                                                 if ($promo['type'] == 'fixed') {
@@ -364,9 +364,27 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                                                 } elseif ($promo['type'] == 'percent') {
                                                                     echo "- " . number_format($promo['discount_value'], 2) . "%";
                                                                 } elseif ($promo['type'] == 'free_shipping') {
-                                                                    echo "ฟรีค่าจัดส่ง";
+                                                                    echo "ส่งฟรี";
                                                                 }
                                                                 ?>
+                                                            </strong>
+                                                        </td>
+                                                        <td colspan="2" class="text-right">
+                                                            <strong class="text-danger">
+                                                                <?php
+                                                                if ($is_discount_applied && isset($applied_promo)) {
+                                                                    if ($applied_promo['type'] == 'fixed') {
+                                                                        echo "- " . number_format($promotion_discount, 2) . " บาท";
+                                                                    } elseif ($applied_promo['type'] == 'percent') {
+                                                                        echo "- " . number_format($promotion_discount, 2) . " บาท";
+                                                                    } elseif ($applied_promo['type'] == 'free_shipping') {
+                                                                        echo "ส่งฟรี";
+                                                                    }
+                                                                } else {
+                                                                    echo "ไม่ได้ใช้โปรโมชั่น";
+                                                                }
+                                                                ?>
+
                                                             </strong>
                                                         </td>
                                                     </tr>
@@ -377,7 +395,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                                 if (!$is_promo_applicable && !empty($cart_promotions)) :
                                                 ?>
                                                     <tr class="promo-note">
-                                                        <td colspan="5" class="text-danger text-center" style="font-size: 0.9em;">
+                                                        <td colspan="5" class="text-danger text-center">
                                                             * กรุณาเลือกสินค้าทั้งหมดที่อยู่ในโปรโมชั่นเดียวกันเพื่อรับส่วนลด
                                                         </td>
                                                     </tr>
@@ -388,8 +406,8 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                                 if (isset($promo_suggestion_message)):
                                                 ?>
                                                     <tr class="promo-note">
-                                                        <td colspan="5" class="text-info text-center" style="font-size: 0.9em; font-weight: bold;">
-                                                            <i class="fa fa-info-circle"></i> <?= $promo_suggestion_message ?>
+                                                        <td colspan="5" class="text-info text-center">
+                                                            <i class="fa fa-info-circle"></i> <strong><?= $promo_suggestion_message ?></strong>
                                                         </td>
                                                     </tr>
                                             <?php
@@ -398,13 +416,13 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                             ?>
                                             <tr class="no-border">
                                                 <th>
-                                                    <div class="input-group" style="display: flex; align-items: center;">
+                                                    <div class="input-group input-code" style="display: flex; align-items: center;">
                                                         คูปองส่วนลด
-                                                        <input type="text" id="coupon_code_input" placeholder="กรอกรหัสคูปองส่วนลด" class="ml-3">
-                                                        <div class="input-group-append">
-                                                            <button type="button" id="apply_coupon_button" class="btn btn-primary btn-sm">ใช้</button>
-                                                        </div>
+                                                        <input type="text" id="coupon_code_input" placeholder="กรอกรหัสคูปองส่วนลด" class=" ml-3 col-5">
+                                                        <button type="button" id="apply_coupon_button" class="btn">ใช้</button>
                                                     </div>
+
+
                                                     <small id="coupon_error_message" class="text-danger" style="display: inline-block;"></small>
                                                 </th>
                                                 <td class="text-right">
@@ -682,7 +700,6 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                 },
                 success: function(resp) {
                     if (resp.success) {
-
                         // === ✅ จุดสำคัญที่สุด ===
                         // นำ ID ของคูปองมาใส่ใน hidden input
                         $('#applied_coupon_id').val(resp.coupon_id);
@@ -694,14 +711,21 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                         appliedCoupon.type = resp.type;
 
                         // แสดงผลลัพธ์ให้ผู้ใช้เห็น
-                        discount_type_el.text(resp.message).addClass('text-success');
-                        discount_val_el.html('<strong class="text-success">- ' + resp.discount_amount.toLocaleString('en-US', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        }) + ' บาท</strong>');
+                        discount_type_el.text(resp.message);
+
+                        // 👇 เพิ่มส่วนนี้เข้ามา 👇
+                        if (resp.type === 'free_shipping') {
+                            discount_val_el.html('<strong class="text-danger">ส่งฟรี</strong>');
+                        } else {
+                            discount_val_el.html('<strong class="text-danger">- ' + resp.discount_amount.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + ' บาท</strong>');
+                        }
+                        // 👆 เพิ่มส่วนนี้เข้ามา 👆
+
                         error_el.text('');
                         alert_toast("ใช้คูปองสำเร็จ!", "success");
-
                     } else {
                         // --- กรณีใช้คูปองไม่สำเร็จ ---
                         // ล้างค่า ID ใน hidden input
