@@ -1081,9 +1081,9 @@ class Master extends DBConnection
 				if ($promo_data['type'] === 'free_shipping') {
 					// ในกรณีส่งฟรี ค่าส่งด้านบน ($final_shipping_cost) จะเป็น 0 อยู่แล้ว
 					// เราอาจจะแสดงให้ชัดเจนว่าค่าส่งเดิมคือเท่าไหร่ และถูกลดไป
-					$promo_text = "ส่วนลดโปรโมชั่น: ส่งฟรี (ประหยัด " . number_format($shipping_cost, 2) . " บาท)";
+					$promo_text = "\nส่วนลดโปรโมชั่น: ส่งฟรี (ประหยัด " . number_format($shipping_cost, 2) . " บาท)";
 				} else {
-					$promo_text = "ส่วนลดโปรโมชั่น: -" . number_format($promotion_discount_amount, 2) . " บาท";
+					$promo_text = "\nส่วนลดโปรโมชั่น: -" . number_format($promotion_discount_amount, 2) . " บาท";
 				}
 				$telegram_message .= $promo_text;
 			}
@@ -1091,9 +1091,9 @@ class Master extends DBConnection
 			// ✨ เพิ่มใหม่: ส่วนลดคูปอง (ถ้ามี)
 			if (isset($coupon_data) && $coupon_code_id > 0) {
 				if ($coupon_data['type'] === 'free_shipping') {
-					$coupon_text = "ส่วนลดคูปอง: ส่งฟรี";
+					$coupon_text = "\nส่วนลดคูปอง: ส่งฟรี";
 				} else {
-					$coupon_text = "ส่วนลดคูปอง: -" . number_format($coupon_discount_amount, 2) . " บาท";
+					$coupon_text = "\nส่วนลดคูปอง: -" . number_format($coupon_discount_amount, 2) . " บาท";
 				}
 				$telegram_message .= $coupon_text;
 			}
