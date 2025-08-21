@@ -33,7 +33,17 @@
   ?>
 
   <?php require_once('inc/footer.php') ?>
-
+  <style>
+    #uni_modal_order .modal-dialog {
+      max-width: 800px !important;
+      z-index: 1050 !important;
+      margin: auto;
+      position: fixed;
+      top: 28%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
   <div class="modal fade" id="uni_modal" role='dialog'>
     <div class="modal-dialog   rounded-0 modal-md modal-dialog-centered" role="document">
       <div class="modal-content  rounded-0">
@@ -94,7 +104,7 @@
         <div class="modal-header">
           <h5 class="modal-title"></h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true"><i class="fa-solid fa-x"></i></span>
           </button>
         </div>
         <div class="modal-body">
@@ -104,6 +114,21 @@
     </div>
   </div>
 
+  <div class="modal fade" id="uni_modal_order" role='dialog'>
+    <div class="modal-dialog modal-md modal-dialog-centered rounded-0" role="document">
+      <div class="modal-content rounded-0">
+        <div class="modal-header">
+          <h5 class="modal-title"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><i class="fa-solid fa-x"></i></span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 

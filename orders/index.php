@@ -221,7 +221,7 @@ $filter_options = [
     $(function() {
         $('.view-order').click(function() {
             const orderId = $(this).data('id');
-            uni_modal("รายละเอียดคำสั่งซื้อ", "orders/view_order.php?id=" + orderId, 'modal-lg');
+            uni_modal_order("รายละเอียดคำสั่งซื้อ", "orders/view_order.php?id=" + orderId, 'modal-lg');
         });
     });
     $('.btn.view-order').click(function(e) {
