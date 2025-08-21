@@ -672,20 +672,58 @@ class Master extends DBConnection
 						throw new Exception('คูปองที่คุณใช้หมดอายุแล้ว');
 					}
 
-					// ตรวจสอบยอดสั่งซื้อขั้นต่ำ
+					// --- START: NEW LOGIC ---
+					// 1. ดึงรายการ ID ของสินค้าที่ร่วมรายการกับคูปองนี้
+					$eligible_product_ids = [];
+					$prod_qry = $this->conn->query("
+            SELECT product_id 
+            FROM `coupon_code_products` 
+            WHERE coupon_code_id = {$coupon_code_id} AND status = 1 AND delete_flag = 0
+        ");
+					while ($p_row = $prod_qry->fetch_assoc()) {
+						$eligible_product_ids[] = $p_row['product_id'];
+					}
+
+					// 2. กำหนดฐานของยอดเงินที่จะใช้คำนวณส่วนลด
+					$discount_base_amount = 0;
+					if (!empty($eligible_product_ids)) {
+						// ถ้าคูปองถูกจำกัดไว้สำหรับสินค้าบางรายการ ให้คำนวณยอดรวมจากสินค้าเหล่านั้นเท่านั้น
+						$eligible_subtotal = 0;
+						foreach ($cart_data as $item) {
+							if (in_array($item['product_id'], $eligible_product_ids)) {
+								$eligible_subtotal += $item['final_price'] * $item['quantity'];
+							}
+						}
+						$discount_base_amount = $eligible_subtotal;
+					} else {
+						// ถ้าคูปองไม่ได้จำกัดสินค้า (ใช้ได้ทั้งร้าน) ให้ใช้ยอดรวมทั้งหมด
+						$discount_base_amount = $backend_subtotal;
+					}
+					// --- END: NEW LOGIC ---
+
+					// ตรวจสอบยอดสั่งซื้อขั้นต่ำ (ยังคงเช็คจากยอดรวมทั้งตะกร้า)
 					if ($backend_subtotal >= $coupon_data['minimum_order']) {
-						switch ($coupon_data['type']) {
-							case 'fixed':
-								$coupon_discount_amount  = floatval($coupon_data['discount_value']);
-								break;
-							case 'percent':
-								$coupon_discount_amount  = $backend_subtotal * (floatval($coupon_data['discount_value']) / 100);
-								break;
-							case 'free_shipping':
-								// ✅ แก้ไข: บันทึกค่าส่งที่ถูกยกเว้นให้เป็นยอดส่วนลด
-								$shipping_discount  = $shipping_cost;
-								$final_shipping_cost = 0; // คูปองส่งฟรี
-								break;
+
+						// คำนวณส่วนลดจากฐานยอดเงินที่กำหนดไว้ ($discount_base_amount)
+						if ($discount_base_amount > 0) { // คำนวณเมื่อมีสินค้าที่ร่วมรายการในตะกร้าเท่านั้น
+							switch ($coupon_data['type']) {
+								case 'fixed':
+									$coupon_discount_amount = floatval($coupon_data['discount_value']);
+									// ป้องกันไม่ให้ส่วนลดมากกว่าราคาสินค้าที่ร่วมรายการ
+									if ($coupon_discount_amount > $discount_base_amount) {
+										$coupon_discount_amount = $discount_base_amount;
+									}
+									break;
+								case 'percent':
+									// คำนวณส่วนลดจากยอดรวมของสินค้าที่ร่วมรายการเท่านั้น
+									$coupon_discount_amount = $discount_base_amount * (floatval($coupon_data['discount_value']) / 100);
+									break;
+								case 'free_shipping':
+									// ส่วนลดค่าส่งจะทำงานเหมือนเดิม ไม่เกี่ยวกับราคาสินค้า
+									$shipping_discount += $shipping_cost;
+									$final_shipping_cost = 0;
+									break;
+							}
 						}
 					} else {
 						throw new Exception('ยอดสั่งซื้อไม่ถึงเกณฑ์ขั้นต่ำสำหรับคูปองนี้');
