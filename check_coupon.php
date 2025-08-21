@@ -106,7 +106,8 @@ $response = [
     'success' => true,
     'type' => $coupon['type'],
     'discount_amount' => round($discount_amount, 2),
-    'message' => $message
+    'message' => $message . $quantity_warning_message
+
 ];
 
 echo json_encode($response);

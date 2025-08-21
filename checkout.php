@@ -424,9 +424,11 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
 
 
                                                     <small id="coupon_error_message" class="text-danger" style="display: inline-block;"></small>
+                                                    <small id="quantity_warning_message" class="text-danger" style="display: inline-block;"></small>
                                                 </th>
                                                 <td class="text-right">
                                                     <p id="discount_type"></p>
+                                                    <p id="quantity_warning_message"></p>
                                                 </td>
                                                 <td colspan="3" class="text-right">
                                                     <strong id="discount_value"></strong>
@@ -673,6 +675,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
             var error_el = $('#coupon_error_message');
             var discount_val_el = $('#discount_value');
             var discount_type_el = $('#discount_type');
+            var quantity_warning_message_el = $('#quantity_warning_message'); // เพิ่มตัวแปรสำหรับแสดงข้อความเตือน
 
             if (coupon_code === '') {
                 error_el.text('กรุณากรอกรหัสคูปอง');
@@ -713,6 +716,13 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                         // แสดงผลลัพธ์ให้ผู้ใช้เห็น
                         discount_type_el.text(resp.message);
 
+                        // แสดงข้อความเตือนจำนวนคูปองที่เหลือ
+                        if (resp.quantity_warning_message) {
+                            quantity_warning_message_el.text(resp.quantity_warning_message).show(); // แสดงข้อความ
+                        } else {
+                            quantity_warning_message_el.hide(); // ซ่อนข้อความถ้าไม่มี
+                        }
+
                         // 👇 เพิ่มส่วนนี้เข้ามา 👇
                         if (resp.type === 'free_shipping') {
                             discount_val_el.html('<strong class="text-danger">ส่งฟรี</strong>');
@@ -740,6 +750,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                         error_el.text(resp.error);
                         discount_type_el.text('');
                         discount_val_el.text('');
+                        quantity_warning_message_el.hide(); // ซ่อนข้อความเตือนถ้าใช้คูปองไม่สำเร็จ
                         alert_toast(resp.error, "error");
                     }
 

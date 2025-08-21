@@ -1816,6 +1816,9 @@ class Master extends DBConnection
 			}
 		}
 
+		// ประกาศตัวแปรสำหรับเก็บข้อความแจ้งเตือนเรื่องคูปองเหลือน้อย
+		$quantity_warning_message = '';
+
 		// 2.2 ตรวจสอบจำนวนคูปองทั้งหมดที่ถูกใช้ไปแล้ว (Overall Coupon Quantity)
 		// ทำการตรวจสอบก็ต่อเมื่อคูปองไม่ได้ถูกตั้งค่าให้มีจำนวนไม่จำกัด (unl_amount = 0)
 		if ($coupon['unl_amount'] == 0) {
@@ -1825,9 +1828,18 @@ class Master extends DBConnection
 			$amount_result = $amount_qry->get_result()->fetch_assoc();
 			$total_times_used = $amount_result['total_used'];
 
-			if ($total_times_used >= $coupon['coupon_amount']) {
-				echo json_encode(['success' => false, 'error' => 'คูปองนี้ถูกใช้หมดแล้ว']);
+			// คำนวณหาจำนวนคูปองที่เหลืออยู่
+			$remaining_coupons = $coupon['coupon_amount'] - $total_times_used;
+
+			// ตรวจสอบว่าคูปองหมดหรือยัง
+			if ($remaining_coupons <= 0) {
+				echo json_encode(['success' => false, 'error' => 'คูปองหมดแล้ว']);
 				exit;
+			}
+
+			// ถ้าคูปองที่เหลือมีจำนวนน้อยกว่า 4 ให้สร้างข้อความแจ้งเตือน
+			if ($remaining_coupons < 4) {
+				$quantity_warning_message = " เหลือคูปอง {$remaining_coupons} ชิ้น";
 			}
 		}
 
@@ -1899,7 +1911,8 @@ class Master extends DBConnection
 			'coupon_code_id' => $coupon['id'],
 			'type' => $coupon['type'],
 			'discount_amount' => round($discount_amount, 2),
-			'message' => $message
+			'quantity_warning_message' => $quantity_warning_message,
+			'message' => $message // นำข้อความแจ้งเตือนมาต่อท้าย
 		];
 
 		echo json_encode($response);
