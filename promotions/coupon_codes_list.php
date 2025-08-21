@@ -1,6 +1,15 @@
 <?php
 $i = 1;
-$qry_limit = $conn->query("SELECT * FROM coupon_code_list ORDER BY date_created ASC, name ASC LIMIT 5");
+$qry_limit = $conn->query("
+    SELECT * 
+    FROM coupon_code_list 
+    ORDER BY 
+        type = 'free_shipping' DESC,  -- free_shipping อยู่หน้าสุด
+        discount_value DESC,           -- จัดลำดับตามส่วนลดจากมากไปหาน้อย
+        date_created DESC              -- ใหม่สุดอยู่ก่อน
+    LIMIT 5
+");
+
 $qry_free_shipping = $conn->query("SELECT * FROM coupon_code_list WHERE type = 'free_shipping' ORDER BY date_created ASC, name ASC");
 $qry = $conn->query("SELECT * FROM coupon_code_list ORDER BY date_created ASC, name ASC");
 function formatDateThai($date)
