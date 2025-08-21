@@ -355,21 +355,8 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                                         <td class="text-right">
                                                             <p><?= htmlspecialchars($promo['name']) ?></p>
                                                         </td>
-                                                        <td colspan="2" class="text-right">
-                                                            <strong class="text-danger">
-                                                                <?php
-                                                                // แสดงรายละเอียดส่วนลด
-                                                                if ($promo['type'] == 'fixed') {
-                                                                    echo "- " . number_format($promo['discount_value'], 2) . " บาท";
-                                                                } elseif ($promo['type'] == 'percent') {
-                                                                    echo "- " . number_format($promo['discount_value'], 2) . "%";
-                                                                } elseif ($promo['type'] == 'free_shipping') {
-                                                                    echo "ส่งฟรี";
-                                                                }
-                                                                ?>
-                                                            </strong>
-                                                        </td>
-                                                        <td colspan="2" class="text-right">
+
+                                                        <td colspan="3" class="text-right">
                                                             <strong class="text-danger">
                                                                 <?php
                                                                 if ($is_discount_applied && isset($applied_promo)) {
