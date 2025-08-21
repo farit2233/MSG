@@ -45,7 +45,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                 <div class="row row-cols-1 row-cols-md-5 g-4">
                     <?php
                     mysqli_data_seek($qry, 0);
-                    while ($row = $qry->fetch_assoc()): ?>
+                    while ($row = $qry_limit->fetch_assoc()): ?>
                         <div class="col mb-4">
                             <div class="card" style="width: 16.5rem;">
                                 <div class="card-img" style="position: relative;">

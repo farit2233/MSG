@@ -494,7 +494,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                 <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                                 <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
                                 <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
-                                <input type="hidden" name="coupon_id" id="applied_coupon_id" value="0">
+                                <input type="hidden" name="coupon_code_id" id="applied_coupon_id" value="0">
 
                                 <div class="py-1 text-center">
                                     <button class="btn addcart rounded-pill" <?= empty($full_address) ? 'disabled' : '' ?>>
@@ -702,11 +702,11 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                     if (resp.success) {
                         // === ✅ จุดสำคัญที่สุด ===
                         // นำ ID ของคูปองมาใส่ใน hidden input
-                        $('#applied_coupon_id').val(resp.coupon_id);
+                        $('#applied_coupon_id').val(resp.coupon_code_id);
                         // ======================
 
                         // อัปเดตตัวแปร appliedCoupon เพื่อใช้ในการคำนวณราคาสุทธิ
-                        appliedCoupon.id = resp.coupon_id;
+                        appliedCoupon.id = resp.coupon_code_id;
                         appliedCoupon.amount = resp.discount_amount;
                         appliedCoupon.type = resp.type;
 

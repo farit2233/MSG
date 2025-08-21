@@ -660,9 +660,9 @@ class Master extends DBConnection
 			// ======================= END: ส่วนจัดการโปรโมชั่น =========================
 
 			// ======================= ✨ START: ส่วนจัดการคูปอง (เพิ่มใหม่) =======================
-			$coupon_id = isset($_POST['coupon_id']) ? intval($_POST['coupon_id']) : 0;
-			if ($coupon_id > 0) {
-				$coupon_qry = $this->conn->query("SELECT * FROM `coupon_code_list` WHERE id = {$coupon_id} AND status = 1 AND delete_flag = 0");
+			$coupon_code_id = isset($_POST['coupon_code_id']) ? intval($_POST['coupon_code_id']) : 0;
+			if ($coupon_code_id > 0) {
+				$coupon_qry = $this->conn->query("SELECT * FROM `coupon_code_list` WHERE id = {$coupon_code_id} AND status = 1 AND delete_flag = 0");
 				if ($coupon_qry->num_rows > 0) {
 					$coupon_data = $coupon_qry->fetch_assoc();
 
@@ -703,7 +703,7 @@ class Master extends DBConnection
 			// --- เตรียมข้อมูลสำหรับบันทึก ---
 			$delivery_address = $this->conn->real_escape_string($delivery_address);
 			$applied_promo_id = ($promotion_id > 0) ? "'{$promotion_id}'" : "NULL";
-			$applied_coupon_id = ($coupon_id > 0) ? "'{$coupon_id}'" : "NULL";
+			$applied_coupon_id = ($coupon_code_id > 0) ? "'{$coupon_code_id}'" : "NULL";
 
 			$customer = $this->conn->query("SELECT * FROM customer_list WHERE id = '{$customer_id}'")->fetch_assoc();
 			$customer_name = trim("{$customer['firstname']} {$customer['middlename']} {$customer['lastname']}");
@@ -719,7 +719,7 @@ class Master extends DBConnection
 
 			// --- ✨ บันทึกข้อมูลลง order_list (แก้ไข Query) ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-            (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`, `promotion_id`, `coupon_id`, `status`, `payment_status`, `delivery_status`) 
+            (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`) 
             VALUES 
             ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id}, {$applied_promo_id}, {$applied_coupon_id}, 0, 0, 0)");
 
@@ -732,10 +732,10 @@ class Master extends DBConnection
 				$logged_promo_discount = ($promo_data['type'] === 'free_shipping') ? $shipping_discount : $promotion_discount_amount;
 				$this->log_promotion_usage($promotion_id, $customer_id, $oid, $logged_promo_discount, count($cart_data));
 			}
-			if ($coupon_id > 0) {
+			if ($coupon_code_id > 0) {
 				// ถ้าเป็นคูปองส่งฟรี ให้ส่งค่า shipping_discount ไปบันทึก
 				$logged_coupon_discount = ($coupon_data['type'] === 'free_shipping') ? $shipping_discount : $coupon_discount_amount;
-				$this->log_coupon_usage($coupon_id, $customer_id, $oid, $logged_coupon_discount, count($cart_data));
+				$this->log_coupon_usage($coupon_code_id, $customer_id, $oid, $logged_coupon_discount, count($cart_data));
 			}
 
 			// --- ✨ บันทึกข้อมูลลง order_items (แก้ไข Query) ---
@@ -748,7 +748,7 @@ class Master extends DBConnection
 				$data .= "('{$oid}', '{$product_id}', '{$quantity}', '{$price}', {$applied_promo_id}, {$applied_coupon_id})";
 			}
 
-			$save = $this->conn->query("INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`, `promotion_id`, `coupon_id`) VALUES {$data}");
+			$save = $this->conn->query("INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`, `promotion_id`, `coupon_code_id`) VALUES {$data}");
 			if (!$save) throw new Exception('ไม่สามารถบันทึกรายการสินค้า: ' . $this->conn->error);
 
 			// --- ลบสินค้าออกจากตะกร้าและ Commit ---
@@ -837,7 +837,7 @@ class Master extends DBConnection
 					$body .= $promo_row_html;
 				}
 
-				if (isset($coupon_data) && $coupon_id > 0) {
+				if (isset($coupon_data) && $coupon_code_id > 0) {
 					if ($coupon_data['type'] === 'free_shipping') {
 						$coupon_display = "<span style='color: green;'>ส่งฟรี</span>";
 						$coupon_label = "<strong>ส่วนลดโค้ดส่วนลด</strong>";
@@ -955,7 +955,7 @@ class Master extends DBConnection
 					$admin_body .= $promo_row_html;
 				}
 
-				if (isset($coupon_data) && $coupon_id > 0) {
+				if (isset($coupon_data) && $coupon_code_id > 0) {
 					if ($coupon_data['type'] === 'free_shipping') {
 						$coupon_display = "<span style='color: green;'>ส่งฟรี</span>";
 						$coupon_label = "<strong>ส่วนลดโค้ดส่วนลด</strong>";
@@ -1051,7 +1051,7 @@ class Master extends DBConnection
 			}
 
 			// ✨ เพิ่มใหม่: ส่วนลดคูปอง (ถ้ามี)
-			if (isset($coupon_data) && $coupon_id > 0) {
+			if (isset($coupon_data) && $coupon_code_id > 0) {
 				if ($coupon_data['type'] === 'free_shipping') {
 					$coupon_text = "ส่วนลดคูปอง: ส่งฟรี";
 				} else {
@@ -1070,7 +1070,7 @@ class Master extends DBConnection
 				$this->log_promotion_usage($promotion_id, $customer_id, $oid, $promotion_discount, count($cart_data));
 			}
 			if ($coupon_discount > 0) {
-				$this->log_coupon_usage($coupon_id, $customer_id, $oid, $coupon_discount, count($cart_data));
+				$this->log_coupon_usage($coupon_code_id, $customer_id, $oid, $coupon_discount, count($cart_data));
 			}
 
 			$this->settings->set_flashdata('success', 'ชำระสินค้าสำเร็จ');
@@ -1096,11 +1096,11 @@ class Master extends DBConnection
 			throw new Exception("ไม่สามารถบันทึกข้อมูลการใช้โปรโมชั่นได้: " . $this->conn->error);
 		}
 	}
-	function log_coupon_usage($coupon_id, $customer_id, $order_id, $discount_amount, $items_in_order)
+	function log_coupon_usage($coupon_code_id, $customer_id, $order_id, $discount_amount, $items_in_order)
 	{
 		$query = "
 		INSERT INTO `coupon_code_usage_logs` (`coupon_code_id`, `customer_id`, `order_id`, `discount_amount`, `items_in_order`, `used_at`)
-		VALUES ('{$coupon_id}', '{$customer_id}', '{$order_id}', '{$discount_amount}', '{$items_in_order}', NOW())
+		VALUES ('{$coupon_code_id}', '{$customer_id}', '{$order_id}', '{$discount_amount}', '{$items_in_order}', NOW())
 		";
 
 		// บันทึกข้อมูลการใช้งานคูปอง
@@ -1752,6 +1752,13 @@ class Master extends DBConnection
 	}
 	function apply_coupon($conn, $post_data)
 	{
+		// ตรวจสอบให้แน่ใจว่าลูกค้า login อยู่ และมี customer_id
+		if (!isset($_SESSION['userdata']['id']) || $_SESSION['userdata']['login_type'] != 2) {
+			echo json_encode(['success' => false, 'error' => 'กรุณาเข้าสู่ระบบก่อนใช้คูปอง']);
+			exit;
+		}
+		$customer_id = $_SESSION['userdata']['id'];
+
 		// รับข้อมูลจาก AJAX
 		$coupon_code = isset($_POST['coupon_code']) ? $_POST['coupon_code'] : '';
 		$cart_items = isset($_POST['cart_items']) ? $_POST['cart_items'] : [];
@@ -1775,43 +1782,61 @@ class Master extends DBConnection
 		}
 
 		$coupon = $result->fetch_assoc();
+		$coupon_code_id = $coupon['id']; // ดึง ID ของคูปองไว้ใช้
 
-		// 2. ตรวจสอบจำนวนครั้งที่ลูกค้าใช้คูปองนี้
-		$customer_id = isset($_POST['customer_id']) ? intval($_POST['customer_id']) : 0;
-		$qry_usage_count = $conn->prepare("SELECT COUNT(*) AS usage_count FROM coupon_code_usage_logs WHERE coupon_code_id = ? AND customer_id = ?");
-		$qry_usage_count->bind_param("ii", $coupon['id'], $customer_id);
-		$qry_usage_count->execute();
-		$usage_result = $qry_usage_count->get_result();
-		$usage_data = $usage_result->fetch_assoc();
+		// 2. ตรวจสอบเงื่อนไขของคูปอง (วันหมดอายุ, ยอดขั้นต่ำ)
+		$current_date = date('Y-m-d H:i:s');
+		if ($coupon['start_date'] > $current_date || $coupon['end_date'] < $current_date) {
+			echo json_encode(['success' => false, 'error' => 'คูปองหมดอายุแล้ว']);
+			exit;
+		}
 
-		// เช็กจำนวนครั้งที่ลูกค้าใช้คูปอง
-		$usage_count = $usage_data['usage_count'];
+		if ($cart_total < $coupon['minimum_order']) {
+			$needed = number_format($coupon['minimum_order'] - $cart_total, 2);
+			echo json_encode(['success' => false, 'error' => "ยอดสั่งซื้อขั้นต่ำ {$coupon['minimum_order']} บาท (ขาดอีก {$needed} บาท)"]);
+			exit;
+		}
 
-		// 3. เช็กว่าใช้ได้ไม่จำกัดหรือไม่
-		if ($coupon['unl_coupon'] == 0) { // ถ้าคูปองจำกัดจำนวน
-			if ($usage_count >= $coupon['limit_coupon']) {
-				echo json_encode(['success' => false, 'error' => 'คุณใช้คูปองนี้เกินจำนวนที่กำหนด']);
+		// =================================================================
+		// >> ส่วนที่เพิ่มเข้ามาใหม่: ตรวจสอบจำนวนการใช้งาน <<
+		// =================================================================
+
+		// 2.1 ตรวจสอบจำนวนครั้งที่ลูกค้าคนนี้ใช้คูปองไปแล้ว (Per-Customer Usage Limit)
+		// ทำการตรวจสอบก็ต่อเมื่อคูปองไม่ได้ถูกตั้งค่าให้ใช้ได้ไม่จำกัดครั้ง (unl_coupon = 0)
+		if ($coupon['unl_coupon'] == 0) {
+			$usage_qry = $conn->prepare("SELECT COUNT(id) AS total_usage FROM coupon_code_usage_logs WHERE coupon_code_id = ? AND customer_id = ?");
+			$usage_qry->bind_param("ii", $coupon_code_id, $customer_id);
+			$usage_qry->execute();
+			$usage_result = $usage_qry->get_result()->fetch_assoc();
+			$times_used_by_customer = $usage_result['total_usage'];
+
+			if ($times_used_by_customer >= $coupon['limit_coupon']) {
+				echo json_encode(['success' => false, 'error' => 'คุณใช้คูปองนี้ครบจำนวนครั้งที่กำหนดแล้ว']);
 				exit;
 			}
 		}
 
-		// 4. เช็กจำนวนคูปองที่เหลือ
-		if ($coupon['unl_amount'] == 0) { // ถ้าคูปองจำกัดจำนวน
-			$qry_coupon_left = $conn->prepare("SELECT (coupon_amount - (SELECT COUNT(*) FROM coupon_code_usage_logs WHERE coupon_code_id = ?)) AS remaining_coupons");
-			$qry_coupon_left->bind_param("i", $coupon['id']);
-			$qry_coupon_left->execute();
-			$coupon_left_result = $qry_coupon_left->get_result();
-			$coupon_left_data = $coupon_left_result->fetch_assoc();
-			$remaining_coupons = $coupon_left_data['remaining_coupons'];
+		// 2.2 ตรวจสอบจำนวนคูปองทั้งหมดที่ถูกใช้ไปแล้ว (Overall Coupon Quantity)
+		// ทำการตรวจสอบก็ต่อเมื่อคูปองไม่ได้ถูกตั้งค่าให้มีจำนวนไม่จำกัด (unl_amount = 0)
+		if ($coupon['unl_amount'] == 0) {
+			$amount_qry = $conn->prepare("SELECT COUNT(id) AS total_used FROM coupon_code_usage_logs WHERE coupon_code_id = ?");
+			$amount_qry->bind_param("i", $coupon_code_id);
+			$amount_qry->execute();
+			$amount_result = $amount_qry->get_result()->fetch_assoc();
+			$total_times_used = $amount_result['total_used'];
 
-			if ($remaining_coupons <= 0) {
-				echo json_encode(['success' => false, 'error' => 'คูปองนี้หมดแล้ว']);
+			if ($total_times_used >= $coupon['coupon_amount']) {
+				echo json_encode(['success' => false, 'error' => 'คูปองนี้ถูกใช้หมดแล้ว']);
 				exit;
 			}
 		}
 
-		// (ต่อไปเป็นส่วนที่คุณคำนวณส่วนลดและเช็กเงื่อนไขอื่นๆ)
-		// 5. คำนวณส่วนลดตามประเภทของคูปองและส่งผลลัพธ์
+		// =================================================================
+		// >> จบส่วนที่เพิ่มเข้ามาใหม่ <<
+		// =================================================================
+
+
+		// 3. คำนวณส่วนลดตามเงื่อนไข all_products_status
 		$discount_amount = 0;
 		$base_total_for_discount = 0; // ยอดรวมที่จะใช้เป็นฐานในการคำนวณส่วนลด
 
@@ -1822,7 +1847,7 @@ class Master extends DBConnection
 			// ---- กรณี 0: ใช้ได้กับสินค้าที่กำหนด ----
 			// ดึง ID สินค้าที่ร่วมรายการของคูปองนี้
 			$product_qry = $conn->prepare("SELECT product_id FROM coupon_code_products WHERE coupon_code_id = ?");
-			$product_qry->bind_param("i", $coupon['id']);
+			$product_qry->bind_param("i", $coupon_code_id);
 			$product_qry->execute();
 			$product_result = $product_qry->get_result();
 
@@ -1850,7 +1875,8 @@ class Master extends DBConnection
 			}
 		}
 
-		// 6. คำนวณยอดส่วนลดจากประเภทของคูปอง
+
+		// 4. คำนวณยอดส่วนลดจากประเภทของคูปอง
 		$message = "";
 		switch ($coupon['type']) {
 			case 'fixed':
@@ -1867,14 +1893,13 @@ class Master extends DBConnection
 				break;
 		}
 
-		// 7. ส่งผลลัพธ์กลับไปเป็น JSON
+		// 5. ส่งผลลัพธ์กลับไปเป็น JSON
 		$response = [
 			'success' => true,
-			'coupon_id' => $coupon['id'],
+			'coupon_code_id' => $coupon['id'],
 			'type' => $coupon['type'],
 			'discount_amount' => round($discount_amount, 2),
-			'message' => $message,
-			'remaining_coupons' => $remaining_coupons ?? null // เพิ่มจำนวนคูปองที่เหลือถ้าเป็นคูปองจำกัดจำนวน
+			'message' => $message
 		];
 
 		echo json_encode($response);
