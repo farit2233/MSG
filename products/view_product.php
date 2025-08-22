@@ -121,6 +121,70 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		margin-left: auto;
 		margin-right: auto;
 	}
+
+	.product-gallery-container {
+		position: relative;
+		overflow-x: hidden;
+		/* ไม่ให้ scroll visible */
+		padding: 10px 0;
+		display: flex;
+		align-items: center;
+		/* ทำให้ปุ่มอยู่ในแนวเดียวกัน */
+	}
+
+	.product-gallery {
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 10px;
+		overflow-x: auto;
+		scroll-behavior: smooth;
+		/* ทำให้การเลื่อนดูนุ่มนวล */
+		padding-bottom: 10px;
+		/* ปรับระยะห่างด้านล่าง */
+	}
+
+	/* สไตล์รูปภาพในแกลเลอรี */
+	.product-gallery img {
+		width: 100px;
+		/* ขนาดรูป */
+		height: auto;
+		cursor: pointer;
+	}
+
+	/* ปุ่มเลื่อน */
+	.gallery-prev-btn,
+	.gallery-next-btn {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		background-color: rgba(0, 0, 0, 0.5);
+		color: white;
+		border: none;
+		padding: 10px 12px;
+		font-size: 16px;
+		cursor: pointer;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+	}
+
+	/* ปุ่มเลื่อนซ้าย */
+	.gallery-prev-btn {
+		left: 10px;
+	}
+
+	/* ปุ่มเลื่อนขวา */
+	.gallery-next-btn {
+		right: 10px;
+	}
+
+	/* เพิ่ม effect เมื่อ hover ปุ่ม */
+	.gallery-prev-btn:hover,
+	.gallery-next-btn:hover {
+		background-color: rgba(0, 0, 0, 0.8);
+	}
 </style>
 <section class="py-3">
 	<div class="container">
@@ -147,17 +211,22 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											class="img-thumbnail p-0 border w-100"
 											id="product-img">
 									</a>
-									<div class="product-gallery mt-2">
-										<?php foreach ($product_images as $index => $img_src): ?>
-											<a href="#" data-toggle="modal" data-target="#productImageModal">
-												<img src="<?= $img_src ?>"
-													alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
-													class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
-													data-full-src="<?= $img_src ?>"
-													data-index="<?= $index ?>">
-											</a>
-										<?php endforeach; ?>
+									<div class="product-gallery-container mt-2">
+										<button class="gallery-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+										<div class="product-gallery">
+											<?php foreach ($product_images as $index => $img_src): ?>
+												<a href="#" data-toggle="modal" data-target="#productImageModal">
+													<img src="<?= $img_src ?>"
+														alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
+														class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
+														data-full-src="<?= $img_src ?>"
+														data-index="<?= $index ?>">
+												</a>
+											<?php endforeach; ?>
+										</div>
+										<button class="gallery-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
 									</div>
+
 									<!----------------- Desktop ----------------->
 									<div class="product-description-mobile-pc mt-3">
 										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
@@ -697,6 +766,18 @@ if ($plat_q && $plat_q->num_rows > 0) {
 			changeImage(currentIndex);
 		});
 
+		$('.gallery-next-btn').click(function() {
+			$('.product-gallery').animate({
+				scrollLeft: $('.product-gallery').scrollLeft() + 120 // เลื่อน 120px ขวา
+			}, 300); // ความเร็วในการเลื่อน
+		});
+
+		// เมื่อกดปุ่มเลื่อนซ้าย
+		$('.gallery-prev-btn').click(function() {
+			$('.product-gallery').animate({
+				scrollLeft: $('.product-gallery').scrollLeft() - 120 // เลื่อน 120px ซ้าย
+			}, 300); // ความเร็วในการเลื่อน
+		});
 		// ฟังก์ชันในการเปลี่ยนภาพ
 		function changeImage(index) {
 			// เลือก thumbnail ที่ตรงกับ index
