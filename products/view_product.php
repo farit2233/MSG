@@ -149,11 +149,13 @@ if ($plat_q && $plat_q->num_rows > 0) {
 									</a>
 									<div class="product-gallery mt-2">
 										<?php foreach ($product_images as $index => $img_src): ?>
-											<img src="<?= $img_src ?>"
-												alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
-												class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
-												data-full-src="<?= $img_src ?>"
-												data-index="<?= $index ?>">
+											<a href="#" data-toggle="modal" data-target="#productImageModal">
+												<img src="<?= $img_src ?>"
+													alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
+													class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
+													data-full-src="<?= $img_src ?>"
+													data-index="<?= $index ?>">
+											</a>
 										<?php endforeach; ?>
 									</div>
 									<!----------------- Desktop ----------------->
@@ -402,16 +404,14 @@ if ($plat_q && $plat_q->num_rows > 0) {
 				<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-hidden="true">
 					<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 						<div class="modal-content position-relative">
-							<!-- ปุ่มกากบาท -->
 							<button type="button" class="close position-absolute" style="right: 10px; top: 10px; z-index: 10;" data-dismiss="modal" aria-label="Close">
 								<i class="fa fa-times"></i>
 							</button>
 
 							<div class="modal-body p-0 text-center">
 								<div class="modal-body p-0 text-center image-modal">
-									<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
-										alt="<?= isset($name) ? $name : '' ?>"
-										class="img-fluid rounded">
+									<img id="modal-image" src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
+										alt="<?= isset($name) ? $name : '' ?>" class="img-fluid rounded">
 								</div>
 								<div class="product-gallery mt-2">
 									<?php foreach ($product_images as $index => $img_src): ?>
@@ -426,39 +426,10 @@ if ($plat_q && $plat_q->num_rows > 0) {
 								<a class="modal-prev"><i class="fa-solid fa-chevron-left"></i></a>
 								<a class="modal-next"><i class="fa-solid fa-chevron-right"></i></a>
 							</div>
-
 						</div>
 					</div>
 				</div>
-				<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-hidden="true">
-					<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-						<div class="modal-content position-relative bg-transparent border-0">
-							<button type="button" class="close position-absolute" style="right: -25px; top: -25px; z-index: 10; color: white; opacity: 1; font-size: 2rem;" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
 
-							<div class="modal-body p-0 text-center">
-								<div class="modal-body p-0 text-center image-modal">
-									<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
-										alt="<?= isset($name) ? $name : '' ?>"
-										class="img-fluid rounded">
-								</div>
-								<div class="product-gallery mt-2">
-									<?php foreach ($product_images as $index => $img_src): ?>
-										<img src="<?= $img_src ?>"
-											alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
-											class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
-											data-full-src="<?= $img_src ?>"
-											data-index="<?= $index ?>">
-									<?php endforeach; ?>
-								</div>
-
-								<a class="modal-prev">&#10094;</a>
-								<a class="modal-next">&#10095;</a>
-							</div>
-						</div>
-					</div>
-				</div>
 			</div>
 
 			<!--------------------สินค้าที่เกี่ยวข้อง--------------------->
@@ -694,4 +665,49 @@ if ($plat_q && $plat_q->num_rows > 0) {
 		alert_toast("เพิ่มสินค้าในตะกร้าแล้ว", 'success');
 		update_cart_count();
 	}
+	$(document).ready(function() {
+		// คำนวณจำนวนภาพทั้งหมด
+		const totalImages = <?= count($product_images) ?>;
+
+		let currentIndex = 0; // ใช้ติดตามตำแหน่งปัจจุบันของภาพ
+
+		// เมื่อคลิก thumbnail เพื่อเปลี่ยนภาพ
+		$('.gallery-thumbnail').click(function() {
+			// เอา active ออกจากภาพเก่า
+			$('.gallery-thumbnail').removeClass('active');
+			// กำหนดให้ thumbnail ที่คลิกเป็น active
+			$(this).addClass('active');
+
+			// อัพเดต src ของภาพใน modal
+			$('#modal-image').attr('src', $(this).data('full-src'));
+
+			// อัพเดตตำแหน่งปัจจุบัน
+			currentIndex = $(this).data('index');
+		});
+
+		// คลิกปุ่มเลื่อนไปข้างหน้า (next)
+		$('.modal-next').click(function() {
+			currentIndex = (currentIndex + 1) % totalImages; // ทำให้เลื่อนไปเรื่อยๆ (วนลูป)
+			changeImage(currentIndex);
+		});
+
+		// คลิกปุ่มเลื่อนย้อนกลับ (prev)
+		$('.modal-prev').click(function() {
+			currentIndex = (currentIndex - 1 + totalImages) % totalImages; // เลื่อนไปย้อนกลับ (วนลูป)
+			changeImage(currentIndex);
+		});
+
+		// ฟังก์ชันในการเปลี่ยนภาพ
+		function changeImage(index) {
+			// เลือก thumbnail ที่ตรงกับ index
+			const selectedThumbnail = $('.gallery-thumbnail').eq(index);
+
+			// อัพเดต active class
+			$('.gallery-thumbnail').removeClass('active');
+			selectedThumbnail.addClass('active');
+
+			// อัพเดต src ของภาพใน modal
+			$('#modal-image').attr('src', selectedThumbnail.data('full-src'));
+		}
+	});
 </script>
