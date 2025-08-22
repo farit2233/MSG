@@ -1,0 +1,31 @@
+    .page-link {
+        display: block;
+        padding: 8px 16px;
+        color: #f57421;
+        /* สีข้อความหลัก (เลือกสีที่คุณต้องการ) */
+        text-decoration: none;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+    .page-link:hover {
+        background-color: #f1f1f1;
+        /* สีพื้นหลังตอน hover */
+        color: #f57421;
+        /* สีข้อความตอน hover */
+    }
+
+    .page-item.active .page-link {
+        background-color: #f57421;
+        /* สีพื้นหลังของปุ่มที่เลือก */
+        color: white;
+        border-color: #f57421;
+        /* สีเส้นขอบของปุ่มที่เลือก */
+    }
+
+    .page-item.disabled .page-link {
+        color: #ddd;
+        /* สีข้อความของปุ่มที่ไม่สามารถคลิกได้ */
+        pointer-events: none;
+    }

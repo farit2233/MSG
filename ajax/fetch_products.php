@@ -6,6 +6,13 @@ if (!isset($conn)) {
     die("Database connection not established.");
 }
 
+// === START: PAGINATION SETUP ===
+$limit = 20; // จำนวนสินค้าต่อหน้า
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
+$offset = ($page - 1) * $limit;
+// === END: PAGINATION SETUP ===
+
+
 // การเรียงลำดับ
 $order_by = "`pl`.`date_created` DESC";
 if (isset($_GET['sort'])) {
@@ -48,9 +55,24 @@ if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
     $additional_where .= " AND pp.promotion_id = {$pid}";
 }
 
+// === START: QUERY FOR TOTAL COUNT ===
+// สร้าง query เพื่อนับจำนวนสินค้าทั้งหมดที่ตรงตามเงื่อนไข
+$count_qry_str = "
+    SELECT COUNT(DISTINCT pl.id) as total_products
+    FROM product_list pl
+    INNER JOIN category_list cl ON pl.category_id = cl.id
+    LEFT JOIN promotion_products pp ON pp.product_id = pl.id
+    WHERE pl.status = 1 AND pl.delete_flag = 0
+    {$additional_where}
+";
+$count_qry = $conn->query($count_qry_str);
+$total_products = $count_qry->fetch_assoc()['total_products'];
+$total_pages = ceil($total_products / $limit);
+// === END: QUERY FOR TOTAL COUNT ===
 
-// ดึงรายการสินค้า พร้อม JOIN ตาราง category_list เพื่อใช้ product_type_id
-$qry = $conn->query("
+
+// ดึงรายการสินค้า พร้อม JOIN ตาราง category_list และเพิ่ม LIMIT OFFSET
+$qry_str = "
     SELECT pl.*,
         (
             COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = pl.id), 0)
@@ -63,7 +85,10 @@ $qry = $conn->query("
     {$additional_where}
     GROUP BY pl.id  -- Group by product id
     ORDER BY {$order_by}
-");
+    LIMIT {$limit} OFFSET {$offset} -- เพิ่มส่วนนี้เข้ามา
+";
+$qry = $conn->query($qry_str);
+
 
 // ฟังก์ชันแสดงราคาแบบไม่มี .00
 if (!function_exists('format_price_custom')) {
@@ -77,6 +102,7 @@ if (!function_exists('format_price_custom')) {
 // แสดง HTML
 ob_start();
 
+// ส่วนแสดงผลสินค้า (เหมือนเดิม)
 if ($qry->num_rows > 0):
     while ($row = $qry->fetch_assoc()):
         $in_stock = $row['available'] > 0;
@@ -121,7 +147,34 @@ if ($qry->num_rows > 0):
     <div class="col-12 text-center py-5">
         <p>ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
     </div>
-<?php endif;
+<?php endif; ?>
 
+<?php if ($total_pages > 1) { ?>
+    <div class="col-12 d-flex justify-content-center mt-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <!-- ปุ่มก่อนหน้า -->
+                <li class="page-item <?= ($page == 1) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="javascript:void(0)" data-page="<?= $page - 1 ?>" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                        <a class="page-link" href="javascript:void(0)" data-page="<?= $i ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <!-- ปุ่มถัดไป -->
+                <li class="page-item <?= ($page == $total_pages) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="javascript:void(0)" data-page="<?= $page + 1 ?>" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+<?php }
 echo ob_get_clean();
 ?>

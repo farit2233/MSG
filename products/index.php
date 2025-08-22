@@ -229,47 +229,76 @@ if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
         </div>
     </div>
 </section>
-
 <script>
-    // เก็บค่า category ID ปัจจุบันจาก PHP เพื่อใช้ใน JavaScript
-    var currentCid = "<?= $current_cid ?>";
-    var currentTid = "<?= $current_tid ?>";
-    var currentPid = "<?= $current_pid ?>"
+    $(document).ready(function() {
 
-    function sortProducts() {
-        var sortBy = $('#sort_by').val(); // ดึงค่าที่เลือกจาก dropdown
-        var productContainer = $('#product-list-container');
-        var loadingSpinner = $('#loading-spinner');
+        // เก็บค่า filter ID จาก PHP
+        var currentCid = "<?= $current_cid ?>";
+        var currentTid = "<?= $current_tid ?>";
+        var currentPid = "<?= $current_pid ?>";
 
-        // แสดง loading spinner
-        loadingSpinner.show();
-        productContainer.html(''); // เคลียร์เนื้อหาเก่า
+        // ฟังก์ชันหลักสำหรับโหลดสินค้า
+        function loadProducts(page = 1) {
+            var sortBy = $('#sort_by').val();
+            var productContainer = $('#product-list-container');
+            var loadingSpinnerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">กำลังโหลดสินค้า...</p>
+            </div>`;
 
-        $.ajax({
-            url: './ajax/fetch_products.php', // แก้ไขพาธนี้ให้ถูกต้อง (เช่น './products/fetch_products.php' หรือ './fetch_products.php')
-            method: 'GET',
-            data: {
-                sort: sortBy,
-                cid: currentCid,
-                tid: currentTid,
-                pid: currentPid
-            },
-            success: function(response) {
-                // ซ่อน loading spinner
-                loadingSpinner.hide();
-                productContainer.html(response); // นำ HTML ที่ได้มาใส่ใน container
-            },
-            error: function(xhr, status, error) {
-                // ซ่อน loading spinner
-                loadingSpinner.hide();
-                console.error("AJAX Error: ", status, error);
-                productContainer.html('<div class="col-12 text-center py-5 text-danger">เกิดข้อผิดพลาดในการโหลดสินค้า กรุณาลองใหม่อีกครั้ง</div>');
+            // แสดง loading spinner
+            productContainer.html(loadingSpinnerHTML);
+
+            // **หมายเหตุ:** แก้ไข path 'url' ให้ตรงกับที่อยู่ของไฟล์ fetch_product.php ของคุณ
+            $.ajax({
+                url: './ajax/fetch_products.php', // <-- **สำคัญมาก!** แก้ไข path ตรงนี้
+                method: 'GET',
+                data: {
+                    page: page, // ส่งเลขหน้าไปด้วย
+                    sort: sortBy,
+                    cid: currentCid,
+                    tid: currentTid,
+                    pid: currentPid
+                },
+                success: function(response) {
+                    // นำ HTML ที่ได้ (ทั้งสินค้าและเลขหน้า) มาแสดงผล
+                    productContainer.html(response);
+                    // เลื่อนหน้าจอขึ้นไปบนสุดของรายการสินค้า (เผื่อผู้ใช้คลิกจากเลขหน้าด้านล่าง)
+                    $('html, body').animate({
+                        scrollTop: productContainer.offset().top - 80 // -80 คือ offset เผื่อมี header fixed
+                    }, 'fast');
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error: ", status, error);
+                    productContainer.html('<div class="col-12 text-center py-5 text-danger">เกิดข้อผิดพลาดในการโหลดสินค้า กรุณาลองใหม่อีกครั้ง</div>');
+                }
+            });
+        }
+
+        // --- Event Listeners ---
+
+        // 1. โหลดสินค้าครั้งแรกเมื่อหน้าเว็บพร้อม (โหลดหน้า 1)
+        loadProducts(1);
+
+        // 2. เมื่อมีการเปลี่ยนการเรียงลำดับ ให้โหลดหน้า 1 ใหม่
+        $('#sort_by').on('change', function() {
+            loadProducts(1);
+        });
+
+        // 3. เมื่อมีการคลิกที่เลขหน้า (Pagination)
+        // ใช้ Event Delegation เพื่อให้ทำงานกับ element ของเลขหน้าที่ถูกโหลดมาทีหลังได้
+        $(document).on('click', '.pagination .page-link', function(e) {
+            e.preventDefault(); // ป้องกันไม่ให้หน้าเว็บรีโหลด
+
+            var page = $(this).data('page'); // ดึงเลขหน้าจาก attribute 'data-page'
+
+            if (page) {
+                loadProducts(page);
             }
         });
-    }
 
-    // เรียกใช้ฟังก์ชันเมื่อหน้าโหลดเสร็จครั้งแรก เพื่อแสดงสินค้าตามการเรียงลำดับเริ่มต้น
-    $(document).ready(function() {
-        sortProducts();
     });
 </script>
