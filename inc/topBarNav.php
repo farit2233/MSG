@@ -55,7 +55,6 @@ while ($type_row = $type_qry->fetch_assoc()) {
 }
 
 ?>
-
 <nav class="navbar navbar-expand-lg navbar-dark navbar-msg">
   <div class="container container-wide px-0 px-lg-0">
 
@@ -366,8 +365,10 @@ while ($type_row = $type_qry->fetch_assoc()) {
     <div class="modal-content modal-content-search minimalist-search-modal">
       <div class="modal-body">
         <form method="get" action="./" class="search-form-wrapper">
+
           <i class="fa fa-search search-icon"></i>
-          <input type="search" name="search" class="form-control search-input" placeholder="ค้นหา..." required autofocus>
+
+          <input type="search" name="search" class="form-control search-input-minimal" placeholder="ค้นหา..." required autofocus>
         </form>
       </div>
     </div>
@@ -472,7 +473,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     // ถ้าเป็นมือถือ → redirect ไป orders ทันที
     document.querySelector(".notif-bell").addEventListener("click", function(e) {
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 1180) {
         e.preventDefault(); // กัน dropdown เด้ง
         window.location.href = "./?p=orders";
       }
