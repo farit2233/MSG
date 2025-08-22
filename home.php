@@ -144,7 +144,7 @@
                                     ORDER BY 
                                         IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
                                         RAND() 
-                                    LIMIT 4
+                                    LIMIT 8
                                 ");
                             while ($row = $qry->fetch_assoc()):
                             ?>
@@ -236,7 +236,7 @@
                                     COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
                                 ORDER BY 
                                     `date_created` DESC 
-                                LIMIT 4
+                                LIMIT 8
                             ");
                             while ($row = $qry->fetch_assoc()):
                             ?>

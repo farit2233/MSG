@@ -21,6 +21,17 @@ WHERE p.id = '{$_GET['id']}' AND p.delete_flag = 0");
 		} else {
 			$max_order_qty = max(1, floor($available / 1));
 		}
+		$product_images = [];
+		// 1. เพิ่มรูปภาพหลักเป็นรูปแรกในอาร์เรย์
+		if (isset($image_path) && !empty($image_path)) {
+			$product_images[] = validate_image($image_path);
+		}
+
+		// 2. ดึงรูปภาพเพิ่มเติมจากตาราง product_image_path
+		$img_qry = $conn->query("SELECT * FROM `product_image_path` WHERE product_id = '{$id}' ORDER BY `id` ASC");
+		while ($row = $img_qry->fetch_assoc()) {
+			$product_images[] = validate_image($row['image_path']);
+		}
 	} else {
 		echo "<script>alert('You don't have access to this page'); location.replace('./');</script>";
 	}
@@ -42,408 +53,73 @@ if ($plat_q && $plat_q->num_rows > 0) {
 	$platform_links['tiktok'] = $row['tiktok_url'] ?? '';
 }
 
+
 ?>
 <style>
-	.breadcrumb {
-		font-size: 0.95rem;
-		background: none;
-		padding: 0;
-		margin-bottom: 1rem;
-	}
-
-	.breadcrumb-item+.breadcrumb-item::before {
-		content: "/";
-	}
-
-
-	.text-muted-FIXX-FIXX {
-		color: #202020;
-	}
-
-	.price {
-		font-size: 30px;
-		font-weight: normal;
-	}
-
-	.price-head {
-		font-weight: bold;
-	}
-
-	.price-n {
-		color: #f57421;
-		font-size: 40px;
-	}
-
-	.bg-price {
-		background-color: rgba(245, 116, 33, 0.1);
-		/* สีส้มโปร่งใส 30% */
-	}
-
-	.stock {
-		font-size: 18px;
-		font-weight: normal;
-	}
-
-	.stock-n {
-		font-size: 22px;
-	}
-
-	.product-info-sticky {
-		position: sticky;
-		top: 2rem;
-		z-index: 2;
-	}
-
-	.addcart-plus {
-		background: none;
-		color: #f57421;
-		border: 2px solid #f57421;
-		padding: 5px 15px;
-		margin-right: 1rem;
-	}
-
-	.addcart {
-		background: none;
-		color: #f57421;
-		border: 2px solid #f57421;
-		padding: 10px 50px;
-	}
-
-	.group-qty {
-		margin: 1rem 1rem;
-	}
-
-	.btn-shop {
-		min-width: 120px;
-		/* ความกว้างขั้นต่ำ */
-		text-align: center;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		font-size: 14px;
-
-		background: #f57421;
-		color: white;
-		border: 2px solid #f57421;
-		padding: 10px 20px;
-		margin-top: 0.5rem;
-		margin-bottom: 0.5rem;
-		margin-right: 0.5rem;
-		/* <-- เว้นระยะห่างขวา */
-		transition: all 0.2s ease-in-out;
-	}
-
-	.addcart:hover,
-	.addcart-plus:hover {
-		background-color: #f57421;
-		color: white;
-		display: inline-block;
-	}
-
-	.btn-shop:hover {
-		color: white;
-		filter: brightness(90%);
-	}
-
-	.plain-link {
-		color: inherit;
-		text-decoration: none;
-		cursor: pointer;
-		margin-left: 0.5rem;
-	}
-
-	.plain-link,
-	.plain-link:visited,
-	.plain-link:hover,
-	.plain-link:active {
-		color: inherit;
-		text-decoration: none;
-	}
-
-	.sku {
-		margin-left: 0.5rem;
-		font-weight: normal !important;
-	}
-
-
-	.product-img-holder {
-		width: 100%;
-		aspect-ratio: 1 / 1;
-		/* ทำให้กล่องภาพเป็นจัตุรัส */
-		overflow: hidden;
-		background: #f5f5f5;
-		position: relative;
-	}
-
-	.product-img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		object-position: center center;
-		transition: all .3s ease-in-out;
-	}
-
-	.product-item:hover .product-img {
-		transform: scale(1.1)
-	}
-
-	.bg-gradient-dark-FIXX {
-		background-color: #202020;
-	}
-
-	.banner-wrapper {
-		width: 100%;
-		height: auto;
-		object-fit: cover;
-		/* ครอบคลุมทั้งจอ */
-		display: block;
-	}
-
-	.banner-wrapper img {
-		width: 100%;
-		/* เต็มความกว้าง */
-		height: auto;
-		/* รักษาสัดส่วนภาพ */
-		display: block;
-		object-fit: cover;
-		/* หรือ contain แล้วแต่ภาพ */
-	}
-
-	.card-title {
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		/* จำนวนบรรทัด */
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-
-	.banner-price {
-		font-size: 20px;
-		color: #f57421;
-	}
-
-	.modal-content {
-		background-color: #fff;
-		/* หรือสีที่ต้องการ เช่น white */
-		border: none;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-		/* เพิ่มเงาเบา ๆ ถ้าอยากให้ลอย */
-	}
-
-	/* สำหรับป้ายสินค้าหมด */
-	.out-of-stock-label {
-		position: absolute;
-		top: 50%;
+	#productImageModal .modal-dialog {
+		max-width: 800px !important;
+		z-index: 1050 !important;
+		margin: auto;
+		position: fixed;
+		top: 28%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		background-color: rgba(255, 0, 0, 0.7);
-		/* สีแดงโปร่งแสง */
-		color: white;
-		padding: 8px 15px;
-		border-radius: 5px;
-		font-weight: bold;
-		z-index: 10;
-		/* ให้แสดงทับบนรูปภาพ */
-		text-align: center;
-		white-space: nowrap;
 	}
 
-	/* สำหรับสินค้าที่หมดสต็อก */
-	.out-of-stock .product-img {
-		filter: grayscale(100%);
-		/* ทำให้รูปภาพเป็นขาวดำ */
-		opacity: 0.6;
-		/* ทำให้รูปภาพจางลง */
-	}
-
-	/* อาจจะเพิ่ม Overlay เมื่อสินค้าหมด */
-	.out-of-stock .product-img-holder::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background-color: rgba(0, 0, 0, 0.3);
-		/* Overlay สีดำโปร่งแสง */
-		z-index: 5;
-		/* อยู่ใต้ label แต่ทับรูปภาพ */
-	}
-
-	.product-description-mobile {
-		display: none;
-	}
-
-	.product-specs {
-		font-size: 14px;
-		line-height: 1.6;
-		color: #000;
-	}
-
-	.spec-row {
+	.product-gallery {
 		display: flex;
-		justify-content: space-between;
-		padding: 6px 0;
-		border-bottom: 1px solid #f1f1f1;
+		flex-wrap: wrap;
+		gap: 10px;
+		/* ระยะห่างระหว่างรูป */
 	}
 
-	.spec-label {
-		color: #888;
-		/* สีเทาอ่อน */
-		flex: 0 0 40%;
-		word-break: break-word;
+	.gallery-thumbnail {
+		width: 80px;
+		height: 80px;
+		object-fit: cover;
+		cursor: pointer;
+		border: 2px solid #ddd;
+		border-radius: 4px;
+		transition: border-color 0.3s;
 	}
 
-	.spec-value {
-		flex: 1;
-		text-align: right;
-		font-weight: 500;
-		color: #333;
-		word-break: break-word;
-	}
-
-	.badge-sm {
-		font-size: 12px;
-		/* ลดขนาดฟอนต์ */
-		padding: 4px 5px;
-		/* ปรับ padding */
-		background-color: #f79c60;
-	}
-
-
-	.btn-readmore {
-		min-width: 120px;
-		/* ความกว้างขั้นต่ำ */
-		text-align: center;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		font-size: 14px;
-
-		background: #f57421;
-		color: white;
-		border: 2px solid #f57421;
-		padding: 10px 20px;
-		margin-top: 0.5rem;
-		margin-bottom: 0.5rem;
-		margin-right: 0.5rem;
-		/* <-- เว้นระยะห่างขวา */
-		transition: all 0.2s ease-in-out;
-	}
-
-	.btn-readmore:hover {
-		color: white;
-		filter: brightness(90%);
-	}
-
-	#text-pc {
-		max-height: 150px;
-		/* ย่อตามความเหมาะสม */
-		overflow: hidden;
-		transition: max-height 0.3s ease;
-		position: relative;
-	}
-
-	#text-pc.collapsed::after {
-		content: "";
+	/* Modal Navigation */
+	#productImageModal .modal-prev,
+	#productImageModal .modal-next {
+		cursor: pointer;
 		position: absolute;
-		bottom: 0;
+		top: 50%;
+		width: auto;
+		padding: 16px;
+		margin-top: -30px;
+		color: white;
+		font-weight: bold;
+		font-size: 24px;
+		transition: 0.3s ease;
+		border-radius: 0 3px 3px 0;
+		user-select: none;
+		background-color: rgba(0, 0, 0, 0.5);
+	}
+
+	#productImageModal .modal-next {
+		right: 0;
+		border-radius: 3px 0 0 3px;
+	}
+
+	#productImageModal .modal-prev {
 		left: 0;
-		width: 100%;
-		height: 50px;
-		background: linear-gradient(to bottom, rgba(255, 255, 255, 0), white);
 	}
 
-	#text-pc.expanded {
-		max-height: none;
+	#productImageModal .modal-prev:hover,
+	#productImageModal .modal-next:hover {
+		background-color: rgba(0, 0, 0, 0.8);
 	}
 
-	/* มือถือ */
-	#text-mobile {
-		max-height: 150px;
-		/* ย่อตามความเหมาะสม */
-		overflow: hidden;
-		transition: max-height 0.3s ease;
-		position: relative;
-	}
-
-	#text-mobile.collapsed::after {
-		content: "";
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		width: 100%;
-		height: 50px;
-		background: linear-gradient(to bottom, rgba(255, 255, 255, 0), white);
-	}
-
-	#text-mobile.expanded {
-		max-height: none;
-	}
-
-	.more-text {
-		line-height: 1.5;
-		/* หรือ 1.6, 1.8 ตามความเหมาะสม */
-	}
-
-
-	@media only screen and (max-width: 768px) {
-		.product-info-sticky {
-			position: static !important;
-		}
-
-		.price-n {
-			font-size: 28px;
-		}
-
-		.stock-n {
-			align-items: center;
-			font-size: 20px;
-		}
-
-		.addcart {
-			margin-top: 1rem;
-		}
-
-		.btn-shop,
-		.addcart {
-			width: 100%;
-			margin-right: 0 !important;
-			padding: 10px 0;
-		}
-
-		.modal-dialog.modal-lg {
-			max-width: 95% !important;
-		}
-
-		.product-description-mobile {
-			display: block;
-		}
-
-		.product-description-mobile-pc {
-			display: none;
-		}
-
-		.product-specs {
-			font-size: 14px;
-			line-height: 1.6;
-			color: #000;
-		}
-
-		.spec-row {
-			display: flex;
-			justify-content: space-between;
-			padding: 12px 0;
-			border-bottom: 1px solid #f1f1f1;
-		}
-
-		.spec-label {
-			color: #888;
-			/* สีเทาอ่อน */
-			flex: 0 0 50%;
-			word-break: break-word;
-		}
-
+	.image-modal {
+		width: 70%;
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
 	}
 </style>
 <section class="py-3">
@@ -471,7 +147,15 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											class="img-thumbnail p-0 border w-100"
 											id="product-img">
 									</a>
-
+									<div class="product-gallery mt-2">
+										<?php foreach ($product_images as $index => $img_src): ?>
+											<img src="<?= $img_src ?>"
+												alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
+												class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
+												data-full-src="<?= $img_src ?>"
+												data-index="<?= $index ?>">
+										<?php endforeach; ?>
+									</div>
 									<!----------------- Desktop ----------------->
 									<div class="product-description-mobile-pc mt-3">
 										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
@@ -724,26 +408,68 @@ if ($plat_q && $plat_q->num_rows > 0) {
 							</button>
 
 							<div class="modal-body p-0 text-center">
-								<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
-									alt="<?= isset($name) ? $name : '' ?>"
-									class="img-fluid rounded">
+								<div class="modal-body p-0 text-center image-modal">
+									<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
+										alt="<?= isset($name) ? $name : '' ?>"
+										class="img-fluid rounded">
+								</div>
+								<div class="product-gallery mt-2">
+									<?php foreach ($product_images as $index => $img_src): ?>
+										<img src="<?= $img_src ?>"
+											alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
+											class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
+											data-full-src="<?= $img_src ?>"
+											data-index="<?= $index ?>">
+									<?php endforeach; ?>
+								</div>
+
+								<a class="modal-prev"><i class="fa-solid fa-chevron-left"></i></a>
+								<a class="modal-next"><i class="fa-solid fa-chevron-right"></i></a>
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+						<div class="modal-content position-relative bg-transparent border-0">
+							<button type="button" class="close position-absolute" style="right: -25px; top: -25px; z-index: 10; color: white; opacity: 1; font-size: 2rem;" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+
+							<div class="modal-body p-0 text-center">
+								<div class="modal-body p-0 text-center image-modal">
+									<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
+										alt="<?= isset($name) ? $name : '' ?>"
+										class="img-fluid rounded">
+								</div>
+								<div class="product-gallery mt-2">
+									<?php foreach ($product_images as $index => $img_src): ?>
+										<img src="<?= $img_src ?>"
+											alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
+											class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
+											data-full-src="<?= $img_src ?>"
+											data-index="<?= $index ?>">
+									<?php endforeach; ?>
+								</div>
+
+								<a class="modal-prev">&#10094;</a>
+								<a class="modal-next">&#10095;</a>
 							</div>
 						</div>
 					</div>
 				</div>
-
-
 			</div>
 
 			<!--------------------สินค้าที่เกี่ยวข้อง--------------------->
 			<?php
 			// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
 			$related = $conn->query("SELECT *, 
-(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
-- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
-FROM `product_list` 
-WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
-ORDER BY RAND() LIMIT 4");
+			(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
+			- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+			FROM `product_list` 
+			WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
+			ORDER BY RAND() LIMIT 4");
 
 			// ============== โค้ดที่แก้ไข เริ่มต้นที่นี่ ==============
 
@@ -812,7 +538,8 @@ ORDER BY RAND() LIMIT 4");
 					</div>
 				</div>
 			<?php endif; ?>
-
+		</div>
+	</div>
 </section>
 <script>
 	document.addEventListener("DOMContentLoaded", function() {

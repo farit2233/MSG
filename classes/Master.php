@@ -317,16 +317,67 @@ class Master extends DBConnection
 					}
 				}
 			}
+			if (isset($_FILES['gallery_imgs']) && is_array($_FILES['gallery_imgs']['name'])) {
+				$gallery_path = "uploads/products/"; // ใช้โฟลเดอร์เดียวกับรูปหลัก หรือเปลี่ยนได้ตามต้องการ
+				if (!is_dir(base_app . $gallery_path)) {
+					mkdir(base_app . $gallery_path, 0777, true);
+				}
+				$accept = ['image/jpeg', 'image/png', 'image/jpg'];
+
+				foreach ($_FILES['gallery_imgs']['name'] as $key => $filename) {
+					// ตรวจสอบว่ามีไฟล์ถูกอัปโหลดมาจริงหรือไม่
+					if (!empty($_FILES['gallery_imgs']['tmp_name'][$key])) {
+						$file_type = $_FILES['gallery_imgs']['type'][$key];
+
+						if (!in_array($file_type, $accept)) {
+							$resp['msg'] .= " | ไฟล์แกลเลอรี '{$filename}' มีประเภทไม่ถูกต้อง";
+							continue; // ข้ามไปไฟล์ถัดไป
+						}
+
+						// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำกัน
+						$file_ext = pathinfo($filename, PATHINFO_EXTENSION);
+						$new_filename = uniqid('gallery_', true) . '.' . $file_ext;
+						$target_path = $gallery_path . $new_filename;
+
+						// ย้ายไฟล์ที่อัปโหลดไปยังตำแหน่งที่ต้องการ
+						if (move_uploaded_file($_FILES['gallery_imgs']['tmp_name'][$key], base_app . $target_path)) {
+							// บันทึก path ลงในตาราง product_image_path
+							$escaped_path = $this->conn->real_escape_string($target_path);
+							$this->conn->query("INSERT INTO `product_image_path` (product_id, image_path) VALUES ('{$product_id}', '{$escaped_path}')");
+						} else {
+							$resp['msg'] .= " | ไม่สามารถอัปโหลดไฟล์แกลเลอรี '{$filename}' ได้";
+						}
+					}
+				}
+			}
 		} else {
 			return json_encode(['status' => 'failed', 'err' => $this->conn->error . " [{$sql}]"]);
 		}
-
-
 
 		// Flash message
 		if ($resp['status'] == 'success' && isset($resp['msg']))
 			$this->settings->set_flashdata('success', $resp['msg']);
 
+		return json_encode($resp);
+	}
+
+	function delete_gallery_image()
+	{
+		extract($_POST);
+		$qry = $this->conn->query("SELECT * FROM `product_image_path` where id = '{$id}'");
+		if ($qry->num_rows > 0) {
+			$res = $qry->fetch_array();
+			$path = base_app . $res['path'];
+		}
+		$del = $this->conn->query("DELETE FROM `product_image_path` where id = '{$id}'");
+		if ($del) {
+			if (isset($path) && is_file($path))
+				unlink($path);
+			$resp['status'] = 'success';
+		} else {
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
 		return json_encode($resp);
 	}
 
@@ -1981,6 +2032,9 @@ switch ($action) {
 		break;
 	case 'delete_product':
 		echo $Master->delete_product();
+		break;
+	case 'delete_gallery_image':
+		echo $Master->delete_gallery_image();
 		break;
 	case 'save_stock':
 		echo $Master->save_stock();
