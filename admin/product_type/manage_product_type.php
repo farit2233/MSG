@@ -38,6 +38,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="form-group">
                         <label for="description">รายละเอียด</label>
                         <textarea rows="3" name="description" id="description" class="form-control"><?php echo isset($description) ? $description : ''; ?></textarea>
+                        <input type="checkbox" id="other" name="other" value="1" <?= (isset($other) && $other == 1) ? 'checked' : '' ?>>
+                        <label for="other">เปิด / ปิดการใช้สถานะประเภทสินค้าอื่น ๆ <small>*เปิดใช้งานเพื่อให้หมวดหมู่นี้แสดงอยู่ท้ายสุด</small></label>
                     </div>
                 </div>
             </div>
@@ -49,7 +51,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <input type="hidden" name="status" value="0">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" <?= (isset($status) && $status == 1) ? 'checked' : '' ?>>
-                        <label class="custom-control-label" for="status">เปิด/ปิดการใช้งานประเภทสินค้า</label>
+                        <label class="custom-control-label" for="status">เปิด / ปิดการใช้งานประเภทสินค้า</label>
                     </div>
                 </div>
             </div>

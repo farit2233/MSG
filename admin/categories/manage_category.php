@@ -54,6 +54,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 								</option>
 							<?php endwhile; ?>
 						</select>
+						<input type="checkbox" id="other" name="other" value="1" <?= (isset($other) && $other == 1) ? 'checked' : '' ?>>
+						<label for="other">เปิด / ปิดการใช้สถานะประเภทสินค้าอื่น ๆ <small>*เปิดใช้งานเพื่อให้หมวดหมู่นี้แสดงอยู่ท้ายสุด</small></label>
 					</div>
 				</div>
 			</div>
