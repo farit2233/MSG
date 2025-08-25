@@ -639,7 +639,7 @@
   }
 
   .modal-dialog-search {
-    margin-top: 200px !important;
+    margin-top: 300px !important;
     width: 100% !important;
     margin-left: auto !important; /* ใช้เพื่อทำให้ modal เคลื่อนที่ไปทางขวาสุด */
     margin-right: auto !important; /* ใช้เพื่อทำให้ modal เคลื่อนที่ไปทางซ้ายสุด */
