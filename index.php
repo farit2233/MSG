@@ -33,17 +33,6 @@
   ?>
 
   <?php require_once('inc/footer.php') ?>
-  <style>
-    #uni_modal_order .modal-dialog {
-      max-width: 800px !important;
-      z-index: 1050 !important;
-      margin: auto;
-      position: fixed;
-      top: 28%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-  </style>
   <div class="modal fade" id="uni_modal" role='dialog'>
     <div class="modal-dialog   rounded-0 modal-md modal-dialog-centered" role="document">
       <div class="modal-content  rounded-0">
