@@ -2,13 +2,17 @@
 $product_structure = [];
 
 $type_qry = $conn->query("SELECT * FROM `product_type` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
+$product_structure = [];
+$other_types = [];
 while ($type_row = $type_qry->fetch_assoc()) {
   $tid = $type_row['id'];
+  $is_other = $type_row['other']; // ตรวจสอบค่า other
   $product_structure[$tid] = [
     'name' => $type_row['name'],
     'categories' => []
   ];
 
+  // ดึงข้อมูล category_list
   $cat_qry = $conn->query("SELECT * FROM `category_list` WHERE `status` = 1 AND `delete_flag` = 0 AND `product_type_id` = {$tid} ORDER BY `date_created` ASC");
   while ($cat_row = $cat_qry->fetch_assoc()) {
     $product_structure[$tid]['categories'][] = [
@@ -16,8 +20,16 @@ while ($type_row = $type_qry->fetch_assoc()) {
       'name' => $cat_row['name']
     ];
   }
+
+  // ถ้าเป็น product_type ที่มี other = 1 ให้เก็บไว้ใน $other_types
+  if ($is_other == 1) {
+    $other_types[$tid] = $product_structure[$tid];
+    unset($product_structure[$tid]);
+  }
 }
 
+// รวม product_type ที่มี other = 1 ไว้ท้ายสุด
+$product_structure = array_merge($product_structure, $other_types);
 $promotion_structure = [];
 
 // Query เพื่อดึงข้อมูลของหมวดหมู่โปรโมชั่น
