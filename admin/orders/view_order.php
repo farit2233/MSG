@@ -1,7 +1,9 @@
 <?php
+$gt = 0; // กำหนดค่าเริ่มต้นให้กับ $gt ที่นี่
+
+// ดึงข้อมูลคำสั่งซื้อ
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    // สมมติว่าตาราง order_list มีคอลัมน์ promotion_id
-    $qry = $conn->query("SELECT ol.*, ol.promotion_id FROM `order_list` ol where ol.id = '{$_GET['id']}' ");
+    $qry = $conn->query("SELECT ol.*, ol.promotion_id, ol.coupon_code_id FROM `order_list` ol WHERE ol.id = '{$_GET['id']}' ");
     if ($qry->num_rows > 0) {
         foreach ($qry->fetch_assoc() as $k => $v) {
             $$k = $v;
@@ -56,6 +58,71 @@ if (!empty($shipping_methods_id)) {
         $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
     }
 }
+
+$promo_discount_amount = 0;
+$promotion_name = '';
+
+if (!empty($promotion_id)) {
+    $promo_qry = $conn->query("SELECT * FROM `promotions_list` WHERE id = '{$promotion_id}' AND status = 1");
+    if ($promo_qry->num_rows > 0) {
+        $promo_data = $promo_qry->fetch_assoc();
+        if ($gt >= $promo_data['minimum_order']) {
+            $promotion_name = $promo_data['name'];
+            switch ($promo_data['type']) {
+                case 'percent':
+                    $promo_discount_amount = ($gt * $promo_data['discount_value']) / 100;
+                    break;
+                case 'fixed':
+                    $promo_discount_amount = $promo_data['discount_value'];
+                    break;
+                case 'free_shipping':
+                    $shipping_cost = 0;
+                    break;
+            }
+        }
+    }
+}
+
+// --- คำนวณส่วนลดคูปอง ---
+$coupon_discount_amount = 0;
+$coupon_name = '';
+
+if (!empty($coupon_code_id)) {
+    $coupon_qry = $conn->query("SELECT * FROM `coupon_code_list` WHERE id = '{$coupon_code_id}' AND status = 1");
+    if ($coupon_qry->num_rows > 0) {
+        $coupon_data = $coupon_qry->fetch_assoc();
+
+        // คำนวณยอดที่ใช้ตรวจสอบขั้นต่ำหลังจากหักส่วนลดโปรโมชั่นแล้ว
+        $subtotal_for_coupon_check = $gt - $promo_discount_amount;
+
+        if ($subtotal_for_coupon_check >= $coupon_data['minimum_order']) {
+            $coupon_name = $coupon_data['name'];
+            switch ($coupon_data['type']) {
+                case 'percent':
+                    // ส่วนลดเปอร์เซ็นต์จากยอดหลังหักโปรโมชั่น
+                    $coupon_discount_amount = ($subtotal_for_coupon_check * $coupon_data['discount_value']) / 100;
+                    break;
+                case 'fixed':
+                    $coupon_discount_amount = $coupon_data['discount_value'];
+                    break;
+                case 'free_shipping':
+                    $shipping_cost = 0; // ตั้งค่าส่งเป็น 0
+                    break;
+            }
+        }
+    }
+}
+
+// --- คำนวณยอดรวมสุดท้าย ---
+$original_shipping_cost = 0; // ดึงค่าส่งเดิมมาแสดง
+if (!empty($shipping_methods_id)) {
+    $cost_qry_orig = $conn->query("SELECT price FROM shipping_prices WHERE shipping_methods_id = '{$shipping_methods_id}' AND {$total_weight} BETWEEN min_weight AND max_weight LIMIT 1");
+    if ($cost_qry_orig->num_rows > 0) {
+        $original_shipping_cost = (float)$cost_qry_orig->fetch_assoc()['price'];
+    }
+}
+
+$grand_total = ($gt - $promo_discount_amount - $coupon_discount_amount) + $shipping_cost;
 ?>
 
 <style>
@@ -318,19 +385,27 @@ if (!empty($shipping_methods_id)) {
                                 <div class="col-auto">
                                     <div class="text-right">
                                         <h5>ยอดรวม: <?= format_num($gt, 2) ?> บาท</h5>
+                                        <h5>ค่าจัดส่ง: <?= format_num($original_shipping_cost, 2) ?> บาท</h5>
 
-                                        <?php if ($shipping_discount > 0): ?>
-                                            <h5>ค่าจัดส่ง: <span><?= format_num($original_shipping_cost, 2) ?></span> บาท</h5>
+                                        <?php if (!empty($promotion_name)): ?>
                                             <h5>
-                                                ส่วนลด : <?= htmlspecialchars($promotion_name) ?> (-<?= format_num($shipping_discount, 2) ?> บาท)
+                                                ส่วนลดโปรโมชั่น: <?= htmlspecialchars($promotion_name) ?>
+                                                <?php if ($promo_discount_amount > 0): ?>
+                                                    (-<?= format_num($promo_discount_amount, 2) ?> บาท)
+                                                <?php elseif ($promo_data['type'] == 'free_shipping'): ?>
+                                                    (ส่งฟรี)
+                                                <?php endif; ?>
                                             </h5>
-                                        <?php else: ?>
-                                            <h5>ค่าจัดส่ง: <?= format_num($original_shipping_cost, 2) ?> บาท</h5>
                                         <?php endif; ?>
 
-                                        <?php if ($discount_amount > 0): ?>
+                                        <?php if (!empty($coupon_name)): ?>
                                             <h5>
-                                                ส่วนลด : <?= htmlspecialchars($promotion_name) ?> (-<?= format_num($discount_amount, 2) ?> บาท)
+                                                ส่วนลดคูปอง: <?= htmlspecialchars($coupon_name) ?>
+                                                <?php if ($coupon_discount_amount > 0): ?>
+                                                    (-<?= format_num($coupon_discount_amount, 2) ?> บาท)
+                                                <?php elseif ($coupon_data['type'] == 'free_shipping' && $original_shipping_cost > 0): ?>
+                                                    (ส่งฟรี)
+                                                <?php endif; ?>
                                             </h5>
                                         <?php endif; ?>
 
