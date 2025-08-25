@@ -124,7 +124,19 @@ exit;
         z-index: 2;
     }
 
-    @media (max-width: 576px) {
+    @media (max-width: 431px) {
+
+        .cart-item h4,
+        .cart-item h5,
+        .cart-item .text-muted {
+            font-size: 14px !important;
+            line-height: 1.2;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+    }
+
+    @media (max-width: 932px) {
 
         .cart-item {
             flex-direction: column !important;
@@ -170,7 +182,7 @@ exit;
         .cart-item h4,
         .cart-item h5,
         .cart-item .text-muted {
-            font-size: 14px;
+            font-size: 22px;
             line-height: 1.2;
             white-space: normal;
             word-wrap: break-word;
