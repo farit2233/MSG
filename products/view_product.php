@@ -471,7 +471,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 
 				<!-- Modal รูปสินค้า -->
 				<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-hidden="true">
-					<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+					<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-image" role="document">
 						<div class="modal-content position-relative">
 							<button type="button" class="close position-absolute" style="right: 10px; top: 10px; z-index: 10;" data-dismiss="modal" aria-label="Close">
 								<i class="fa fa-times"></i>

@@ -559,7 +559,7 @@
     box-shadow: none !important;
   }
 
-  .minimalist-search-modal .modal-body {
+  .minimalist-search-modal{
     padding: 1rem;
     position: relative;
   }
