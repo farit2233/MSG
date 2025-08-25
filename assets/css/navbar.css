@@ -587,13 +587,44 @@
     border-bottom: 2px solid #f57421;
     border-radius: 0;
     padding: 0.5rem 0.5rem 0.5rem 35px;
-    font-size: 16px;
+    font-size: 14px;
     outline: none !important;
     box-shadow: none !important;
     -webkit-appearance: none;
     /* Safari/Chrome บางเวอร์ชัน */
   }
+  
+  .search-input-minimal input[type="text"] {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 0 42px 0 12px;
+    font-size: 14px;
+    display: inline-block;
+    box-sizing: border-box;
+  }
 
+  .search-input-minimal button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 42px;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: #f57421;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+  
   /* ทำให้ placeholder เป็นสีเทาจางๆ */
   .search-input-minimal::placeholder {
     color: rgba(255, 255, 255, 0.7);
@@ -607,8 +638,14 @@
     box-shadow: none !important;
   }
 
-  .modal-dialog {
-    margin-top: 190px !important;
+  .modal-dialog-search {
+    margin-top: 200px !important;
+    width: 100% !important;
+    margin-left: auto !important; /* ใช้เพื่อทำให้ modal เคลื่อนที่ไปทางขวาสุด */
+    margin-right: auto !important; /* ใช้เพื่อทำให้ modal เคลื่อนที่ไปทางซ้ายสุด */
+    position: absolute !important; /* ใช้เพื่อให้ modal อยู่ในตำแหน่ง absolute */
+    left: 50% !important; /* ทำให้ modal อยู่ตรงกลางแนวนอน */
+    transform: translate( -50%) !important; /* ปรับตำแหน่งให้แน่ใจว่าอยู่ตรงกลาง */
   }
 
 

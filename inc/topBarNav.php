@@ -361,14 +361,15 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
 <!-- Modal ช่องค้นหา -->
 <div class="modal fade" id="mobileSearchModal" tabindex="-5" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm mt-5">
+  <div class="modal-dialog modal-dialog-search modal-md mt-5">
     <div class="modal-content modal-content-search minimalist-search-modal">
       <div class="modal-body">
-        <form method="get" action="./" class="search-form-wrapper">
+        <form method="get" action="./" class="search-input-minimal">
+          <input type="text" name="search" class="form-control " placeholder="ค้นหา..." required autofocus>
+          <button type="submit" title="ค้นหา">
+            <i class="fa fa-search search-icon"></i>
+          </button>
 
-          <i class="fa fa-search search-icon"></i>
-
-          <input type="search" name="search" class="form-control search-input-minimal" placeholder="ค้นหา..." required autofocus>
         </form>
       </div>
     </div>
