@@ -91,6 +91,7 @@ if ($cpromo == 1) {
     }
 </style>
 <!-- แสดงคูปองแค่ 1 อัน -->
+
 <div class="container d-flex justify-content-center">
     <div class="card" style="width: 16.5rem;">
         <div class="card-img" style="position: relative;">
@@ -180,6 +181,9 @@ if ($cpromo == 1) {
             <p>ข้อกำหนดและเงื่อนไขอื่น ๆ เป็นไปตามที่บริษัทกำหนด</p>
         </li>
     </ul>
+</div>
+</div>
+</div>
 </div>
 <script>
 

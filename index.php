@@ -31,7 +31,6 @@
       include $page . '.php';
   }
   ?>
-
   <?php require_once('inc/footer.php') ?>
   <div class="modal fade" id="uni_modal" role='dialog'>
     <div class="modal-dialog   rounded-0 modal-md modal-dialog-centered" role="document">
@@ -87,13 +86,13 @@
     </div>
   </div>
 
-  <div class="modal fade" id="uni_modal_conditions" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+  <div class="modal fade modal-conditions" id="uni_modal_conditions" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg " role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title"></h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true"><i class="fa-solid fa-x"></i></span>
+          <button type="button" class="close position-absolute" style="right: 10px; top: 10px; z-index: 10;" data-dismiss="modal" aria-label="Close">
+            <i class="fa fa-times"></i>
           </button>
         </div>
         <div class="modal-body">

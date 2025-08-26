@@ -175,3 +175,6 @@
         text-decoration: none; /* ยกเลิกการขีดเส้นใต้ของลิงก์ */
         color: inherit; /* ทำให้ข้อความมีสีเหมือนกับข้อความธรรมดา */
     }
+    .modal-conditions {
+      margin-top: 110px !important ;
+    }

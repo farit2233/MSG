@@ -76,34 +76,6 @@
         }
       })
     }
-    window.uni_modal_conditions = function($title = '', $url = '', $size = "") {
-      start_loader()
-      $.ajax({
-        url: $url,
-        error: err => {
-          console.log()
-          alert("An error occured")
-        },
-        success: function(resp) {
-          if (resp) {
-            $('#uni_modal_conditions .modal-title').html($title)
-            $('#uni_modal_conditions .modal-body').html(resp)
-            if ($size != '') {
-              $('#uni_modal_conditions .modal-dialog').addClass($size + '  modal-dialog-centered')
-            } else {
-              $('#uni_modal_conditions .modal-dialog').removeAttr("class").addClass("modal-dialog modal-md modal-dialog-centered")
-            }
-            $('#uni_modal_conditions').modal({
-              show: true,
-              backdrop: 'static',
-              keyboard: false,
-              focus: true
-            })
-            end_loader()
-          }
-        }
-      })
-    }
     window._conf = function($msg = '', $func = '', $params = []) {
       $('#confirm_modal #confirm').attr('onclick', $func + "(" + $params.join(',') + ")")
       $('#confirm_modal .modal-body').html($msg)

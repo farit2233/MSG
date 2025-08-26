@@ -70,7 +70,7 @@
               }
               $('#uni_modal_conditions').modal({
                 show: true,
-                backdrop: 'static',
+                backdrop: 'true',
                 keyboard: false,
                 focus: true
               })
