@@ -98,7 +98,7 @@
               }
               $('#uni_modal_order').modal({
                 show: true,
-                backdrop: 'static',
+                backdrop: 'true',
                 keyboard: false,
                 focus: true
               })

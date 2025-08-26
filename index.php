@@ -107,8 +107,8 @@
       <div class="modal-content rounded-0">
         <div class="modal-header">
           <h5 class="modal-title"></h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true"><i class="fa-solid fa-x"></i></span>
+          <button type="button" class="close position-absolute" style="right: 10px; top: 10px; z-index: 10;" data-dismiss="modal" aria-label="Close">
+            <i class="fa fa-times"></i>
           </button>
         </div>
         <div class="modal-body">
