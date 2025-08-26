@@ -650,23 +650,25 @@ class Master extends DBConnection
 			if (empty($cart_data)) throw new Exception('ไม่พบรายการสินค้าที่ตรงกันในตะกร้า');
 
 			// --- คำนวณค่าขนส่งตามน้ำหนักรวม (Backend) ---
+			$shipping_prices_id = 0;
 			$shipping_cost = 0;
 			$selected_shipping_method_id = isset($_POST['shipping_methods_id']) ? intval($_POST['shipping_methods_id']) : 0;
 			if ($selected_shipping_method_id <= 0) {
 				throw new Exception('กรุณาเลือกวิธีการจัดส่ง');
 			}
-
 			if ($total_weight > 0) {
 				$shipping_qry = $this->conn->query("
-            SELECT price FROM `shipping_prices` 
-            WHERE `shipping_methods_id` = '{$selected_shipping_method_id}' 
-              AND '{$total_weight}' >= min_weight 
-              AND '{$total_weight}' <= max_weight
-            LIMIT 1
-        ");
+					SELECT id, price 
+					FROM `shipping_prices` 
+					WHERE `shipping_methods_id` = '{$selected_shipping_method_id}' 
+					AND '{$total_weight}' >= min_weight 
+					AND '{$total_weight}' <= max_weight
+					LIMIT 1
+				");
 				if ($shipping_qry->num_rows > 0) {
 					$shipping_data = $shipping_qry->fetch_assoc();
 					$shipping_cost = floatval($shipping_data['price']);
+					$shipping_prices_id = $shipping_data['id'];  // เก็บ ID ของ shipping_prices
 				} else {
 					throw new Exception("ไม่สามารถคำนวณค่าจัดส่งได้สำหรับน้ำหนักรวม {$total_weight} กรัม กรุณาติดต่อร้านค้า");
 				}
@@ -808,9 +810,9 @@ class Master extends DBConnection
 
 			// --- ✨ บันทึกข้อมูลลง order_list (แก้ไข Query) ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-            (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`) 
+            (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`,shipping_prices_id, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`) 
             VALUES 
-            ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id}, {$applied_promo_id}, {$applied_coupon_id}, 0, 0, 0)");
+            ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id},{$shipping_prices_id}, {$applied_promo_id}, {$applied_coupon_id}, 0, 0, 0)");
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
 			$oid = $this->conn->insert_id;

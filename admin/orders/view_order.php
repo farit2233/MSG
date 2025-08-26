@@ -3,7 +3,8 @@ $gt = 0; // กำหนดค่าเริ่มต้นให้กับ $
 
 // ดึงข้อมูลคำสั่งซื้อ
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $qry = $conn->query("SELECT ol.*, ol.promotion_id, ol.coupon_code_id FROM `order_list` ol WHERE ol.id = '{$_GET['id']}' ");
+    // ### MODIFIED QUERY: ไม่จำเป็นต้องระบุคอลัมน์ซ้ำซ้อน แค่ ol.* ก็พอ ###
+    $qry = $conn->query("SELECT ol.* FROM `order_list` ol WHERE ol.id = '{$_GET['id']}' ");
     if ($qry->num_rows > 0) {
         foreach ($qry->fetch_assoc() as $k => $v) {
             $$k = $v;
@@ -11,7 +12,29 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     }
 }
 
-// ชื่อลูกค้า
+$promotion_name = '';
+if (!empty($promotion_id)) {
+    // คิวรีหาชื่อโปรโมชั่นจาก promotion_id ที่ได้มา
+    $promo_qry = $conn->query("SELECT name FROM `promotions_list` WHERE id = '{$promotion_id}'");
+    if ($promo_qry->num_rows > 0) {
+        $promotion_name = $promo_qry->fetch_assoc()['name'];
+    } else {
+        $promotion_name = "โปรโมชั่นที่ถูกลบไปแล้ว";
+    }
+}
+
+$coupon_name = '';
+if (!empty($coupon_code_id)) {
+    // คิวรีหาชื่อ/โค้ดคูปองจาก coupon_code_id ที่ได้มา
+    // สมมติว่าตารางชื่อ coupon_code_list และคอลัมน์ที่เก็บโค้ดชื่อ code
+    $coupon_qry = $conn->query("SELECT coupon_code FROM `coupon_code_list` WHERE id = '{$coupon_code_id}'");
+    if ($coupon_qry->num_rows > 0) {
+        $coupon_name = $coupon_qry->fetch_assoc()['coupon_code'];
+    } else {
+        $coupon_name = "คูปองที่ถูกลบไปแล้ว";
+    }
+}
+
 $customer_name = '';
 if (!empty($customer_id)) {
     $cus = $conn->query("SELECT CONCAT(firstname, ' ', middlename, ' ', lastname,' ',contact) AS fullname FROM customer_list WHERE id = '{$customer_id}'");
@@ -33,25 +56,32 @@ if (!empty($shipping_methods_id)) {
 }
 
 $total_weight = 0;
-$weight_qry = $conn->query("
-    SELECT
-        oi.quantity,
-        p.product_weight
-    FROM order_items oi
-    INNER JOIN product_list p ON oi.product_id = p.id
-    WHERE oi.order_id = '{$id}'
-");
-while ($w = $weight_qry->fetch_assoc()) {
-    $total_weight += ($w['product_weight'] * $w['quantity']);
+if (isset($id)) {
+    $weight_qry = $conn->query("
+        SELECT
+            oi.quantity,
+            p.product_weight
+        FROM order_items oi
+        INNER JOIN product_list p ON oi.product_id = p.id
+        WHERE oi.order_id = '{$id}'
+    ");
+    while ($w = $weight_qry->fetch_assoc()) {
+        $total_weight += ($w['product_weight'] * $w['quantity']);
+    }
 }
 
 $shipping_cost = 0.00;
-if (!empty($shipping_methods_id)) {
+if (!empty($shipping_prices_id)) {
+    // ### MODIFIED: ดึงค่าจัดส่งจาก shipping_prices_id ที่บันทึกไว้ใน order_list โดยตรง ###
+    $cost_qry = $conn->query("SELECT price FROM shipping_prices WHERE id = '{$shipping_prices_id}'");
+    if ($cost_qry && $cost_qry->num_rows > 0) {
+        $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
+    }
+} elseif (!empty($shipping_methods_id)) {
+    // Fallbackเผื่อกรณีที่ไม่ได้บันทึก shipping_prices_id แต่มี methods_id
     $cost_qry = $conn->query("
         SELECT price FROM shipping_prices
-        WHERE
-            shipping_methods_id = '{$shipping_methods_id}'
-            AND {$total_weight} BETWEEN min_weight AND max_weight
+        WHERE shipping_methods_id = '{$shipping_methods_id}' AND {$total_weight} BETWEEN min_weight AND max_weight
         LIMIT 1
     ");
     if ($cost_qry && $cost_qry->num_rows > 0) {
@@ -59,99 +89,11 @@ if (!empty($shipping_methods_id)) {
     }
 }
 
-$promo_discount_amount = 0;
-$promotion_name = '';
-
-if (!empty($promotion_id)) {
-    $promo_qry = $conn->query("SELECT * FROM `promotions_list` WHERE id = '{$promotion_id}' AND status = 1");
-    if ($promo_qry->num_rows > 0) {
-        $promo_data = $promo_qry->fetch_assoc();
-        if ($gt >= $promo_data['minimum_order']) {
-            $promotion_name = $promo_data['name'];
-            switch ($promo_data['type']) {
-                case 'percent':
-                    $promo_discount_amount = ($gt * $promo_data['discount_value']) / 100;
-                    break;
-                case 'fixed':
-                    $promo_discount_amount = $promo_data['discount_value'];
-                    break;
-                case 'free_shipping':
-                    $shipping_cost = 0;
-                    break;
-            }
-        }
-    }
-}
-
-// --- คำนวณส่วนลดคูปอง ---
-$coupon_discount_amount = 0;
-$coupon_name = '';
-
-if (!empty($coupon_code_id)) {
-    $coupon_qry = $conn->query("SELECT * FROM `coupon_code_list` WHERE id = '{$coupon_code_id}' AND status = 1");
-    if ($coupon_qry->num_rows > 0) {
-        $coupon_data = $coupon_qry->fetch_assoc();
-
-        // คำนวณยอดที่ใช้ตรวจสอบขั้นต่ำหลังจากหักส่วนลดโปรโมชั่นแล้ว
-        $subtotal_for_coupon_check = $gt - $promo_discount_amount;
-
-        if ($subtotal_for_coupon_check >= $coupon_data['minimum_order']) {
-            $coupon_name = $coupon_data['name'];
-            switch ($coupon_data['type']) {
-                case 'percent':
-                    // ส่วนลดเปอร์เซ็นต์จากยอดหลังหักโปรโมชั่น
-                    $coupon_discount_amount = ($subtotal_for_coupon_check * $coupon_data['discount_value']) / 100;
-                    break;
-                case 'fixed':
-                    $coupon_discount_amount = $coupon_data['discount_value'];
-                    break;
-                case 'free_shipping':
-                    $shipping_cost = 0; // ตั้งค่าส่งเป็น 0
-                    break;
-            }
-        }
-    }
-}
-
-// --- คำนวณยอดรวมสุดท้าย ---
-$original_shipping_cost = 0; // ดึงค่าส่งเดิมมาแสดง
-if (!empty($shipping_methods_id)) {
-    $cost_qry_orig = $conn->query("SELECT price FROM shipping_prices WHERE shipping_methods_id = '{$shipping_methods_id}' AND {$total_weight} BETWEEN min_weight AND max_weight LIMIT 1");
-    if ($cost_qry_orig->num_rows > 0) {
-        $original_shipping_cost = (float)$cost_qry_orig->fetch_assoc()['price'];
-    }
-}
-
-$grand_total = ($gt - $promo_discount_amount - $coupon_discount_amount) + $shipping_cost;
+// คำนวณยอดรวมสุดท้าย
+$grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amount จาก order_list โดยตรง
 ?>
 
-<style>
-    #order-logo {
-        max-width: 100%;
-        max-height: 20em;
-        object-fit: scale-down;
-        object-position: center center;
-    }
 
-    .product-logo {
-        width: 7em;
-        object-fit: cover;
-        object-position: center center;
-    }
-
-    .card-title {
-        font-size: 20px !important;
-        font-weight: bold;
-    }
-
-    .head-detail {
-        font-size: 16px;
-    }
-
-    section {
-        font-size: 16px;
-    }
-</style>
 <section class="card card-outline card-orange rounded-0">
     <div class="card-header">
         <div class="card-title">รายละเอียดคำสั่งซื้อ</div>
@@ -202,25 +144,29 @@ $grand_total = ($gt - $promo_discount_amount - $coupon_discount_amount) + $shipp
                                         <label for="" class="control-label head-detail">สถานะการชำระเงิน :</label>
                                         <div class="pl-4 ">
                                             <?php
-                                            switch ((int)$payment_status) {
-                                                case 0:
-                                                    echo '<span>ยังไม่ชำระเงิน</span>';
-                                                    break;
-                                                case 1:
-                                                    echo '<span>รอตรวจสอบ</span>';
-                                                    break;
-                                                case 2:
-                                                    echo '<span>ชำระแล้ว</span>';
-                                                    break;
-                                                case 3:
-                                                    echo '<span>ล้มเหลว</span>';
-                                                    break;
-                                                case 4:
-                                                    echo '<span>คืนเงินแล้ว</span>';
-                                                    break;
-                                                default:
-                                                    echo '<span>N/A</span>';
-                                                    break;
+                                            if (isset($payment_status)) {
+                                                switch ((int)$payment_status) {
+                                                    case 0:
+                                                        echo '<span>ยังไม่ชำระเงิน</span>';
+                                                        break;
+                                                    case 1:
+                                                        echo '<span>รอตรวจสอบ</span>';
+                                                        break;
+                                                    case 2:
+                                                        echo '<span>ชำระแล้ว</span>';
+                                                        break;
+                                                    case 3:
+                                                        echo '<span>ล้มเหลว</span>';
+                                                        break;
+                                                    case 4:
+                                                        echo '<span>คืนเงินแล้ว</span>';
+                                                        break;
+                                                    default:
+                                                        echo '<span>N/A</span>';
+                                                        break;
+                                                }
+                                            } else {
+                                                echo '<span>N/A</span>';
                                             }
                                             ?>
                                         </div>
@@ -229,34 +175,38 @@ $grand_total = ($gt - $promo_discount_amount - $coupon_discount_amount) + $shipp
                                         <label for="" class="control-label head-detail">สถานะการจัดส่ง :</label>
                                         <div class="pl-4 ">
                                             <?php
-                                            switch ((int)$delivery_status) {
-                                                case 0:
-                                                    echo '<span>ตรวจสอบคำสั่งซื้อ</span>';
-                                                    break;
-                                                case 1:
-                                                    echo '<span>เตรียมของ</span>';
-                                                    break;
-                                                case 2:
-                                                    echo '<span>แพ๊กของแล้ว</span>';
-                                                    break;
-                                                case 3:
-                                                    echo '<span>กำลังจัดส่ง</span>';
-                                                    break;
-                                                case 4:
-                                                    echo '<span>จัดส่งสำเร็จ</span>';
-                                                    break;
-                                                case 5:
-                                                    echo '<span>ส่งไม่สำเร็จ</span>';
-                                                    break;
-                                                case 6:
-                                                    echo '<span>คืนของระหว่างทาง</span>';
-                                                    break;
-                                                case 7:
-                                                    echo '<span>คืนของสำเร็จ</span>';
-                                                    break;
-                                                default:
-                                                    echo '<span>N/A</span>';
-                                                    break;
+                                            if (isset($delivery_status)) {
+                                                switch ((int)$delivery_status) {
+                                                    case 0:
+                                                        echo '<span>ตรวจสอบคำสั่งซื้อ</span>';
+                                                        break;
+                                                    case 1:
+                                                        echo '<span>เตรียมของ</span>';
+                                                        break;
+                                                    case 2:
+                                                        echo '<span>แพ๊กของแล้ว</span>';
+                                                        break;
+                                                    case 3:
+                                                        echo '<span>กำลังจัดส่ง</span>';
+                                                        break;
+                                                    case 4:
+                                                        echo '<span>จัดส่งสำเร็จ</span>';
+                                                        break;
+                                                    case 5:
+                                                        echo '<span>ส่งไม่สำเร็จ</span>';
+                                                        break;
+                                                    case 6:
+                                                        echo '<span>คืนของระหว่างทาง</span>';
+                                                        break;
+                                                    case 7:
+                                                        echo '<span>คืนของสำเร็จ</span>';
+                                                        break;
+                                                    default:
+                                                        echo '<span>N/A</span>';
+                                                        break;
+                                                }
+                                            } else {
+                                                echo '<span>N/A</span>';
                                             }
                                             ?>
                                         </div>
@@ -278,137 +228,70 @@ $grand_total = ($gt - $promo_discount_amount - $coupon_discount_amount) + $shipp
                             <div id="item_list" class="list-group">
                                 <?php
                                 $gt = 0;
-                                // ### MODIFIED QUERY: Added p.discounted_price to select statement ###
-                                $order_items = $conn->query("SELECT o.*, p.name as product, p.brand as brand, p.price, p.discounted_price, cc.name as category, p.image_path, COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) as `available` FROM `order_items` o inner join product_list p on o.product_id = p.id inner join category_list cc on p.category_id = cc.id where order_id = '{$id}' ");
-                                while ($row = $order_items->fetch_assoc()):
-                                    // ### START: LOGIC FOR DISCOUNTED PRICE ###
-                                    $price = $row['price'];
-                                    $discounted_price = $row['discounted_price'];
-                                    $has_discount = isset($discounted_price) && $discounted_price > 0;
+                                if (isset($id)) {
+                                    $order_items = $conn->query("SELECT o.*, p.name as product, p.brand as brand, p.price, p.discounted_price, cc.name as category, p.image_path, COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) as `available` FROM `order_items` o inner join product_list p on o.product_id = p.id inner join category_list cc on p.category_id = cc.id where order_id = '{$id}' ");
+                                    while ($row = $order_items->fetch_assoc()):
+                                        $price = $row['price'];
+                                        $discounted_price = $row['discounted_price'];
+                                        $has_discount = isset($discounted_price) && $discounted_price > 0;
 
-                                    // Use discounted price if available, otherwise use regular price
-                                    $effective_price = $has_discount ? $discounted_price : $price;
-                                    $item_total = $effective_price * $row['quantity'];
-                                    $gt += $item_total;
-                                    // ### END: LOGIC FOR DISCOUNTED PRICE ###
+                                        $effective_price = $has_discount ? $discounted_price : $price;
+                                        $item_total = $effective_price * $row['quantity'];
+                                        $gt += $item_total;
                                 ?>
-                                    <div class="list-group-item cart-item" data-id='<?= $row['id'] ?>' data-max='<?= format_num($row['available'], 0) ?>'>
-                                        <div class="d-flex w-100 align-items-center">
-                                            <div class="col-2 text-center">
-                                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail border p-0 product-logo">
-                                            </div>
-                                            <div class="col-auto flex-shrink-1 flex-grow-1">
-                                                <div style="line-height:1em">
-                                                    <div class='mb-0'><?= $row['product'] ?></div>
-                                                    <div class="text-muted"><?= $row['brand'] ?></div>
-                                                    <div class="text-muted"><?= $row['category'] ?></div>
-                                                    <div class="text-muted d-flex w-100">
-                                                        <?= format_num($row['quantity'], 0) ?> x
-                                                        <?php if ($has_discount): ?>
-                                                            <span class="text-danger px-2"><del><?= format_num($price, 2) ?></del></span> <b><?= format_num($effective_price, 2) ?></b>
-                                                        <?php else: ?>
-                                                            <span class="px-2"><b><?= format_num($effective_price, 2) ?></b></span>
-                                                        <?php endif; ?>
+                                        <div class="list-group-item cart-item" data-id='<?= $row['id'] ?>' data-max='<?= format_num($row['available'], 0) ?>'>
+                                            <div class="d-flex w-100 align-items-center">
+                                                <div class="col-2 text-center">
+                                                    <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail border p-0 product-logo">
+                                                </div>
+                                                <div class="col-auto flex-shrink-1 flex-grow-1">
+                                                    <div style="line-height:1em">
+                                                        <div class='mb-0'><?= $row['product'] ?></div>
+                                                        <div class="text-muted"><?= $row['brand'] ?></div>
+                                                        <div class="text-muted"><?= $row['category'] ?></div>
+                                                        <div class="text-muted d-flex w-100">
+                                                            <?= format_num($row['quantity'], 0) ?> x
+                                                            <?php if ($has_discount): ?>
+                                                                <span class="text-danger px-2"><del><?= format_num($price, 2) ?></del></span> <b><?= format_num($effective_price, 2) ?></b>
+                                                            <?php else: ?>
+                                                                <span class="px-2"><b><?= format_num($effective_price, 2) ?></b></span>
+                                                            <?php endif; ?>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-auto">
-                                                <h5 class="text-bold"><?= format_num($item_total, 2) ?></h5>
+                                                <div class="col-auto">
+                                                    <h5 class="text-bold"><?= format_num($item_total, 2) ?></h5>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                <?php endwhile; ?>
-                            </div>
-                            <?php if ($order_items->num_rows <= 0): ?>
-                                <h5 class="text-center text-muted">Order Items is empty.</h5>
-                            <?php endif; ?>
-
-                            <div id="item_list" class="list-group">
                                 <?php
-                                $gt = 0;
-                                $order_items = $conn->query("SELECT o.*, p.name as product, p.brand as brand, p.price, p.discounted_price, cc.name as category, p.image_path, COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) as `available` FROM `order_items` o inner join product_list p on o.product_id = p.id inner join category_list cc on p.category_id = cc.id where order_id = '{$id}' ");
-                                while ($row = $order_items->fetch_assoc()):
-                                    $price = $row['price'];
-                                    $discounted_price = $row['discounted_price'];
-                                    $has_discount = isset($discounted_price) && $discounted_price > 0;
-                                    $effective_price = $has_discount ? $discounted_price : $price;
-                                    $item_total = $effective_price * $row['quantity'];
-                                    $gt += $item_total; // $gt คือยอดรวมราคาสินค้าทั้งหมด (Subtotal)
-                                ?>
-                                <?php endwhile; ?>
-                            </div>
-                            <?php if ($order_items->num_rows <= 0): ?>
-                                <h5 class="text-center text-muted">Order Items is empty.</h5>
-                            <?php endif; ?>
-                            <?php
-                            $discount_amount = 0;
-                            $shipping_discount = 0; // เพิ่มตัวแปรสำหรับส่วนลดค่าส่ง
-                            $promotion_name = '';
-                            $original_shipping_cost = $shipping_cost;
-
-                            // ตรวจสอบว่ามี promotion_id หรือไม่
-                            if (!empty($promotion_id)) {
-                                $promo_qry = $conn->query("SELECT * FROM `promotions_list` WHERE id = '{$promotion_id}' AND status = 1");
-                                if ($promo_qry->num_rows > 0) {
-                                    $promo_data = $promo_qry->fetch_assoc();
-
-                                    // ตรวจสอบว่ายอดสั่งซื้อถึงขั้นต่ำหรือไม่
-                                    if ($gt >= $promo_data['minimum_order']) {
-                                        $promotion_name = $promo_data['name'];
-                                        switch ($promo_data['type']) {
-                                            case 'percent':
-                                                $discount_amount = ($gt * $promo_data['discount_value']) / 100;
-                                                break;
-                                            case 'fixed':
-                                                $discount_amount = $promo_data['discount_value'];
-                                                break;
-                                            case 'free_shipping':
-                                                // แก้ไข: ไม่ได้หักจาก $gt แต่ให้เป็นส่วนลดค่าส่ง
-                                                $shipping_discount = $shipping_cost; // ส่วนลดค่าส่งจะเท่ากับค่าส่งทั้งหมด
-                                                $shipping_cost = 0; // ตั้งค่าส่งเป็น 0
-                                                break;
-                                                // สามารถเพิ่ม case 'code' ได้ถ้ามีเงื่อนไขเพิ่มเติม
-                                        }
-                                    }
+                                    endwhile;
                                 }
-                            }
-
-                            // คำนวณส่วนลดทั้งหมด
-                            $total_discount = $discount_amount + $shipping_discount;
-
-                            // คำนวณยอดรวมสุทธิใหม่
-                            // ยอดรวม = (ยอดรวมราคาสินค้า - ส่วนลดราคาสินค้า) + ค่าส่งที่ลดแล้ว
-                            $grand_total = ($gt - $discount_amount) + $shipping_cost;
-                            ?>
+                                ?>
+                            </div>
+                            <?php if (!isset($order_items) || $order_items->num_rows <= 0): ?>
+                                <h5 class="text-center text-muted">ไม่มีสินค้าที่สั่งซื้อ</h5>
+                            <?php endif; ?>
 
                             <div class="d-flex justify-content-end py-3">
                                 <div class="col-auto">
                                     <div class="text-right">
-                                        <h5>ยอดรวม: <?= format_num($gt, 2) ?> บาท</h5>
-                                        <h5>ค่าจัดส่ง: <?= format_num($original_shipping_cost, 2) ?> บาท</h5>
+                                        <h5>ยอดรวมสินค้า: <?= format_num($gt, 2) ?> บาท</h5>
+                                        <h5>ค่าจัดส่ง: <?= number_format($shipping_cost, 2) ?> บาท</h5>
 
-                                        <?php if (!empty($promotion_name)): ?>
+                                        <?php if (!empty($promotion_name) && isset($promotion_discount) && $promotion_discount > 0): ?>
                                             <h5>
-                                                ส่วนลดโปรโมชั่น: <?= htmlspecialchars($promotion_name) ?>
-                                                <?php if ($promo_discount_amount > 0): ?>
-                                                    (-<?= format_num($promo_discount_amount, 2) ?> บาท)
-                                                <?php elseif ($promo_data['type'] == 'free_shipping'): ?>
-                                                    (ส่งฟรี)
-                                                <?php endif; ?>
+                                                ส่วนลดโปรโมชั่น (<?= htmlspecialchars($promotion_name) ?>):
+                                                <span class="text-danger">(-<?= format_num($promotion_discount, 2) ?> บาท)</span>
                                             </h5>
                                         <?php endif; ?>
 
-                                        <?php if (!empty($coupon_name)): ?>
+                                        <?php if (!empty($coupon_name) && isset($coupon_discount) && $coupon_discount > 0): ?>
                                             <h5>
-                                                ส่วนลดคูปอง: <?= htmlspecialchars($coupon_name) ?>
-                                                <?php if ($coupon_discount_amount > 0): ?>
-                                                    (-<?= format_num($coupon_discount_amount, 2) ?> บาท)
-                                                <?php elseif ($coupon_data['type'] == 'free_shipping' && $original_shipping_cost > 0): ?>
-                                                    (ส่งฟรี)
-                                                <?php endif; ?>
+                                                ส่วนลดคูปอง (<?= htmlspecialchars($coupon_name) ?>):
+                                                <span class="text-danger">(-<?= format_num($coupon_discount, 2) ?> บาท)</span>
                                             </h5>
                                         <?php endif; ?>
-
                                         <hr>
                                         <h4><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h4>
                                     </div>
@@ -419,7 +302,6 @@ $grand_total = ($gt - $promo_discount_amount - $coupon_discount_amount) + $shipp
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <noscript id="print-header">
@@ -441,6 +323,7 @@ $grand_total = ($gt - $promo_discount_amount - $coupon_discount_amount) + $shipp
         <hr>
     </noscript>
 </section>
+
 <script>
     function print_t() {
         var h = $('head').clone()
