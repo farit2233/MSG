@@ -203,7 +203,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 					<div class="card-body">
 						<div class="container-fluid">
 							<div class="row align-items-start">
-								<!-- รูปสินค้า (ซ้าย) -->
 								<div class="col-md-5 mb-3">
 									<a href="#" data-toggle="modal" data-target="#productImageModal">
 										<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
@@ -227,10 +226,8 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										<button class="gallery-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
 									</div>
 
-									<!----------------- Desktop ----------------->
 									<div class="product-description-mobile-pc mt-3">
 										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
-
 										<div class="product-specs">
 											<div class="spec-row">
 												<div class="spec-label">น้ำหนักสินค้า</div>
@@ -244,7 +241,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 											<?php endif; ?>
 										</div>
 									</div>
-									<!-- คำอธิบายสินค้าใต้รูป -->
+
 									<?php if (!empty($description)): ?>
 										<div class="product-description-mobile-pc mt-3">
 											<h5><b>รายละเอียด</b></h5>
@@ -264,11 +261,9 @@ if ($plat_q && $plat_q->num_rows > 0) {
 												<button class="btn btn-readmore rounded-pill" id="toggleButton-pc">ดูเพิ่มเติม +</button>
 											</div>
 										</div>
-
 									<?php endif; ?>
 								</div>
-								<div class=""></div>
-								<!-- รายละเอียดสินค้า (ขวา) -->
+
 								<div class="col-md-7 product-info-sticky">
 									<h2 class="fw-bold mb-3"><?= isset($name) ? $name : "" ?></h2>
 									<p class="mb-3 text-muted">แบรนด์: <b><?= isset($brand) ? $brand : "" ?></b></p>
@@ -280,16 +275,15 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										$percent_off = round((($price - $discounted_price) / $price) * 100);
 
 										if ($percent_off >= 50) {
-											$discount_type_label = 'hot';  // 🔥 ลดราคาร้อน
+											$discount_type_label = 'hot';
 										} else {
-											$discount_type_label = 'normal'; // ลดราคาธรรมดา
+											$discount_type_label = 'normal';
 										}
 									}
 									?>
 
 
 									<?php if ($discount_type_label === 'hot'): ?>
-										<!-- 🔥 ลดราคาร้อน -->
 										<section class="mb-3">
 											<div class="border rounded overflow-hidden shadow-sm">
 												<div class="bg-danger text-white px-3 py-2">
@@ -310,7 +304,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										</section>
 
 									<?php elseif ($discount_type_label === 'normal'): ?>
-										<!-- ✅ ลดราคาธรรมดา -->
 										<section class="mb-3">
 											<div class="border rounded overflow-hidden shadow-sm">
 												<div class="bg-warning text-dark px-3 py-2">
@@ -331,13 +324,11 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										</section>
 
 									<?php else: ?>
-										<!-- ไม่มีโปรโมชัน -->
 										<dl>
 											<dd class="price-n"><?= format_num($price, 2) ?> ฿</dd>
 										</dl>
 									<?php endif; ?>
 
-									<!-- 🧾 สินค้าในคลัง -->
 									<dl>
 										<dt class="text-muted stock">สินค้าในคลัง</dt>
 										<dd class="pl-4 stock-n">
@@ -345,7 +336,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										</dd>
 									</dl>
 
-									<!-- ปุ่ม Add to Cart -->
 									<div class="mb-3">
 										<?php if ($available > 0): ?>
 											<div class="d-flex flex-wrap align-items-center group-qty">
@@ -408,7 +398,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										<label class="sku"> | </label> <label class="sku">รหัสสินค้า:</label> <b style="margin-left: 0.5rem;"><?= $sku ?> </b>
 									</p>
 
-									<!-- ติดต่อสอบถาม -->
 									<div class=" mt-4">
 										<div class="border rounded p-3 bg-light shadow-sm">
 											<h6 class="fw-bold">ติดต่อสอบถาม</h6>
@@ -418,8 +407,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										</div>
 									</div>
 
-
-									<!----------------- Mobile ----------------->
 									<div class="product-description-mobile mt-3">
 										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
 										<div class="product-specs">
@@ -436,7 +423,6 @@ if ($plat_q && $plat_q->num_rows > 0) {
 										</div>
 									</div>
 									<div class="col-md-5 mb-3">
-										<!-- คำอธิบายสินค้าใต้รูป -->
 										<?php if (!empty($description)): ?>
 											<div class="product-description-mobile mt-3">
 												<h5><b>รายละเอียด</b></h5>
@@ -462,14 +448,10 @@ if ($plat_q && $plat_q->num_rows > 0) {
 
 								</div>
 							</div>
-							<!--div class="card-footer py-1 text-center">
-					<a class="btn btn-light btn-sm bg-gradient-light border rounded-0" href="./?p=products"><i class="fa fa-angle-left"></i>กลับไปยังสินค้าทั้งหมด</a>
-				</div-->
 						</div>
 					</div>
 				</div>
 
-				<!-- Modal รูปสินค้า -->
 				<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-hidden="true">
 					<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-image" role="document">
 						<div class="modal-content position-relative">
@@ -501,8 +483,9 @@ if ($plat_q && $plat_q->num_rows > 0) {
 
 			</div>
 
-			<!--------------------สินค้าที่เกี่ยวข้อง--------------------->
+
 			<?php
+			//สินค้าที่เกี่ยวข้อง
 			// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
 			$related = $conn->query("SELECT *, 
 			(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
