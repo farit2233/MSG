@@ -612,6 +612,26 @@ if (!function_exists('format_price_custom')) {
     }
     let selectedShipping = null;
 
+    function formatPrice(value) {
+        if (isNaN(value)) return value;
+
+        // แปลงเป็นจำนวน float
+        let num = parseFloat(value);
+
+        // ถ้าจำนวนเต็ม → ไม่แสดงทศนิยม
+        if (num % 1 === 0) {
+            return num.toLocaleString('th-TH', {
+                maximumFractionDigits: 0
+            });
+        } else {
+            // ถ้ามีทศนิยม → แสดง 2 หลัก
+            return num.toLocaleString('th-TH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+    }
+
     // ============================
     // ฟังก์ชันกลางสำหรับคำนวณยอดรวมสุทธิ
     // ============================
@@ -668,7 +688,7 @@ if (!function_exists('format_price_custom')) {
                 });
             }
 
-            document.getElementById('order-total-text').innerText = formattedTotal;
+            document.getElementById('order-total-text').innerText = formatPrice(grandTotal);
         }
 
         // ตัวอย่างการเรียกใช้งาน
@@ -753,10 +773,7 @@ if (!function_exists('format_price_custom')) {
                         if (resp.type === 'free_shipping') {
                             discount_val_el.html('<strong class="text-danger">ส่งฟรี</strong>');
                         } else {
-                            discount_val_el.html('<strong class="text-danger">- ' + resp.discount_amount.toLocaleString('en-US', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            }) + ' บาท</strong>');
+                            discount_val_el.html('<strong class="text-danger">- ' + formatPrice(resp.discount_amount) + ' บาท</strong>');
                         }
                         // 👆 เพิ่มส่วนนี้เข้ามา 👆
 
