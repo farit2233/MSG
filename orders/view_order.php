@@ -85,6 +85,17 @@ if (!empty($shipping_prices_id)) {
         $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
     }
 }
+
+if (!function_exists('format_price_custom')) {
+    function format_price_custom($price)
+    {
+        $formatted_price = format_num($price, 2);
+        if (substr($formatted_price, -3) == '.00') {
+            return format_num($price, 0);
+        }
+        return $formatted_price;
+    }
+}
 ?>
 
 <style>
@@ -138,6 +149,29 @@ if (!empty($shipping_prices_id)) {
     .order-total {
         margin-top: 1.5rem;
         gap: 0.5rem;
+    }
+
+    .order-band {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        /* จำนวนบรรทัด */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    @media (max-width: 1200px) {
+        .order-price {
+            font-size: 16px;
+            display: block;
+        }
+
+        .btn-orders {
+            font-size: 12px;
+            background-color: #f57421;
+            border-radius: 13px;
+            color: white;
+            transition: all 0.2s ease-in-out;
+        }
     }
 </style>
 <?php
@@ -282,29 +316,29 @@ if (!empty($customer_id)) {
                                 <a href=".?p=products/view_product&id=<?= $row['product_id'] ?>" class=" product-link">
                                     <span class='mb-1 fw-bold order-peoduct'><?= $row['product'] ?></span>
                                 </a>
-                                <small class="text-muted"><?= $row['brand'] ?> | <?= $row['category'] ?></small>
+                                <small class="text-muted order-band"><?= $row['brand'] ?> | <?= $row['category'] ?></small>
                                 <div class="text-muted d-flex align-items-center gap-1 mt-1">
-                                    <span class="order-amount">
-                                        <?= format_num($row['quantity'], 0) ?> x
-                                    </span>
+                                    <small class="text-muted order-band">
+                                        <?= format_num($row['quantity'], 0) ?> x</>
+                                    </small>
                                     <?php if ($row['price'] < $row['product_price']): ?>
-                                        <span class="text-muted ml-1 order-amount" style="text-decoration: line-through;">
-                                            <?= format_num($row['product_price'], 2) ?>
-                                        </span>
-                                        <span class="text-danger fw-bold ml-1 order-amount">
-                                            <?= format_num($row['price'], 2) ?>
-                                        </span>
+                                        <small class="text-muted ml-1 order-amount" style="text-decoration: line-through;">
+                                            <?= format_price_custom($row['product_price'], 2) ?>
+                                        </small>
+                                        <small class="text-danger fw-bold ml-1 order-amount">
+                                            <?= format_price_custom($row['price'], 2) ?>
+                                        </small>
                                     <?php else: ?>
-                                        <span class="ml-1 order-amount"><?= format_num($row['price'], 2) ?></span>
+                                        <span class="ml-1 order-amount"><?= format_price_custom($row['price'], 2) ?></span>
                                     <?php endif; ?>
                                     <span class=" ml-1 order-amount">บาท</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-auto text-end">
-                            <div class="col-auto text-end">
+                        <div class="col-auto text-right">
+                            <div class="col-auto text-right">
                                 <span class="text-dark mb-0 order-price">
-                                    <b><?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b>
+                                    <b><?= format_price_custom($row['price'] * $row['quantity'], 2) ?> บาท</b>
                                 </span>
                                 <a href=".?p=products/view_product&id=<?= $row['product_id'] ?>" class="btn btn-orders mt-2 d-block">
                                     <i class="fa fa-shopping-cart me-1"></i> ซื้ออีกครั้ง
@@ -324,32 +358,32 @@ if (!empty($customer_id)) {
             <div class="order-total">
                 <div class="d-flex justify-content-between order-total-detail ">
                     <span>ยอดรวมสินค้า:</span>
-                    <span><?= isset($gt) ? format_num($gt, 2) : '0.00' ?> บาท</span>
+                    <span><?= isset($gt) ? format_price_custom($gt, 2) : '0.00' ?> บาท</span>
                 </div>
 
                 <div class="d-flex justify-content-between order-total-detail ">
                     <span>ค่าจัดส่ง:</span>
-                    <span><?= isset($shipping_cost) ? format_num($shipping_cost, 2) : '0.00' ?> บาท</span>
+                    <span><?= isset($shipping_cost) ? format_price_custom($shipping_cost, 2) : '0.00' ?> บาท</span>
                 </div>
 
                 <?php if (!empty($promotion_name) && isset($promotion_discount) && $promotion_discount > 0): ?>
                     <div class="d-flex justify-content-between text-danger order-total-detail ">
                         <span>โปรโมชั่น (<?= htmlspecialchars($promotion_name) ?>):</span>
-                        <span>-<?= format_num($promotion_discount, 2) ?> บาท</span>
+                        <span>-<?= format_price_custom($promotion_discount, 2) ?> บาท</span>
                     </div>
                 <?php endif; ?>
 
                 <?php if (!empty($coupon_name) && isset($coupon_discount) && $coupon_discount > 0): ?>
                     <div class="d-flex justify-content-between text-danger order-total-detail ">
                         <span>คูปอง (<?= htmlspecialchars($coupon_name) ?>):</span>
-                        <span>-<?= format_num($coupon_discount, 2) ?> บาท</span>
+                        <span>-<?= format_price_custom($coupon_discount, 2) ?> บาท</span>
                     </div>
                 <?php endif; ?>
                 <hr style="margin: 1rem 0;">
 
                 <div class="d-flex justify-content-between order-total">
                     <h4><b>ยอดรวมทั้งสิ้น:</b></h4>
-                    <h4><b><?= isset($total_amount) ? format_num($total_amount, 2) : '0.00' ?> บาท</b></h4>
+                    <h4><b><?= isset($total_amount) ? format_price_custom($total_amount, 2) : '0.00' ?> บาท</b></h4>
                 </div>
             </div>
         </div>
