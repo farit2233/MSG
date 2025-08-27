@@ -32,6 +32,13 @@
   }
   ?>
   <?php require_once('inc/footer.php') ?>
+  <style>
+    @media (max-width: 932px) {
+      .modal-dialog-order {
+        width: 100% !important;
+      }
+    }
+  </style>
   <div class="modal fade" id="uni_modal" role='dialog'>
     <div class="modal-dialog   rounded-0 modal-md modal-dialog-centered" role="document">
       <div class="modal-content  rounded-0">
@@ -103,7 +110,7 @@
   </div>
 
   <div class="modal fade" id="uni_modal_order" role='dialog'>
-    <div class="modal-dialog modal-md modal-dialog-centered rounded-0" role="document">
+    <div class="modal-dialog modal-md modal-dialog-centered rounded-0 modal-dialog-order" role="document">
       <div class="modal-content rounded-0">
         <div class="modal-header">
           <h5 class="modal-title"></h5>
@@ -114,6 +121,9 @@
         <div class="modal-body">
 
         </div>
+        <button type="button" class="btn btn-light btn-sm border btn-flat" data-dismiss="modal" aria-label="Close">
+          <i class="fa fa-times"></i> ปิด
+        </button>
       </div>
     </div>
   </div>

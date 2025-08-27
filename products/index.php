@@ -179,6 +179,17 @@ if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
         $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบโปรโมชั่น</li>';
     }
 }
+
+if (!function_exists('format_price_custom')) {
+    function format_price_custom($price)
+    {
+        $formatted_price = format_num($price, 2);
+        if (substr($formatted_price, -3) == '.00') {
+            return format_num($price, 0);
+        }
+        return $formatted_price;
+    }
+}
 ?>
 
 <section class="py-3">

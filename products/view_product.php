@@ -53,7 +53,27 @@ if ($plat_q && $plat_q->num_rows > 0) {
 	$platform_links['tiktok'] = $row['tiktok_url'] ?? '';
 }
 
-
+// ตรวจสอบและสร้างฟังก์ชันสำหรับจัดรูปแบบราคา (หากยังไม่มี)
+if (!function_exists('format_price_custom')) {
+	function format_price_custom($price)
+	{
+		$formatted_price = format_num($price, 2);
+		if (substr($formatted_price, -3) == '.00') {
+			return format_num($price, 0);
+		}
+		return $formatted_price;
+	}
+}
+if (!function_exists('format_price_custom')) {
+	function format_price_custom($discounted_price)
+	{
+		$formatted_price = format_num($discounted_price, 2);
+		if (substr($formatted_price, -3) == '.00') {
+			return format_num($discounted_price, 0);
+		}
+		return $formatted_price;
+	}
+}
 ?>
 <style>
 	#productImageModal .modal-dialog {
@@ -292,12 +312,12 @@ if ($plat_q && $plat_q->num_rows > 0) {
 												<div class="bg-price px-3 py-3">
 													<div class="d-flex align-items-center mb-2">
 														<div class="price-n m-0 mr-2 px-3 py-1 rounded" style="font-weight: bold;">
-															<?= format_num($discounted_price, 2) ?> ฿
+															<?= format_price_custom($discounted_price, 2) ?> ฿
 														</div>
 														<span class="badge badge-success" style="font-size: 0.8rem; padding: 4px 8px;">-<?= $percent_off ?>%</span>
 													</div>
 													<div class="price-old m-0 mr-2 px-3" style="text-decoration: line-through; color: #888;">
-														<?= format_num($price, 2) ?> ฿
+														<?= format_price_custom($price, 2) ?> ฿
 													</div>
 												</div>
 											</div>
@@ -312,12 +332,12 @@ if ($plat_q && $plat_q->num_rows > 0) {
 												<div class="bg-price px-3 py-3">
 													<div class="d-flex align-items-center mb-2">
 														<div class="price-n m-0 mr-2 px-3 py-1 rounded" style="font-weight: bold; ">
-															<?= format_num($discounted_price, 2) ?> ฿
+															<?= format_price_custom($discounted_price, 2) ?> ฿
 														</div>
 														<span class="badge badge-success" style="font-size: 0.8rem; padding: 4px 8px;">-<?= $percent_off ?>%</span>
 													</div>
 													<div class="price-old m-0 mr-2 px-3" style="text-decoration: line-through; color: #888;">
-														<?= format_num($price, 2) ?> ฿
+														<?= format_price_custom($price, 2) ?> ฿
 													</div>
 												</div>
 											</div>
@@ -325,7 +345,7 @@ if ($plat_q && $plat_q->num_rows > 0) {
 
 									<?php else: ?>
 										<dl>
-											<dd class="price-n"><?= format_num($price, 2) ?> ฿</dd>
+											<dd class="price-n"><?= format_price_custom($price, 2) ?> ฿</dd>
 										</dl>
 									<?php endif; ?>
 
