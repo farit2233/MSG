@@ -261,6 +261,16 @@ if ($is_coupon_applicable) {
 
 $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_shipping_cost;
 
+if (!function_exists('format_price_custom')) {
+    function format_price_custom($price)
+    {
+        $formatted_price = format_num($price, 2);
+        if (substr($formatted_price, -3) == '.00') {
+            return format_num($price, 0);
+        }
+        return $formatted_price;
+    }
+}
 ?>
 <script>
     // ส่งค่าจาก PHP มาให้ JavaScript
@@ -313,13 +323,13 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                                     </td>
                                                     <td class="text-right" colspan="2">
                                                         <?php if ($is_discounted): ?>
-                                                            <span><?= format_num($item['final_price'], 2) ?></span>
+                                                            <span><?= format_price_custom($item['final_price'], 2) ?></span>
                                                         <?php else: ?>
-                                                            <?= format_num($item['price'], 2) ?>
+                                                            <?= format_price_custom($item['price'], 2) ?>
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="text-right"><?= $item['quantity'] ?></td>
-                                                    <td class="text-right"><span><?= format_num($item['final_price'] * $item['quantity'], 2) ?></span></td>
+                                                    <td class="text-right"><span><?= format_price_custom($item['final_price'] * $item['quantity'], 2) ?></span></td>
                                                 </tr>
                                             <?php endforeach; ?>
 
@@ -346,7 +356,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                                     <a href="javascript:void(0);" onclick="openShippingModal()">เปลี่ยน</a>
                                                 </td>
                                                 <td class="text-right">
-                                                    <label id="shipping-cost"><?= number_format($default_shipping_cost, 2) ?> บาท</label>
+                                                    <label id="shipping-cost"><?= format_price_custom($default_shipping_cost, 2) ?> บาท</label>
                                                 </td>
                                             </tr>
 
@@ -436,7 +446,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
                                                 <th><strong>รวม</strong></th>
                                                 <td colspan="5">
                                                     <h5 class="text-bold text-right">
-                                                        <span id="order-total-text"><?= format_num($grand_total, 2) ?></span> บาท
+                                                        <span id="order-total-text"><?= format_price_custom($grand_total, 2) ?></span> บาท
                                                     </h5>
                                                 </td>
                                             </tr>
@@ -525,7 +535,7 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
 
                             <div>
                                 <strong><?= $row['name'] ?></strong>
-                                <span style="float:right;"><?= number_format($cost, 2) ?> บาท</span>
+                                <span style="float:right;"><?= format_price_custom($cost, 2) ?> บาท</span>
                                 <span class="checkmark">&#10003;</span>
                             </div>
                             <div class="desc text-muted" style="font-size: 0.9em;"><?= htmlspecialchars($row['description']) ?></div>
@@ -641,10 +651,29 @@ $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_s
 
 
         // อัปเดตยอดรวมสุทธิ (ใช้ toLocaleString เหมือนเดิมได้)
-        document.getElementById('order-total-text').innerText = grandTotal.toLocaleString('th-TH', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+        // ฟังก์ชันอัปเดตยอดรวม
+        function updateOrderTotal(grandTotal) {
+            let formattedTotal;
+
+            if (grandTotal % 1 === 0) {
+                // จำนวนเต็ม → ไม่แสดงทศนิยม
+                formattedTotal = grandTotal.toLocaleString('th-TH', {
+                    maximumFractionDigits: 0
+                });
+            } else {
+                // มีทศนิยม → แสดง 2 หลัก
+                formattedTotal = grandTotal.toLocaleString('th-TH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            document.getElementById('order-total-text').innerText = formattedTotal;
+        }
+
+        // ตัวอย่างการเรียกใช้งาน
+        updateOrderTotal(grandTotal);
+
     }
 
     // ============================

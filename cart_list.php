@@ -25,6 +25,17 @@ allowEscapeKey: false
 </script>";
 exit;
 }*/
+
+if (!function_exists('format_price_custom')) {
+    function format_price_custom($price)
+    {
+        $formatted_price = format_num($price, 2);
+        if (substr($formatted_price, -3) == '.00') {
+            return format_num($price, 0);
+        }
+        return $formatted_price;
+    }
+}
 ?>
 <style>
     /* ปรับให้ทันสมัย */
@@ -296,12 +307,12 @@ exit;
                                         <div class="col-auto text-right">
                                             <?php if ($show_discount): ?>
                                                 <h5 class="text-muted mb-0">
-                                                    <del><?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</del>
+                                                    <del><?= format_price_custom($row['price'] * $row['quantity'], 2) ?> บาท</del>
                                                 </h5>
-                                                <h4><b class="text-danger">ลดเหลือ: <?= format_num($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
+                                                <h4><b class="text-danger">ลดเหลือ: <?= format_price_custom($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
                                             <?php else: ?>
 
-                                                <h4><b>ราคา: <?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
+                                                <h4><b>ราคา: <?= format_price_custom($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
                                             <?php endif; ?>
                                         </div>
 
@@ -315,7 +326,7 @@ exit;
                             <?php endif; ?>
                             <div class="d-flex justify-content-end py-3">
                                 <div class="col-auto">
-                                    <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0.00</span></b> บาท</h3>
+                                    <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0</span></b> บาท</h3>
                                 </div>
                             </div>
                             <?php if ($gt > 0): ?>
@@ -479,12 +490,29 @@ exit;
         $('.cart-check:checked').each(function() {
             total += parseFloat($(this).data('price'));
         });
-        $('#selected-total').text(total.toLocaleString('th-TH', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }));
 
+        let formattedTotal;
+
+        // ถ้าทศนิยมเป็น .00 ให้ลบออก
+        if (total % 1 === 0) {
+            formattedTotal = total.toLocaleString('th-TH', {
+                maximumFractionDigits: 0
+            });
+        } else {
+            formattedTotal = total.toLocaleString('th-TH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        $('#selected-total').text(formattedTotal);
     }
+
+    // ตัวอย่าง: เรียกฟังก์ชันตอนโหลดหน้าและทุกครั้งที่เช็ค/ยกเลิก
+    $(document).ready(function() {
+        calculateSelectedTotal();
+        $('.cart-check').on('change', calculateSelectedTotal);
+    });
 
     $(function() {
         // เรียกเมื่อมีการเปลี่ยนสถานะ checkbox
