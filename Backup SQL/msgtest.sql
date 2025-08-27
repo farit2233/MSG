@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 26, 2025 at 04:58 AM
+-- Generation Time: Aug 27, 2025 at 04:38 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -48,8 +48,7 @@ INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
 (266, 18, 35, 1),
 (276, 19, 21, 1),
 (284, 20, 30, 2),
-(290, 19, 39, 3),
-(291, 19, 33, 2);
+(290, 19, 39, 3);
 
 -- --------------------------------------------------------
 
@@ -207,7 +206,9 @@ CREATE TABLE `coupon_code_usage_logs` (
 
 INSERT INTO `coupon_code_usage_logs` (`id`, `coupon_code_id`, `customer_id`, `order_id`, `discount_amount`, `items_in_order`, `used_at`) VALUES
 (31, 1, 19, 53, 2350.00, 2, '2025-08-26 03:40:45'),
-(32, 1, 19, 54, 5085.60, 5, '2025-08-26 03:53:08');
+(32, 1, 19, 54, 5085.60, 5, '2025-08-26 03:53:08'),
+(33, 1, 19, 55, 79.60, 1, '2025-08-26 06:17:05'),
+(34, 1, 19, 56, 2346.20, 1, '2025-08-26 06:17:48');
 
 -- --------------------------------------------------------
 
@@ -285,7 +286,10 @@ INSERT INTO `order_items` (`order_id`, `product_id`, `promotion_id`, `coupon_cod
 (54, 41, 16, 1, 1, 169.00),
 (54, 38, 16, 1, 1, 55.00),
 (54, 37, 16, 1, 1, 149.00),
-(54, 36, 16, 1, 1, 25000.00);
+(54, 36, 16, 1, 1, 25000.00),
+(55, 33, 10, 1, 2, 199.00),
+(56, 14, 13, 1, 1, 11731.00),
+(57, 36, 16, NULL, 2, 25000.00);
 
 -- --------------------------------------------------------
 
@@ -319,7 +323,10 @@ CREATE TABLE `order_list` (
 
 INSERT INTO `order_list` (`id`, `code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`, `shipping_prices_id`, `promotion_id`, `coupon_code_id`, `payment_status`, `delivery_status`, `status`, `is_seen`, `date_created`, `date_updated`) VALUES
 (53, '2025082600001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 9450.00, 0.00, 2350.00, 3, NULL, NULL, 1, 0, 0, 0, 1, '2025-08-26 10:40:45', '2025-08-26 10:53:20'),
-(54, '2025082600002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 10246.20, 10171.20, 5085.60, 3, NULL, 16, 1, 0, 0, 0, 1, '2025-08-26 10:53:08', '2025-08-26 10:53:20');
+(54, '2025082600002', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 10246.20, 10171.20, 5085.60, 3, NULL, 16, 1, 2, 4, 0, 1, '2025-08-26 10:53:08', '2025-08-26 14:20:20'),
+(55, '2025082600003', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 239.00, 119.40, 79.60, 3, 1, 10, 1, 0, 0, 0, 1, '2025-08-26 13:17:05', '2025-08-26 14:38:29'),
+(56, '2025082600004', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 9334.80, 100.00, 2346.20, 7, 65, 13, 1, 0, 0, 0, 1, '2025-08-26 13:17:48', '2025-08-26 14:38:29'),
+(57, '2025082700001', 19, '44 หมู่ 8, ต.นาท่ามเหนือ, อ.เมือง, จ.ตรัง, 92190', 30050.00, 20000.00, 0.00, 3, 2, 16, NULL, 0, 0, 0, 1, '2025-08-27 09:05:21', '2025-08-27 09:05:31');
 
 -- --------------------------------------------------------
 
@@ -543,11 +550,11 @@ CREATE TABLE `promotions_list` (
 --
 
 INSERT INTO `promotions_list` (`id`, `promotion_category_id`, `name`, `description`, `image_path`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(10, 10, 'โปรโมชั่น 8.8 !', 'พบกับส่วนลดพิเศษทั้งร้านค้าต้อนรับ 8.8 ! ลดหนัก ลดกันไปเลย 30 % !', 'uploads/promotions/promo_689db31d6e8fb_1755165469.png?v=1755165469', 'percent', 30, 300, '2025-08-06 09:18:00', '2025-08-21 09:18:00', 1, 0, '2025-08-06 09:18:27', '2025-08-18 16:55:53'),
-(11, 10, 'ลดล้างสต๊อก', 'ลดล้างสต๊อก\r\nลดล้างสต๊อกลดล้างสต๊อกลดล้างสต๊อก', 'uploads/promotions/promo_689daed0bca7e_1755164368.png?v=1755164368', 'percent', 90, 0, '2025-08-06 16:01:00', '2025-08-07 16:01:00', 1, 0, '2025-08-06 16:01:33', '2025-08-14 16:39:28'),
-(12, 10, 'ส่งฟรีไม่มีขั้นต่ำ', 'ส่งฟรีไม่มีขั้นต่ำ', 'uploads/promotions/promo_689db326cfea5_1755165478.png?v=1755165478', 'free_shipping', 0, 0, '2025-08-07 13:56:00', '2025-08-21 13:56:00', 1, 0, '2025-08-07 13:56:10', '2025-08-14 16:57:58'),
-(13, 10, 'ลดราคา 100 บาท', 'สั่งซื้อครบ 20 บาท ลดเลย 100 บาท !', 'uploads/promotions/promo_689db32dcf831_1755165485.png?v=1755165485', 'fixed', 100, 20, '2025-08-08 09:31:00', '2025-08-22 09:31:00', 1, 0, '2025-08-08 09:31:56', '2025-08-14 16:58:05'),
-(14, 10, 'ส่งฟรีขั้นต่ำ 200 บาท', 'ส่งฟรีขั้นต่ำ 200 บาท', 'uploads/promotions/promo_689db33b5db62_1755165499.png?v=1755165499', 'free_shipping', 0, 200, '2025-08-08 09:49:00', '2025-08-22 09:49:00', 1, 0, '2025-08-08 09:49:49', '2025-08-14 16:58:19'),
+(10, 10, 'โปรโมชั่น 8.8 !', 'พบกับส่วนลดพิเศษทั้งร้านค้าต้อนรับ 8.8 ! ลดหนัก ลดกันไปเลย 30 % !', 'uploads/promotions/promo_689db31d6e8fb_1755165469.png?v=1755165469', 'percent', 30, 300, '2025-08-06 09:18:00', '2025-08-21 09:18:00', 0, 0, '2025-08-06 09:18:27', '2025-08-27 11:31:27'),
+(11, 10, 'ลดล้างสต๊อก', 'ลดล้างสต๊อก\r\nลดล้างสต๊อกลดล้างสต๊อกลดล้างสต๊อก', 'uploads/promotions/promo_689daed0bca7e_1755164368.png?v=1755164368', 'percent', 90, 0, '2025-08-06 16:01:00', '2025-08-07 16:01:00', 0, 0, '2025-08-06 16:01:33', '2025-08-27 11:31:27'),
+(12, 10, 'ส่งฟรีไม่มีขั้นต่ำ', 'ส่งฟรีไม่มีขั้นต่ำ', 'uploads/promotions/promo_689db326cfea5_1755165478.png?v=1755165478', 'free_shipping', 0, 0, '2025-08-07 13:56:00', '2025-08-21 13:56:00', 0, 0, '2025-08-07 13:56:10', '2025-08-27 11:31:27'),
+(13, 10, 'ลดราคา 100 บาท', 'สั่งซื้อครบ 20 บาท ลดเลย 100 บาท !', 'uploads/promotions/promo_689db32dcf831_1755165485.png?v=1755165485', 'fixed', 100, 20, '2025-08-08 09:31:00', '2025-08-22 09:31:00', 0, 0, '2025-08-08 09:31:56', '2025-08-27 11:31:27'),
+(14, 10, 'ส่งฟรีขั้นต่ำ 200 บาท', 'ส่งฟรีขั้นต่ำ 200 บาท', 'uploads/promotions/promo_689db33b5db62_1755165499.png?v=1755165499', 'free_shipping', 0, 200, '2025-08-08 09:49:00', '2025-08-22 09:49:00', 0, 0, '2025-08-08 09:49:49', '2025-08-27 11:31:27'),
 (15, 10, 'ลดหนังสือนิทาน การ์ตูน ฯลฯ ทั้งร้าน !', 'ลดหนังสือนิทาน การ์ตูน มังงะ ทั้งร้าน ! ลดหนัก จัดหนักกันไปเลย ! ลดถึง 20 % !', 'uploads/promotions/promo_689db2eceddb6_1755165420.png?v=1755165420', 'percent', 20, 60, '2025-08-14 16:46:00', '2025-08-30 16:46:00', 1, 0, '2025-08-14 16:46:56', '2025-08-14 16:57:00'),
 (16, 10, 'ลดเลยทันที 40% !!!', 'ลดหนัก ๆ จัดกันจุก ๆ ลดทันที 40% !!!', 'uploads/promotions/promo_68a3ebac39e7f_1755573164.png?v=1755573164', 'percent', 40, 0, '2025-08-19 10:12:00', '2025-10-01 10:12:00', 1, 0, '2025-08-19 10:12:44', '2025-08-26 10:51:42');
 
@@ -661,7 +668,10 @@ CREATE TABLE `promotion_usage_logs` (
 --
 
 INSERT INTO `promotion_usage_logs` (`id`, `promotion_id`, `customer_id`, `order_id`, `discount_amount`, `items_in_order`, `used_at`) VALUES
-(35, 16, 19, 54, 10171.20, 5, '2025-08-26 03:53:08');
+(35, 16, 19, 54, 10171.20, 5, '2025-08-26 03:53:08'),
+(36, 10, 19, 55, 119.40, 1, '2025-08-26 06:17:05'),
+(37, 13, 19, 56, 100.00, 1, '2025-08-26 06:17:48'),
+(38, 16, 19, 57, 20000.00, 1, '2025-08-27 02:05:21');
 
 -- --------------------------------------------------------
 
@@ -1093,7 +1103,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=297;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=299;
 
 --
 -- AUTO_INCREMENT for table `category_list`
@@ -1123,7 +1133,7 @@ ALTER TABLE `coupon_code_products`
 -- AUTO_INCREMENT for table `coupon_code_usage_logs`
 --
 ALTER TABLE `coupon_code_usage_logs`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `customer_list`
@@ -1135,7 +1145,7 @@ ALTER TABLE `customer_list`
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `product_image_path`
@@ -1177,7 +1187,7 @@ ALTER TABLE `promotion_products`
 -- AUTO_INCREMENT for table `promotion_usage_logs`
 --
 ALTER TABLE `promotion_usage_logs`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `shipping_methods`
@@ -1348,6 +1358,18 @@ ALTER TABLE `stock_list`
 ALTER TABLE `stock_out`
   ADD CONSTRAINT `order_id_fk_so` FOREIGN KEY (`order_id`) REFERENCES `order_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stock_id_fk_so` FOREIGN KEY (`stock_id`) REFERENCES `stock_list` (`id`) ON DELETE CASCADE;
+
+DELIMITER $$
+--
+-- Events
+--
+CREATE DEFINER=`root`@`localhost` EVENT `auto_update_promotion_status` ON SCHEDULE EVERY 1 MINUTE STARTS '2025-08-27 11:34:14' ON COMPLETION NOT PRESERVE ENABLE DO UPDATE promotions_list
+SET status = CASE
+    WHEN start_date <= NOW() AND end_date >= NOW() THEN 1
+    ELSE 0
+END$$
+
+DELIMITER ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
