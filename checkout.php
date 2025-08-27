@@ -86,7 +86,7 @@ $shipping_query_string = "
     LEFT JOIN 
         shipping_prices sp ON sm.id = sp.shipping_methods_id
     WHERE 
-        sm.is_active = 1 
+        sm.status = 1 
         AND sm.delete_flag = 0
         AND ('{$total_weight}' >= sp.min_weight AND '{$total_weight}' <= sp.max_weight) -- เงื่อนไขสำคัญ
     ORDER BY 
@@ -617,9 +617,14 @@ if (!function_exists('format_price_custom')) {
         document.getElementById('shipping_methods_id').value = selectedShipping.id;
         document.getElementById('shipping_methods_name_display').innerText = selectedShipping.name;
 
+        // --- [ บรรทัดที่ต้องเพิ่ม ] ---
+        // อัปเดตข้อความแสดงราคาค่าส่งให้ตรงกับที่เลือก
+        document.getElementById('shipping-cost').innerText = formatPrice(selectedShipping.cost) + ' บาท';
+
         updateGrandTotal(selectedShipping.cost);
         closeShippingModal();
     }
+
     let selectedShipping = null;
 
     function formatPrice(value) {
