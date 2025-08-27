@@ -156,6 +156,16 @@ if (count($unique_promo_ids) === 1 && !in_array(false, $product_has_promo_status
     $is_promo_applicable = true;
 }
 
+function formatPrice($value)
+{
+    if (floor($value) == $value) {
+        // จำนวนเต็ม → ไม่แสดงทศนิยม
+        return number_format($value, 0);
+    } else {
+        // มีทศนิยม → แสดง 2 หลัก
+        return number_format($value, 2);
+    }
+}
 // --- คำนวณส่วนลดถ้าโปรโมชั่นใช้งานได้ และ ตรวจสอบ minimum_order ---
 $final_shipping_cost = $default_shipping_cost;
 $promo_suggestion_message = null;
@@ -184,7 +194,7 @@ if ($is_promo_applicable) {
         // --- ยอดซื้อไม่ถึงเกณฑ์ ---
         $is_discount_applied = false;
         $needed_amount = $applied_promo['minimum_order'] - $cart_total;
-        $promo_suggestion_message = "ซื้อเพิ่มอีก " . number_format($needed_amount, 2) . " บาท เพื่อรับโปรโมชั่นนี้";
+        $promo_suggestion_message = "ซื้อเพิ่มอีก " . formatPrice($needed_amount, 2) . " บาท เพื่อรับโปรโมชั่นนี้";
     }
 }
 
@@ -255,7 +265,7 @@ if ($is_coupon_applicable) {
         // --- ยอดซื้อไม่ถึงเกณฑ์ ---
         $is_coupon_applied = false;
         $needed_amount = $applied_coupon['minimum_order'] - $cart_total;
-        $coupon_suggestion_message = "ซื้อเพิ่มอีก " . number_format($needed_amount, 2) . " บาท เพื่อรับคูปองนี้";
+        $coupon_suggestion_message = "ซื้อเพิ่มอีก " . formatPrice($needed_amount, 2) . " บาท เพื่อรับคูปองนี้";
     }
 }
 
@@ -381,9 +391,9 @@ if (!function_exists('format_price_custom')) {
                                                                 <?php
                                                                 if ($is_discount_applied && isset($applied_promo)) {
                                                                     if ($applied_promo['type'] == 'fixed') {
-                                                                        echo "- " . number_format($promotion_discount, 2) . " บาท";
+                                                                        echo "- " . format_price_custom($promotion_discount, 2) . " บาท";
                                                                     } elseif ($applied_promo['type'] == 'percent') {
-                                                                        echo "- " . number_format($promotion_discount, 2) . " บาท";
+                                                                        echo "- " . format_price_custom($promotion_discount, 2) . " บาท";
                                                                     } elseif ($applied_promo['type'] == 'free_shipping') {
                                                                         echo "ส่งฟรี";
                                                                     }
@@ -444,7 +454,7 @@ if (!function_exists('format_price_custom')) {
 
                                             <tr>
                                                 <th><strong>รวม</strong></th>
-                                                <td colspan="5">
+                                                <td colspan=" 5">
                                                     <h5 class="text-bold text-right">
                                                         <span id="order-total-text"><?= format_price_custom($grand_total, 2) ?></span> บาท
                                                     </h5>
@@ -688,7 +698,7 @@ if (!function_exists('format_price_custom')) {
                 });
             }
 
-            document.getElementById('order-total-text').innerText = formatPrice(grandTotal);
+            document.getElementById('order-total-text').innerText = formattedTotal;
         }
 
         // ตัวอย่างการเรียกใช้งาน
