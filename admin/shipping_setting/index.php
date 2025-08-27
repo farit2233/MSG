@@ -62,8 +62,8 @@
                             sm.id AS shipping_methods_id,
                             sm.name AS shipping_method_name,
                             sm.description AS shipping_method_description,
-                            sm.cod_enabled AS is_cod_enabled,
-                            sm.is_active AS is_active,
+                            sm.cod_enabled AS cod_enabled,
+                            sm.status AS status,
                             sm.delete_flag AS delete_flag,
                             MIN(sp.price) AS min_price,
                             MAX(sp.price) AS max_price
@@ -92,14 +92,14 @@
                                     ?>
                                 </td>
                                 <td class="text-center">
-                                    <?php if ($row['is_cod_enabled'] == 1): ?>
+                                    <?php if ($row['cod_enabled'] == 1): ?>
                                         <span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
                                     <?php else: ?>
                                         <span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
-                                    <?php if ($row['is_active'] == 1): ?>
+                                    <?php if ($row['status'] == 1): ?>
                                         <span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
                                     <?php else: ?>
                                         <span class="badge badge-danger px-3 rounded-pill">ไม่ได้ใช้งาน</span>

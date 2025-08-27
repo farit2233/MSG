@@ -1288,57 +1288,62 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+
 	function save_shipping_methods()
 	{
+		header('Content-Type: application/json; charset=utf-8');
+
 		if (!isset($_SESSION['userdata']) || $_SESSION['userdata']['type'] != 1) {
 			http_response_code(403);
-			return json_encode(['status' => 'forbidden', 'message' => 'ไม่มีสิทธิ์ใช้งาน']);
+			echo json_encode(['status' => 'forbidden', 'message' => 'ไม่มีสิทธิ์ใช้งาน']);
+			exit;
 		}
 
-		extract($_POST);
-		$id = isset($id) ? intval($id) : 0;
+		$id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
-		// ป้องกัน SQL injection
-		$provider_id = intval($provider_id ?? 0);
-		$name = $this->conn->real_escape_string($display_name ?? '');
-		$description = $this->conn->real_escape_string($description ?? '');
-		$cost = floatval($cost ?? 0);
+		$provider_id = intval($_POST['provider_id'] ?? 0);
+		$name = $this->conn->real_escape_string($_POST['display_name'] ?? '');
+		$description = $this->conn->real_escape_string($_POST['description'] ?? '');
+		$cost = floatval($_POST['cost'] ?? 0);
 		$cod_enabled = ($_POST['cod_enabled'] == '1') ? 1 : 0;
 		$status = ($_POST['status'] == '1') ? 1 : 0;
 
-		// ตรวจสอบข้อมูลที่สำคัญ
 		if (!$provider_id || !$name) {
-			return json_encode(['status' => 'failed', 'msg' => 'กรุณากรอกข้อมูลให้ครบ']);
+			echo json_encode(['status' => 'failed', 'msg' => 'กรุณากรอกข้อมูลให้ครบ']);
+			exit;
 		}
 
-		// SQL สำหรับการอัปเดตหรือเพิ่มข้อมูลใน shipping_methods
-		if ($id > 0) {
-			$sql = "UPDATE `shipping_methods` SET 
-            provider_id = '{$provider_id}',
-            name = '{$name}', 
-            description = '{$description}',
-            cost = '{$cost}',
-            cod_enabled = '{$cod_enabled}',
-            status = '{$status}'
-            WHERE id = {$id}";
-		} else {
-			$sql = "INSERT INTO `shipping_methods` 
-        (provider_id, name, description, cost, cod_enabled, status)
-        VALUES 
-        ('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$status}')";
-		}
+		$this->conn->begin_transaction();
+		try {
+			if ($id > 0) {
+				$sql = "UPDATE `shipping_methods` SET 
+                provider_id = '{$provider_id}',
+                name = '{$name}', 
+                description = '{$description}',
+                cost = '{$cost}',
+                cod_enabled = '{$cod_enabled}',
+                status = '{$status}'
+                WHERE id = {$id}";
+			} else {
+				$sql = "INSERT INTO `shipping_methods` 
+                (provider_id, name, description, cost, cod_enabled, status)
+                VALUES 
+                ('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$status}')";
+			}
 
-		// บันทึกข้อมูลใน shipping_methods
-		if ($this->conn->query($sql)) {
-			$shipping_methods_id = ($id > 0) ? $id : $this->conn->insert_id; // กรณีเพิ่มใหม่หรือแก้ไข
+			if (!$this->conn->query($sql)) {
+				throw new Exception($this->conn->error);
+			}
 
-			// ลบข้อมูลราคาจัดส่งเก่าในกรณีที่มีการแก้ไขข้อมูล
+			$shipping_methods_id = ($id > 0) ? $id : $this->conn->insert_id;
+
+			// ลบช่วงน้ำหนักเดิมถ้าแก้ไข
 			if ($id > 0) {
 				$this->conn->query("DELETE FROM `shipping_prices` WHERE shipping_methods_id = {$shipping_methods_id}");
 			}
 
-			// บันทึกข้อมูลราคาตามน้ำหนักใน shipping_prices
-			if (isset($_POST['weight_from']) && isset($_POST['weight_to']) && isset($_POST['price'])) {
+			// บันทึกค่าจัดส่งตามน้ำหนัก
+			if (!empty($_POST['weight_from']) && !empty($_POST['weight_to']) && !empty($_POST['price'])) {
 				$weight_from = $_POST['weight_from'];
 				$weight_to = $_POST['weight_to'];
 				$price = $_POST['price'];
@@ -1348,40 +1353,30 @@ class Master extends DBConnection
 					$w_to = intval($weight_to[$i]);
 					$p = floatval($price[$i]);
 
-					// ตรวจสอบความถูกต้องของน้ำหนักและราคา
 					if ($w_from >= $w_to) {
-						return json_encode(['status' => 'failed', 'msg' => 'น้ำหนักเริ่มต้นต้องน้อยกว่าหน้ำหนักสูงสุด']);
+						throw new Exception('น้ำหนักเริ่มต้นต้องน้อยกว่าน้ำหนักสูงสุด');
 					}
-
 					if ($p < 0) {
-						return json_encode(['status' => 'failed', 'msg' => 'ราคาต้องไม่ติดลบ']);
+						throw new Exception('ราคาต้องไม่ติดลบ');
 					}
 
-					// SQL สำหรับการบันทึกข้อมูลราคาตามน้ำหนัก
-					$sql_price = "INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price)
-                              VALUES (?, ?, ?, ?)";
-					$stmt_price = $this->conn->prepare($sql_price);
+					$stmt_price = $this->conn->prepare("INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price)
+                                                    VALUES (?, ?, ?, ?)");
 					$stmt_price->bind_param('iiid', $shipping_methods_id, $w_from, $w_to, $p);
 					if (!$stmt_price->execute()) {
-						return json_encode(['status' => 'failed', 'msg' => 'ไม่สามารถบันทึกข้อมูลราคาจัดส่งตามน้ำหนัก']);
+						throw new Exception('ไม่สามารถบันทึกข้อมูลราคาจัดส่งตามน้ำหนัก');
 					}
 				}
 			}
 
-			// หากบันทึกสำเร็จ
-			return json_encode([
-				'status' => 'success',
-				'provider_id' => $provider_id,
-				'display_name' => $name,
-				'description' => $description,
-				'cost' => $cost,
-				'cod_enabled' => $cod_enabled,
-				'status' => $status
-			]);
-		} else {
-			return json_encode(['status' => 'failed', 'msg' => $this->conn->error]);
+			$this->conn->commit();
+			echo json_encode(['status' => 'success']);
+		} catch (Exception $e) {
+			$this->conn->rollback();
+			echo json_encode(['status' => 'failed', 'msg' => $e->getMessage()]);
 		}
 	}
+
 
 
 	function delete_shipping()

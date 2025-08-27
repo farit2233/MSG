@@ -20,7 +20,7 @@ $description = '';
 $shipping_type = 'fixed';
 $cost = 0.00;
 $cod_enabled = 0;
-$is_active = 1;
+$status = 1;
 $id = '';
 
 
@@ -177,10 +177,10 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="card-title" style="font-size: 18px !important;">สถานะการแสดงผล</div>
                 </div>
                 <div class="card-body">
-                    <input type="hidden" name="is_active" value="0">
+                    <input type="hidden" name="status" value="0">
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" value="1" <?= isset($is_active) && $is_active == 1 ? 'checked' : '' ?>>
-                        <label class="custom-control-label" for="is_active">ปิดเพื่อซ่อนการจัดส่งจากหน้าร้าน แต่ร้านค้ายังสามารถจัดการต่อได้</label>
+                        <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" <?= isset($status) && $status == 1 ? 'checked' : '' ?>>
+                        <label class="custom-control-label" for="status">ปิดเพื่อซ่อนการจัดส่งจากหน้าร้าน แต่ร้านค้ายังสามารถจัดการต่อได้</label>
                     </div>
                 </div>
             </div>
