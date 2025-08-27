@@ -12,27 +12,22 @@ $qry = $conn->query("
 $qry_promo_recommand = $conn->query("
     SELECT * 
     FROM promotions_list 
+    WHERE status = 1 
+      AND delete_flag = 0
+      AND start_date <= NOW() 
+      AND end_date >= NOW() 
     ORDER BY 
-        -- ให้ 'freeshipping' อยู่หน้าสุด
         CASE 
             WHEN type = 'free_shipping' THEN 0 
             WHEN type = 'percent' THEN 1 
             ELSE 2 
         END, 
-        
-        -- ถ้าประเภทเป็น 'percent' คำนวณส่วนลดจาก 'discount_value' และจัดลำดับจากมากไปหาน้อย
         CASE 
             WHEN type = 'percent' THEN discount_value 
             ELSE 0 
         END DESC,
-        
-        -- ตรวจสอบ 'minimum_order' เพื่อให้รายการที่มี 'minimum_order' ต่ำสุดอยู่หน้าสุด
         minimum_order ASC,
-        
-        -- ใช้วันที่สร้าง (ถ้าต้องการใช้)
         date_created ASC,
-
-        -- กรณีที่ต้องการให้จัดตามชื่อ (ถ้าต้องการ)
         name ASC
     LIMIT 8
 ");

@@ -124,9 +124,19 @@ $applied_promo = null; // ตัวแปรเก็บข้อมูลโป
 
 // --- วนลูปเพื่อรวบรวมข้อมูลโปรโมชั่นทั้งหมดก่อน ---
 foreach ($cart_items as $item) {
-    $promo_query = "SELECT p.id, p.name, p.description, p.type, p.discount_value, p.minimum_order FROM promotion_products pp
-                    JOIN promotions_list p ON pp.promotion_id = p.id
-                    WHERE pp.product_id = {$item['product_id']} AND pp.status = 1 AND pp.delete_flag = 0";
+    $promo_query = "
+        SELECT p.id, p.name, p.description, p.type, p.discount_value, p.minimum_order, p.start_date, p.end_date
+        FROM promotion_products pp
+        JOIN promotions_list p ON pp.promotion_id = p.id
+        WHERE pp.product_id = {$item['product_id']}
+          AND pp.status = 1
+          AND pp.delete_flag = 0
+          AND p.status = 1
+          AND p.delete_flag = 0
+          AND p.start_date <= NOW()
+          AND p.end_date >= NOW()
+    ";
+
     $promo_result = $conn->query($promo_query);
 
     if ($promo_result && $promo_result->num_rows > 0) {
