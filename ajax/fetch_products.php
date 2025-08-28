@@ -12,7 +12,6 @@ $page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']
 $offset = ($page - 1) * $limit;
 // === END: PAGINATION SETUP ===
 
-
 // การเรียงลำดับ
 $order_by = "`pl`.`date_created` DESC";
 if (isset($_GET['sort'])) {
@@ -51,12 +50,10 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
 // เช็คว่าเลือก promotion_id หรือไม่
 if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
     $pid = intval($_GET['pid']);
-    // เพิ่มเงื่อนไขในการดึงสินค้าที่เชื่อมโยงกับ promotion_id
     $additional_where .= " AND pp.promotion_id = {$pid}";
 }
 
 // === START: QUERY FOR TOTAL COUNT ===
-// สร้าง query เพื่อนับจำนวนสินค้าทั้งหมดที่ตรงตามเงื่อนไข
 $count_qry_str = "
     SELECT COUNT(DISTINCT pl.id) as total_products
     FROM product_list pl
@@ -70,8 +67,7 @@ $total_products = $count_qry->fetch_assoc()['total_products'];
 $total_pages = ceil($total_products / $limit);
 // === END: QUERY FOR TOTAL COUNT ===
 
-
-// ดึงรายการสินค้า พร้อม JOIN ตาราง category_list และเพิ่ม LIMIT OFFSET
+// ดึงรายการสินค้าหลัก (ตาม filter และ pagination)
 $qry_str = "
     SELECT pl.*,
         (
@@ -83,12 +79,23 @@ $qry_str = "
     LEFT JOIN promotion_products pp ON pp.product_id = pl.id
     WHERE pl.status = 1 AND pl.delete_flag = 0
     {$additional_where}
-    GROUP BY pl.id  -- Group by product id
+    GROUP BY pl.id
     ORDER BY {$order_by}
-    LIMIT {$limit} OFFSET {$offset} -- เพิ่มส่วนนี้เข้ามา
+    LIMIT {$limit} OFFSET {$offset}
 ";
 $qry = $conn->query($qry_str);
 
+// === ดึง ID สินค้าใหม่ล่าสุด 4 ชิ้น ===
+$newest_ids = [];
+$newest_qry = $conn->query("
+    SELECT id FROM product_list
+    WHERE status = 1 AND delete_flag = 0
+    ORDER BY date_created DESC
+    LIMIT 4
+");
+while ($r = $newest_qry->fetch_assoc()) {
+    $newest_ids[] = $r['id'];
+}
 
 // ฟังก์ชันแสดงราคาแบบไม่มี .00
 if (!function_exists('format_price_custom')) {
@@ -99,15 +106,15 @@ if (!function_exists('format_price_custom')) {
     }
 }
 
-// แสดง HTML
+// เริ่มต้นการสร้าง HTML Output
 ob_start();
+?>
 
-// ส่วนแสดงผลสินค้า (เหมือนเดิม)
-if ($qry->num_rows > 0):
-    while ($row = $qry->fetch_assoc()):
+<?php if ($qry->num_rows > 0): ?>
+    <?php while ($row = $qry->fetch_assoc()):
         $in_stock = $row['available'] > 0;
         $stock_class = $in_stock ? '' : 'out-of-stock';
-?>
+    ?>
         <div class="col-6 col-sm-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
             <a class="card rounded-0 product-item text-decoration-none text-reset h-100 <?= $stock_class ?>"
                 href="./?p=products/view_product&id=<?= $row['id'] ?>">
@@ -116,6 +123,13 @@ if ($qry->num_rows > 0):
                         <?php if (!$in_stock): ?>
                             <div class="out-of-stock-label">สินค้าหมด</div>
                         <?php endif; ?>
+
+                        <?php if (in_array($row['id'], $newest_ids)): ?>
+                            <div class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 small" style="z-index: 1;">
+                                ใหม่
+                            </div>
+                        <?php endif; ?>
+
                         <img src="<?= validate_image($row['image_path']) ?>" alt="<?= $row['name'] ?>" class="product-img">
                     </div>
                 </div>
@@ -124,9 +138,7 @@ if ($qry->num_rows > 0):
                         <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
                         <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
                             <div class="w-100">
-                                <small class="text-muted" style="line-height: 1.25em; display: block;">
-                                    <?= $row['brand'] ?>
-                                </small>
+                                <small class="text-muted" style="line-height: 1.25em; display: block;"><?= $row['brand'] ?></small>
                             </div>
                         </div>
                         <div class="d-flex justify-content-end align-items-center">
@@ -148,33 +160,26 @@ if ($qry->num_rows > 0):
         <p>ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
     </div>
 <?php endif; ?>
-
 <?php if ($total_pages > 1) { ?>
     <div class="col-12 d-flex justify-content-center mt-4">
         <nav aria-label="Page navigation">
             <ul class="pagination">
-                <!-- ปุ่มก่อนหน้า -->
                 <li class="page-item <?= ($page == 1) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="javascript:void(0)" data-page="<?= $page - 1 ?>" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
+                    <a class="page-link" href="javascript:void(0)" data-page="<?= $page - 1 ?>" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
                 </li>
-
                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                     <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
                         <a class="page-link" href="javascript:void(0)" data-page="<?= $i ?>"><?= $i ?></a>
                     </li>
                 <?php endfor; ?>
-
-                <!-- ปุ่มถัดไป -->
                 <li class="page-item <?= ($page == $total_pages) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="javascript:void(0)" data-page="<?= $page + 1 ?>" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
+                    <a class="page-link" href="javascript:void(0)" data-page="<?= $page + 1 ?>" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
                 </li>
             </ul>
         </nav>
     </div>
 <?php }
+
+// ส่ง Output ทั้งหมดกลับไป
 echo ob_get_clean();
 ?>
