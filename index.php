@@ -38,6 +38,11 @@
         width: 100% !important;
       }
     }
+
+    #uni_modal_conditions .modal-dialog {
+      margin-top: 8% !important;
+      margin-bottom: auto !important;
+    }
   </style>
   <div class="modal fade" id="uni_modal" role='dialog'>
     <div class="modal-dialog   rounded-0 modal-md modal-dialog-centered" role="document">
@@ -94,7 +99,7 @@
   </div>
 
   <div class="modal fade modal-conditions" id="uni_modal_conditions" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg " role="document">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title"></h5>
@@ -103,7 +108,6 @@
           </button>
         </div>
         <div class="modal-body">
-          <!-- เนื้อหาจะถูกโหลดจาก URL -->
         </div>
       </div>
     </div>
