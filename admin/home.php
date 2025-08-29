@@ -28,30 +28,57 @@
   <h4 class="mt-4">สรุปข้อมูลระบบ</h4>
   <div class="row">
     <?php
-    //$boxes = [
-    //  ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-primary', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
-    //  ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-info', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
-    //  ['link' => '?page=inventory', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-secondary', 'icon' => 'fas fa-warehouse'],
-    //];
+    // กำหนดเกณฑ์ "สินค้าใกล้หมด"
+    $low_stock_threshold = 10;
+
+    // ตรวจสอบว่ามีสินค้าใกล้หมดหรือไม่
+    $low_stock_query = $conn->query("
+    SELECT 1
+    FROM product_list pl
+    WHERE pl.delete_flag = 0 
+      AND pl.status = 1
+      AND (
+          COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = pl.id), 0)
+          - COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = pl.id), 0)
+      ) <= $low_stock_threshold
+    LIMIT 1
+");
+
+    $has_low_stock = $low_stock_query->num_rows > 0;
+
+    // --- Info Boxes ---
     $boxes = [
       ['link' => '?page=product_type', 'label' => 'ประเภทสินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-layer-group', 'query' => "SELECT * FROM product_type where delete_flag = 0"],
       ['link' => '?page=categories', 'label' => 'หมวดหมู่สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-th-list', 'query' => "SELECT * FROM category_list where delete_flag = 0"],
       ['link' => '?page=products', 'label' => 'สินค้าทั้งหมด', 'bg' => 'bg-white', 'icon' => 'fas fa-boxes', 'query' => "SELECT id FROM product_list where `status` = 1"],
-      ['link' => '?page=inventory', 'label' => 'สต๊อกสินค้า', 'bg' => 'bg-white', 'icon' => 'fas fa-warehouse'],
     ];
 
-    foreach ($boxes as $box):
+    // เพิ่มกล่องสินค้าใกล้หมดถ้ามี
+    $boxes[] = [
+      'link' => '?page=inventory',
+      'label' => $has_low_stock ? 'ตรวจพบสต๊อกสินค้าใกล้หมด' : 'สต๊อกสินค้าทั้งหมด',
+      'bg' => $has_low_stock ? 'bg-danger' : 'bg-white',
+      'icon' => $has_low_stock ? 'fas fa-exclamation-triangle' : 'fas fa-warehouse'
+    ];
+
+
+    foreach ($boxes as $box) :
       $bg = $box['bg'] ?? 'bg-light';
     ?>
       <div class="col-12 col-sm-4 col-md-4">
         <a href="<?= $box['link'] ?>">
-          <div class="info-box <?= $bg ?> text-white">
+          <div class="info-box <?= $bg ?> text-dark">
             <span class="info-box-icon"><i class="<?= $box['icon'] ?>"></i></span>
             <div class="info-box-content">
               <span class="info-box-text text-bold"><?= $box['label'] ?></span>
-              <?php if (isset($box['query'])): ?>
+
+              <?php if (isset($box['query'])) : ?>
                 <?php $result = $conn->query($box['query']); ?>
                 <span class="info-box-number text-right h5"><?= format_num($result->num_rows ?? 0) ?></span>
+
+              <?php elseif (isset($box['count'])) : ?>
+                <span class="info-box-number text-right h5"><?= format_num($box['count'] ?? 0) ?></span>
+
               <?php endif; ?>
             </div>
           </div>

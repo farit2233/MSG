@@ -838,6 +838,29 @@ class Master extends DBConnection
 				$price = floatval($row['final_price']);
 				$data .= "('{$oid}', '{$product_id}', '{$quantity}', '{$price}', {$applied_promo_id}, {$applied_coupon_id})";
 			}
+			$stock_out_data = "";
+			foreach ($cart_data as $item) {
+				$product_id = intval($item['product_id']);
+				$quantity_out = intval($item['quantity']);
+
+				// ค้นหา stock_id จาก product_id
+				// สมมติว่า 1 product มี 1 stock หลัก
+				$stock_qry = $this->conn->query("SELECT id FROM `stock_list` WHERE product_id = {$product_id} LIMIT 1");
+				if ($stock_qry->num_rows > 0) {
+					$stock = $stock_qry->fetch_assoc();
+					$stock_id = $stock['id'];
+
+					if (!empty($stock_out_data)) $stock_out_data .= ", ";
+					$stock_out_data .= "('{$oid}', '{$stock_id}', '{$quantity_out}')";
+				}
+			}
+
+			if (!empty($stock_out_data)) {
+				$insert_stock_out = $this->conn->query("INSERT INTO `stock_out` (`order_id`, `stock_id`, `quantity`) VALUES {$stock_out_data}");
+				if (!$insert_stock_out) {
+					throw new Exception('ไม่สามารถบันทึกข้อมูลการตัดสต็อกได้: ' . $this->conn->error);
+				}
+			}
 
 			$save = $this->conn->query("INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`, `promotion_id`, `coupon_code_id`) VALUES {$data}");
 			if (!$save) throw new Exception('ไม่สามารถบันทึกรายการสินค้า: ' . $this->conn->error);

@@ -51,12 +51,28 @@
 					<tbody>
 						<?php
 						$i = 1;
-						$qry = $conn->query("SELECT *, (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = product_list.id), 0) - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = product_list.id), 0)) as `available` from `product_list` where delete_flag = 0 and `status` = 1 order by `brand` asc, `name` asc ");
+
+						// กำหนดเกณฑ์ใกล้หมด
+						$low_stock_threshold = 10;
+
+						$qry = $conn->query("
+							SELECT pl.*, 
+								(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = pl.id), 0) 
+								- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = pl.id), 0)) AS available
+							FROM `product_list` pl
+							WHERE pl.delete_flag = 0 AND pl.`status` = 1
+							ORDER BY 
+								available ASC,       -- สินค้าใกล้หมดขึ้นก่อน
+								pl.brand ASC, 
+								pl.name ASC
+						");
+
 						while ($row = $qry->fetch_assoc()):
+							// ตรวจสอบว่าจำนวนสินค้าต่ำกว่าเกณฑ์หรือไม่
+							$stock_class = ($row['available'] <= $low_stock_threshold) ? 'text-danger fw-bold' : '';
 						?>
 							<tr>
 								<td class="text-center"><?php echo $i++; ?></td>
-
 								<td class="text-center">
 									<img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
 								</td>
@@ -67,14 +83,16 @@
 										<div><small class="text-muted"><?= $row['dose'] ?></small></div>
 									</div>
 								</td>
-								<td class="text-center"><?= format_num($row['available'], 0) ?></td>
+								<td class="text-center <?= $stock_class ?>"><?= format_num($row['available'], 0) ?></td>
 								<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 								<td class="text-center">
-									<a class="btn btn-sm btn-flat btn-light bg-gradient-light border" href="./?page=inventory/view_inventory&id=<?php echo $row['id'] ?>"><span class="fa fa-edit text-dark"></span> แก้ไขสต๊อก</a>
+									<a class="btn btn-sm btn-flat btn-light bg-gradient-light border" href="./?page=inventory/view_inventory&id=<?php echo $row['id'] ?>">
+										<span class="fa fa-edit text-dark"></span> แก้ไขสต๊อก
+									</a>
 								</td>
 							</tr>
 						<?php endwhile; ?>
-					</tbody>
+
 				</table>
 			</div>
 		</div>
