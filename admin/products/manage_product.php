@@ -238,15 +238,13 @@ if (isset($id)) {
 						<label>รายละเอียดสินค้า</label>
 						<textarea name="description" rows="3" class="form-control"><?= isset($description) ? $description : '' ?></textarea>
 					</div>
-					<div class="row">
-						<div class="col-md-6">
-							<div class="form-group">
-								<label>รหัสสินค้า (SKU) <span class="text-danger">*</span></label>
-								<input type="text" name="sku" class="form-control" value="<?= isset($sku) ? $sku : '' ?>" required>
-							</div>
-						</div>
+					<div class="form-group">
+						<label>รหัสสินค้า (SKU) <span class="text-danger">*</span></label>
+						<input type="text" name="sku" class="form-control" value="<?= isset($sku) ? $sku : '' ?>" required>
+					</div>
 
-						<div class="col-md-6">
+					<div class="row">
+						<div class="col-md-3">
 							<div class="form-group">
 								<label>ราคา <span class="text-danger">*</span></label>
 								<div class="input-group">
@@ -257,189 +255,207 @@ if (isset($id)) {
 								</div>
 							</div>
 						</div>
-					</div>
 
-				</div>
-			</div>
-			<div class="card card-outline card-dark rounded-0 mb-3">
-				<div class="card-header">
-					<div class="card-title">ช่องทางจำหน่าย</div>
-				</div>
-				<div class="card-body">
-					<div class="form-row">
-						<div class="form-group col-md-4">
-							<label>Shopee</label>
-							<input type="url" name="shopee" class="form-control" value="<?= isset($id) ? get_platform_link($conn, $id, 'shopee') : '' ?>">
+						<div class="col-md-3">
+							<div class="form-group">
+								<label>ภาษี VAT% <span class="text-danger">*</span></label>
+								<input type="number" step="1" min="0" max="100" name="vat_percent" class="form-control" value="<?= isset($vat_percent) ? $vat_percent : '7' ?>" required>
+							</div>
 						</div>
-						<div class="form-group col-md-4">
-							<label>Lazada</label>
-							<input type="url" name="lazada" class="form-control" value="<?= isset($id) ? get_platform_link($conn, $id, 'lazada') : '' ?>">
-						</div>
-						<div class="form-group col-md-4">
-							<label>TikTok</label>
-							<input type="url" name="tiktok" class="form-control" value="<?= isset($id) ? get_platform_link($conn, $id, 'tiktok') : '' ?>">
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="card card-outline card-dark rounded-0 mb-3">
-				<div class="card-header">
-					<div class="card-title">ส่วนลด</div>
-				</div>
-				<div class="card-body">
-					<div class="custom-control custom-switch mb-3">
-						<input type="checkbox" class="custom-control-input" id="discount_toggle"
-							<?= (isset($discount_value) && $discount_value != 0) ? 'checked' : '' ?>>
 
-						<label class="custom-control-label" for="discount_toggle">เปิดใช้งานส่วนลด</label>
-					</div>
-
-					<div id="discount_section" class="border p-3 bg-light">
-						<?php
-						$discount_type = $discount_type ?? ''; // กำหนดค่าเริ่มต้น
-						$discount_value = $discount_value ?? ''; // กำหนดค่าเริ่มต้น
-						?>
-
-						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="discount_type" id="discount_amount" value="amount"
-								<?= $discount_type == 'amount' ? 'checked' : '' ?>>
-							<label class="form-check-label" for="discount_amount">ลดเป็นจำนวนเงิน (บาท)</label>
-						</div>
-						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="discount_type" id="discount_percent" value="percent"
-								<?= $discount_type == 'percent' ? 'checked' : '' ?>>
-							<label class="form-check-label" for="discount_percent">ลดเป็นเปอร์เซ็นต์ (%)</label>
-						</div>
-						<div class="form-group mt-2">
-							<label>มูลค่าส่วนลด</label>
-							<input type="number" name="discount_value" class="form-control" min="0" step="any" value="<?= $discount_value ?>">
-						</div>
-						<div class="form-group">
-							<label>ราคาหลังหักส่วนลด</label>
-							<input type="text" readonly class="form-control" id="final-price">
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="card card-outline card-dark rounded-0 mb-3">
-				<div class="card-header">
-					<div class="card-title">การจัดส่ง</div>
-				</div>
-				<div class="card-body">
-					<div class="form-row">
-						<div class="form-group col-md-6">
-							<label>น้ำหนัก (กรัม) <span class="text-danger">*</span></label>
-							<div class="input-group">
-								<input type="number" step="any" min="0" name="product_weight" class="form-control" value="<?= isset($product_weight) ? $product_weight : '' ?>" required>
-								<div class="input-group-append">
-									<span class="input-group-text">g</span>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>ราคาทั้งหมด (รวม VAT)</label>
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">฿</span>
+									</div>
+									<input type="text" class="form-control" id="price-with-vat" value="<?= isset($price) ? $price : '0' ?>" disabled>
 								</div>
 							</div>
 						</div>
-						<div class="form-group col-md-6">
-							<label>ขนาดพัสดุ (กว้าง x ยาว x สูง)</label>
-							<div class="form-row">
-								<div class="col"><input type="number" step="any" name="product_width" class="form-control" placeholder="กว้าง" value="<?= isset($product_width) ? $product_width : '' ?>"></div>
-								<div class="col"><input type="number" step="any" name="product_length" class="form-control" placeholder="ยาว" value="<?= isset($product_length) ? $product_length : '' ?>"></div>
-								<div class="input-group col">
-									<input type="number" step="any" name="product_height" class="form-control" placeholder="สูง" value="<?= isset($product_height) ? $product_height : '' ?>">
+
+
+					</div>
+				</div>
+				<div class="card card-outline card-dark rounded-0 mb-3">
+					<div class="card-header">
+						<div class="card-title">ช่องทางจำหน่าย</div>
+					</div>
+					<div class="card-body">
+						<div class="form-row">
+							<div class="form-group col-md-4">
+								<label>Shopee</label>
+								<input type="url" name="shopee" class="form-control" value="<?= isset($id) ? get_platform_link($conn, $id, 'shopee') : '' ?>">
+							</div>
+							<div class="form-group col-md-4">
+								<label>Lazada</label>
+								<input type="url" name="lazada" class="form-control" value="<?= isset($id) ? get_platform_link($conn, $id, 'lazada') : '' ?>">
+							</div>
+							<div class="form-group col-md-4">
+								<label>TikTok</label>
+								<input type="url" name="tiktok" class="form-control" value="<?= isset($id) ? get_platform_link($conn, $id, 'tiktok') : '' ?>">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="card card-outline card-dark rounded-0 mb-3">
+					<div class="card-header">
+						<div class="card-title">ส่วนลด</div>
+					</div>
+					<div class="card-body">
+						<div class="custom-control custom-switch mb-3">
+							<input type="checkbox" class="custom-control-input" id="discount_toggle"
+								<?= (isset($discount_value) && $discount_value != 0) ? 'checked' : '' ?>>
+
+							<label class="custom-control-label" for="discount_toggle">เปิดใช้งานส่วนลด</label>
+						</div>
+
+						<div id="discount_section" class="border p-3 bg-light">
+							<?php
+							$discount_type = $discount_type ?? ''; // กำหนดค่าเริ่มต้น
+							$discount_value = $discount_value ?? ''; // กำหนดค่าเริ่มต้น
+							?>
+
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="discount_type" id="discount_amount" value="amount"
+									<?= $discount_type == 'amount' ? 'checked' : '' ?>>
+								<label class="form-check-label" for="discount_amount">ลดเป็นจำนวนเงิน (บาท)</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="discount_type" id="discount_percent" value="percent"
+									<?= $discount_type == 'percent' ? 'checked' : '' ?>>
+								<label class="form-check-label" for="discount_percent">ลดเป็นเปอร์เซ็นต์ (%)</label>
+							</div>
+							<div class="form-group mt-2">
+								<label>มูลค่าส่วนลด</label>
+								<input type="number" name="discount_value" class="form-control" min="0" step="any" value="<?= $discount_value ?>">
+							</div>
+							<div class="form-group">
+								<label>ราคาหลังหักส่วนลด</label>
+								<input type="text" readonly class="form-control" id="final-price">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="card card-outline card-dark rounded-0 mb-3">
+					<div class="card-header">
+						<div class="card-title">การจัดส่ง</div>
+					</div>
+					<div class="card-body">
+						<div class="form-row">
+							<div class="form-group col-md-6">
+								<label>น้ำหนัก (กรัม) <span class="text-danger">*</span></label>
+								<div class="input-group">
+									<input type="number" step="any" min="0" name="product_weight" class="form-control" value="<?= isset($product_weight) ? $product_weight : '' ?>" required>
 									<div class="input-group-append">
-										<span class="input-group-text">cm</span>
+										<span class="input-group-text">g</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group col-md-6">
+								<label>ขนาดพัสดุ (กว้าง x ยาว x สูง)</label>
+								<div class="form-row">
+									<div class="col"><input type="number" step="any" name="product_width" class="form-control" placeholder="กว้าง" value="<?= isset($product_width) ? $product_width : '' ?>"></div>
+									<div class="col"><input type="number" step="any" name="product_length" class="form-control" placeholder="ยาว" value="<?= isset($product_length) ? $product_length : '' ?>"></div>
+									<div class="input-group col">
+										<input type="number" step="any" name="product_height" class="form-control" placeholder="สูง" value="<?= isset($product_height) ? $product_height : '' ?>">
+										<div class="input-group-append">
+											<span class="input-group-text">cm</span>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
 
-					<hr>
-					<h5>ราคาขนส่ง</h5>
-					<div class="table-responsive">
-						<table class="table table-bordered">
-							<thead class="thead-light">
-								<tr>
-									<th>ชื่อขนส่ง</th>
-									<th>ราคาขนส่งคงที่</th>
-									<th>ราคาขนส่งตามขนาด</th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php
-								// 1) เตรียมน้ำหนักจริง
-								$product_weight = isset($product_weight) ? (float)$product_weight : 0;
+						<hr>
+						<h5>ราคาขนส่ง</h5>
+						<div class="table-responsive">
+							<table class="table table-bordered">
+								<thead class="thead-light">
+									<tr>
+										<th>ชื่อขนส่ง</th>
+										<th>ราคาขนส่งคงที่</th>
+										<th>ราคาขนส่งตามขนาด</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									// 1) เตรียมน้ำหนักจริง
+									$product_weight = isset($product_weight) ? (float)$product_weight : 0;
 
-								// 2) วนขนส่งทั้งหมด
-								$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND status = 1");
+									// 2) วนขนส่งทั้งหมด
+									$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND status = 1");
 
-								$matched_shipping_price_id = null; // จะเก็บ id ช่วงราคาที่ match จริง
+									$matched_shipping_price_id = null; // จะเก็บ id ช่วงราคาที่ match จริง
 
-								while ($row = $shippings->fetch_assoc()):
-									$method_id = $row['id'];
+									while ($row = $shippings->fetch_assoc()):
+										$method_id = $row['id'];
 
-									// หา rate ตามช่วงน้ำหนัก
-									$qry = $conn->query("SELECT * FROM shipping_prices 
+										// หา rate ตามช่วงน้ำหนัก
+										$qry = $conn->query("SELECT * FROM shipping_prices 
 								WHERE shipping_methods_id = {$method_id} 
 								AND min_weight <= {$product_weight} 
 								AND max_weight >= {$product_weight}
 								ORDER BY min_weight ASC LIMIT 1");
 
-									$matched_row = $qry && $qry->num_rows ? $qry->fetch_assoc() : null;
+										$matched_row = $qry && $qry->num_rows ? $qry->fetch_assoc() : null;
 
-									// ถ้าเจอช่วงแรก เอา id เก็บไว้
-									if ($matched_row && !$matched_shipping_price_id) {
-										$matched_shipping_price_id = $matched_row['id'];
-									}
+										// ถ้าเจอช่วงแรก เอา id เก็บไว้
+										if ($matched_row && !$matched_shipping_price_id) {
+											$matched_shipping_price_id = $matched_row['id'];
+										}
 
-								?>
-									<tr data-method-id="<?= $row['id'] ?>">
+									?>
+										<tr data-method-id="<?= $row['id'] ?>">
 
-										<td data-label="ชื่อขนส่ง">
-											<h6><?= $row['name'] ?></h6>
-										</td>
+											<td data-label="ชื่อขนส่ง">
+												<h6><?= $row['name'] ?></h6>
+											</td>
 
-										<td data-label="ราคาขนส่งคงที่">
-											<input type="text" class="form-control" value="<?= number_format($row['cost'], 2) ?> บาท" readonly>
-										</td>
+											<td data-label="ราคาขนส่งคงที่">
+												<input type="text" class="form-control" value="<?= number_format($row['cost'], 2) ?> บาท" readonly>
+											</td>
 
-										<td data-label="ราคาขนส่งตามขนาด">
-											<input type="text" class="form-control dynamic-shipping"
-												value="<?= $matched_row ? "ช่วง {$matched_row['min_weight']}-{$matched_row['max_weight']} g | " . number_format($matched_row['price'], 2) . " บาท" : "น้ำหนักสินค้าสูงเกินขีดจำกัด" ?>"
-												readonly>
-											<div class="weight-error text-danger" style="display: none;"></div>
-										</td>
+											<td data-label="ราคาขนส่งตามขนาด">
+												<input type="text" class="form-control dynamic-shipping"
+													value="<?= $matched_row ? "ช่วง {$matched_row['min_weight']}-{$matched_row['max_weight']} g | " . number_format($matched_row['price'], 2) . " บาท" : "น้ำหนักสินค้าสูงเกินขีดจำกัด" ?>"
+													readonly>
+												<div class="weight-error text-danger" style="display: none;"></div>
+											</td>
 
-									</tr>
-								<?php endwhile; ?>
-							</tbody>
+										</tr>
+									<?php endwhile; ?>
+								</tbody>
 
-						</table>
+							</table>
+						</div>
+						<div class="form-check">
+							<input type="checkbox" name="slow_prepare" id="slow_prepare" class="form-check-input" <?= isset($slow_prepare) && $slow_prepare ? 'checked' : '' ?>>
+							<label class="form-check-label" for="slow_prepare">เตรียมส่งนานกว่าปกติ</label>
+						</div>
 					</div>
-					<div class="form-check">
-						<input type="checkbox" name="slow_prepare" id="slow_prepare" class="form-check-input" <?= isset($slow_prepare) && $slow_prepare ? 'checked' : '' ?>>
-						<label class="form-check-label" for="slow_prepare">เตรียมส่งนานกว่าปกติ</label>
+				</div>
+				<div class="card card-outline card-dark rounded-0 mb-3">
+					<div class="card-header">
+						<div class="card-title">สถานะการขาย</div>
+					</div>
+					<div class="card-body">
+						<input type="hidden" name="status" value="0">
+						<div class="custom-control custom-switch">
+							<input type="checkbox" class="custom-control-input" id="status" name="status" value="1" <?= isset($status) && $status == 1 ? 'checked' : '' ?>>
+							<label class="custom-control-label" for="status">เปิด/ปิดการขายของสินค้าบนหน้าร้าน</label>
+						</div>
 					</div>
 				</div>
 			</div>
-			<div class="card card-outline card-dark rounded-0 mb-3">
-				<div class="card-header">
-					<div class="card-title">สถานะการขาย</div>
-				</div>
-				<div class="card-body">
-					<input type="hidden" name="status" value="0">
-					<div class="custom-control custom-switch">
-						<input type="checkbox" class="custom-control-input" id="status" name="status" value="1" <?= isset($status) && $status == 1 ? 'checked' : '' ?>>
-						<label class="custom-control-label" for="status">เปิด/ปิดการขายของสินค้าบนหน้าร้าน</label>
-					</div>
-				</div>
+			<div class="card-footer py-1 text-center">
+				<button class="btn btn-success btn-sm btn-flat" form="product-form"><i class="fa fa-save"></i> บันทึก</button>
+				<a class="btn btn-danger btn-sm border btn-flat" href="./?page=products"><i class="fa fa-times"></i> ยกเลิก</a>
+				<a class="btn btn-light btn-sm border btn-flat" href="./?page=products"><i class="fa fa-angle-left"></i> กลับ</a>
 			</div>
-		</div>
-		<div class="card-footer py-1 text-center">
-			<button class="btn btn-success btn-sm btn-flat" form="product-form"><i class="fa fa-save"></i> บันทึก</button>
-			<a class="btn btn-danger btn-sm border btn-flat" href="./?page=products"><i class="fa fa-times"></i> ยกเลิก</a>
-			<a class="btn btn-light btn-sm border btn-flat" href="./?page=products"><i class="fa fa-angle-left"></i> กลับ</a>
-		</div>
 	</form>
 </div>
-
 
 <script>
 	function previewGallery(input) {
@@ -490,22 +506,21 @@ if (isset($id)) {
 		}
 	}
 
-	function calculateFinalPrice() {
+	function calculatePriceWithVAT() {
 		const price = parseFloat($('[name="price"]').val()) || 0;
-		const discountType = $('[name="discount_type"]:checked').val();
-		const discountValue = parseFloat($('[name="discount_value"]').val()) || 0;
-		let finalPrice = price;
+		const vat = parseFloat($('[name="vat_percent"]').val()) || 0;
 
-		if (discountType === 'amount') {
-			finalPrice -= discountValue;
-		} else if (discountType === 'percent') {
-			finalPrice -= (price * discountValue / 100);
-		}
+		// รวม VAT
+		const total = price + (price * vat / 100);
 
-		finalPrice = Math.max(0, finalPrice);
-		$('#final-price').val(finalPrice.toFixed(2));
-		$('#final-price-display').text(finalPrice.toFixed(2) + ' บาท');
+		$('#price-with-vat').val(total.toFixed(2)); // แสดง 2 ตำแหน่ง
 	}
+
+	// Event listener
+	$('[name="price"], [name="vat_percent"]').on('input', calculatePriceWithVAT);
+
+	// เรียกตอน load page
+	calculatePriceWithVAT();
 
 	function updateShippingPrices(weight) {
 		const tbody = $('table tbody');
@@ -544,6 +559,7 @@ if (isset($id)) {
 			}
 		});
 
+
 		// แสดงหรือปิดปุ่มบันทึก
 		if (weight > 25000) {
 			$('#save-btn').prop('disabled', true); // ปิดปุ่มเซฟ
@@ -551,7 +567,6 @@ if (isset($id)) {
 			$('#save-btn').prop('disabled', false); // เปิดปุ่มเซฟ
 		}
 	}
-
 
 
 	$(document).ready(function() {
@@ -593,7 +608,6 @@ if (isset($id)) {
 				});
 				return; // ไม่ส่งฟอร์ม
 			}
-
 
 			// หากผ่านเงื่อนไข
 			$('.err-msg').remove(); // ลบ error ที่เก่าก่อนหน้า
