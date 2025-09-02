@@ -537,21 +537,26 @@ if (isset($id)) {
 	}
 
 	function calculateFinalPrice() {
-		const price = parseFloat($('[name="price"]').val()) || 0;
+		const vat_price = parseFloat($('[name="vat_price"]').val()) || 0;
 		const discountType = $('[name="discount_type"]:checked').val();
 		const discountValue = parseFloat($('[name="discount_value"]').val()) || 0;
-		let finalPrice = price;
+		let finalPrice = vat_price;
 
 		if (discountType === 'amount') {
 			finalPrice -= discountValue;
 		} else if (discountType === 'percent') {
-			finalPrice -= (price * discountValue / 100);
+			finalPrice -= (vat_price * discountValue / 100);
 		}
 
 		finalPrice = Math.max(0, finalPrice);
-		$('#final-price').val(finalPrice.toFixed(2));
-		$('#final-price-display').text(finalPrice.toFixed(2) + ' บาท');
+
+		// ปัดเศษให้เป็นจำนวนเต็ม (ไม่มีทศนิยม)
+		finalPrice = Math.round(finalPrice);
+
+		$('#final-price').val(finalPrice); // สำหรับ input hidden หรือ readonly
+		$('#final-price-display').text(finalPrice + ' บาท'); // แสดงผล
 	}
+
 
 	function updateShippingPrices(weight) {
 		const tbody = $('table tbody');
@@ -637,7 +642,7 @@ if (isset($id)) {
 		});
 
 		// 🔑 เพิ่ม Event listener คำนวณทันทีเมื่อกรอก
-		$('[name="price"], [name="discount_type"], [name="discount_value"]').on('input change', calculateFinalPrice);
+		$('[name="vat_price"], [name="discount_type"], [name="discount_value"]').on('input change', calculateFinalPrice);
 		calculateFinalPrice(); // เรียกครั้งแรกเลย
 
 		$('[name="product_weight"]').on('input', function() {

@@ -47,7 +47,7 @@
 							<th>รูปภาพสินค้า</th>
 							<th>แบรนด์</th>
 							<th>ชื่อสินค้า</th>
-							<th>ราคา</th>
+							<th>ราคา(VAT)</th>
 							<th>วันที่สร้าง</th>
 							<th>สถานะ</th>
 							<th>จัดการ</th>
@@ -72,29 +72,28 @@
 										<div><small class="text-muted"><?= $row['dose'] ?></small></div>
 									</div>
 								</td>
+
+								<?php
+								$price = (float) $row['price'];
+								$vat_price = !empty($row['vat_price']) ? (float)$row['vat_price'] : null;
+								$discounted_price = !empty($row['discounted_price']) ? (float)$row['discounted_price'] : null;
+								?>
 								<td class="text-right">
-									<?php
-									$price = (float) $row['price'];
-									$discounted_price = $price;
-
-									if (!empty($row['discount_type']) && !empty($row['discount_value'])) {
-										if ($row['discount_type'] === 'percent') {
-											$discounted_price = $price - ($price * ($row['discount_value'] / 100));
-										} elseif ($row['discount_type'] === 'amount') {
-											$discounted_price = $price - $row['discount_value'];
-										}
-										if ($discounted_price < 0) $discounted_price = 0;
-									}
-									?>
-
-									<?php if ($discounted_price < $price): ?>
-										<span class="text-muted" style="text-decoration: line-through;"><?= format_num($price, 2) ?> ฿</span><br>
-										<span class="text-danger font-weight-bold"><?= format_num($discounted_price, 2) ?> ฿</span><br>
-
+									<?php if (!is_null($discounted_price)): ?>
+										<!-- แสดงราคาส่วนลด -->
+										<span class="text-muted" style="text-decoration: line-through;">
+											<?= number_format($vat_price ?? $price, 0, '.', ',') ?> ฿
+										</span><br>
+										<span class="text-danger font-weight-bold"><?= number_format($discounted_price, 0, '.', ',') ?> ฿</span>
+									<?php elseif (!is_null($vat_price)): ?>
+										<!-- แสดง VAT -->
+										<span class="font-weight-bold"><?= number_format($vat_price, 0, '.', ',') ?> ฿</span>
 									<?php else: ?>
-										<span class="font-weight-bold"><?= format_num($price, 2) ?> ฿</span>
+										<!-- แสดงราคาเต็ม -->
+										<span class="font-weight-bold"><?= number_format($price, 0, '.', ',') ?> ฿</span>
 									<?php endif; ?>
 								</td>
+
 								<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
 								<td class="text-center">
 									<?php if ($row['status'] == 1): ?>

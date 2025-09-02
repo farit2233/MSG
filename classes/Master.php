@@ -231,10 +231,13 @@ class Master extends DBConnection
 		$_POST['slow_prepare'] = isset($_POST['slow_prepare']) ? 1 : 0;
 		if ($discount_type !== null && $discount_value !== null) {
 			if ($discount_type == 'amount') {
-				$discounted_price = max(0, $price - $discount_value);
+				$discounted_price = max(0, $vat_price - $discount_value);
 			} elseif ($discount_type == 'percent') {
-				$discounted_price = max(0, $price - ($price * $discount_value / 100));
+				$discounted_price = max(0, $vat_price - ($vat_price * $discount_value / 100));
 			}
+
+			// ปัดเป็นจำนวนเต็ม
+			$discounted_price = round($discounted_price);
 		} else {
 			$discount_value = null;
 			$discounted_price = null;
@@ -244,6 +247,7 @@ class Master extends DBConnection
 		$_POST['discount_value'] = $discount_value;
 		$_POST['discounted_price'] = $discounted_price;
 		$_POST['discount_type'] = $discount_type;
+
 
 		// รายการฟิลด์ที่ไม่ควรบันทึกลง product_list
 		$skip_keys = ['id', 'extra_categories', 'shopee', 'lazada', 'tiktok'];
