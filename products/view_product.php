@@ -287,21 +287,21 @@ if (!function_exists('format_price_custom')) {
 								<div class="col-md-7 product-info-sticky">
 									<h2 class="fw-bold mb-3"><?= isset($name) ? $name : "" ?></h2>
 									<p class="mb-3 text-muted">แบรนด์: <b><?= isset($brand) ? $brand : "" ?></b></p>
+
 									<?php
-									$discount_type_label = null;
+									$final_price = $price;
 									$percent_off = 0;
+									$discount_type_label = null;
 
+									// ตรวจสอบว่ามี discounted_price ไหม
 									if (!empty($discounted_price) && $discounted_price < $price) {
+										$final_price = $discounted_price;
 										$percent_off = round((($price - $discounted_price) / $price) * 100);
-
-										if ($percent_off >= 50) {
-											$discount_type_label = 'hot';
-										} else {
-											$discount_type_label = 'normal';
-										}
+										$discount_type_label = ($percent_off >= 50) ? 'hot' : 'normal';
+									} elseif (!empty($vat_price) && $vat_price > 0) {
+										$final_price = $vat_price;
 									}
 									?>
-
 
 									<?php if ($discount_type_label === 'hot'): ?>
 										<section class="mb-3">
@@ -311,8 +311,8 @@ if (!function_exists('format_price_custom')) {
 												</div>
 												<div class="bg-price px-3 py-3">
 													<div class="d-flex align-items-center mb-2">
-														<div class="price-n m-0 mr-2 px-3 py-1 rounded" style="font-weight: bold;">
-															<?= format_price_custom($discounted_price, 2) ?> ฿
+														<div class="price-n m-0 mr-2 px-3 py-1 rounded">
+															<?= format_price_custom($final_price, 2) ?> ฿
 														</div>
 														<span class="badge badge-success" style="font-size: 0.8rem; padding: 4px 8px;">-<?= $percent_off ?>%</span>
 													</div>
@@ -331,8 +331,8 @@ if (!function_exists('format_price_custom')) {
 												</div>
 												<div class="bg-price px-3 py-3">
 													<div class="d-flex align-items-center mb-2">
-														<div class="price-n m-0 mr-2 px-3 py-1 rounded" style="font-weight: bold; ">
-															<?= format_price_custom($discounted_price, 2) ?> ฿
+														<div class="price-n m-0 mr-2 px-3 py-1 rounded">
+															<?= format_price_custom($final_price, 2) ?> ฿
 														</div>
 														<span class="badge badge-success" style="font-size: 0.8rem; padding: 4px 8px;">-<?= $percent_off ?>%</span>
 													</div>
@@ -345,9 +345,10 @@ if (!function_exists('format_price_custom')) {
 
 									<?php else: ?>
 										<dl>
-											<dd class="price-n"><?= format_price_custom($price, 2) ?> ฿</dd>
+											<dd class="price-n"><?= format_price_custom($final_price, 2) ?> ฿</dd>
 										</dl>
 									<?php endif; ?>
+
 
 									<dl>
 										<dt class="text-muted stock">สินค้าในคลัง</dt>
@@ -558,16 +559,23 @@ if (!function_exists('format_price_custom')) {
 															</div>
 														</div>
 														<div class="d-flex justify-content-end align-items-center">
-															<?php if (!is_null($rel['discounted_price']) && $rel['discounted_price'] < $rel['price']): ?>
+															<?php
+															// เริ่มต้นด้วย price เป็น fallback
+															$display_price = isset($rel['price']) && $rel['price'] > 0 ? $rel['price'] : 0;
 
-																<span class="banner-price fw-bold me-2"><?= format_price_custom($rel['discounted_price']) ?> ฿</span>
-
-																<?php $discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100); ?>
-																<span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
-
-															<?php else: ?>
-																<span class="banner-price"><?= format_price_custom($rel['price']) ?> ฿</span>
-															<?php endif; ?>
+															if (!is_null($rel['discounted_price']) && $rel['discounted_price'] > 0 && $rel['discounted_price'] < $rel['price']) {
+																$display_price = $rel['discounted_price'];
+																$discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100);
+																echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
+																echo '<span class="badge badge-sm text-white">ลด ' . $discount_percentage . '%</span>';
+															} elseif (!is_null($rel['vat_price']) && $rel['vat_price'] > 0) {
+																$display_price = $rel['vat_price'];
+																echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+															} else {
+																// fallback ใช้ price จริง
+																echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+															}
+															?>
 														</div>
 
 													</div>

@@ -26,6 +26,7 @@
 	.price-n {
 		color: #f57421;
 		font-size: 40px;
+		font-weight: bold !important;
 	}
 
 	.bg-price {
