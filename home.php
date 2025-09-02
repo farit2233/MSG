@@ -149,15 +149,17 @@
                             while ($row = $qry->fetch_assoc()):
                             ?>
                                 <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
-
                                     <a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
                                         <div class="position-relative">
                                             <div class="img-top position-relative product-img-holder">
+                                                <div class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 small" style="z-index: 1;">
+                                                    ใหม่
+                                                </div>
                                                 <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
                                             </div>
                                         </div>
-                                        <div class="card-body">
-                                            <div style="line-height:1.5em">
+                                        <div class="card-body d-flex flex-column">
+                                            <div>
                                                 <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
                                                 <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
                                                     <div class="w-100">
@@ -166,21 +168,26 @@
                                                         </small>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex justify-content-end align-items-center">
-                                                    <?php if (!is_null($row['discounted_price']) && $row['discounted_price'] < $row['price']): ?>
-                                                        <?php
-                                                        // คำนวณส่วนลด
-                                                        $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
-                                                        ?>
+                                            </div>
 
-                                                        <span class="banner-price fw-bold me-2"><?= format_price_custom($row['discounted_price'], 2) ?> ฿</span>
-                                                        <span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
+                                            <div class="d-flex justify-content-end align-items-center mt-auto">
+                                                <?php
+                                                // เริ่มต้นด้วย price เป็น fallback
+                                                $display_price = isset($row['price']) && $row['price'] > 0 ? $row['price'] : 0;
 
-                                                    <?php else: ?>
-                                                        <span class="banner-price"><?= format_price_custom($row['price'], 2) ?> ฿</span>
-                                                    <?php endif; ?>
-                                                </div>
-
+                                                if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $row['price']) {
+                                                    $display_price = $row['discounted_price'];
+                                                    $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
+                                                    echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
+                                                    echo '<span class="badge badge-sm text-white">ลด ' . $discount_percentage . '%</span>';
+                                                } elseif (!is_null($row['vat_price']) && $row['vat_price'] > 0) {
+                                                    $display_price = $row['vat_price'];
+                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+                                                } else {
+                                                    // fallback ใช้ price จริง
+                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+                                                }
+                                                ?>
                                             </div>
                                         </div>
                                     </a>
@@ -241,7 +248,6 @@
                             while ($row = $qry->fetch_assoc()):
                             ?>
                                 <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
-
                                     <a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
                                         <div class="position-relative">
                                             <div class="img-top position-relative product-img-holder">
@@ -251,8 +257,8 @@
                                                 <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
                                             </div>
                                         </div>
-                                        <div class="card-body">
-                                            <div style="line-height:1.5em">
+                                        <div class="card-body d-flex flex-column">
+                                            <div>
                                                 <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
                                                 <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
                                                     <div class="w-100">
@@ -261,21 +267,26 @@
                                                         </small>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex justify-content-end align-items-center">
-                                                    <?php if (!is_null($row['discounted_price']) && $row['discounted_price'] < $row['price']): ?>
-                                                        <?php
-                                                        // คำนวณส่วนลด
-                                                        $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
-                                                        ?>
+                                            </div>
 
-                                                        <span class="banner-price fw-bold me-2"><?= format_price_custom($row['discounted_price'], 2) ?> ฿</span>
-                                                        <span class="badge badge-sm text-white">ลด <?= $discount_percentage ?>%</span>
+                                            <div class="d-flex justify-content-end align-items-center mt-auto">
+                                                <?php
+                                                // เริ่มต้นด้วย price เป็น fallback
+                                                $display_price = isset($row['price']) && $row['price'] > 0 ? $row['price'] : 0;
 
-                                                    <?php else: ?>
-                                                        <span class="banner-price"><?= format_price_custom($row['price'], 2) ?> ฿</span>
-                                                    <?php endif; ?>
-                                                </div>
-
+                                                if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $row['price']) {
+                                                    $display_price = $row['discounted_price'];
+                                                    $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
+                                                    echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
+                                                    echo '<span class="badge badge-sm text-white">ลด ' . $discount_percentage . '%</span>';
+                                                } elseif (!is_null($row['vat_price']) && $row['vat_price'] > 0) {
+                                                    $display_price = $row['vat_price'];
+                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+                                                } else {
+                                                    // fallback ใช้ price จริง
+                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+                                                }
+                                                ?>
                                             </div>
                                         </div>
                                     </a>
