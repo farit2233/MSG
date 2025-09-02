@@ -196,22 +196,21 @@ function formatDateThai($date)
                                         <td class="text-right">
                                             <?php
                                             $price = (float)$row['price'];
-                                            $vat_price = isset($row['vat_price']) ? (float)$row['vat_price'] : null;
-                                            $discounted_price = isset($row['discounted_price']) ? (float)$row['discounted_price'] : null;
+                                            $vat_price = !empty($row['vat_price']) ? (float)$row['vat_price'] : null;
+                                            $discounted_price = !empty($row['discounted_price']) ? (float)$row['discounted_price'] : null;
 
-                                            // ตรวจสอบว่ามีส่วนลดจริงหรือไม่
-                                            $has_discount = !is_null($discounted_price) && $discounted_price < ($vat_price ?? $price);
+                                            // กำหนดตัวแปรแสดงผลหลัก
+                                            $display_price = $discounted_price ?? $vat_price ?? $price;
+                                            $original_price = $vat_price ?? $price;
 
-                                            if ($has_discount) {
-                                                // แสดงราคาก่อนลด (ขีดฆ่า) และราคาหลังลด (แดง)
-                                                echo '<span class="text-muted" style="text-decoration: line-through;">' . number_format($vat_price ?? $price, 0, '.', ',') . ' ฿</span><br>';
+                                            // แสดงผล
+                                            if (!is_null($discounted_price) && $discounted_price < $original_price) {
+                                                // มีส่วนลด: ขีดฆ่า original และแสดง discounted สีแดง
+                                                echo '<span class="text-muted" style="text-decoration: line-through;">' . number_format($original_price, 0, '.', ',') . ' ฿</span><br>';
                                                 echo '<span class="text-danger font-weight-bold">' . number_format($discounted_price, 0, '.', ',') . ' ฿</span>';
-                                            } elseif (!is_null($vat_price)) {
-                                                // มี VAT แต่ไม่มีส่วนลด
-                                                echo '<span class="font-weight-bold">' . number_format($vat_price, 0, '.', ',') . ' ฿</span>';
                                             } else {
-                                                // ไม่มีทั้ง VAT และส่วนลด
-                                                echo '<span class="font-weight-bold">' . number_format($price, 0, '.', ',') . ' ฿</span>';
+                                                // ไม่มีส่วนลด: แสดง display_price ปกติ
+                                                echo '<span class="font-weight-bold">' . number_format($display_price, 0, '.', ',') . ' ฿</span>';
                                             }
                                             ?>
                                         </td>
