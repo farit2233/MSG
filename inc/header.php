@@ -50,6 +50,7 @@
   <link rel="stylesheet" href="assets/css/navbar.css">
   <link rel="stylesheet" href="assets/css/product.css">
   <link rel="stylesheet" href="assets/css/promotions.css">
+  <link rel="stylesheet" href="assets/css/search.css">
 
 
   <style type="text/css">
