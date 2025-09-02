@@ -88,7 +88,7 @@
                                 <td class="text-center">
                                     <?php
                                     // Show min price and max price
-                                    echo format_num($row['min_price'], 2) . " ฿ - " . format_num($row['max_price'], 2) . " ฿";
+                                    echo format_num($row['min_price'], 2) . " ฿ - " . format_num($row['max_pric e'], 2) . " ฿";
                                     ?>
                                 </td>
                                 <td class="text-center">

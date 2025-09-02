@@ -152,9 +152,6 @@
                                     <a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
                                         <div class="position-relative">
                                             <div class="img-top position-relative product-img-holder">
-                                                <div class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 small" style="z-index: 1;">
-                                                    ใหม่
-                                                </div>
                                                 <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
                                             </div>
                                         </div>
@@ -268,7 +265,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="d-flex justify-content-end align-items-center mt-auto">
                                                 <?php
                                                 // เริ่มต้นด้วย price เป็น fallback

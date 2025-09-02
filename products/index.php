@@ -61,7 +61,7 @@
     }
 
     .banner-price {
-        font-size: 25px;
+        font-size: 20px;
         color: #f57421;
     }
 

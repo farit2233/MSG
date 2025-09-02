@@ -62,11 +62,6 @@ if (isset($_GET['search'])) {
         overflow: hidden;
     }
 
-    .banner-price {
-        font-size: 20px;
-        color: #f57421;
-    }
-
     /* สำหรับป้ายสินค้าหมด */
     .out-of-stock-label {
         position: absolute;
