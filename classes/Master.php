@@ -624,7 +624,7 @@ class Master extends DBConnection
 			if (empty($selected_ids)) throw new Exception('ไม่มีรายการสินค้าสำหรับชำระสินค้า');
 			$ids_str = implode(',', $selected_ids);
 			$cart = $this->conn->query("
-            SELECT c.*, p.name as product, p.price, p.discount_type, p.discount_value, p.discounted_price, p.product_weight
+            SELECT c.*, p.name as product, p.price, p.vat_price, p.discount_type, p.discount_value, p.discounted_price, p.product_weight
             FROM `cart_list` c 
             INNER JOIN product_list p ON c.product_id = p.id 
             WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
@@ -635,7 +635,7 @@ class Master extends DBConnection
 			$total_weight = 0;
 			$cart_data = [];
 			while ($row = $cart->fetch_assoc()) {
-				$original_price = $row['price'];
+				$original_price = $row['vat_price'];
 				if (!is_null($row['discounted_price'])) {
 					$final_price = $row['discounted_price'];
 				} elseif ($row['discount_type'] === 'amount') {
