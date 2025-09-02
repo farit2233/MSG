@@ -177,6 +177,8 @@ function formatDateThai($date)
                                     p.name as product_name,
                                     p.brand,
                                     p.price,
+                                    p.vat_price,
+                                    p.discounted_price,
                                     p.image_path
                                 FROM promotion_products pp
                                 INNER JOIN product_list p ON pp.product_id = p.id
@@ -191,14 +193,36 @@ function formatDateThai($date)
                                         </td>
                                         <td><?= htmlspecialchars($row['brand']) ?></td>
                                         <td><?= htmlspecialchars($row['product_name']) ?></td>
-                                        <td class="text-right"><?= number_format($row['price'], 2) ?> ฿</td>
+                                        <td class="text-right">
+                                            <?php
+                                            $price = (float)$row['price'];
+                                            $vat_price = isset($row['vat_price']) ? (float)$row['vat_price'] : null;
+                                            $discounted_price = isset($row['discounted_price']) ? (float)$row['discounted_price'] : null;
+
+                                            // ตรวจสอบว่ามีส่วนลดจริงหรือไม่
+                                            $has_discount = !is_null($discounted_price) && $discounted_price < ($vat_price ?? $price);
+
+                                            if ($has_discount) {
+                                                // แสดงราคาก่อนลด (ขีดฆ่า) และราคาหลังลด (แดง)
+                                                echo '<span class="text-muted" style="text-decoration: line-through;">' . number_format($vat_price ?? $price, 0, '.', ',') . ' ฿</span><br>';
+                                                echo '<span class="text-danger font-weight-bold">' . number_format($discounted_price, 0, '.', ',') . ' ฿</span>';
+                                            } elseif (!is_null($vat_price)) {
+                                                // มี VAT แต่ไม่มีส่วนลด
+                                                echo '<span class="font-weight-bold">' . number_format($vat_price, 0, '.', ',') . ' ฿</span>';
+                                            } else {
+                                                // ไม่มีทั้ง VAT และส่วนลด
+                                                echo '<span class="font-weight-bold">' . number_format($price, 0, '.', ',') . ' ฿</span>';
+                                            }
+                                            ?>
+                                        </td>
+
                                         <td class="text-center">
                                             <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
                                                 จัดการ
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </button>
                                             <div class="dropdown-menu" role="menu">
-                                                <a class="dropdown-item" href="./?page=products/view_product&id=<?= $row['product_id'] ?>">
+                                                <a class="dropdown-item" href="./?page=products/manage_product&id=<?= $row['product_id'] ?>">
                                                     <span class="fa fa-eye text-dark"></span> ดู
                                                 </a>
                                                 <div class="dropdown-divider"></div>
