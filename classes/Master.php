@@ -209,6 +209,7 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+
 	function save_product()
 	{
 
