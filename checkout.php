@@ -19,6 +19,7 @@ if (!empty($selected_items)) {
             c.*, 
             p.name as product, 
             p.price,
+            p.vat_price,
             p.discount_type,
             p.discount_value,
             p.discounted_price,
@@ -31,7 +32,7 @@ if (!empty($selected_items)) {
 
     while ($row = $cart_qry->fetch_assoc()) {
         // คำนวณราคาหลังลด
-        $original_price = $row['price'];
+        $original_price = $row['vat_price'];
         if (!is_null($row['discounted_price'])) {
             $final_price = $row['discounted_price'];
         } elseif ($row['discount_type'] === 'amount') {
@@ -272,11 +273,11 @@ if ($is_coupon_applicable) {
 $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_shipping_cost;
 
 if (!function_exists('format_price_custom')) {
-    function format_price_custom($price)
+    function format_price_custom($vat_price)
     {
-        $formatted_price = format_num($price, 2);
+        $formatted_price = format_num($vat_price, 2);
         if (substr($formatted_price, -3) == '.00') {
-            return format_num($price, 0);
+            return format_num($vat_price, 0);
         }
         return $formatted_price;
     }
@@ -320,7 +321,7 @@ if (!function_exists('format_price_custom')) {
                                         </thead>
                                         <tbody>
                                             <?php foreach ($cart_items as $item):
-                                                $is_discounted = $item['final_price'] < $item['price'];
+                                                $is_discounted = $item['final_price'] < $item['vat_price'];
                                             ?>
                                                 <tr class="no-border">
                                                     <td>
@@ -335,7 +336,7 @@ if (!function_exists('format_price_custom')) {
                                                         <?php if ($is_discounted): ?>
                                                             <span><?= format_price_custom($item['final_price'], 2) ?></span>
                                                         <?php else: ?>
-                                                            <?= format_price_custom($item['price'], 2) ?>
+                                                            <?= format_price_custom($item['vat_price'], 2) ?>
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="text-right"><?= $item['quantity'] ?></td>
