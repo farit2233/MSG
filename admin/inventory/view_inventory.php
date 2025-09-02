@@ -99,23 +99,22 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 												<dd><?= isset($price) ? format_num($price, 2) . ' ฿' : '' ?></dd>
 											</div>
 											<div class="col-md-3">
-												<dt class="text-muted">ราคาปัจจุบัน</dt>
+												<dt class="text-muted">ราคาปัจจุบัน(VAT)</dt>
 												<dd>
 													<?php
-													$final_price = $price ?? 0;
-													if (!empty($discount_type) && !empty($discount_value)) {
-														if ($discount_type === 'percent') {
-															$final_price = $price - ($price * ($discount_value / 100));
-														} elseif ($discount_type === 'amount') {
-															$final_price = $price - $discount_value;
-														}
-														if ($final_price < 0) $final_price = 0;
-													}
+													$price = (float) ($price ?? 0);
+													$vat_price = !empty($vat_price) ? (float)$vat_price : null;
+													$discounted_price = !empty($discounted_price) ? (float)$discounted_price : null;
 
-													if (isset($price) && $final_price < $price) {
-														echo '<span class="text-danger font-weight-bold">' . format_num($final_price, 2) . ' ฿</span>';
+													if (!is_null($discounted_price)) {
+														// แสดงราคาส่วนลด ถ้ามี
+														echo '<span class="text-danger font-weight-bold">' . number_format($discounted_price, 0, '.', ',') . ' ฿</span>';
+													} elseif (!is_null($vat_price)) {
+														// แสดง VAT ถ้ามี
+														echo number_format($vat_price, 0, '.', ',') . ' ฿';
 													} else {
-														echo format_num($price, 2) . ' ฿';
+														// แสดงราคาเต็ม
+														echo number_format($price, 0, '.', ',') . ' ฿';
 													}
 													?>
 												</dd>
