@@ -219,16 +219,18 @@ function formatDateThai($date)
                                 $i = 1;
                                 // ======================= แก้ไขจุดที่ 1: เพิ่ม WHERE clause เพื่อกรองสินค้า =======================
                                 $qry = $conn->query("
-                                    SELECT 
-                                        ccp.id as ccd_id,
-                                        p.id as product_id, 
-                                        p.name as product_name,
-                                        p.brand,
-                                        p.price,
-                                        p.image_path
-                                    FROM coupon_code_products ccp
-                                    INNER JOIN product_list p ON ccp.product_id = p.id
-                                    WHERE ccp.coupon_code_id = '{$id}'
+                                        SELECT 
+                                            ccp.id as ccd_id,
+                                            p.id as product_id, 
+                                            p.name as product_name,
+                                            p.brand,
+                                            p.price,
+                                            p.vat_price,
+                                            p.discounted_price,
+                                            p.image_path
+                                        FROM coupon_code_products ccp
+                                        INNER JOIN product_list p ON ccp.product_id = p.id
+                                        WHERE ccp.coupon_code_id = '{$id}'
                                 ");
 
                                 while ($row = $qry->fetch_assoc()):
@@ -240,7 +242,28 @@ function formatDateThai($date)
                                         </td>
                                         <td><?= htmlspecialchars($row['brand']) ?></td>
                                         <td><?= htmlspecialchars($row['product_name']) ?></td>
-                                        <td class="text-right"><?= number_format($row['price'], 2) ?> ฿</td>
+                                        <td class="text-right">
+                                            <?php
+                                            $price = (float)$row['price'];
+                                            $vat_price = !empty($row['vat_price']) ? (float)$row['vat_price'] : null;
+                                            $discounted_price = !empty($row['discounted_price']) ? (float)$row['discounted_price'] : null;
+
+                                            // กำหนดตัวแปรแสดงผลหลัก
+                                            $display_price = $discounted_price ?? $vat_price ?? $price;
+                                            $original_price = $vat_price ?? $price;
+
+                                            // แสดงผล
+                                            if (!is_null($discounted_price) && $discounted_price < $original_price) {
+                                                // มีส่วนลด: ขีดฆ่า original และแสดง discounted สีแดง
+                                                echo '<span class="text-muted" style="text-decoration: line-through;">' . number_format($original_price, 0, '.', ',') . ' ฿</span><br>';
+                                                echo '<span class="text-danger font-weight-bold">' . number_format($discounted_price, 0, '.', ',') . ' ฿</span>';
+                                            } else {
+                                                // ไม่มีส่วนลด: แสดง display_price ปกติ
+                                                echo '<span class="font-weight-bold">' . number_format($display_price, 0, '.', ',') . ' ฿</span>';
+                                            }
+                                            ?>
+                                        </td>
+
                                         <td class="text-center">
                                             <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
                                                 จัดการ
