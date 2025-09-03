@@ -292,6 +292,8 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                                 <span class="text-danger">(-<?= format_num($coupon_discount, 2) ?> บาท)</span>
                                             </h5>
                                         <?php endif; ?>
+
+                                        <h5>ยอดสั่งซื้อ <small> รวม VAT:</small> <?= format_num($grand_total, 2) ?> บาท</h5>
                                         <hr>
                                         <h4><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h4>
                                     </div>
