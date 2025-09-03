@@ -379,6 +379,10 @@ if (!empty($customer_id)) {
                         <span>-<?= format_price_custom($coupon_discount, 2) ?> บาท</span>
                     </div>
                 <?php endif; ?>
+                <div class="d-flex justify-content-between order-total-detail ">
+                    <span>ยอดสั่งซื้อ<small> รวม VAT:</small></span>
+                    <span><?= isset($total_amount) ? format_price_custom($total_amount, 2) : '0.00' ?> บาท</span>
+                </div>
                 <hr style="margin: 1rem 0;">
 
                 <div class="d-flex justify-content-between order-total">
