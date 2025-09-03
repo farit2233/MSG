@@ -975,6 +975,10 @@ class Master extends DBConnection
 
 				$body .= "
 									<tr>
+										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ยอดสั่งซื้อ<small> รวม VAT</small></strong></td>
+										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
+									</tr>
+									<tr>
 										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
 										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
 									</tr>
@@ -1092,6 +1096,10 @@ class Master extends DBConnection
 				}
 
 				$admin_body .= "
+								<tr>
+									<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ยอดสั่งซื้อ<small> รวม VAT</small></strong></td>
+									<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
+								</tr>
 								<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>รวมทั้งสิ้น</strong></td>
 								<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($grand_total, 2) . "</td>
 							</tr>
@@ -1179,6 +1187,7 @@ class Master extends DBConnection
 				$telegram_message .= $coupon_text;
 			}
 			$telegram_message .= "
+			ยอดสั่งซื้อรวม VAT " . number_format($grand_total, 2) . " บาท
 			รวมทั้งสิ้น: " . number_format($grand_total, 2) . " บาท
 			";
 			// ส่งข้อความ Telegram
