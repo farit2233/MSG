@@ -452,7 +452,16 @@ if (!function_exists('format_price_custom')) {
                                                     <strong id="discount_value"></strong>
                                                 </td>
                                             </tr>
-
+                                            <tr class="no-border">
+                                                <th>
+                                                    ยอดสั่งซื้อ<small> รวม VAT</small>
+                                                </th>
+                                                <td colspan=" 5">
+                                                    <p class="text-bold text-right">
+                                                        <span id="order-total-text"><?= format_price_custom($grand_total, 2) ?></span> บาท
+                                                    </p>
+                                                </td>
+                                            </tr>
                                             <tr>
                                                 <th><strong>รวม</strong></th>
                                                 <td colspan=" 5">
