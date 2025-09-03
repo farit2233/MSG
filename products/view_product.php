@@ -289,14 +289,14 @@ if (!function_exists('format_price_custom')) {
 									<p class="mb-3 text-muted">แบรนด์: <b><?= isset($brand) ? $brand : "" ?></b></p>
 
 									<?php
-									$final_price = $price;
+									$final_price = $vat_price;
 									$percent_off = 0;
 									$discount_type_label = null;
 
 									// ตรวจสอบว่ามี discounted_price ไหม
-									if (!empty($discounted_price) && $discounted_price < $price) {
+									if (!empty($discounted_price) && $discounted_price < $vat_price) {
 										$final_price = $discounted_price;
-										$percent_off = round((($price - $discounted_price) / $price) * 100);
+										$percent_off = round((($vat_price - $discounted_price) / $vat_price) * 100);
 										$discount_type_label = ($percent_off >= 50) ? 'hot' : 'normal';
 									} elseif (!empty($vat_price) && $vat_price > 0) {
 										$final_price = $vat_price;
