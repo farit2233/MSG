@@ -1210,6 +1210,83 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
+	function cancel_order()
+	{
+		// ใช้ extract เพื่อรับค่า 'order_id' จาก AJAX POST request
+		extract($_POST);
+
+		try {
+			$order_id = intval($order_id);
+			$customer_id = $this->settings->userdata('id');
+
+			// 1. ตรวจสอบว่าคำสั่งซื้อเป็นของลูกค้าที่ล็อกอินอยู่จริงหรือไม่ (เพื่อความปลอดภัย)
+			$qry = $this->conn->query("SELECT o.*, c.email, CONCAT(c.firstname, ' ', c.lastname) as customer_name 
+            FROM order_list o 
+            INNER JOIN customer_list c ON o.customer_id = c.id 
+            WHERE o.id = {$order_id} AND o.customer_id = {$customer_id}");
+
+			if ($qry->num_rows <= 0) {
+				throw new Exception("ไม่พบคำสั่งซื้อ หรือคุณไม่มีสิทธิ์ยกเลิกคำสั่งซื้อนี้");
+			}
+
+			$order = $qry->fetch_assoc();
+			$order_code = $order['code'];
+			$customer_email = $order['email'];
+			$customer_name = $order['customer_name'];
+
+			// 2. อัปเดตสถานะ payment_status เป็น 4 และ delivery_status เป็น 6
+			$update = $this->conn->query("UPDATE order_list 
+            SET payment_status = 4, delivery_status = 6, date_updated = NOW() 
+            WHERE id = {$order_id}");
+
+			if (!$update) {
+				throw new Exception("ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้: " . $this->conn->error);
+			}
+
+			// 3. ส่วนของการส่งอีเมล (คงเดิม)
+			$mail_admin = new PHPMailer(true);
+			try {
+				$mail_admin->isSMTP();
+				$mail_admin->Host = 'smtp.gmail.com';
+				$mail_admin->Port = 465;
+				$mail_admin->SMTPAuth = true;
+				$mail_admin->Username = "faritre5566@gmail.com";
+				$mail_admin->Password = "bchljhaxoqflmbys";
+				$mail_admin->SMTPSecure = "ssl";
+				$mail_admin->CharSet = 'UTF-8';
+				$mail_admin->isHTML(true);
+				$mail_admin->Subject = "❌ ยกเลิกคำสั่งซื้อ #{$order_code}";
+
+				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
+				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
+				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+				$admin_body = "
+             <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
+                 <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อถูกยกเลิก</h2>
+                 <p>ลูกค้า <strong>{$customer_name}</strong>,</p>
+                 <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> ถูกยกเลิก</p>
+                 <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
+                 <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
+                 <hr>
+                 <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+             </div>
+            ";
+
+				$mail_admin->Body = $admin_body;
+				$mail_admin->send();
+			} catch (Exception $e) {
+				// หากส่งอีเมลไม่สำเร็จ ให้บันทึก error ไว้ แต่ไม่ต้องหยุดการทำงาน
+				error_log("❌ ส่งอีเมลแจ้งยกเลิกไม่สำเร็จ: " . $mail_admin->ErrorInfo);
+			}
+
+			// 4. ส่งค่า 1 กลับไปให้ AJAX เพื่อยืนยันว่าทำรายการสำเร็จ
+			echo 1;
+		} catch (Exception $e) {
+			// หากเกิดข้อผิดพลาดใดๆ ใน try block ให้ส่งข้อความ error กลับไปให้ AJAX
+			echo $e->getMessage();
+		}
+	}
 	function log_promotion_usage($promotion_id, $customer_id, $order_id, $discount_amount, $items_in_order)
 	{
 		$query = "
@@ -2093,6 +2170,9 @@ switch ($action) {
 		$result = $Master->place_order();
 		ob_end_clean();  // เคลียร์ buffer
 		echo $result;
+		break;
+	case 'cancel_order':
+		echo $Master->cancel_order();
 		break;
 	case 'log_promotion_usage':
 		if (isset($promotion_id) && isset($customer_id) && isset($oid) && isset($promotion_discount) && isset($cart_data)) {
