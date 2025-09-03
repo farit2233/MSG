@@ -250,32 +250,32 @@ if (!function_exists('format_price_custom')) {
                                 <?php
                                 $gt = 0;
                                 $cart = $conn->query("SELECT 
-    c.*, 
-    p.name as product, 
-    p.brand as brand, 
-    p.price, 
-    p.discounted_price, 
-    p.vat_price,
-    p.discount_type,
-    cc.name as category, 
-    p.image_path,
-    (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
-    - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
-FROM `cart_list` c 
-INNER JOIN product_list p ON c.product_id = p.id 
-INNER JOIN category_list cc ON p.category_id = cc.id 
-WHERE customer_id = '{$_settings->userdata('id')}'");
+                                    c.*, 
+                                    p.name as product, 
+                                    p.brand as brand, 
+                                    p.price, 
+                                    p.discounted_price, 
+                                    p.vat_price,
+                                    p.discount_type,
+                                    cc.name as category, 
+                                    p.image_path,
+                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
+                                    - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
+                                FROM `cart_list` c 
+                                INNER JOIN product_list p ON c.product_id = p.id 
+                                INNER JOIN category_list cc ON p.category_id = cc.id 
+                                WHERE customer_id = '{$_settings->userdata('id')}'");
 
                                 while ($row = $cart->fetch_assoc()):
                                     // เงื่อนไขเลือกใช้ราคา
-                                    if (!empty($row['discounted_price']) && $row['discounted_price'] < $row['price']) {
+                                    if (!empty($row['discounted_price']) && $row['discounted_price'] < $row['vat_price']) {
                                         $price_to_use = $row['discounted_price'];
                                         $show_discount = true;
                                     } elseif (!empty($row['vat_price']) && $row['vat_price'] > 0) {
                                         $price_to_use = $row['vat_price'];
                                         $show_discount = false;
                                     } else {
-                                        $price_to_use = $row['price'];
+                                        $price_to_use = $row['vat_price'];
                                         $show_discount = false;
                                     }
 
@@ -321,7 +321,7 @@ WHERE customer_id = '{$_settings->userdata('id')}'");
                                         <div class="col-auto text-right">
                                             <?php if ($show_discount): ?>
                                                 <h5 class="text-muted mb-0">
-                                                    <del><?= format_price_custom($row['price'] * $row['quantity']) ?> บาท</del>
+                                                    <del><?= format_price_custom($row['vat_price'] * $row['quantity']) ?> บาท</del>
                                                 </h5>
                                                 <h4><b class="text-danger">ลดเหลือ: <?= format_price_custom($row['discounted_price'] * $row['quantity']) ?> บาท</b></h4>
                                             <?php else: ?>
