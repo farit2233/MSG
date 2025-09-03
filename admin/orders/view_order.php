@@ -159,6 +159,9 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                                         echo '<span>ล้มเหลว</span>';
                                                         break;
                                                     case 4:
+                                                        echo '<span>กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>';
+                                                        break;
+                                                    case 5:
                                                         echo '<span>คืนเงินแล้ว</span>';
                                                         break;
                                                     default:
@@ -196,9 +199,12 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                                         echo '<span>ส่งไม่สำเร็จ</span>';
                                                         break;
                                                     case 6:
-                                                        echo '<span>คืนของระหว่างทาง</span>';
+                                                        echo '<span>กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>';
                                                         break;
                                                     case 7:
+                                                        echo '<span>คืนของระหว่างทาง</span>';
+                                                        break;
+                                                    case 8:
                                                         echo '<span>คืนของสำเร็จ</span>';
                                                         break;
                                                     default:

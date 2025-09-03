@@ -28,7 +28,7 @@ $filter_options = [
         padding: 1.25rem;
         background-color: #fff;
         transition: all 0.3s ease-in-out;
-        cursor: pointer;
+
     }
 
     .order-card:hover {
@@ -169,10 +169,10 @@ $filter_options = [
                                     $where .= " AND delivery_status = 4";
                                     break;
                                 case 'cancelled':
-                                    $where .= " AND (payment_status = 3 OR delivery_status = 5)";
+                                    $where .= " AND (payment_status = 3 OR delivery_status = 5 OR payment_status = 4 OR delivery_status = 6)";
                                     break;
                                 case 'returned':
-                                    $where .= " AND (payment_status = 4 OR delivery_status = 7)";
+                                    $where .= " AND (payment_status = 5 OR delivery_status = 8)";
                                     break;
                                     // 'all' doesn't need condition
                             }
@@ -186,7 +186,8 @@ $filter_options = [
                                         1 => '<span class="badge bg-warning">รอตรวจสอบ</span>',
                                         2 => '<span class="badge bg-success text-dark">ชำระเงินแล้ว</span>',
                                         3 => '<span class="badge bg-danger">ชำระเงินล้มเหลว</span>',
-                                        4 => '<span class="badge bg-dark">คืนเงินสำเร็จ</span>',
+                                        4 => '<span class="badge bg-secondary">กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>',
+                                        5 => '<span class="badge bg-dark">คืนเงินสำเร็จ</span>',
                                         default => '<span class="badge bg-light">N/A</span>'
                                     };
                                     $badge_delivery = match ($delivery_status) {
@@ -196,12 +197,13 @@ $filter_options = [
                                         3 => '<span class="badge bg-warning text-dark">พัสดุกำลังจัดส่ง</span>',
                                         4 => '<span class="badge bg-success">พัสดุจัดส่งสำเร็จ</span>',
                                         5 => '<span class="badge bg-danger">พัสดุจัดส่งไม่สำเร็จ</span>',
-                                        6 => '<span class="badge bg-dark">คืนของระหว่างทาง</span>',
-                                        7 => '<span class="badge bg-secondary">คืนของสำเร็จ</span>',
+                                        6 => '<span class="badge bg-secondary">กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>',
+                                        7 => '<span class="badge bg-dark">คืนของระหว่างทาง</span>',
+                                        8 => '<span class="badge bg-secondary">คืนของสำเร็จ</span>',
                                         default => '<span class="badge bg-light">N/A</span>'
                                     };
                             ?>
-                                    <div class="order-card view-order" data-id="<?= $row['id'] ?>">
+                                    <div class="order-card" data-id="<?= $row['id'] ?>">
                                         <div class="order-header">
                                             <div class="order-info">
                                                 <strong>เลขที่คำสั่งซื้อ: </strong> <?= $row['code'] ?><br>
@@ -211,9 +213,15 @@ $filter_options = [
                                                 <button class="btn btn-orders view-order mb-2" data-id="<?= $row['id'] ?>">
                                                     <i class="fa fa-eye me-1"></i> ดูรายละเอียด
                                                 </button>
-                                                <button class="btn btn-cancel view-order btn-danger" data-id="<?= $row['id'] ?>">
-                                                    <i class="fa fa-trash me-1"></i> ยกเลิกคำสั่งซื้อ
-                                                </button>
+
+                                                <?php
+                                                if ($delivery_status < 3 && $payment_status < 3) :
+                                                ?>
+                                                    <button class="btn btn-cancel btn-danger cancel-order" data-id="<?= $row['id'] ?>">
+                                                        <i class="fa fa-times"></i> ยกเลิกคำสั่งซื้อ
+                                                    </button>
+                                                <?php endif; ?>
+
                                             </div>
 
                                         </div>
@@ -236,37 +244,77 @@ $filter_options = [
 </section>
 <script>
     $(function() {
+        // ฟังก์ชันสำหรับเปิด modal ดูรายละเอียด (เหมือนเดิม)
         $('.view-order').click(function() {
             const orderId = $(this).data('id');
             uni_modal_order("รายละเอียดคำสั่งซื้อ", "orders/view_order.php?id=" + orderId, 'modal-lg');
         });
-    });
-    $('.btn.view-order').click(function(e) {
-        e.stopPropagation(); // หยุด event ไม่ให้ไปถึง .order-card
-    });
 
-    function cancel_order(id) {
-        start_loader();
-        $.ajax({
-            url: _base_url_ + "classes/Master.php?f=cancel_order",
-            method: "POST",
-            data: {
-                id: id
-            },
-            dataType: "json",
-            error: err => {
-                console.log(err);
-                alert_toast("เกิดข้อผิดพลาด", 'error');
-                end_loader();
-            },
-            success: function(resp) {
-                if (resp.status == 'success') {
-                    location.reload();
-                } else {
-                    alert_toast("ไม่สามารถลบได้", 'error');
-                    end_loader();
+        // --- ส่วนที่แก้ไขโดยใช้ SweetAlert2 ---
+        $(".cancel-order").click(function() {
+            let orderId = $(this).data("id");
+            const $this = $(this);
+            const originalHtml = $this.html();
+
+            // 1. เปลี่ยนจาก confirm() มาใช้ Swal.fire()
+            Swal.fire({
+                title: 'ยืนยันการยกเลิก',
+                text: "คุณต้องการยกเลิกคำสั่งซื้อนี้ใช่หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'ใช่, ยกเลิกเลย',
+                cancelButtonText: 'ไม่'
+            }).then((result) => {
+                // ตรวจสอบว่าผู้ใช้กดปุ่ม "ยืนยัน" (ใช่, ยกเลิกเลย)
+                if (result.isConfirmed) {
+                    // เปลี่ยนสถานะปุ่มเป็นกำลังโหลด
+                    $this.prop('disabled', true);
+                    $this.html('<i class="fa fa-spinner fa-spin"></i> กำลังดำเนินการ...');
+
+                    $.ajax({
+                        url: "classes/Master.php?f=cancel_order",
+                        method: "POST",
+                        data: {
+                            order_id: orderId
+                        },
+                        success: function(resp) {
+                            if (resp == 1) {
+                                // 2. เปลี่ยน alert() สำเร็จเป็น Swal.fire()
+                                Swal.fire({
+                                    title: 'สำเร็จ!',
+                                    text: 'ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว',
+                                    icon: 'success'
+                                }).then(() => {
+                                    location.reload(); // รีโหลดหน้าหลังจากกด OK
+                                });
+                            } else {
+                                // 3. เปลี่ยน alert() ข้อผิดพลาดเป็น Swal.fire()
+                                Swal.fire({
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: resp,
+                                    icon: 'error'
+                                });
+                                // คืนค่าปุ่ม
+                                $this.prop('disabled', false);
+                                $this.html(originalHtml);
+                            }
+                        },
+                        error: function() {
+                            // 4. เปลี่ยน alert() ข้อผิดพลาด Network เป็น Swal.fire()
+                            Swal.fire({
+                                title: 'เกิดข้อผิดพลาด',
+                                text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
+                                icon: 'error'
+                            });
+                            // คืนค่าปุ่ม
+                            $this.prop('disabled', false);
+                            $this.html(originalHtml);
+                        }
+                    });
                 }
-            }
+            });
         });
-    }
+    });
 </script>
