@@ -99,6 +99,19 @@ $filter_options = [
         color: white;
         filter: brightness(90%);
     }
+
+    .btn-cancel {
+        font-size: 14px;
+        background-color: #bb2d3b;
+        border-radius: 13px;
+        color: white;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-cancel:hover {
+        color: white;
+        filter: brightness(90%);
+    }
 </style>
 <section class="py-3">
     <div class="container">
@@ -194,11 +207,15 @@ $filter_options = [
                                                 <strong>เลขที่คำสั่งซื้อ: </strong> <?= $row['code'] ?><br>
                                                 <small class="text-muted">วันที่สั่ง: <?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></small>
                                             </div>
-                                            <div>
-                                                <button class="btn btn-orders view-order" data-id="<?= $row['id'] ?>">
+                                            <div class="d-flex flex-column">
+                                                <button class="btn btn-orders view-order mb-2" data-id="<?= $row['id'] ?>">
                                                     <i class="fa fa-eye me-1"></i> ดูรายละเอียด
                                                 </button>
+                                                <button class="btn btn-cancel view-order btn-danger" data-id="<?= $row['id'] ?>">
+                                                    <i class="fa fa-trash me-1"></i> ยกเลิกคำสั่งซื้อ
+                                                </button>
                                             </div>
+
                                         </div>
                                         <div class="d-flex flex-wrap gap-3">
                                             <div><strong>ยอดรวม:</strong> <?= format_num($row['total_amount'], 2) ?> บาท</div>
@@ -227,4 +244,29 @@ $filter_options = [
     $('.btn.view-order').click(function(e) {
         e.stopPropagation(); // หยุด event ไม่ให้ไปถึง .order-card
     });
+
+    function cancel_order(id) {
+        start_loader();
+        $.ajax({
+            url: _base_url_ + "classes/Master.php?f=cancel_order",
+            method: "POST",
+            data: {
+                id: id
+            },
+            dataType: "json",
+            error: err => {
+                console.log(err);
+                alert_toast("เกิดข้อผิดพลาด", 'error');
+                end_loader();
+            },
+            success: function(resp) {
+                if (resp.status == 'success') {
+                    location.reload();
+                } else {
+                    alert_toast("ไม่สามารถลบได้", 'error');
+                    end_loader();
+                }
+            }
+        });
+    }
 </script>
