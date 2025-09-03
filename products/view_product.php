@@ -539,17 +539,14 @@ if (!function_exists('format_price_custom')) {
 								<div class="row gy-3 gx-3">
 									<?php while ($rel = $related->fetch_assoc()): ?>
 										<div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
-											<a class="card rounded-0 shadow product-item text-decoration-none text-reset h-100 <?= ($rel['available'] <= 0 ? 'out-of-stock' : '') ?>" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
+											<a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
 												<div class="position-relative">
 													<div class="img-top position-relative product-img-holder">
-														<?php if ($rel['available'] <= 0): ?>
-															<div class="out-of-stock-label">สินค้าหมด</div>
-														<?php endif; ?>
-														<img src="<?= validate_image($rel['image_path']) ?>" alt="<?= $rel['name'] ?>" class="product-img">
+														<img src="<?= validate_image($rel['image_path']) ?>" alt="" class="product-img">
 													</div>
 												</div>
-												<div class="card-body">
-													<div style="line-height:1.5em">
+												<div class="card-body d-flex flex-column">
+													<div>
 														<div class="card-title w-100 mb-0"><?= $rel['name'] ?></div>
 														<div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
 															<div class="w-100">
@@ -558,26 +555,26 @@ if (!function_exists('format_price_custom')) {
 																</small>
 															</div>
 														</div>
-														<div class="d-flex justify-content-end align-items-center">
-															<?php
-															// เริ่มต้นด้วย price เป็น fallback
-															$display_price = isset($rel['price']) && $rel['price'] > 0 ? $rel['price'] : 0;
+													</div>
 
-															if (!is_null($rel['discounted_price']) && $rel['discounted_price'] > 0 && $rel['discounted_price'] < $rel['price']) {
-																$display_price = $rel['discounted_price'];
-																$discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100);
-																echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
-																echo '<span class="badge badge-sm text-white">ลด ' . $discount_percentage . '%</span>';
-															} elseif (!is_null($rel['vat_price']) && $rel['vat_price'] > 0) {
-																$display_price = $rel['vat_price'];
-																echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
-															} else {
-																// fallback ใช้ price จริง
-																echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
-															}
-															?>
-														</div>
+													<div class="d-flex justify-content-end align-items-center mt-auto">
+														<?php
+														// เริ่มต้นด้วย price เป็น fallback
+														$display_price = isset($rel['price']) && $rel['price'] > 0 ? $rel['price'] : 0;
 
+														if (!is_null($rel['discounted_price']) && $rel['discounted_price'] > 0 && $rel['discounted_price'] < $rel['price']) {
+															$display_price = $rel['discounted_price'];
+															$discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100);
+															echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
+															echo '<span class="badge badge-sm text-white">ลด ' . $discount_percentage . '%</span>';
+														} elseif (!is_null($rel['vat_price']) && $rel['vat_price'] > 0) {
+															$display_price = $rel['vat_price'];
+															echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+														} else {
+															// fallback ใช้ price จริง
+															echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+														}
+														?>
 													</div>
 												</div>
 											</a>
