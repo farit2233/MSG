@@ -6,8 +6,9 @@ $filter_options = [
     'shipping_required' => 'ที่ต้องจัดส่ง',
     'in_transit' => 'ที่ต้องได้รับ',
     'completed' => 'สำเร็จแล้ว',
-    'cancelled' => 'ยกเลิกแล้ว',
     'returned' => 'คืนเงิน/คืนสินค้า',
+    'cancelled' => 'ยกเลิกแล้ว',
+
 ];
 ?>
 <style>
