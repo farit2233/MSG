@@ -159,7 +159,7 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                                         echo '<span>ล้มเหลว</span>';
                                                         break;
                                                     case 4:
-                                                        echo '<span>กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>';
+                                                        echo '<span>รอการยกเลิกคำสั่งซื้อ</span>';
                                                         break;
                                                     case 5:
                                                         echo '<span>คืนเงินแล้ว</span>';
@@ -199,7 +199,7 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                                         echo '<span>ส่งไม่สำเร็จ</span>';
                                                         break;
                                                     case 6:
-                                                        echo '<span>กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>';
+                                                        echo '<span>รอการยกเลิกคำสั่งซื้อ</span>';
                                                         break;
                                                     case 7:
                                                         echo '<span>คืนของระหว่างทาง</span>';

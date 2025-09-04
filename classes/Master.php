@@ -1261,14 +1261,14 @@ class Master extends DBConnection
 				$mail->CharSet = 'UTF-8';
 				//Email Setting
 				$mail->isHTML(true);
-				$mail->Subject = "คำสั่งซื้อกำลังรอดำเนินการยกเลิก #{$order_code}";
+				$mail->Subject = "คำสั่งซื้อกำลังดำเนินการยกเลิก #{$order_code}";
 
 				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
 				$mail->addAddress($order['email'], $customer_name);
 
 				$body = "
              <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
-                 <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการยกเลิก</h2>
+                 <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังดำเนินการยกเลิก</h2>
                  <p>ลูกค้า <strong>{$customer_name}</strong>,</p>
                  <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> รอดำเนินการยกเลิก</p>
                  <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>

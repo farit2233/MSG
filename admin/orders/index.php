@@ -68,6 +68,9 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 							case 4:
 								$where = " where o.`payment_status` = 4 ";
 								break;
+							case 5:
+								$where = " where o.`payment_status` = 5 ";
+								break;
 						}
 						switch ($delivery_status) {
 							case 0:
@@ -92,6 +95,9 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 								$where = " where o.`delivery_status` = 6 ";
 								break;
 							case 7:
+								$where = " where o.`delivery_status` = 7 ";
+								break;
+							case 8:
 								$where = " where o.`delivery_status` = 7 ";
 								break;
 						}
@@ -126,6 +132,9 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 											echo '<span class="badge bg-danger">ล้มเหลว</span>';
 											break;
 										case 4:
+											echo '<span class="badge bg-secondary">รอการยกเลิกคำสั่งซื้อ</span>';
+											break;
+										case 5:
 											echo '<span class="badge bg-dark">คืนเงินแล้ว</span>';
 											break;
 										default:
@@ -156,9 +165,12 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 											echo '<span class="badge bg-danger">ส่งไม่สำเร็จ</span>';
 											break;
 										case 6:
-											echo '<span class="badge bg-dark">คืนระหว่างทาง</span>';
+											echo '<span class="badge bg-secondary">รอการยกเลิกคำสั่งซื้อ</span>';
 											break;
 										case 7:
+											echo '<span class="badge bg-dark">คืนระหว่างทาง</span>';
+											break;
+										case 8:
 											echo '<span class="badge bg-secondary">คืนของแล้ว</span>';
 											break;
 										default:
