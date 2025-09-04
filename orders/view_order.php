@@ -213,12 +213,15 @@ if (!empty($customer_id)) {
                                 echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
                                 break;
                             case 2:
-                                echo '<span class="badge bg-success">ชำระแล้ว</span>';
+                                echo '<span class="badge bg-success">ชำระเงินแล้ว</span>';
                                 break;
                             case 3:
-                                echo '<span class="badge bg-danger">ล้มเหลว</span>';
+                                echo '<span class="badge bg-danger">ชำระเงินล้มเหลว</span>';
                                 break;
                             case 4:
+                                echo '<span class="badge bg-secondary">กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>';
+                                break;
+                            case 5:
                                 echo '<span class="badge bg-dark">คืนเงินแล้ว</span>';
                                 break;
                             default:
@@ -239,7 +242,7 @@ if (!empty($customer_id)) {
                                 echo '<span class="badge bg-secondary">ตรวจสอบคำสั่งซื้อ</span>';
                                 break;
                             case 1:
-                                echo '<span class="badge bg-info">เตรียมของ</span>';
+                                echo '<span class="badge bg-info">กำลังเตรียมของ</span>';
                                 break;
                             case 2:
                                 echo '<span class="badge bg-primary">แพ๊กของแล้ว</span>';
@@ -251,13 +254,19 @@ if (!empty($customer_id)) {
                                 echo '<span class="badge bg-success">จัดส่งสำเร็จ</span>';
                                 break;
                             case 5:
-                                echo '<span class="badge bg-danger">ส่งไม่สำเร็จ</span>';
+                                echo '<span class="badge bg-danger">จัดส่งไม่สำเร็จ</span>';
                                 break;
                             case 6:
-                                echo '<span class="badge bg-dark">คืนของระหว่างทาง</span>';
+                                echo '<span class="badge bg-secondary">กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>';
                                 break;
                             case 7:
-                                echo '<span class="badge bg-secondary">คืนของสำเร็จ</span>';
+                                echo '<span class="badge bg-dark">คืนระหว่างทาง</span>';
+                                break;
+                            case 8:
+                                echo '<span class="badge bg-secondary">คืนของแล้ว</span>';
+                                break;
+                            case 9:
+                                echo '<span class="badge bg-danger">ยกเลิกแล้ว</span>';
                                 break;
                             default:
                                 echo '<span class="badge bg-light">N/A</span>';

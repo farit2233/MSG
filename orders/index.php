@@ -5,8 +5,8 @@ $filter_options = [
     'pending_payment' => 'ที่ต้องชำระ',
     'shipping_required' => 'ที่ต้องจัดส่ง',
     'in_transit' => 'ที่ต้องได้รับ',
-    'completed' => 'สำเร็จ',
-    'cancelled' => 'ยกเลิก',
+    'completed' => 'สำเร็จแล้ว',
+    'cancelled' => 'ยกเลิกแล้ว',
     'returned' => 'คืนเงิน/คืนสินค้า',
 ];
 ?>
@@ -187,19 +187,20 @@ $filter_options = [
                                         2 => '<span class="badge bg-success text-dark">ชำระเงินแล้ว</span>',
                                         3 => '<span class="badge bg-danger">ชำระเงินล้มเหลว</span>',
                                         4 => '<span class="badge bg-secondary">กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>',
-                                        5 => '<span class="badge bg-dark">คืนเงินสำเร็จ</span>',
+                                        5 => '<span class="badge bg-dark">คืนเงินแล้ว</span>',
                                         default => '<span class="badge bg-light">N/A</span>'
                                     };
                                     $badge_delivery = match ($delivery_status) {
                                         0 => '<span class="badge bg-secondary">ตรวจสอบคำสั่งซื้อ</span>',
                                         1 => '<span class="badge bg-info">กำลังเตรียมของ</span>',
                                         2 => '<span class="badge bg-primary">แพ๊กของแล้ว</span>',
-                                        3 => '<span class="badge bg-warning text-dark">พัสดุกำลังจัดส่ง</span>',
-                                        4 => '<span class="badge bg-success">พัสดุจัดส่งสำเร็จ</span>',
-                                        5 => '<span class="badge bg-danger">พัสดุจัดส่งไม่สำเร็จ</span>',
+                                        3 => '<span class="badge bg-warning text-dark">กำลังจัดส่ง</span>',
+                                        4 => '<span class="badge bg-success">จัดส่งสำเร็จ</span>',
+                                        5 => '<span class="badge bg-danger">จัดส่งไม่สำเร็จ</span>',
                                         6 => '<span class="badge bg-secondary">กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>',
                                         7 => '<span class="badge bg-dark">คืนของระหว่างทาง</span>',
-                                        8 => '<span class="badge bg-secondary">คืนของสำเร็จ</span>',
+                                        8 => '<span class="badge bg-secondary">คืนของแล้ว</span>',
+                                        9 => '<span class="badge bg-danger">ยกเลิกแล้ว</span>',
                                         default => '<span class="badge bg-light">N/A</span>'
                                     };
                             ?>
