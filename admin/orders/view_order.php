@@ -184,7 +184,7 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                                         echo '<span>ตรวจสอบคำสั่งซื้อ</span>';
                                                         break;
                                                     case 1:
-                                                        echo '<span>เตรียมของ</span>';
+                                                        echo '<span>กำลังเตรียมของ</span>';
                                                         break;
                                                     case 2:
                                                         echo '<span>แพ๊กของแล้ว</span>';

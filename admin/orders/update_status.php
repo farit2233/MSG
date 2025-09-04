@@ -29,7 +29,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             <label for="delivery_status" class="control-label">สถานะการจัดส่ง (Delivery Status)</label>
             <select class="form-control form-control-sm rounded-0" name="delivery_status" id="delivery_status" required>
                 <option value="0" <?= isset($delivery_status) && $delivery_status == 0 ? 'selected' : '' ?>>ตรวจสอบคำสั่งซื้อ</option>
-                <option value="1" <?= isset($delivery_status) && $delivery_status == 1 ? 'selected' : '' ?>>เตรียมของ</option>
+                <option value="1" <?= isset($delivery_status) && $delivery_status == 1 ? 'selected' : '' ?>>กำลังเตรียมของ</option>
                 <option value="2" <?= isset($delivery_status) && $delivery_status == 2 ? 'selected' : '' ?>>แพ๊กของแล้ว</option>
                 <option value="3" <?= isset($delivery_status) && $delivery_status == 3 ? 'selected' : '' ?>>กำลังจัดส่ง</option>
                 <option value="4" <?= isset($delivery_status) && $delivery_status == 4 ? 'selected' : '' ?>>จัดส่งสำเร็จ</option>
