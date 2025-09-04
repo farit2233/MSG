@@ -1231,7 +1231,6 @@ class Master extends DBConnection
 
 			$order = $qry->fetch_assoc();
 			$order_code = $order['code'];
-			$customer_email = $order['email'];
 			$customer_name = $order['customer_name'];
 
 			// 2. อัปเดตสถานะ payment_status เป็น 4 และ delivery_status เป็น 6
@@ -1241,6 +1240,49 @@ class Master extends DBConnection
 
 			if (!$update) {
 				throw new Exception("ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้: " . $this->conn->error);
+			}
+
+			$mail = new PHPMailer(true);
+			try {
+				//SMTP Setting
+				$mail->isSMTP();
+				//$mail->Host = 'localhost';
+				//$mail->Port = 1025;
+				//$mail->SMTPAuth = false;
+
+
+				$mail->Host = 'smtp.gmail.com';
+				$mail->Port = 465;
+				$mail->SMTPAuth = true;
+				$mail->Username = "faritre5566@gmail.com";
+				$mail->Password = "bchljhaxoqflmbys";
+				$mail->SMTPSecure = "ssl";
+
+				$mail->CharSet = 'UTF-8';
+				//Email Setting
+				$mail->isHTML(true);
+				$mail->Subject = "คำสั่งซื้อกำลังรอดำเนินการยกเลิก #{$order_code}";
+
+				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->addAddress($order['email'], $customer_name);
+
+				$body = "
+             <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
+                 <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการยกเลิก</h2>
+                 <p>ลูกค้า <strong>{$customer_name}</strong>,</p>
+                 <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> รอดำเนินการยกเลิก</p>
+                 <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
+                 <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
+                 <hr>
+                 <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+             </div>
+            ";
+
+				$mail->Body = $body;
+				$mail->send();
+			} catch (Exception $e) {
+				// หากส่งอีเมลไม่สำเร็จ ให้บันทึก error ไว้ แต่ไม่ต้องหยุดการทำงาน
+				error_log("❌ ส่งอีเมลแจ้งยกเลิกไม่สำเร็จ: " . $mail->ErrorInfo);
 			}
 
 			// 3. ส่วนของการส่งอีเมล (คงเดิม)
@@ -1255,7 +1297,7 @@ class Master extends DBConnection
 				$mail_admin->SMTPSecure = "ssl";
 				$mail_admin->CharSet = 'UTF-8';
 				$mail_admin->isHTML(true);
-				$mail_admin->Subject = "❌ ยกเลิกคำสั่งซื้อ #{$order_code}";
+				$mail_admin->Subject = "คำสั่งซื้อกำลังรอดำเนินการยกเลิก #{$order_code}";
 
 				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
 				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
@@ -1263,9 +1305,9 @@ class Master extends DBConnection
 				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
 				$admin_body = "
              <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
-                 <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อถูกยกเลิก</h2>
+                 <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการยกเลิก</h2>
                  <p>ลูกค้า <strong>{$customer_name}</strong>,</p>
-                 <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> ถูกยกเลิก</p>
+                 <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> คำสั่งซื้อกำลังรอดำเนินการยกเลิก</p>
                  <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
                  <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
                  <hr>
@@ -1282,6 +1324,43 @@ class Master extends DBConnection
 
 			// 4. ส่งค่า 1 กลับไปให้ AJAX เพื่อยืนยันว่าทำรายการสำเร็จ
 			echo 1;
+
+			// ฟังก์ชันส่ง Telegram
+			function sendTelegramNotificationCancelOrder($message)
+			{
+				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
+				$chat_id = "-4869854888";      // ใช้ Chat ID ของแอดมินหรือ Group
+
+				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
+
+				$data = [
+					'chat_id' => $chat_id,
+					'text' => $message,
+					'parse_mode' => 'HTML',  // ถ้าคุณต้องการให้ข้อความในรูปแบบ HTML
+				];
+
+				// ส่งข้อความด้วย cURL
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+				$response = curl_exec($ch);
+				curl_close($ch);
+
+				return $response;
+			}
+
+			$telegram_message = "
+			คำสั่งซื้อกำลังรอดำเนินการยกเลิก
+			- รหัสคำสั่งซื้อ: {$order_code}
+			- ลูกค้า: {$customer_name}
+			- ที่อยู่จัดส่ง: {$order['delivery_address']}
+			- ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท";
+			// ส่งข้อความ Telegram
+			sendTelegramNotificationCancelOrder($telegram_message);
 		} catch (Exception $e) {
 			// หากเกิดข้อผิดพลาดใดๆ ใน try block ให้ส่งข้อความ error กลับไปให้ AJAX
 			echo $e->getMessage();
