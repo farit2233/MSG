@@ -29,7 +29,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
 }
 
 // รวม product_type ที่มี other = 1 ไว้ท้ายสุด
-$product_structure = array_merge($product_structure, $other_types);
+$product_structure = $product_structure + $other_types;
 $promotion_structure = [];
 
 // Query เพื่อดึงข้อมูลของหมวดหมู่โปรโมชั่น
