@@ -207,6 +207,9 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                                     case 8:
                                                         echo '<span>คืนของสำเร็จ</span>';
                                                         break;
+                                                    case 9:
+                                                        echo '<span>ยกเลิกแล้ว</span>';
+                                                        break;
                                                     default:
                                                         echo '<span>N/A</span>';
                                                         break;

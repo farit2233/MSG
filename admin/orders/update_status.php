@@ -37,6 +37,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 <option value="6" <?= isset($delivery_status) && $delivery_status == 6 ? 'selected' : '' ?>>รอการยกเลิกคำสั่งซื้อ</option>
                 <option value="7" <?= isset($delivery_status) && $delivery_status == 7 ? 'selected' : '' ?>>คืนของระหว่างทาง</option>
                 <option value="8" <?= isset($delivery_status) && $delivery_status == 8 ? 'selected' : '' ?>>คืนของสำเร็จ</option>
+                <option value="9" <?= isset($delivery_status) && $delivery_status == 9 ? 'selected' : '' ?>>ยกเลิกแล้ว</option>
             </select>
         </div>
     </form>

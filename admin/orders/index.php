@@ -98,7 +98,10 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 								$where = " where o.`delivery_status` = 7 ";
 								break;
 							case 8:
-								$where = " where o.`delivery_status` = 7 ";
+								$where = " where o.`delivery_status` = 8 ";
+								break;
+							case 9:
+								$where = " where o.`delivery_status` = 9 ";
 								break;
 						}
 						$qry = $conn->query("SELECT o.*, 
@@ -172,6 +175,9 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 											break;
 										case 8:
 											echo '<span class="badge bg-secondary">คืนของแล้ว</span>';
+											break;
+										case 9:
+											echo '<span class="badge bg-danger">ยกเลิกแล้ว</span>';
 											break;
 										default:
 											echo '<span class="badge bg-light">N/A</span>';
