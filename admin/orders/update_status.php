@@ -18,8 +18,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             <select class="form-control form-control-sm rounded-0" name="payment_status" id="payment_status" required>
                 <option value="0" <?= isset($payment_status) && $payment_status == 0 ? 'selected' : '' ?>>ยังไม่ชำระเงิน</option>
                 <option value="1" <?= isset($payment_status) && $payment_status == 1 ? 'selected' : '' ?>>รอตรวจสอบ</option>
-                <option value="2" <?= isset($payment_status) && $payment_status == 2 ? 'selected' : '' ?>>ชำระแล้ว</option>
-                <option value="3" <?= isset($payment_status) && $payment_status == 3 ? 'selected' : '' ?>>ชำระล้มเหลว</option>
+                <option value="2" <?= isset($payment_status) && $payment_status == 2 ? 'selected' : '' ?>>ชำระเงินแล้ว</option>
+                <option value="3" <?= isset($payment_status) && $payment_status == 3 ? 'selected' : '' ?>>ชำระเงินล้มเหลว</option>
                 <option value="4" <?= isset($payment_status) && $payment_status == 4 ? 'selected' : '' ?>>รอการยกเลิกคำสั่งซื้อ</option>
                 <option value="5" <?= isset($payment_status) && $payment_status == 5 ? 'selected' : '' ?>>คืนเงินแล้ว</option>
             </select>
@@ -33,7 +33,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 <option value="2" <?= isset($delivery_status) && $delivery_status == 2 ? 'selected' : '' ?>>แพ๊กของแล้ว</option>
                 <option value="3" <?= isset($delivery_status) && $delivery_status == 3 ? 'selected' : '' ?>>กำลังจัดส่ง</option>
                 <option value="4" <?= isset($delivery_status) && $delivery_status == 4 ? 'selected' : '' ?>>จัดส่งสำเร็จ</option>
-                <option value="5" <?= isset($delivery_status) && $delivery_status == 5 ? 'selected' : '' ?>>ส่งไม่สำเร็จ</option>
+                <option value="5" <?= isset($delivery_status) && $delivery_status == 5 ? 'selected' : '' ?>>จัดส่งไม่สำเร็จ</option>
                 <option value="6" <?= isset($delivery_status) && $delivery_status == 6 ? 'selected' : '' ?>>รอการยกเลิกคำสั่งซื้อ</option>
                 <option value="7" <?= isset($delivery_status) && $delivery_status == 7 ? 'selected' : '' ?>>คืนของระหว่างทาง</option>
                 <option value="8" <?= isset($delivery_status) && $delivery_status == 8 ? 'selected' : '' ?>>คืนของสำเร็จ</option>

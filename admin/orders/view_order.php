@@ -153,10 +153,10 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                                         echo '<span>รอตรวจสอบ</span>';
                                                         break;
                                                     case 2:
-                                                        echo '<span>ชำระแล้ว</span>';
+                                                        echo '<span>ชำระเงินแล้ว</span>';
                                                         break;
                                                     case 3:
-                                                        echo '<span>ล้มเหลว</span>';
+                                                        echo '<span>ชำระเงินล้มเหลว</span>';
                                                         break;
                                                     case 4:
                                                         echo '<span>รอการยกเลิกคำสั่งซื้อ</span>';

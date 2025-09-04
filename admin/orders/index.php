@@ -129,10 +129,10 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 											echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
 											break;
 										case 2:
-											echo '<span class="badge bg-success">ชำระแล้ว</span>';
+											echo '<span class="badge bg-success">ชำระเงินแล้ว</span>';
 											break;
 										case 3:
-											echo '<span class="badge bg-danger">ล้มเหลว</span>';
+											echo '<span class="badge bg-danger">ชำระเงินล้มเหลว</span>';
 											break;
 										case 4:
 											echo '<span class="badge bg-secondary">รอการยกเลิกคำสั่งซื้อ</span>';
@@ -150,22 +150,22 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 									<?php
 									switch ((int)$row['delivery_status']) {
 										case 0:
-											echo '<span class="badge bg-secondary">ตรวจสอบ</span>';
+											echo '<span class="badge bg-secondary">ตรวจสอบคำสั่งซื้อ</span>';
 											break;
 										case 1:
-											echo '<span class="badge bg-info">เตรียมของ</span>';
+											echo '<span class="badge bg-info">กำลังเตรียมของ</span>';
 											break;
 										case 2:
 											echo '<span class="badge bg-primary">แพ๊กของแล้ว</span>';
 											break;
 										case 3:
-											echo '<span class="badge bg-warning text-dark">กำลังส่ง</span>';
+											echo '<span class="badge bg-warning text-dark">กำลังจัดส่ง</span>';
 											break;
 										case 4:
-											echo '<span class="badge bg-success">ส่งสำเร็จ</span>';
+											echo '<span class="badge bg-success">จัดส่งสำเร็จ</span>';
 											break;
 										case 5:
-											echo '<span class="badge bg-danger">ส่งไม่สำเร็จ</span>';
+											echo '<span class="badge bg-danger">จัดส่งไม่สำเร็จ</span>';
 											break;
 										case 6:
 											echo '<span class="badge bg-secondary">รอการยกเลิกคำสั่งซื้อ</span>';
