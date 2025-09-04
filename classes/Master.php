@@ -1269,7 +1269,7 @@ class Master extends DBConnection
 				$body = "
              <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
                  <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังดำเนินการยกเลิก</h2>
-                 <p>ลูกค้า <strong>{$customer_name}</strong>,</p>
+                 <p>เรียนคุณลูกค้า <strong>{$customer_name}</strong>,</p>
                  <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> รอดำเนินการยกเลิก</p>
                  <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
                  <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
@@ -1310,8 +1310,6 @@ class Master extends DBConnection
                  <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> คำสั่งซื้อกำลังรอดำเนินการยกเลิก</p>
                  <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
                  <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
-                 <hr>
-                 <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
              </div>
             ";
 
@@ -1403,6 +1401,8 @@ class Master extends DBConnection
 		$payment_status = isset($_POST['payment_status']) ? (int)$_POST['payment_status'] : 0;
 		$delivery_status = isset($_POST['delivery_status']) ? (int)$_POST['delivery_status'] : 0;
 
+
+
 		$update = $this->conn->query("UPDATE `order_list` 
         SET 
             `payment_status` = '{$payment_status}',
@@ -1413,12 +1413,128 @@ class Master extends DBConnection
 		if ($update) {
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success', "อัปเดตสถานะเรียบร้อยแล้ว");
+			// ส่งอีเมลแจ้งลูกค้า
+			$this->send_order_status_email($id, $payment_status, $delivery_status);
 		} else {
 			$resp['status'] = 'failed';
 			$resp['msg'] = $this->conn->error;
 		}
 
 		return json_encode($resp);
+	}
+
+	function send_order_status_email($order_id, $payment_status, $delivery_status)
+	{
+		// ดึงข้อมูลคำสั่งซื้อ
+		$qry = $this->conn->query("SELECT o.*, c.email, CONCAT(c.firstname, ' ', c.lastname) as customer_name 
+        FROM order_list o 
+        INNER JOIN customer_list c ON o.customer_id = c.id 
+        WHERE o.id = {$order_id}");
+
+		if ($qry->num_rows > 0) {
+			$order = $qry->fetch_assoc();
+			$order_code = $order['code'];
+			$customer_email = $order['email'];
+			$customer_name = $order['customer_name'];
+
+			$payment_status_text_map = [
+				0 => 'ยังไม่ชำระเงิน',
+				1 => 'รอตรวจสอบ',
+				2 => 'ชำระแล้ว',
+				3 => 'ล้มเหลว',
+				4 => 'รอการยกเลิกคำสั่งซื้อ',
+				5 => 'คืนเงินแล้ว',
+			];
+
+			$delivery_status_text_map = [
+				0 => 'ตรวจสอบคำสั่งซื้อ',
+				1 => 'เตรียมของ',
+				2 => 'แพ๊กของแล้ว',
+				3 => 'กำลังจัดส่ง',
+				4 => 'จัดส่งสำเร็จ',
+				5 => 'ส่งไม่สำเร็จ',
+				6 => 'รอการยกเลิกคำสั่งซื้อ',
+				7 => 'คืนของระหว่างทาง',
+				8 => 'คืนของสำเร็จ',
+			];
+
+			// แปลงค่าตัวเลขเป็นข้อความ
+			$payment_text = $payment_status_text_map[$payment_status] ?? 'N/A';
+			$delivery_text = $delivery_status_text_map[$delivery_status] ?? 'N/A';
+
+			// ตั้งค่าการส่งอีเมล
+			$mail = new PHPMailer(true);
+			try {
+				$mail->isSMTP();
+				$mail->Host = 'smtp.gmail.com';
+				$mail->Port = 465;
+				$mail->SMTPAuth = true;
+				$mail->Username = "faritre5566@gmail.com"; // ใส่อีเมลของคุณ
+				$mail->Password = "bchljhaxoqflmbys"; // ใส่รหัสอีเมลของคุณ
+				$mail->SMTPSecure = "ssl";
+				$mail->CharSet = 'UTF-8';
+				$mail->isHTML(true);
+				$mail->Subject = "สถานะคำสั่งซื้อ #{$order_code}";
+
+				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->addAddress($customer_email, $customer_name);
+
+				// สร้างเนื้อหาอีเมล
+				$body = "
+					<div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto;'>
+						<h2 style='text-align:center;'>สถานะคำสั่งซื้อ #{$order_code}</h2>
+						<p>เรียน คุณ <strong>{$customer_name}</strong></p>
+						<p><strong>รหัสคำสั่งซื้อ: </strong>{$order_code}</p>
+						<p>ขณะนี้สถานะคำสั่งซื้อของคุณได้ถูกอัปเดตแล้ว</p>
+						<p>สถานะการชำระเงิน: <strong>{$payment_text}</strong></p>
+						<p>สถานะการจัดส่ง: <strong>{$delivery_text}</strong></p>
+						<hr>
+						<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+					</div>
+           		";
+
+				$mail->Body = $body;
+				$mail->send();
+			} catch (Exception $e) {
+				// หากส่งอีเมลไม่สำเร็จ ให้บันทึก error ไว้ แต่ไม่ต้องหยุดการทำงาน
+				error_log("❌ ส่งอีเมลสถานะคำสั่งซื้อไม่สำเร็จ: " . $mail->ErrorInfo);
+			}
+
+			$mail_admin = new PHPMailer(true);
+			try {
+				$mail_admin->isSMTP();
+				$mail_admin->Host = 'smtp.gmail.com';
+				$mail_admin->Port = 465;
+				$mail_admin->SMTPAuth = true;
+				$mail_admin->Username = "faritre5566@gmail.com";
+				$mail_admin->Password = "bchljhaxoqflmbys";
+				$mail_admin->SMTPSecure = "ssl";
+				$mail_admin->CharSet = 'UTF-8';
+				$mail_admin->isHTML(true);
+				$mail_admin->Subject = "อัปเดตสถานะคำสั่งซื้อ #{$order_code}";
+
+				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
+				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
+				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+				$admin_body = "
+					<div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto;'>
+						<h2 style='text-align:center;'>อัปเดตสถานะคำสั่งซื้อ #{$order_code}</h2>
+						<p>ลูกค้า <strong>{$customer_name}</strong></p>
+						<p><strong>รหัสคำสั่งซื้อ: </strong>{$order_code}</p>
+						<p>ขณะนี้สถานะคำสั่งซื้อได้ถูกอัปเดตแล้ว</p>
+						<p>สถานะการชำระเงิน: <strong>{$payment_text}</strong></p>
+						<p>สถานะการจัดส่ง: <strong>{$delivery_text}</strong></p>
+					</div>
+				";
+
+				$mail_admin->Body = $admin_body;
+				$mail_admin->send();
+			} catch (Exception $e) {
+				// หากส่งอีเมลไม่สำเร็จ ให้บันทึก error ไว้ แต่ไม่ต้องหยุดการทำงาน
+				error_log("❌ ส่งอีเมลแจ้งยกเลิกไม่สำเร็จ: " . $mail_admin->ErrorInfo);
+			}
+		}
 	}
 
 
