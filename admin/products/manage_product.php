@@ -504,38 +504,51 @@ if (isset($id)) {
 
 
 <script>
+	// CHANGE 1: สร้าง Array เพื่อเก็บไฟล์ที่เลือกไว้จริงๆ
+	let galleryFiles = [];
+
 	function previewGallery(input) {
 		const previewContainer = document.getElementById("gallery-preview-container");
+		previewContainer.innerHTML = ''; // ล้าง preview เก่าทุกครั้งที่เลือกใหม่
+		galleryFiles = Array.from(input.files); // นำไฟล์ทั้งหมดมาเก็บใน Array ของเรา
 
-		// ตรวจสอบว่ามีไฟล์ที่เลือกหรือไม่
-		if (input.files && input.files.length > 0) {
-			// วนลูปเพื่อแสดงตัวอย่างรูปภาพที่เลือก
-			for (let i = 0; i < input.files.length; i++) {
-				const file = input.files[i];
+		if (galleryFiles.length > 0) {
+			galleryFiles.forEach((file, index) => {
 				const reader = new FileReader();
 
 				reader.onload = function(e) {
-					// สร้างการแสดงตัวอย่างรูปภาพใหม่
 					const imgContainer = document.createElement('div');
 					imgContainer.classList.add('gallery-item');
+					// CHANGE 2: เพิ่ม data-index เพื่ออ้างอิงถึงไฟล์ใน Array
+					imgContainer.setAttribute('data-index', index);
 					imgContainer.innerHTML = `
-                    <img src="${e.target.result}" alt="Gallery Image">
-                    <button type="button" class="btn-delete-img" onclick="removeImage(this)" title="ลบรูปภาพนี้">
-                        <i class="fa fa-times"></i>
-                    </button>
-                `;
+                        <img src="${e.target.result}" alt="Preview Image">
+                        <button type="button" class="btn-delete-img" onclick="removeNewImage(this)" title="ลบรูปภาพนี้">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    `;
 					previewContainer.appendChild(imgContainer);
 				};
-
-				reader.readAsDataURL(file); // อ่านไฟล์เป็น Data URL (แสดงผลเป็นรูปภาพ)
-			}
+				reader.readAsDataURL(file);
+			});
 		}
 	}
 
-	// ฟังก์ชันสำหรับลบรูปที่เลือกใน preview
-	function removeImage(button) {
+	// CHANGE 3: ฟังก์ชันลบรูปใหม่ที่ยังไม่ได้อัปโหลด
+	function removeNewImage(button) {
 		const item = button.closest('.gallery-item');
+		const indexToRemove = parseInt(item.getAttribute('data-index'), 10);
+
+		// ลบไฟล์ออกจาก Array ของเราตาม index
+		galleryFiles.splice(indexToRemove, 1);
+
+		// ลบ DOM element ของรูปนั้นทิ้ง
 		item.remove();
+
+		// อัปเดต data-index ของรูปที่เหลือใหม่ทั้งหมดเพื่อให้ถูกต้อง
+		document.querySelectorAll('#gallery-preview-container .gallery-item').forEach((el, newIndex) => {
+			el.setAttribute('data-index', newIndex);
+		});
 	}
 
 	function displayImg(input) {
@@ -739,6 +752,27 @@ if (isset($id)) {
 			// หากผ่านเงื่อนไข
 			$('.err-msg').remove(); // ลบ error ที่เก่าก่อนหน้า
 			start_loader(); // เริ่มโหลดหน้า
+			const formData = new FormData();
+
+			$(this).find('input, select, textarea').not('input[type=file]').each(function() {
+				if ($(this).is(':checkbox') || $(this).is(':radio')) {
+					if ($(this).is(':checked')) {
+						formData.append($(this).attr('name'), $(this).val());
+					}
+				} else {
+					formData.append($(this).attr('name'), $(this).val());
+				}
+			});
+
+			// 2. ใส่ไฟล์รูปภาพหลัก (ถ้ามี)
+			if ($('#img')[0].files[0]) {
+				formData.append('img', $('#img')[0].files[0]);
+			}
+
+			// 3. วนลูปใส่ไฟล์จาก Array `galleryFiles` ของเรา
+			galleryFiles.forEach(file => {
+				formData.append('gallery_imgs[]', file);
+			});
 
 			$.ajax({
 				url: _base_url_ + "classes/Master.php?f=save_product", // ส่งฟอร์ม
@@ -755,7 +789,7 @@ if (isset($id)) {
 				},
 				success: function(resp) {
 					if (resp.status === 'success') {
-						location.replace(`./?page=products`);
+						location.replace(``);
 					} else {
 						const el = $('<div>').addClass("alert alert-dark err-msg").text(resp.msg);
 						$('#product-form').prepend(el);
