@@ -313,6 +313,35 @@ if (!function_exists('format_price_custom')) {
                                     <table class="table table-bordered mb-4 small-table">
                                         <thead>
                                             <tr>
+                                                <th colspan="2">
+                                                    <h5 class="text-bold">ที่อยู่จัดส่ง</h5>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th>ชื่อ</th>
+                                                <td><?= htmlentities($customer['firstname'] . ' ' . $customer['middlename'] . ' ' . $customer['lastname']) ?></td>
+                                            </tr>
+                                            <tr>
+                                                <th>เบอร์โทร</th>
+                                                <td><?= htmlentities($customer['contact']) ?></td>
+                                            </tr>
+                                            <tr>
+                                                <th>ที่อยู่</th>
+                                                <td>
+                                                    <?= htmlentities($customer['address']) ?><br>
+                                                    <?= !empty($customer['sub_district']) ? 'ต.' . htmlentities($customer['sub_district']) . ' ' : '' ?>
+                                                    <?= !empty($customer['district']) ? 'อ.' . htmlentities($customer['district']) . ' ' : '' ?>
+                                                    <?= !empty($customer['province']) ? 'จ.' . htmlentities($customer['province']) : '' ?><br>
+                                                    <?= htmlentities($customer['postal_code']) ?>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <table class="table table-bordered mb-4 small-table">
+                                        <thead>
+                                            <tr>
                                                 <th>สั่งซื้อสินค้าแล้ว</th>
                                                 <th class="text-muted text-right" colspan="2">ราคาต่อหน่วย</th>
                                                 <th class="text-muted text-right">จำนวน</th>
@@ -474,35 +503,7 @@ if (!function_exists('format_price_custom')) {
 
                                     </table>
 
-                                    <table class="table table-bordered mb-4 small-table">
-                                        <thead>
-                                            <tr>
-                                                <th colspan="2">
-                                                    <h5 class="text-bold">ที่อยู่จัดส่ง</h5>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <th>ชื่อ</th>
-                                                <td><?= htmlentities($customer['firstname'] . ' ' . $customer['middlename'] . ' ' . $customer['lastname']) ?></td>
-                                            </tr>
-                                            <tr>
-                                                <th>เบอร์โทร</th>
-                                                <td><?= htmlentities($customer['contact']) ?></td>
-                                            </tr>
-                                            <tr>
-                                                <th>ที่อยู่</th>
-                                                <td>
-                                                    <?= htmlentities($customer['address']) ?><br>
-                                                    <?= !empty($customer['sub_district']) ? 'ต.' . htmlentities($customer['sub_district']) . ' ' : '' ?>
-                                                    <?= !empty($customer['district']) ? 'อ.' . htmlentities($customer['district']) . ' ' : '' ?>
-                                                    <?= !empty($customer['province']) ? 'จ.' . htmlentities($customer['province']) : '' ?><br>
-                                                    <?= htmlentities($customer['postal_code']) ?>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+
                                 </div>
 
                             <?php else: ?>
