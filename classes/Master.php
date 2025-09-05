@@ -1267,16 +1267,16 @@ class Master extends DBConnection
 				$mail->addAddress($order['email'], $customer_name);
 
 				$body = "
-             <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
-                 <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังดำเนินการยกเลิก</h2>
-                 <p>เรียนคุณลูกค้า <strong>{$customer_name}</strong>,</p>
-                 <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> รอดำเนินการยกเลิก</p>
-                 <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
-                 <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
-                 <hr>
-                 <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
-             </div>
-            ";
+					<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
+						<h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังดำเนินการยกเลิก</h2>
+						<p>เรียนคุณลูกค้า <strong>{$customer_name}</strong>,</p>
+						<p>หมายเลขคำสั่งซื้อ <strong>#{$order_code}</strong> กำลังดำเนินการยกเลิก</p>
+						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
+						<p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
+						<hr>
+						<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+					</div>
+				";
 
 				$mail->Body = $body;
 				$mail->send();
@@ -1297,21 +1297,21 @@ class Master extends DBConnection
 				$mail_admin->SMTPSecure = "ssl";
 				$mail_admin->CharSet = 'UTF-8';
 				$mail_admin->isHTML(true);
-				$mail_admin->Subject = "คำสั่งซื้อกำลังรอดำเนินการยกเลิก #{$order_code}";
+				$mail_admin->Subject = "ลูกค้าได้ทำการยกเลิกคำสั่งซื้อหมายเลข #{$order_code}";
 
 				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
 				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
 				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
 				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
 				$admin_body = "
-             <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
-                 <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการยกเลิก</h2>
-                 <p>ลูกค้า <strong>{$customer_name}</strong>,</p>
-                 <p>รหัสคำสั่งซื้อ <strong>#{$order_code}</strong> คำสั่งซื้อกำลังรอดำเนินการยกเลิก</p>
-                 <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
-                 <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
-             </div>
-            ";
+					<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
+						<h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการยกเลิก</h2>
+						<p>ลูกค้า <strong>{$customer_name}</strong>,</p>
+						<p>หมายเลขคำสั่งซื้อ <strong>#{$order_code}</strong> กำลังรอดำเนินการยกเลิก</p>
+						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
+						<p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
+					</div>
+				";
 
 				$mail_admin->Body = $admin_body;
 				$mail_admin->send();
@@ -1352,8 +1352,8 @@ class Master extends DBConnection
 			}
 
 			$telegram_message = "
-			คำสั่งซื้อกำลังรอดำเนินการยกเลิก
-			- รหัสคำสั่งซื้อ: {$order_code}
+			ลูกค้าได้ทำการยกเลิกคำสั่งซื้อ
+			- หมายเลขคำสั่งซื้อ: {$order_code}
 			- ลูกค้า: {$customer_name}
 			- ที่อยู่จัดส่ง: {$order['delivery_address']}
 			- ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท";
