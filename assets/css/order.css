@@ -1,0 +1,101 @@
+    /* Header bar */
+    .cart-header-bar {
+        border-left: 4px solid #ff6600;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-card {
+        border-left: 5px solid #ff6600;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        padding: 1.25rem;
+        background-color: #fff;
+        transition: all 0.3s ease-in-out;
+
+    }
+
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .order-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .badge-order {
+        font-size: 0.9rem;
+        padding: 0.4em 0.8em;
+    }
+
+    .order-filter-link {
+        margin-left: 10px;
+        color: #333;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+
+    .order-filter-link:hover {
+        text-decoration: underline;
+        color: #f57421;
+    }
+
+    .order-filter-link.active {
+        font-weight: bold;
+        color: #f57421;
+        text-decoration: underline;
+    }
+
+    .btn-search-orders {
+        background-color: none;
+        border: 2px solid #f57421;
+        border-radius: 13px;
+        color: #f57421;
+        font-size: 14px;
+    }
+
+    .btn-search-orders:hover {
+        background-color: #f57421;
+        color: white;
+    }
+
+    .btn-orders {
+        font-size: 14px;
+        background-color: #f57421;
+        border-radius: 13px;
+        color: white;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-orders:hover {
+        color: white;
+        filter: brightness(90%);
+    }
+
+    .btn-cancel {
+        font-size: 14px;
+        background-color: #bb2d3b;
+        border-radius: 13px;
+        color: white;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-cancel:hover {
+        color: white;
+        filter: brightness(90%);
+    }
