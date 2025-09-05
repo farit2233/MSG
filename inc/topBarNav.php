@@ -32,35 +32,35 @@ while ($type_row = $type_qry->fetch_assoc()) {
 $product_structure = $product_structure + $other_types;
 $promotion_structure = [];
 
-// Query เพื่อดึงข้อมูลของหมวดหมู่โปรโมชั่น
+// Query เพื่อดึงข้อมูลของหมวดหมู่โปรโมชัน
 $type_qry = $conn->query("SELECT * FROM `promotion_category` WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `date_created` ASC");
 while ($type_row = $type_qry->fetch_assoc()) {
   $pcid = $type_row['id'];
 
-  // ตรวจสอบวันหมดอายุของโปรโมชั่น
+  // ตรวจสอบวันหมดอายุของโปรโมชัน
   $current_time = time(); // เวลาปัจจุบัน
   $pro_qry = $conn->query("SELECT * FROM `promotions_list` 
                            WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
                            ORDER BY `date_created` ASC");
 
-  $has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชั่นที่ยังคงใช้งานได้หรือไม่
+  $has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชันที่ยังคงใช้งานได้หรือไม่
 
   while ($pro_row = $pro_qry->fetch_assoc()) {
-    // ตรวจสอบวันหมดอายุของแต่ละโปรโมชั่น
+    // ตรวจสอบวันหมดอายุของแต่ละโปรโมชัน
     $end_date = strtotime($pro_row['end_date']); // วันหมดอายุ
     if ($end_date >= $current_time) {
-      // ถ้าโปรโมชั่นยังไม่หมดอายุ ให้เพิ่มลงใน array
+      // ถ้าโปรโมชันยังไม่หมดอายุ ให้เพิ่มลงใน array
       $promotion_structure[$pcid]['categories'][] = [
         'id' => $pro_row['id'],
         'name' => $pro_row['name'],
         'discount_value' => $pro_row['discount_value'],
         'type' => $pro_row['type']
       ];
-      $has_active_promotions = true; // ตั้งค่าถ้ามีโปรโมชั่นที่ยังใช้งานได้
+      $has_active_promotions = true; // ตั้งค่าถ้ามีโปรโมชันที่ยังใช้งานได้
     }
   }
 
-  // ถ้ามีโปรโมชั่นที่ยังใช้งานได้ จะเพิ่มหมวดหมู่
+  // ถ้ามีโปรโมชันที่ยังใช้งานได้ จะเพิ่มหมวดหมู่
   if ($has_active_promotions) {
     $promotion_structure[$pcid]['name'] = $type_row['name'];
   }
@@ -79,7 +79,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
         <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li-->
 
-        <!-- HTML Navbar ที่แสดงโปรโมชั่น -->
+        <!-- HTML Navbar ที่แสดงโปรโมชัน -->
         <li class="nav-item dropdown position-static">
           <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             ใหม่และโดดเด่น
@@ -147,7 +147,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
             </div>
           </div>
         </li>
-        <li class="nav-item"><a class="nav-link text-white fos" href="./?p=promotions">โปรโมชั่น</a></li>
+        <li class="nav-item"><a class="nav-link text-white fos" href="./?p=promotions">โปรโมชัน</a></li>
         <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li-->
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
       </ul>

@@ -36,7 +36,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 </style>
 <section class="card card-outline card-orange rounded-0">
     <div class="card-header">
-        <div class="card-title"><?= isset($id) ? "แก้ไขหมวดหมู่โปรโมชั่น" : "สร้างหมวดหมู่โปรโมชั่นใหม่" ?></div>
+        <div class="card-title"><?= isset($id) ? "แก้ไขหมวดหมู่โปรโมชัน" : "สร้างหมวดหมู่โปรโมชันใหม่" ?></div>
     </div>
     <form action="" id="promotion-category-form">
         <input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
@@ -44,11 +44,11 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <div class="card-title" style="font-size: 18px !important;">ข้อมูลหมวดหมู่โปรโมชั่น</div>
+                    <div class="card-title" style="font-size: 18px !important;">ข้อมูลหมวดหมู่โปรโมชัน</div>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label>ชื่อหมวดหมู่โปรโมชั่น <span class="text-danger">*</span></label>
+                        <label>ชื่อหมวดหมู่โปรโมชัน <span class="text-danger">*</span></label>
                         <input type="text" name="name" id="name" class="form-control" value="<?php echo isset($name) ? $name : ''; ?>" required />
                     </div>
                     <div class="form-group">
@@ -65,7 +65,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <input type="hidden" name="status" value="0">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" <?= (isset($status) && $status == 1) ? 'checked' : '' ?>>
-                        <label class="custom-control-label" for="status">เปิด/ปิดการใช้งานหมวดหมู่โปรโมชั่น</label>
+                        <label class="custom-control-label" for="status">เปิด/ปิดการใช้งานหมวดหมู่โปรโมชัน</label>
                     </div>
                 </div>
             </div>
@@ -124,12 +124,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // กลับไปหน้าหมวดหมู่โปรโมชั่น
+                        // กลับไปหน้าหมวดหมู่โปรโมชัน
                         window.location.href = './?page=promotion_category';
                     }
                 });
             } else {
-                // ถ้าไม่มีการเปลี่ยนแปลงก็กลับไปหน้าหมวดหมู่โปรโมชั่น
+                // ถ้าไม่มีการเปลี่ยนแปลงก็กลับไปหน้าหมวดหมู่โปรโมชัน
                 window.location.href = './?page=promotion_category';
             }
         });
@@ -155,7 +155,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 },
                 success: function(resp) {
                     if (typeof resp == 'object' && resp.status == 'success') {
-                        location.replace('./?page=promotion_category');
+                        location.reload();
                     } else if (resp.status == 'failed' && !!resp.msg) {
                         var el = $('<div>');
                         el.addClass("alert alert-danger err-msg").text(resp.msg);

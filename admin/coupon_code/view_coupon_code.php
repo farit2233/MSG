@@ -116,7 +116,7 @@ function formatDateThai($date)
                             </dd>
                         </div>
                         <div class="col-md-3">
-                            <dt class="text-muted">ใช่ร่วมกับโปรโมชั่น</dt>
+                            <dt class="text-muted">ใช่ร่วมกับโปรโมชัน</dt>
                             <dd>
                                 <?php if ($cpromo == 1): ?>
                                     <span class="badge badge-success px-3 rounded-pill">กำลังใช้งาน</span>
@@ -185,7 +185,7 @@ function formatDateThai($date)
         </div>
         <div class="card card-outline card-dark rounded-0 mb-3">
             <div class="card-header">
-                <div class="card-title">สินค้าที่มีโปรโมชั่น</div>
+                <div class="card-title">สินค้าที่มีโปรโมชัน</div>
                 <div class="card-tools">
                     <button class="btn btn-flat btn-dark" type="button" id="coupon_code_products">
                         <i class="fas fa-plus"></i> เพิ่มสินค้า
@@ -320,7 +320,7 @@ function formatDateThai($date)
 
         $('.delete_data').click(function() {
             const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชั่นนี้?", "delete_coupon_code", [id]);
+            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_coupon_code", [id]);
         });
     });
     $(function() {
@@ -353,13 +353,13 @@ function formatDateThai($date)
             }
         });
 
-        // ฟังก์ชันลบสินค้าออกจากโปรโมชั่น
+        // ฟังก์ชันลบสินค้าออกจากโปรโมชัน
         $('.delete_data').click(function() {
-            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชั่น?", "delete_coupon_code_products", [$(this).attr('data-id')])
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชัน?", "delete_coupon_code_products", [$(this).attr('data-id')])
         });
     });
 
-    // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชั่น
+    // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชัน
     function delete_coupon_code_products(id) {
         start_loader();
         $.ajax({

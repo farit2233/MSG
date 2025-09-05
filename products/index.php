@@ -161,10 +161,10 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
     }
 }
 
-// ตรวจสอบการเลือกโปรโมชั่น
+// ตรวจสอบการเลือกโปรโมชัน
 if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
     $current_pid = $_GET['pid'];
-    // ดึงข้อมูลโปรโมชั่น
+    // ดึงข้อมูลโปรโมชัน
     $promotion_qry = $conn->query("SELECT * FROM `promotions_list` WHERE `id` = '{$current_pid}' AND `status` = 1 AND `delete_flag` = 0");
     if ($promotion_qry->num_rows > 0) {
         $promotion_result = $promotion_qry->fetch_assoc();
@@ -173,10 +173,10 @@ if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
         $breadcrumb_item_2_html = '<li class="breadcrumb-item"><a href="./?p=products&pid=' . $current_pid . '" class="plain-link">' . $promotion_result['name'] . '</a></li>';
         $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">' . $promotion_result['name'] . '</li>';
     } else {
-        // กรณีไม่พบโปรโมชั่น
-        $page_title = "ไม่พบโปรโมชั่น";
-        $page_description = "โปรโมชั่นที่คุณระบุไม่ถูกต้องหรือไม่สามารถใช้งานได้";
-        $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบโปรโมชั่น</li>';
+        // กรณีไม่พบโปรโมชัน
+        $page_title = "ไม่พบโปรโมชัน";
+        $page_description = "โปรโมชันที่คุณระบุไม่ถูกต้องหรือไม่สามารถใช้งานได้";
+        $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">ไม่พบโปรโมชัน</li>';
     }
 }
 

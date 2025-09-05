@@ -163,7 +163,7 @@
     color: red;
     margin-top: 5px;
 }
-    /* สไตล์สำหรับโปรโมชั่นที่ใช้ไม่ได้ (ตัวจาง) */
+    /* สไตล์สำหรับโปรโมชันที่ใช้ไม่ได้ (ตัวจาง) */
     .promo-inactive {
         opacity: 0.5;
         text-decoration: line-through;

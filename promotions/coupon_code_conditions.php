@@ -1,7 +1,7 @@
 <?php
 require_once('../config.php');
 
-// ดึงข้อมูลโปรโมชั่น (ถ้ามี)
+// ดึงข้อมูลโปรโมชัน (ถ้ามี)
 if (isset($_GET['id']) && $_GET['id'] > 0) {
     $qry = $conn->query("SELECT * FROM coupon_code_list WHERE id = '{$_GET['id']}' AND delete_flag = 0");
     if ($qry->num_rows > 0) {
@@ -63,9 +63,9 @@ if ($limit_coupon == 0 || $limit_coupon === null) {
 
 // เช็ค cpromo
 if ($cpromo == 1) {
-    $promo_text = "คูปองนี้สามารถใช้ร่วมกับโปรโมชั่นอื่นๆ ได้";
+    $promo_text = "คูปองนี้สามารถใช้ร่วมกับโปรโมชันอื่นๆ ได้";
 } else {
-    $promo_text = "คูปองนี้ไม่สามารถใช้ร่วมกับโปรโมชั่นอื่นๆ ได้";
+    $promo_text = "คูปองนี้ไม่สามารถใช้ร่วมกับโปรโมชันอื่นๆ ได้";
 }
 ?>
 <style>

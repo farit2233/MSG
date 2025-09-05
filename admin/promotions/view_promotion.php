@@ -86,11 +86,11 @@ function formatDateThai($date)
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-3">
-                            <dt class="text-muted">ชื่อโปรโมชั่น</dt>
+                            <dt class="text-muted">ชื่อโปรโมชัน</dt>
                             <dd><?= isset($name) ? $name : "" ?></dd>
                         </div>
                         <div class="col-md-3">
-                            <dt class="text-muted">รายละเอียดโปรโมชั่น</dt>
+                            <dt class="text-muted">รายละเอียดโปรโมชัน</dt>
                             <dd><?= $description ?? '' ?></dd>
                         </div>
                         <div class="col-md-3">&nbsp;</div>
@@ -137,7 +137,7 @@ function formatDateThai($date)
         </div>
         <div class="card card-outline card-dark rounded-0 mb-3">
             <div class="card-header">
-                <div class="card-title">สินค้าที่มีโปรโมชั่น</div>
+                <div class="card-title">สินค้าที่มีโปรโมชัน</div>
                 <div class="card-tools">
                     <button class="btn btn-flat btn-dark" type="button" id="promotion_products">
                         <i class="fas fa-plus"></i> เพิ่มสินค้า
@@ -271,7 +271,7 @@ function formatDateThai($date)
 
         $('.delete_data').click(function() {
             const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชั่นนี้?", "delete_promotion", [id]);
+            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_promotion", [id]);
         });
     });
     $(function() {
@@ -282,14 +282,14 @@ function formatDateThai($date)
 
     $(function() {
         $('.delete_data').click(function() {
-            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชั่น?", "delete_promotion_product", [$(this).attr('data-id')])
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชัน?", "delete_promotion_product", [$(this).attr('data-id')])
         });
         $('#promotion_products').click(function() {
             uni_modal_promotion("เพิ่มสินค้า", "promotions/promotion_products.php?id=<?= isset($id) ? $id : '' ?>")
         })
     })
 
-    // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชั่น
+    // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชัน
     function delete_promotion_product($id) {
         start_loader();
         $.ajax({

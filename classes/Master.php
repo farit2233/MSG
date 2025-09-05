@@ -636,7 +636,7 @@ class Master extends DBConnection
             WHERE c.id IN ($ids_str) AND c.customer_id = '{$customer_id}'
         ");
 
-			// --- คำนวณยอดรวมราคาสินค้า (ยังไม่รวมโปรโมชั่น/คูปอง) ---
+			// --- คำนวณยอดรวมราคาสินค้า (ยังไม่รวมโปรโมชัน/คูปอง) ---
 			$backend_subtotal = 0;
 			$total_weight = 0;
 			$cart_data = [];
@@ -694,7 +694,7 @@ class Master extends DBConnection
 			$coupon_data = null;
 
 
-			// ======================= START: ส่วนจัดการโปรโมชั่น =======================
+			// ======================= START: ส่วนจัดการโปรโมชัน =======================
 			$promotion_id = isset($_POST['promotion_id']) ? intval($_POST['promotion_id']) : 0;
 			if ($promotion_id > 0) {
 				$promo_qry = $this->conn->query("SELECT * FROM `promotions_list` WHERE id = {$promotion_id} AND status = 1 AND delete_flag = 0");
@@ -711,17 +711,17 @@ class Master extends DBConnection
 							case 'free_shipping':
 								// ✅ แก้ไข: บันทึกค่าส่งที่ถูกยกเว้นให้เป็นยอดส่วนลด
 								$shipping_discount  = $shipping_cost;
-								$final_shipping_cost = 0; // โปรโมชั่นส่งฟรี
+								$final_shipping_cost = 0; // โปรโมชันส่งฟรี
 								break;
 						}
 					} else {
-						throw new Exception('ยอดสั่งซื้อไม่ถึงเกณฑ์ขั้นต่ำสำหรับโปรโมชั่นนี้');
+						throw new Exception('ยอดสั่งซื้อไม่ถึงเกณฑ์ขั้นต่ำสำหรับโปรโมชันนี้');
 					}
 				} else {
-					throw new Exception('ไม่พบโปรโมชั่นที่ส่งมา หรือโปรโมชั่นไม่พร้อมใช้งาน');
+					throw new Exception('ไม่พบโปรโมชันที่ส่งมา หรือโปรโมชันไม่พร้อมใช้งาน');
 				}
 			}
-			// ======================= END: ส่วนจัดการโปรโมชั่น =========================
+			// ======================= END: ส่วนจัดการโปรโมชัน =========================
 
 			// ======================= ✨ START: ส่วนจัดการคูปอง (เพิ่มใหม่) =======================
 			$coupon_code_id = isset($_POST['coupon_code_id']) ? intval($_POST['coupon_code_id']) : 0;
@@ -944,14 +944,14 @@ class Master extends DBConnection
 										<td colspan='3' style='padding:8px; border:1px solid #ddd; text-align:right;'><strong>ค่าส่ง</strong></td>
 										<td style='padding:8px; border:1px solid #ddd; text-align:right;'>" . number_format($shipping_cost, 2) . "</td>
 									</tr>";
-				// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
+				// เพิ่มส่วนลดโปรโมชัน (ถ้ามี)
 				if (isset($promo_data) && $promotion_id > 0) {
 					if ($promo_data['type'] === 'free_shipping') {
 						$discount_display = "<span style='color: green;'>ส่งฟรี</span>";
-						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
+						$discount_label = "<strong>ส่วนลดโปรโมชัน</strong>";
 					} else {
 						$discount_display = "<span style='color: red;'>- " . number_format($promotion_discount_amount, 2) . "</span>";
-						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
+						$discount_label = "<strong>ส่วนลดโปรโมชัน</strong>";
 					}
 
 					$promo_row_html = "
@@ -1066,14 +1066,14 @@ class Master extends DBConnection
 							</tr>
 							<tr>";
 
-				// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
+				// เพิ่มส่วนลดโปรโมชัน (ถ้ามี)
 				if (isset($promo_data) && $promotion_id > 0) {
 					if ($promo_data['type'] === 'free_shipping') {
 						$discount_display = "<span style='color: green;'>ส่งฟรี</span>";
-						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
+						$discount_label = "<strong>ส่วนลดโปรโมชัน</strong>";
 					} else {
 						$discount_display = "<span style='color: red;'>- " . number_format($promotion_discount_amount, 2) . "</span>";
-						$discount_label = "<strong>ส่วนลดโปรโมชั่น</strong>";
+						$discount_label = "<strong>ส่วนลดโปรโมชัน</strong>";
 					}
 
 					$promo_row_html = "
@@ -1171,14 +1171,14 @@ class Master extends DBConnection
 			$telegram_message .= "
 			
 			ค่าส่ง: " . number_format($shipping_cost, 2) . " บาท";
-			// เพิ่มส่วนลดโปรโมชั่น (ถ้ามี)
+			// เพิ่มส่วนลดโปรโมชัน (ถ้ามี)
 			if (isset($promo_data) && $promotion_id > 0) {
 				if ($promo_data['type'] === 'free_shipping') {
 					// ในกรณีส่งฟรี ค่าส่งด้านบน ($final_shipping_cost) จะเป็น 0 อยู่แล้ว
 					// เราอาจจะแสดงให้ชัดเจนว่าค่าส่งเดิมคือเท่าไหร่ และถูกลดไป
-					$promo_text = "\nส่วนลดโปรโมชั่น: ส่งฟรี (ประหยัด " . number_format($shipping_cost, 2) . " บาท)";
+					$promo_text = "\nส่วนลดโปรโมชัน: ส่งฟรี (ประหยัด " . number_format($shipping_cost, 2) . " บาท)";
 				} else {
-					$promo_text = "\nส่วนลดโปรโมชั่น: -" . number_format($promotion_discount_amount, 2) . " บาท";
+					$promo_text = "\nส่วนลดโปรโมชัน: -" . number_format($promotion_discount_amount, 2) . " บาท";
 				}
 				$telegram_message .= $promo_text;
 			}
@@ -1200,7 +1200,7 @@ class Master extends DBConnection
 			sendTelegramNotification($telegram_message);
 
 			if ($promotion_discount > 0) {
-				// บันทึกการใช้งานโปรโมชั่น
+				// บันทึกการใช้งานโปรโมชัน
 				$this->log_promotion_usage($promotion_id, $customer_id, $oid, $promotion_discount, count($cart_data));
 			}
 			if ($coupon_discount > 0) {
@@ -1377,11 +1377,11 @@ class Master extends DBConnection
         VALUES ('{$promotion_id}', '{$customer_id}', '{$order_id}', '{$discount_amount}', '{$items_in_order}', NOW())
     ";
 
-		// บันทึกข้อมูลการใช้งานโปรโมชั่น
+		// บันทึกข้อมูลการใช้งานโปรโมชัน
 		if ($this->conn->query($query)) {
 			return true;
 		} else {
-			throw new Exception("ไม่สามารถบันทึกข้อมูลการใช้โปรโมชั่นได้: " . $this->conn->error);
+			throw new Exception("ไม่สามารถบันทึกข้อมูลการใช้โปรโมชันได้: " . $this->conn->error);
 		}
 	}
 	function log_coupon_usage($coupon_code_id, $customer_id, $order_id, $discount_amount, $items_in_order)
@@ -1883,7 +1883,7 @@ class Master extends DBConnection
 		$del = $this->conn->query("DELETE FROM `promotions_list` WHERE id = '{$id}'");
 		if ($del) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', "ลบโปรโมชั่นแล้ว");
+			$this->settings->set_flashdata('success', "ลบโปรโมชันแล้ว");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
@@ -1941,7 +1941,7 @@ class Master extends DBConnection
 		$resp = $qry->execute();
 
 		if ($resp) {
-			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโปรโมชั่นเรียบร้อยแล้ว");
+			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโปรโมชันเรียบร้อยแล้ว");
 			return json_encode(array('status' => 'success'));
 		} else {
 			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
@@ -1980,9 +1980,9 @@ class Master extends DBConnection
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
 			if (empty($id))
-				$resp['msg'] = " สร้างโปรโมชั่นใหม่เรียบร้อย";
+				$resp['msg'] = " สร้างโปรโมชันใหม่เรียบร้อย";
 			else
-				$resp['msg'] = " อัปเดตโปรโมชั่นเรียบร้อย";
+				$resp['msg'] = " อัปเดตโปรโมชันเรียบร้อย";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
@@ -1998,7 +1998,7 @@ class Master extends DBConnection
 		$del = $this->conn->query("UPDATE `promotion_category` set `delete_flag` = 1 where id = '{$id}'");
 		if ($del) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', " ลบประเภทสินค้าเรียบร้อย");
+			$this->settings->set_flashdata('success', "ลบหมวดหมู่โปรโมชันเรียบร้อย");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
@@ -2134,7 +2134,7 @@ class Master extends DBConnection
 		$del = $this->conn->query("DELETE FROM `coupon_code_list` WHERE id = '{$id}'");
 		if ($del) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', "ลบโปรโมชั่นแล้ว");
+			$this->settings->set_flashdata('success', "ลบโปรโมชันแล้ว");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
@@ -2190,7 +2190,7 @@ class Master extends DBConnection
 		$resp = $qry->execute();
 
 		if ($resp) {
-			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโปรโมชั่นเรียบร้อยแล้ว");
+			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโปรโมชันเรียบร้อยแล้ว");
 			return json_encode(array('status' => 'success'));
 		} else {
 			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));

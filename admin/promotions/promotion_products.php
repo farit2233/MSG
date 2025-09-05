@@ -1,7 +1,7 @@
 <?php
 require_once('../../config.php');
 
-// ดึงข้อมูลโปรโมชั่น (ถ้ามี)
+// ดึงข้อมูลโปรโมชัน (ถ้ามี)
 if (isset($_GET['id']) && $_GET['id'] > 0) {
     $qry = $conn->query("SELECT * FROM promotions_list WHERE id = '{$_GET['id']}' AND delete_flag = 0");
     if ($qry->num_rows > 0) {
@@ -11,7 +11,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     }
 }
 
-// ดึงรายการสินค้าที่ถูกเลือกไว้ในโปรโมชั่นนี้
+// ดึงรายการสินค้าที่ถูกเลือกไว้ในโปรโมชันนี้
 $selected_products = [];
 if (isset($id)) {
     $pp_qry = $conn->query("SELECT product_id FROM `promotion_products` WHERE promotion_id = {$id}");
@@ -20,7 +20,7 @@ if (isset($id)) {
     }
 }
 
-// ดึงรายการสินค้าทั้งหมดที่อยู่ในโปรโมชั่น "อื่น" ที่ยังไม่ถูกลบ
+// ดึงรายการสินค้าทั้งหมดที่อยู่ในโปรโมชัน "อื่น" ที่ยังไม่ถูกลบ
 $products_in_other_promos = [];
 $current_promotion_id = isset($id) ? $id : 0;
 
@@ -64,10 +64,10 @@ while ($op_row = $other_promo_qry->fetch_assoc()) {
                     <input type="radio" name="product_filter" value="all" id="filter_all" autocomplete="off" checked> ทั้งหมด
                 </label>
                 <label class="btn btn-light btn-sm rounded ">
-                    <input type="radio" name="product_filter" value="available" id="filter_available" autocomplete="off"> ยังไม่มีโปรโมชั่น
+                    <input type="radio" name="product_filter" value="available" id="filter_available" autocomplete="off"> ยังไม่มีโปรโมชัน
                 </label>
                 <label class="btn btn-light btn-sm rounded">
-                    <input type="radio" name="product_filter" value="in_promo" id="filter_in_promo" autocomplete="off"> มีโปรโมชั่นแล้ว
+                    <input type="radio" name="product_filter" value="in_promo" id="filter_in_promo" autocomplete="off"> มีโปรโมชันแล้ว
                 </label>
             </div>
         </div>
@@ -107,7 +107,7 @@ while ($op_row = $other_promo_qry->fetch_assoc()) {
                         <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
                         <span class="font-weight-bold"> <?= $row['name'] ?> </span>
                         <?php if (!empty($is_disabled)): ?>
-                            <span class="badge badge-warning ml-2">อยู่ในโปรโมชั่นอื่น</span>
+                            <span class="badge badge-warning ml-2">อยู่ในโปรโมชันอื่น</span>
                         <?php endif; ?>
                         <span class="d-block text-muted small">SKU : <?= $row['sku'] ?> | ราคา: <?= number_format($row['price'], 2) ?> บาท | หมวดหมู่: <?= $row['category_name'] ?></span>
                     </div>
@@ -158,7 +158,7 @@ while ($op_row = $other_promo_qry->fetch_assoc()) {
         $('#productList').on('change', '.product-checkbox', updateSelectedCount);
 
         // --- START: ADDED CODE FOR SORTING ---
-        // Event listener สำหรับปุ่มกรองสถานะโปรโมชั่น
+        // Event listener สำหรับปุ่มกรองสถานะโปรโมชัน
         $('input[name="product_filter"]').on('change', filterProducts);
         // --- END: ADDED CODE FOR SORTING ---
 

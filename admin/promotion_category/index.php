@@ -83,10 +83,10 @@ function formatDateThai($date)
 
 <section class="card card-outline card-dark rounded-0">
     <div class="card-header">
-        <div class="card-title">หมวดหมู่โปรโมชั่นทั้งหมด</div>
+        <div class="card-title">หมวดหมู่โปรโมชันทั้งหมด</div>
         <div class="card-tools">
             <a href="./?page=promotion_category/manage_promotion_category" class="btn btn-flat btn-dark">
-                <i class="fas fa-plus"></i> สร้างหมวดหมู่โปรโมชั่นใหม่
+                <i class="fas fa-plus"></i> สร้างหมวดหมู่โปรโมชันใหม่
             </a>
         </div>
     </div>
@@ -127,7 +127,7 @@ function formatDateThai($date)
                     <thead class="text-center">
                         <tr>
                             <th>ที่</th>
-                            <th>ชื่อโปรโมชั่น</th>
+                            <th>ชื่อโปรโมชัน</th>
                             <th>รายละเอียด</th>
                             <th>วันที่สร้าง</th>
                             <th>จัดการ</th>
@@ -166,11 +166,11 @@ function formatDateThai($date)
 
                                         <div class="dropdown-menu" role="menu">
                                             <a class="dropdown-item" href="./?page=promotion_category/manage_promotion_category&id=<?php echo $row['id'] ?>">
-                                                <span class="fa fa-edit text-dark"></span> แก้ไขหมวดหมู่โปรโมชั่น
+                                                <span class="fa fa-edit text-dark"></span> แก้ไขหมวดหมู่โปรโมชัน
                                             </a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">
-                                                <span class="fa fa-trash text-danger"></span> ลบหมวดหมู่โปรโมชั่น
+                                            <a class="dropdown-item delete_promotion_category" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">
+                                                <span class="fa fa-trash text-danger"></span> ลบโปรโมชัน
                                             </a>
                                         </div>
                                     <?php else : ?>
@@ -212,13 +212,13 @@ function formatDateThai($date)
             }
         });
 
-        $('.delete_data').click(function() {
+        $('.delete_promotion_category').click(function() {
             const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชั่นนี้?", "delete_promotion_category", [id]);
+            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_promotion_category", [id]);
         });
     });
 
-    function delete_promotion(id) {
+    function delete_promotion_category(id) {
         start_loader();
         $.ajax({
             url: _base_url_ + "classes/Master.php?f=delete_promotion_category",

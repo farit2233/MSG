@@ -699,12 +699,12 @@ if (isset($id)) {
 					reverseButtons: true
 				}).then((result) => {
 					if (result.isConfirmed) {
-						// กลับไปหน้าหมวดหมู่โปรโมชั่น
+						// กลับไปหน้าหมวดหมู่โปรโมชัน
 						window.location.href = './?page=products';
 					}
 				});
 			} else {
-				// ถ้าไม่มีการเปลี่ยนแปลงก็กลับไปหน้าหมวดหมู่โปรโมชั่น
+				// ถ้าไม่มีการเปลี่ยนแปลงก็กลับไปหน้าหมวดหมู่โปรโมชัน
 				window.location.href = './?page=products';
 			}
 		});

@@ -83,10 +83,10 @@ function formatDateThai($date)
 
 <section class="card card-outline card-dark rounded-0">
     <div class="card-header">
-        <div class="card-title">โปรโมชั่นทั้งหมด</div>
+        <div class="card-title">โปรโมชันทั้งหมด</div>
         <div class="card-tools">
             <a href="./?page=promotions/manage_promotion" class="btn btn-flat btn-dark">
-                <i class="fas fa-plus"></i> สร้างโปรโมชั่นใหม่
+                <i class="fas fa-plus"></i> สร้างโปรโมชันใหม่
             </a>
         </div>
     </div>
@@ -129,7 +129,7 @@ function formatDateThai($date)
                     <thead class="text-center">
                         <tr>
                             <th>ที่</th>
-                            <th>ชื่อโปรโมชั่น</th>
+                            <th>ชื่อโปรโมชัน</th>
                             <th>รายละเอียด</th>
                             <th>ประเภท</th>
                             <th>มูลค่าส่วนลด</th>
@@ -192,11 +192,11 @@ function formatDateThai($date)
                                             </a>
                                             <div class="dropdown-divider"></div>
                                             <a class="dropdown-item" href="./?page=promotions/manage_promotion&id=<?php echo $row['id'] ?>">
-                                                <span class="fa fa-edit text-dark"></span> แก้โปรโมชั่น
+                                                <span class="fa fa-edit text-dark"></span> แก้โปรโมชัน
                                             </a>
                                             <div class="dropdown-divider"></div>
                                             <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">
-                                                <span class="fa fa-trash text-danger"></span> ลบโปรโมชั่น
+                                                <span class="fa fa-trash text-danger"></span> ลบโปรโมชัน
                                             </a>
                                         </div>
                                     <?php else : ?>
@@ -240,7 +240,7 @@ function formatDateThai($date)
 
         $('.delete_data').click(function() {
             const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชั่นนี้?", "delete_promotion", [id]);
+            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_promotion", [id]);
         });
     });
 

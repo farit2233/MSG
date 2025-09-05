@@ -13,14 +13,14 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     echo "<script>alert('You dont have access for this page'); location.replace('./?page=my_orders');</script>";
 }
 
-// ======================= START: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชั่นและคูปอง =======================
+// ======================= START: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชันและคูปอง =======================
 $promotion_name = '';
 if (!empty($promotion_id)) {
     $promo_qry = $conn->query("SELECT name FROM `promotions_list` WHERE id = '{$promotion_id}'");
     if ($promo_qry->num_rows > 0) {
         $promotion_name = $promo_qry->fetch_assoc()['name'];
     } else {
-        $promotion_name = "โปรโมชั่น"; // แสดงข้อความทั่วไปหากไม่พบ
+        $promotion_name = "โปรโมชัน"; // แสดงข้อความทั่วไปหากไม่พบ
     }
 }
 
@@ -33,7 +33,7 @@ if (!empty($coupon_code_id)) {
         $coupon_name = "คูปองส่วนลด"; // แสดงข้อความทั่วไปหากไม่พบ
     }
 }
-// ======================= END: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชั่นและคูปอง =======================
+// ======================= END: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชันและคูปอง =======================
 
 $customer_name = '';
 if (!empty($customer_id)) {
@@ -299,7 +299,7 @@ if (!empty($customer_id)) {
 
                 <?php if (!empty($promotion_name) && isset($promotion_discount) && $promotion_discount > 0): ?>
                     <div class="d-flex justify-content-between text-danger order-total-detail ">
-                        <span>โปรโมชั่น (<?= htmlspecialchars($promotion_name) ?>):</span>
+                        <span>โปรโมชัน (<?= htmlspecialchars($promotion_name) ?>):</span>
                         <span>-<?= format_price_custom($promotion_discount, 2) ?> บาท</span>
                     </div>
                 <?php endif; ?>

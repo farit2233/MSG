@@ -33,13 +33,13 @@ $qry_promo_recommand = $conn->query("
 ");
 
 
-// ตรวจสอบวันหมดอายุของโปรโมชั่น
+// ตรวจสอบวันหมดอายุของโปรโมชัน
 $current_time = time(); // เวลาปัจจุบัน
 $pro_qry = $conn->query("SELECT * FROM `promotions_list` 
                            WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
                            ORDER BY `date_created` ASC");
 
-$has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชั่นที่ยังคงใช้งานได้หรือไม่
+$has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชันที่ยังคงใช้งานได้หรือไม่
 
 
 function formatDateThai($date)
@@ -55,10 +55,10 @@ function formatDateThai($date)
     return "{$day}/{$month}/{$year}";
 }
 
-$page_title = "โปรโมชั่น"; // ตั้งชื่อหน้าเริ่มต้น
+$page_title = "โปรโมชัน"; // ตั้งชื่อหน้าเริ่มต้น
 $page_description = "";
 
-$breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">โปรโมชั่น</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
+$breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">โปรโมชัน</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
 
 ?>
 <div class="promotion-background">
@@ -148,7 +148,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
 <div class="promotion-background">
     <section class="mx-5">
         <div class="d-flex justify-content-between mt-3">
-            <h3>โปรโมชั่นแนะนำ</h3>
+            <h3>โปรโมชันแนะนำ</h3>
             <a href="./?p=promotions/promotions_list" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a>
         </div>
         <div class="card rounded-0 pt-4">
@@ -156,13 +156,13 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                 <div class="card-group">
                     <div class="row g-4">
                         <?php
-                        // ตรวจสอบวันหมดอายุของโปรโมชั่น
+                        // ตรวจสอบวันหมดอายุของโปรโมชัน
                         $current_time = time(); // เวลาปัจจุบัน
                         $pro_qry = $conn->query("SELECT * FROM `promotions_list` 
                            WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
                            ORDER BY `date_created` ASC");
 
-                        $has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชั่นที่ยังคงใช้งานได้หรือไม่
+                        $has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชันที่ยังคงใช้งานได้หรือไม่
 
                         ?>
 
@@ -170,7 +170,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                         // ใช้ลูปเดียวสำหรับการแสดงข้อมูล
                         while ($row = $qry_promo_recommand->fetch_assoc()): ?>
                             <div class="col-md-3 mb-4">
-                                <!-- ลิงก์ไปยังหน้าโปรโมชั่น -->
+                                <!-- ลิงก์ไปยังหน้าโปรโมชัน -->
                                 <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
                                     <div class="card card-promotion h-100">
                                         <div class="card-promotion-holder">

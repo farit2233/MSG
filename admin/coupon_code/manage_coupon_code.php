@@ -47,14 +47,14 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 </style>
 <section class="card card-outline card-orange rounded-0">
     <div class="card-header">
-        <div class="card-title"><?= isset($id) ? "แก้ไขโปรโมชั่น" : "สร้างโปรโมชั่นใหม่" ?></div>
+        <div class="card-title"><?= isset($id) ? "แก้ไขโปรโมชัน" : "สร้างโปรโมชันใหม่" ?></div>
     </div>
     <form action="" id="coupon-code-form">
         <input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
         <div class="card-body">
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <div class="card-title" style="font-size: 18px !important;">ข้อมูลโปรโมชั่น</div>
+                    <div class="card-title" style="font-size: 18px !important;">ข้อมูลโปรโมชัน</div>
                 </div>
                 <div class="card-body">
                     <div class="form-group row">
@@ -76,7 +76,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                         <div class="col-md-6">
                             <label>ประเภทส่วนลด <span class="text-danger">*</span></label>
                             <select name="type" class="form-control" required>
-                                <option value="" disabled <?= !isset($type) ? 'selected' : '' ?>>-- เลือกหมวดหมู่โปรโมชั่น --</option>
+                                <option value="" disabled <?= !isset($type) ? 'selected' : '' ?>>-- เลือกหมวดหมู่โปรโมชัน --</option>
                                 <option value="fixed" <?= (isset($type) && $type == 'fixed') ? 'selected' : '' ?>>ลดราคาคงที่ (บาท)</option>
                                 <option value="percent" <?= (isset($type) && $type == 'percent') ? 'selected' : '' ?>>ลดเป็นเปอร์เซ็นต์ (%)</option>
                                 <option value="free_shipping" <?= (isset($type) && $type == 'free_shipping') ? 'selected' : '' ?>>ส่งฟรี</option>
@@ -84,7 +84,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label>เลือกใช่ร่วมกับโปรโมชั่นประเภทอื่นที่ไม่ใช่คูปองได้ <span class="text-danger">*</span></label>
+                            <label>เลือกใช่ร่วมกับโปรโมชันประเภทอื่นที่ไม่ใช่คูปองได้ <span class="text-danger">*</span></label>
                             <div class="radio-group">
                                 <label>
                                     <input type="radio" id="cpromo_1" name="cpromo" value="1" <?= (isset($cpromo) && $cpromo == 1) ? 'checked' : '' ?> required>
@@ -170,13 +170,13 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             </div>
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <div class="card-title" style="font-size: 18px !important;">สถานะโปรโมชั่น</div>
+                    <div class="card-title" style="font-size: 18px !important;">สถานะโปรโมชัน</div>
                 </div>
                 <div class="card-body">
                     <input type="hidden" name="status" value="0">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" <?= (isset($status) && $status == 1) ? 'checked' : '' ?>>
-                        <label class="custom-control-label" for="status">เปิด / ปิดการใช้งานโปรโมชั่น</label>
+                        <label class="custom-control-label" for="status">เปิด / ปิดการใช้งานโปรโมชัน</label>
                     </div>
                 </div>
             </div>
@@ -237,12 +237,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // กลับไปหน้าหมวดหมู่โปรโมชั่น
+                        // กลับไปหน้าหมวดหมู่โปรโมชัน
                         window.location.href = './?page=coupon_code';
                     }
                 });
             } else {
-                // ถ้าไม่มีการเปลี่ยนแปลงก็กลับไปหน้าหมวดหมู่โปรโมชั่น
+                // ถ้าไม่มีการเปลี่ยนแปลงก็กลับไปหน้าหมวดหมู่โปรโมชัน
                 window.location.href = './?page=coupon_code';
             }
         });

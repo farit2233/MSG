@@ -14,12 +14,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 $promotion_name = '';
 if (!empty($promotion_id)) {
-    // คิวรีหาชื่อโปรโมชั่นจาก promotion_id ที่ได้มา
+    // คิวรีหาชื่อโปรโมชันจาก promotion_id ที่ได้มา
     $promo_qry = $conn->query("SELECT name FROM `promotions_list` WHERE id = '{$promotion_id}'");
     if ($promo_qry->num_rows > 0) {
         $promotion_name = $promo_qry->fetch_assoc()['name'];
     } else {
-        $promotion_name = "โปรโมชั่นที่ถูกลบไปแล้ว";
+        $promotion_name = "โปรโมชันที่ถูกลบไปแล้ว";
     }
 }
 
@@ -290,7 +290,7 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
 
                                         <?php if (!empty($promotion_name) && isset($promotion_discount) && $promotion_discount > 0): ?>
                                             <h5>
-                                                ส่วนลดโปรโมชั่น (<?= htmlspecialchars($promotion_name) ?>):
+                                                ส่วนลดโปรโมชัน (<?= htmlspecialchars($promotion_name) ?>):
                                                 <span class="text-danger">(-<?= format_num($promotion_discount, 2) ?> บาท)</span>
                                             </h5>
                                         <?php endif; ?>

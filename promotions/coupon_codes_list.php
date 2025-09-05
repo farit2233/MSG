@@ -42,7 +42,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
         </div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-transparent px-0">
-                <li class="breadcrumb-item"><a href="./?p=promotions" class="plain-link text-dark">โปรโมชั่น</a></li>
+                <li class="breadcrumb-item"><a href="./?p=promotions" class="plain-link text-dark">โปรโมชัน</a></li>
                 <?= $breadcrumb_item_2_html ?>
             </ol>
         </nav>

@@ -97,7 +97,7 @@
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-list"></i>
                   <p>
-                    โปรโมชั่นสินค้า
+                    โปรโมชันสินค้า
                     <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
@@ -108,7 +108,7 @@
                     <a href="./?page=promotion_category" class="nav-link tree-item  nav-promotion_category">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
-                        หมวดหมู่โปรโมชั่นสินค้า
+                        หมวดหมู่โปรโมชันสินค้า
                       </p>
                     </a>
                   </li>
@@ -117,7 +117,7 @@
                     <a href="./?page=promotions" class="nav-link tree-item nav-promotions">
                       <i class="nav-icon fas fa-th-list"></i>
                       <p>
-                        โปรโมชั่นสินค้าทั้งหมด
+                        โปรโมชันสินค้าทั้งหมด
                       </p>
                     </a>
                   </li>

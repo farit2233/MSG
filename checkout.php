@@ -116,14 +116,14 @@ if ($shipping_qry_all) {
 }
 
 // ==========================================================
-// PHP: ส่วนคำนวณโปรโมชั่นทั้งหมด
+// PHP: ส่วนคำนวณโปรโมชันทั้งหมด
 // ==========================================================
 $cart_promotions = [];
 $product_has_promo_status = [];
-$promotion_discount = 0; // ตัวแปรเก็บส่วนลดจากโปรโมชั่น
-$applied_promo = null; // ตัวแปรเก็บข้อมูลโปรโมชั่นที่ใช้ได้
+$promotion_discount = 0; // ตัวแปรเก็บส่วนลดจากโปรโมชัน
+$applied_promo = null; // ตัวแปรเก็บข้อมูลโปรโมชันที่ใช้ได้
 
-// --- วนลูปเพื่อรวบรวมข้อมูลโปรโมชั่นทั้งหมดก่อน ---
+// --- วนลูปเพื่อรวบรวมข้อมูลโปรโมชันทั้งหมดก่อน ---
 foreach ($cart_items as $item) {
     $promo_query = "
         SELECT p.id, p.name, p.description, p.type, p.discount_value, p.minimum_order, p.start_date, p.end_date
@@ -149,7 +149,7 @@ foreach ($cart_items as $item) {
     }
 }
 
-// --- วิเคราะห์โปรโมชั่นที่รวบรวมได้ ---
+// --- วิเคราะห์โปรโมชันที่รวบรวมได้ ---
 $is_promo_applicable = false;
 $unique_promo_ids = array_unique(array_filter($product_has_promo_status));
 
@@ -167,7 +167,7 @@ function formatPrice($value)
         return number_format($value, 2);
     }
 }
-// --- คำนวณส่วนลดถ้าโปรโมชั่นใช้งานได้ และ ตรวจสอบ minimum_order ---
+// --- คำนวณส่วนลดถ้าโปรโมชันใช้งานได้ และ ตรวจสอบ minimum_order ---
 $final_shipping_cost = $default_shipping_cost;
 $promo_suggestion_message = null;
 $is_discount_applied = false;
@@ -195,7 +195,7 @@ if ($is_promo_applicable) {
         // --- ยอดซื้อไม่ถึงเกณฑ์ ---
         $is_discount_applied = false;
         $needed_amount = $applied_promo['minimum_order'] - $cart_total;
-        $promo_suggestion_message = "ซื้อเพิ่มอีก " . formatPrice($needed_amount, 2) . " บาท เพื่อรับโปรโมชั่นนี้";
+        $promo_suggestion_message = "ซื้อเพิ่มอีก " . formatPrice($needed_amount, 2) . " บาท เพื่อรับโปรโมชันนี้";
     }
 }
 
@@ -407,7 +407,7 @@ if (!function_exists('format_price_custom')) {
                                             ?>
                                                     <tr class="no-border <?= $promo_class ?>">
                                                         <th>
-                                                            สินค้ามีโปรโมชั่น
+                                                            สินค้ามีโปรโมชัน
                                                             <!--span class="text-danger" style="font-size: 0.9em; display: block; font-weight: normal;">
                                                                 <?= htmlspecialchars($promo['name']) ?>
                                                             </span-->
@@ -428,7 +428,7 @@ if (!function_exists('format_price_custom')) {
                                                                         echo "ส่งฟรี";
                                                                     }
                                                                 } else {
-                                                                    echo "ไม่ได้ใช้โปรโมชั่น";
+                                                                    echo "ไม่ได้ใช้โปรโมชัน";
                                                                 }
                                                                 ?>
 
@@ -438,12 +438,12 @@ if (!function_exists('format_price_custom')) {
                                                 <?php
                                                 endforeach;
 
-                                                // --- แสดงหมายเหตุ ถ้าโปรโมชั่นใช้ไม่ได้ (เพราะเลือกของไม่ครบ) ---
+                                                // --- แสดงหมายเหตุ ถ้าโปรโมชันใช้ไม่ได้ (เพราะเลือกของไม่ครบ) ---
                                                 if (!$is_promo_applicable && !empty($cart_promotions)) :
                                                 ?>
                                                     <tr class="promo-note">
                                                         <td colspan="5" class="text-danger text-center">
-                                                            * กรุณาเลือกสินค้าทั้งหมดที่อยู่ในโปรโมชั่นเดียวกันเพื่อรับส่วนลด
+                                                            * กรุณาเลือกสินค้าทั้งหมดที่อยู่ในโปรโมชันเดียวกันเพื่อรับส่วนลด
                                                         </td>
                                                     </tr>
                                                 <?php
@@ -665,7 +665,7 @@ if (!function_exists('format_price_custom')) {
         let promoDiscount = 0;
         let finalShippingCost = parseFloat(shippingCost) || 0;
 
-        // --- ส่วนที่ 1: คำนวณส่วนลดโปรโมชั่น (โค้ดเดิมของคุณ) ---
+        // --- ส่วนที่ 1: คำนวณส่วนลดโปรโมชัน (โค้ดเดิมของคุณ) ---
         if (appliedPromo && cartTotal >= parseFloat(appliedPromo.minimum_order)) {
             switch (appliedPromo.type) {
                 case 'fixed':
@@ -675,7 +675,7 @@ if (!function_exists('format_price_custom')) {
                     promoDiscount = cartTotal * (parseFloat(appliedPromo.discount_value) / 100);
                     break;
                 case 'free_shipping':
-                    finalShippingCost = 0; // โปรโมชั่นส่งฟรี ทำให้ค่าส่งเป็น 0
+                    finalShippingCost = 0; // โปรโมชันส่งฟรี ทำให้ค่าส่งเป็น 0
                     break;
             }
         }
@@ -692,7 +692,7 @@ if (!function_exists('format_price_custom')) {
 
 
         // --- ส่วนที่ 3: คำนวณยอดรวมสุดท้าย ---
-        // ยอดรวม = (ราคาสินค้า - ส่วนลดโปรโมชั่น - ส่วนลดคูปอง) + ค่าส่งสุดท้าย
+        // ยอดรวม = (ราคาสินค้า - ส่วนลดโปรโมชัน - ส่วนลดคูปอง) + ค่าส่งสุดท้าย
         const grandTotal = (cartTotal - promoDiscount - couponDiscount) + finalShippingCost;
 
 
