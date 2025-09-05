@@ -456,9 +456,9 @@ class Master extends DBConnection
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
 			if (empty($id))
-				$resp['msg'] = "New Stock successfully saved.";
+				$resp['msg'] = "เพิ่มสต๊อกสินค้าใหม่เรียบร้อย";
 			else
-				$resp['msg'] = " Stock successfully updated.";
+				$resp['msg'] = "อัปเดตสต๊อกสินค้าเรียบร้อย";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
@@ -473,7 +473,7 @@ class Master extends DBConnection
 		$del = $this->conn->query("DELETE FROM `stock_list` where id = '{$id}'");
 		if ($del) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', " Stock successfully deleted.");
+			$this->settings->set_flashdata('success', "ลบสต๊อกสินค้าเรียบร้อย");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
