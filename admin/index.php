@@ -119,8 +119,8 @@
               <div id="delete_content"></div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-danger rounded-0" id='confirm' onclick="">ดำเนินการต่อ</button>
               <button type="button" class="btn btn-secondary rounded-0" data-dismiss="modal">ยกเลิก</button>
+              <button type="button" class="btn btn-danger rounded-0" id='confirm' onclick="">ดำเนินการต่อ</button>
             </div>
           </div>
         </div>
