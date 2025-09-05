@@ -217,19 +217,19 @@ if (!empty($customer_id)) {
             <?php
             $gt = 0;
             $order_items = $conn->query("
-            SELECT 
-                o.*, 
-                p.name as product, 
-                p.brand as brand, 
-                p.price as product_price,
-                cc.name as category, 
-                p.image_path,
-                p.id as product_id,
-                COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = p.id ), 0) as available
-            FROM `order_items` o 
-            INNER JOIN product_list p ON o.product_id = p.id 
-            INNER JOIN category_list cc ON p.category_id = cc.id 
-            WHERE order_id = '{$id}'
+                SELECT 
+                    o.*, 
+                    p.name as product, 
+                    p.brand as brand, 
+                    p.price as product_price,
+                    cc.name as category, 
+                    p.image_path,
+                    p.id as product_id,
+                    COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = p.id ), 0) as available
+                FROM `order_items` o 
+                INNER JOIN product_list p ON o.product_id = p.id 
+                INNER JOIN category_list cc ON p.category_id = cc.id 
+                WHERE order_id = '{$id}'
             ");
             while ($row = $order_items->fetch_assoc()):
                 $gt += $row['price'] * $row['quantity'];
