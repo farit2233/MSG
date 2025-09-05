@@ -51,7 +51,7 @@ $filter_options = [
         gap: 0.25rem;
     }
 
-    .badge {
+    .badge-order {
         font-size: 0.9rem;
         padding: 0.4em 0.8em;
     }
@@ -183,26 +183,26 @@ $filter_options = [
                                     $payment_status = (int)$row['payment_status'];
                                     $delivery_status = (int)$row['delivery_status'];
                                     $badge_payment = match ($payment_status) {
-                                        0 => '<span class="badge bg-secondary">ยังไม่ชำระเงิน</span>',
-                                        1 => '<span class="badge bg-warning">รอตรวจสอบ</span>',
-                                        2 => '<span class="badge bg-success text-dark">ชำระเงินแล้ว</span>',
-                                        3 => '<span class="badge bg-danger">ชำระเงินล้มเหลว</span>',
-                                        4 => '<span class="badge bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
-                                        5 => '<span class="badge bg-dark">คืนเงินแล้ว</span>',
-                                        default => '<span class="badge bg-light">N/A</span>'
+                                        0 => '<span class="badge badge-order bg-secondary">ยังไม่ชำระเงิน</span>',
+                                        1 => '<span class="badge badge-order bg-warning">รอตรวจสอบ</span>',
+                                        2 => '<span class="badge badge-order bg-success text-dark">ชำระเงินแล้ว</span>',
+                                        3 => '<span class="badge badge-order bg-danger">ชำระเงินล้มเหลว</span>',
+                                        4 => '<span class="badge badge-order bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
+                                        5 => '<span class="badge badge-order bg-dark">คืนเงินแล้ว</span>',
+                                        default => '<span class="badge badge-order bg-light">N/A</span>'
                                     };
                                     $badge_delivery = match ($delivery_status) {
-                                        0 => '<span class="badge bg-secondary">ตรวจสอบคำสั่งซื้อ</span>',
-                                        1 => '<span class="badge bg-info">กำลังเตรียมของ</span>',
-                                        2 => '<span class="badge bg-primary">แพ๊กของแล้ว</span>',
-                                        3 => '<span class="badge bg-warning text-dark">กำลังจัดส่ง</span>',
-                                        4 => '<span class="badge bg-success">จัดส่งสำเร็จ</span>',
-                                        5 => '<span class="badge bg-danger">จัดส่งไม่สำเร็จ</span>',
-                                        6 => '<span class="badge bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
-                                        7 => '<span class="badge bg-dark">คืนของระหว่างทาง</span>',
-                                        8 => '<span class="badge bg-secondary">คืนของแล้ว</span>',
-                                        9 => '<span class="badge bg-danger">ยกเลิกแล้ว</span>',
-                                        default => '<span class="badge bg-light">N/A</span>'
+                                        0 => '<span class="badge badge-order bg-secondary">ตรวจสอบคำสั่งซื้อ</span>',
+                                        1 => '<span class="badge badge-order bg-info">กำลังเตรียมของ</span>',
+                                        2 => '<span class="badge badge-order bg-primary">แพ๊กของแล้ว</span>',
+                                        3 => '<span class="badge badge-order bg-warning text-dark">กำลังจัดส่ง</span>',
+                                        4 => '<span class="badge badge-order bg-success">จัดส่งสำเร็จ</span>',
+                                        5 => '<span class="badge badge-order bg-danger">จัดส่งไม่สำเร็จ</span>',
+                                        6 => '<span class="badge badge-order bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
+                                        7 => '<span class="badge badge-order bg-dark">คืนของระหว่างทาง</span>',
+                                        8 => '<span class="badge badge-order bg-secondary">คืนของแล้ว</span>',
+                                        9 => '<span class="badge badge-order bg-danger">ยกเลิกแล้ว</span>',
+                                        default => '<span class="badge badge-order bg-light">N/A</span>'
                                     };
                             ?>
                                     <div class="order-card" data-id="<?= $row['id'] ?>">
