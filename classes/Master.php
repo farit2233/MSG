@@ -293,7 +293,7 @@ class Master extends DBConnection
 		if ($save) {
 			$resp['pid'] = $product_id;
 			$resp['status'] = 'success';
-			$resp['msg'] = empty($id) ? 'Product has been added successfully' : 'Product has been updated successfully';
+			$resp['msg'] = empty($id) ? 'เพิ่มสินค้าใหม่เรียบร้อย' : 'อัปเดตสินค้าเรียบร้อย';
 
 			// เซฟลิงก์
 			$this->save_product_link($product_id);
@@ -416,7 +416,7 @@ class Master extends DBConnection
 
 		if ($update) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', "Product successfully deleted.");
+			$this->settings->set_flashdata('success', "ลบสินค้าเรียบร้อยแล้ว");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
@@ -2112,9 +2112,9 @@ class Master extends DBConnection
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
 			if (empty($id)) {
-				$resp['msg'] = "สร้างโปรโมชั่นใหม่สำเร็จ";
+				$resp['msg'] = "สร้างคูปองเรียบร้อย";
 			} else {
-				$resp['msg'] = "อัปเดตข้อมูลโปรโมชั่นสำเร็จ";
+				$resp['msg'] = "อัปเดตคูปองเรียบร้อย";
 			}
 			// บันทึกข้อความลง session flash
 			$this->settings->set_flashdata('success', $resp['msg']);
