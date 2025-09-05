@@ -135,7 +135,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             }
         });
 
-
         $('#product-type-form').submit(function(e) {
             e.preventDefault();
             var _this = $(this)
