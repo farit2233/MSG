@@ -187,7 +187,7 @@ $filter_options = [
                                         1 => '<span class="badge bg-warning">รอตรวจสอบ</span>',
                                         2 => '<span class="badge bg-success text-dark">ชำระเงินแล้ว</span>',
                                         3 => '<span class="badge bg-danger">ชำระเงินล้มเหลว</span>',
-                                        4 => '<span class="badge bg-secondary">กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>',
+                                        4 => '<span class="badge bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
                                         5 => '<span class="badge bg-dark">คืนเงินแล้ว</span>',
                                         default => '<span class="badge bg-light">N/A</span>'
                                     };
@@ -198,7 +198,7 @@ $filter_options = [
                                         3 => '<span class="badge bg-warning text-dark">กำลังจัดส่ง</span>',
                                         4 => '<span class="badge bg-success">จัดส่งสำเร็จ</span>',
                                         5 => '<span class="badge bg-danger">จัดส่งไม่สำเร็จ</span>',
-                                        6 => '<span class="badge bg-secondary">กำลังดำเนินการยกเลิกคำสั่งซื้อ</span>',
+                                        6 => '<span class="badge bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
                                         7 => '<span class="badge bg-dark">คืนของระหว่างทาง</span>',
                                         8 => '<span class="badge bg-secondary">คืนของแล้ว</span>',
                                         9 => '<span class="badge bg-danger">ยกเลิกแล้ว</span>',
