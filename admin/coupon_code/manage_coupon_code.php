@@ -28,6 +28,22 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         margin-left: 3.5rem;
         /* ปรับให้ radio ตัวขวาอยู่ใกล้ตัวแรก */
     }
+
+    .swal2-confirm {
+        background-color: #28a745 !important;
+        /* สีเขียว */
+        border-color: #28a745 !important;
+        /* สีเขียว */
+        color: white !important;
+        /* สีตัวอักษรเป็นขาว */
+    }
+
+    .swal2-confirm:hover {
+        background-color: #218838 !important;
+        /* สีเขียวเข้ม */
+        border-color: #1e7e34 !important;
+        /* สีเขียวเข้ม */
+    }
 </style>
 <section class="card card-outline card-orange rounded-0">
     <div class="card-header">
@@ -166,9 +182,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             </div>
         </div>
         <div class="card-footer py-1 text-center">
-            <button class="btn btn-success btn-sm btn-flat" form="coupon-code-form"><i class="fa fa-save"></i> บันทึก</button>
-            <a class="btn btn-danger btn-sm border btn-flat" href="javascript:void(0)" id="cancelBtn"><i class="fa fa-times"></i> ยกเลิก</a>
             <a class="btn btn-light btn-sm border btn-flat" href="javascript:void(0)" id="backBtn"><i class="fa fa-angle-left"></i> กลับ</a>
+            <a class="btn btn-secondary btn-sm border btn-flat" href="javascript:void(0)" id="cancelBtn"><i class="fa fa-times"></i> ยกเลิก</a>
+            <button class="btn btn-success btn-sm btn-flat" form="coupon-code-form"><i class="fa fa-save"></i> บันทึก</button>
         </div>
     </form>
 
@@ -189,11 +205,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 // ถ้ามีการเปลี่ยนแปลงข้อมูล
                 Swal.fire({
                     title: 'คุณแน่ใจหรือไม่?',
-                    text: "การเปลี่ยนแปลงจะหายไปทั้งหมดและหน้าเพจจะรีเฟรช",
+                    text: "การเปลี่ยนแปลงจะหายไปทั้งหมด และหน้าเพจจะรีเฟรช",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน',
-                    cancelButtonText: 'ยกเลิก'
+                    cancelButtonText: '<i class="fa fa-times"></i> ยกเลิก',
+                    confirmButtonText: 'ยืนยัน <i class="fa fa-check"></i>',
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // รีเฟรชหน้า
@@ -212,11 +229,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 // ถ้ามีการเปลี่ยนแปลงข้อมูล
                 Swal.fire({
                     title: 'คุณแน่ใจหรือไม่?',
-                    text: "การเปลี่ยนแปลงจะหายไปและคุณจะกลับไปหน้าหมวดหมู่โปรโมชั่น",
+                    text: "การเปลี่ยนแปลงจะหายไปทั้งหมด และหน้าเพจจะรีเฟรช",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน',
-                    cancelButtonText: 'ยกเลิก'
+                    cancelButtonText: '<i class="fa fa-times"></i> ยกเลิก',
+                    confirmButtonText: 'ยืนยัน <i class="fa fa-check"></i>',
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // กลับไปหน้าหมวดหมู่โปรโมชั่น
