@@ -12,6 +12,22 @@
     section {
         font-size: 16px;
     }
+
+    .swal2-confirm {
+        background-color: #28a745 !important;
+        /* สีเขียว */
+        border-color: #28a745 !important;
+        /* สีเขียว */
+        color: white !important;
+        /* สีตัวอักษรเป็นขาว */
+    }
+
+    .swal2-confirm:hover {
+        background-color: #218838 !important;
+        /* สีเขียวเข้ม */
+        border-color: #1e7e34 !important;
+        /* สีเขียวเข้ม */
+    }
 </style>
 <section class="card card-outline rounded-0 card-dark">
     <div class="card-header">
@@ -35,14 +51,46 @@
         </div>
     </div>
     <div class="card-footer py-1 text-center">
+        <a class="btn btn-secondary btn-sm border btn-flat" href="javascript:void(0)" id="cancelBtn"><i class="fa fa-times"></i> ยกเลิก</a>
         <button class="btn btn-success btn-sm btn-flat" form="system-frm"><i class="fa fa-save"></i> บันทึก</button>
-        <a class="btn btn-danger btn-sm border btn-flat btn-foot" href="./?page=system_info/help_info"><i class="fa fa-times"></i> ยกเลิก</a>
-        <a class="btn btn-light btn-sm border btn-flat btn-foot" href="./?page=home"><i class="fa fa-angle-left"></i> กลับสู่หน้าหลัก</a>
     </div>
 </section>
 
 <script>
     $(document).ready(function() {
+        let formChanged = false;
+        let initialContent = $('.summernote').val(); // เก็บค่าเริ่มต้นของ textarea
+
+        // ตรวจสอบการเปลี่ยนแปลงของฟอร์ม
+        $('#system-frm input, #system-frm textarea').on('input', function() {
+            formChanged = true;
+        });
+
+        // เมื่อกดปุ่ม "ยกเลิก"
+        $('#cancelBtn').click(function() {
+            if (formChanged) {
+                // ถ้ามีการเปลี่ยนแปลงข้อมูล
+                Swal.fire({
+                    title: 'คุณแน่ใจหรือไม่?',
+                    text: "การเปลี่ยนแปลงจะหายไปทั้งหมด และหน้าเพจจะรีเฟรช",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    cancelButtonText: '<i class="fa fa-times"></i> ยกเลิก',
+                    confirmButtonText: 'ยืนยัน <i class="fa fa-check"></i>',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // รีเฟรชหน้า
+                        location.reload();
+                    }
+                });
+            } else {
+                // ถ้าไม่มีการเปลี่ยนแปลงก็รีเฟรชหน้า
+                location.reload();
+            }
+        });
+
+        // เพิ่มเติมสำหรับ summernote ให้เก็บข้อมูลก่อนการรีเฟรช
         $('.summernote').summernote({
             height: 400,
             fontSizes: [
@@ -58,6 +106,10 @@
                 ['view', ['fullscreen', 'codeview']]
             ],
             callbacks: {
+                onChange: function(contents, $editable) {
+                    // ตรวจจับการเปลี่ยนแปลงเนื้อหาใน summernote
+                    formChanged = true;
+                },
                 onInit: function() {
                     const editor = $(this);
                     editor.on('mouseup keyup', function() {
@@ -77,6 +129,5 @@
                 }
             }
         });
-
-    })
+    });
 </script>
