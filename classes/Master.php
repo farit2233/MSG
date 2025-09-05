@@ -405,20 +405,26 @@ class Master extends DBConnection
 		$this->conn->query($sql);
 	}
 
-
 	function delete_product()
 	{
 		extract($_POST);
-		$del = $this->conn->query("DELETE FROM `product_list` where id = '{$id}'");
-		if ($del) {
+
+		// เปลี่ยนค่า delete_flag เป็น 1 และ status เป็น 0 แทนการลบจริง
+		$update = $this->conn->query("UPDATE `product_list` 
+                                  SET `delete_flag` = 1, `status` = 0 
+                                  WHERE `id` = '{$id}'");
+
+		if ($update) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', " Product successfully deleted.");
+			$this->settings->set_flashdata('success', "Product successfully deleted.");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
 		}
 		return json_encode($resp);
 	}
+
+
 	function save_stock()
 	{
 		extract($_POST);
