@@ -104,20 +104,20 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="card-title m-0 flex-grow-1" style="font-size: 18px !important;">รายละเอียดคำสั่งซื้อหมายเลข : <?= isset($code) ? $code : '' ?></div>
                     <div class="card-tools text-end">
+                        <a class="btn btn-light btn-sm bg-gradient-light border rounded-0 mb-1" href="./?page=orders">
+                            <i class="fa fa-angle-left"></i> กลับ
+                        </a>
+                        <button class="btn btn-danger btn-sm bg-gradient-danger rounded-0 mb-1" type="button" id="delete_data">
+                            <i class="fa fa-trash"></i> ลบ
+                        </button>
+                        <button class="btn btn-navy btn-sm bg-gradient-navy rounded-0 mb-1" type="button" id="print">
+                            <i class="fa fa-print"></i> พิมพ์
+                        </button>
                         <?php if (isset($status) && $status < 4): ?>
                             <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="update_status">
                                 อัปเดตสถานะ
                             </button>
                         <?php endif; ?>
-                        <button class="btn btn-navy btn-sm bg-gradient-navy rounded-0 mb-1" type="button" id="print">
-                            <i class="fa fa-print"></i> พิมพ์
-                        </button>
-                        <button class="btn btn-danger btn-sm bg-gradient-danger rounded-0 mb-1" type="button" id="delete_data">
-                            <i class="fa fa-trash"></i> ลบ
-                        </button>
-                        <a class="btn btn-light btn-sm bg-gradient-light border rounded-0 mb-1" href="./?page=orders">
-                            <i class="fa fa-angle-left"></i> กลับ
-                        </a>
                     </div>
                 </div>
 
