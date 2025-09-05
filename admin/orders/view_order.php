@@ -374,7 +374,7 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
             _conf("คุณแน่ใจหรือไม่ที่จะลบคำสั่งซื้อนี้?", "delete_order", ["<?= isset($id) ? $id : '' ?>"])
         })
         $('#update_status').click(function() {
-            uni_modal("อัปเดตสถานะ", "orders/update_status.php?id=<?= isset($id) ? $id : '' ?>")
+            uni_modal_order("อัปเดตสถานะ <small>*บันทึกเพื่ออัปเดตสถานะคำสั่งซื้อ และส่งอีเมล์</small>", "orders/update_status.php?id=<?= isset($id) ? $id : '' ?>")
         })
     })
 
