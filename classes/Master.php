@@ -126,9 +126,9 @@ class Master extends DBConnection
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
 			if (empty($id))
-				$resp['msg'] = "New ประเภท successfully saved.";
+				$resp['msg'] = " สร้างประเภทสินค้าใหม่เรียบร้อย";
 			else
-				$resp['msg'] = " ประเภท successfully updated.";
+				$resp['msg'] = " อัปเดตประเภทสินค้าเรียบร้อย";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
@@ -143,7 +143,7 @@ class Master extends DBConnection
 		$del = $this->conn->query("UPDATE `product_type` set `delete_flag` = 1 where id = '{$id}'");
 		if ($del) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', " ประเภท successfully deleted.");
+			$this->settings->set_flashdata('success', " ลบประเภทสินค้าเรียบร้อย");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
@@ -183,9 +183,9 @@ class Master extends DBConnection
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
 			if (empty($id))
-				$resp['msg'] = "New Category successfully saved.";
+				$resp['msg'] = " สร้างหมวดหมู่สินค้าใหม่เรียบร้อย";
 			else
-				$resp['msg'] = " Category successfully updated.";
+				$resp['msg'] = " อัปเดตหมวดหมู่สินค้าเรียบร้อย";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
@@ -202,7 +202,7 @@ class Master extends DBConnection
 		$del = $this->conn->query("UPDATE `category_list` set `delete_flag` = 1 where id = '{$id}'");
 		if ($del) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', " Category successfully deleted.");
+			$this->settings->set_flashdata('success', " ลบหมวดหมู่สินค้าเรียบร้อย");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
@@ -1980,9 +1980,9 @@ class Master extends DBConnection
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
 			if (empty($id))
-				$resp['msg'] = "New ประเภท successfully saved.";
+				$resp['msg'] = " สร้างโปรโมชั่นใหม่เรียบร้อย";
 			else
-				$resp['msg'] = " ประเภท successfully updated.";
+				$resp['msg'] = " อัปเดตโปรโมชั่นเรียบร้อย";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
@@ -1998,7 +1998,7 @@ class Master extends DBConnection
 		$del = $this->conn->query("UPDATE `promotion_category` set `delete_flag` = 1 where id = '{$id}'");
 		if ($del) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', " ประเภท successfully deleted.");
+			$this->settings->set_flashdata('success', " ลบประเภทสินค้าเรียบร้อย");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
