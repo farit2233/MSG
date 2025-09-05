@@ -187,6 +187,13 @@
                   <li class="nav-item">
                     <a href="./?page=orders&payment_status=4" class="nav-link tree-item nav-payment_status_4">
                       <i class="far fa-circle nav-icon"></i>
+                      <p>รอการยกเลิกคำสั่งซื้อ</p>
+                    </a>
+                  </li>
+
+                  <li class="nav-item">
+                    <a href="./?page=orders&payment_status=5" class="nav-link tree-item nav-payment_status_5">
+                      <i class="far fa-circle nav-icon"></i>
                       <p>คืนเงินแล้ว</p>
                     </a>
                   </li>
@@ -242,14 +249,28 @@
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=6" class="nav-link tree-item nav-delivery_status_6">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>คืนของระหว่างทาง</p>
+                      <p>รอการยกเลิกคำสั่งซื้อ</p>
                     </a>
                   </li>
 
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=7" class="nav-link tree-item nav-delivery_status_7">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>คืนของสำเร็จ</p>
+                      <p>คืนของระหว่างทาง</p>
+                    </a>
+                  </li>
+
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=8" class="nav-link tree-item nav-delivery_status_8">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>คืนของแล้ว</p>
+                    </a>
+                  </li>
+
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=9" class="nav-link tree-item nav-delivery_status_9">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>ยกเลิกแล้ว</p>
                     </a>
                   </li>
 
