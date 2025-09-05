@@ -789,7 +789,7 @@ if (isset($id)) {
 				},
 				success: function(resp) {
 					if (resp.status === 'success') {
-						location.replace(``);
+						location.reload();
 					} else {
 						const el = $('<div>').addClass("alert alert-dark err-msg").text(resp.msg);
 						$('#product-form').prepend(el);
