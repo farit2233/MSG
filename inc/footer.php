@@ -119,7 +119,7 @@
     <hr class="my-4" style="border-top: 1px solid #ccc; margin: 2rem 0;">
     <div class="text-center">
       <div class="mb-2">
-        <a href="./login.php" class="btn btn-login rounded-pill">เข้าสู่ระบบ</a>
+        <a href="./login.php" class="btn btn-not-login rounded-pill">เข้าสู่ระบบ</a>
       </div>
       <div class="mb-2">
         <p>ยังไม่มีบัญชี? <a href="./register.php" class="text-decoration-underline">สมัครสมาชิกที่นี่</a></p>

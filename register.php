@@ -76,10 +76,10 @@
     background: none;
     color: #f57421;
     border: 2px solid #f57421;
-    padding: 8px 30px;
+    padding: 10px 10px;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    font-size: 14px;
+    width: 100%;
   }
 
   .btn-regis:hover {
@@ -200,14 +200,14 @@
                       </div>
                     </div>
                   </div>
-
-                  <div class="row">
-                    <div class="col-md-8 col-12 text-md-left text-center mb-2 mb-md-0">
-                      <p>มีบัญชีอยู่แล้ว? <a href="./login.php">เข้าสู่ระบบที่นี่</a></p>
-                    </div>
-                    <div class="col-md-4 col-12 text-md-right text-center">
+                  <div class="row justify-content-center">
+                    <div class="col-md-5 col-12 text-center">
                       <button type="submit" class="btn btn-regis btn-block rounded-pill">สร้างบัญชี</button>
                     </div>
+                  </div>
+                  <div class="col-12 text-center mt-3">
+                    <p>มีบัญชีอยู่แล้ว? <a href="./login.php">เข้าสู่ระบบที่นี่</a></p>
+
                   </div>
                 </form>
               </div>

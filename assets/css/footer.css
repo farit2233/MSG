@@ -8,14 +8,14 @@
       /* แสดงเส้นใต้เมื่อเมาส์ชี้ */
     }
 
-    .btn-login {
+    .btn-not-login {
       background: #f57421;
       color: white;
       padding: 5px 85px;
       transition: all 0.2s ease-in-out;
     }
 
-    .btn-login:hover {
+    .btn-not-login:hover {
       color: white;
       filter: brightness(90%);
     }
