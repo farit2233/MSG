@@ -149,7 +149,8 @@ while ($type_row = $type_qry->fetch_assoc()) {
         </li>
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=promotions">โปรโมชัน</a></li>
         <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li-->
-        <li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li>
+        <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li-->
+        <li class="nav-item"><a class="nav-link text-white fos" href="./?p=contact">ติดต่อเรา</a></li>
       </ul>
     </div>
 

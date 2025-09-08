@@ -136,6 +136,11 @@
 				$_POST['password'] = md5($_POST['password']);
 			else
 				unset($_POST['password']);
+
+			// ลบ cropped_image ออกจาก $_POST ก่อน เพราะเราจะ xử lý มันแยกต่างหาก
+			$cropped_image_data = isset($_POST['cropped_image']) ? $_POST['cropped_image'] : null;
+			unset($_POST['cropped_image']);
+
 			extract($_POST);
 			$main_field = [
 				'firstname',
@@ -150,11 +155,11 @@
 				'sub_district',
 				'district',
 				'province',
-				'postal_code',
+				'postal_code'
 			];
 
 			$data = "";
-			$check = $this->conn->query("SELECT * FROM `customer_list` where email = '{$email}' " . ($id > 0 ? " and id!='{$id}'" : "") . " ")->num_rows;
+			$check = $this->conn->query("SELECT * FROM `customer_list` where email = '{$email}' " . (!empty($id) > 0 ? " and id!='{$id}'" : "") . " ")->num_rows;
 			if ($check > 0) {
 				$resp['status'] = 'failed';
 				$resp['msg'] = 'Email already exists.';
@@ -177,44 +182,39 @@
 				$uid = !empty($id) ? $id : $this->conn->insert_id;
 				$resp['status'] = 'success';
 				$resp['uid'] = $uid;
-				if (!empty($id))
-					$resp['msg'] = 'แก้ไขข้อมูลส่วนตัวเรียบร้อย';
-				else
-					$resp['msg'] = 'สร้างบัญชีเรียบร้อยแล้ว';
+				$resp['msg'] = !empty($id) ? 'แก้ไขข้อมูลส่วนตัวเรียบร้อย' : 'สร้างบัญชีเรียบร้อยแล้ว';
 
-				if (!empty($_FILES['img']['tmp_name'])) {
+				// === ส่วนจัดการรูปภาพที่แก้ไขใหม่ ===
+				if (!empty($cropped_image_data)) {
 					if (!is_dir(base_app . "uploads/customers"))
-						mkdir(base_app . "uploads/customers");
-					$ext = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-					$fname = "uploads/customers/$uid.png";
-					$accept = array('image/jpeg', 'image/png');
-					if (!in_array($_FILES['img']['type'], $accept)) {
-						$resp['msg'] = "Image file type is invalid";
-					}
-					if ($_FILES['img']['type'] == 'image/jpeg')
-						$uploadfile = imagecreatefromjpeg($_FILES['img']['tmp_name']);
-					elseif ($_FILES['img']['type'] == 'image/png')
-						$uploadfile = imagecreatefrompng($_FILES['img']['tmp_name']);
-					if (!$uploadfile) {
-						$resp['msg'] = "Image is invalid";
-					}
-					$temp = imagescale($uploadfile, 200, 200);
-					if (is_file(base_app . $fname))
-						unlink(base_app . $fname);
-					$upload = imagepng($temp, base_app . $fname);
-					if ($upload) {
+						mkdir(base_app . "uploads/customers", 0777, true);
+
+					// แยกส่วนหัวของ base64 ออกไป (เช่น data:image/png;base64,)
+					$image_parts = explode(";base64,", $cropped_image_data);
+					$image_type_aux = explode("image/", $image_parts[0]);
+					$image_type = $image_type_aux[1]; // png, jpeg, etc.
+					$image_base64 = base64_decode($image_parts[1]);
+
+					// กำหนดชื่อไฟล์และ path
+					$fname = "uploads/customers/{$uid}.png"; // บันทึกเป็น .png เสมอเพื่อให้สอดคล้องกับ client-side
+
+					// บันทึกไฟล์
+					$file_saved = file_put_contents(base_app . $fname, $image_base64);
+
+					if ($file_saved) {
+						// อัปเดต path รูปในฐานข้อมูล
 						$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
+					} else {
+						$resp['msg'] .= " (แต่ไม่สามารถบันทึกรูปโปรไฟล์ได้)";
 					}
-					imagedestroy($temp);
 				} else {
-					// **เพิ่มส่วนนี้**
+					// กรณีไม่มีการอัปโหลดรูป ให้ใช้รูป default (โค้ดเดิม)
 					if (!is_dir(base_app . "uploads/customers"))
 						mkdir(base_app . "uploads/customers");
 					$fname = "uploads/customers/$uid.png";
 					copy(base_app . "uploads/customers/default_user.png", base_app . $fname);
 					$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
 				}
-
 				if (!empty($uid) && $this->settings->userdata('login_type') != 1) {
 					$user = $this->conn->query("SELECT * FROM `customer_list` where id = '{$uid}' ");
 					if ($user->num_rows > 0) {
@@ -237,6 +237,7 @@
 				$this->settings->set_flashdata('success', $resp['msg']);
 			return json_encode($resp);
 		}
+
 		public function delete_customer()
 		{
 			extract($_POST);

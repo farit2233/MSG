@@ -42,6 +42,12 @@
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+
+  <script src="<?= base_url ?>plugins/jquery/jquery.min.js"></script>
+
   <!--Custom css-->
   <link rel="stylesheet" href="assets/css/checkout.css">
   <link rel="stylesheet" href="assets/css/fetch_product.css">

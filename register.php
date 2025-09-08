@@ -1,12 +1,20 @@
 <?php require_once('./config.php') ?>
 <!DOCTYPE html>
 <html lang="en" class="" style="height: auto;">
-<?php require_once('inc/header.php') ?>
+
+<head>
+  <?php require_once('inc/header.php') ?>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
 <script>
   start_loader()
 </script>
 <style>
+  /* --- General Styles (No changes needed) --- */
   body {
+    padding-top: 0px !important;
     background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
     background-size: cover;
     background-repeat: no-repeat;
@@ -52,24 +60,24 @@
     width: 10em;
     object-fit: cover;
     border-radius: 100%;
+    border: 3px solid #f57421;
+    padding: 4px;
   }
 
   label {
     font-size: 18px;
   }
 
-  input.form-control {
+  input.form-control,
+  .custom-select,
+  .custom-file-label {
     border-radius: 13px;
     font-size: 16px;
   }
 
-  .bg-color-Regis {
-    background-color: #16542b;
-  }
-
-  .custom-input {
-    border-radius: 13px;
-    font-size: 16px;
+  .custom-file-input:focus~.custom-file-label {
+    border-color: #f57421;
+    box-shadow: 0 0 0 0.2rem rgba(245, 116, 33, 0.25);
   }
 
   .btn-regis {
@@ -80,23 +88,112 @@
     margin-top: 1rem;
     margin-bottom: 1rem;
     width: 100%;
+    font-weight: bold;
   }
 
   .btn-regis:hover {
     background-color: #f57421;
     color: white;
-    display: inline-block;
   }
 
-  @media (max-width: 767.98px) {
-    .btn-regis {
-      width: 100%;
-    }
+
+  /* --- Styles for Circular Cropper Modal (Updated) --- */
+  #cropModal .modal-dialog {
+    position: fixed !important;
+    /* ทำให้ dialog ล็อกตาม viewport */
+    top: 30%;
+    /* กึ่งกลางแนวตั้ง */
+    left: 50%;
+    /* กึ่งกลางแนวนอน */
+    transform: translate(-50%, -50%);
+    /* ปรับให้ตรงกลางพอดี */
+    max-width: 600px;
+    width: 100%;
+    margin: 0;
+    max-height: 100px;
+    height: 100%;
+    /* ไม่ให้ Bootstrap ใส่ margin */
+  }
+
+  #cropModal .modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .img-container {
+    max-height: 500px;
+    overflow: hidden;
+    background-color: #2c2f33;
+    /* Discord-like background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .img-container img {
+    max-width: 90%;
+    max-height: 90%;
+  }
+
+  /* ทำให้กรอบ crop เป็นวงกลม */
+  .cropper-view-box,
+  .cropper-face {
+    border-radius: 50%;
+  }
+
+  /* ADDED: ทำให้ cursor เป็นรูปมือเมื่อลาก */
+  .cropper-container .cropper-move {
+    cursor: grab !important;
+  }
+
+  .cropper-container .cropper-move:active {
+    cursor: grabbing !important;
+  }
+
+  .preview-container {
+    display: none;
+    /* ซ่อน preview เพราะ view-box เป็นตัวอย่างอยู่แล้ว */
+  }
+
+  #crop_button {
+    background-color: #f57421;
+    border-color: #f57421;
+  }
+
+  /* ADDED: Styles for the zoom slider */
+  .zoom-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .zoom-controls i {
+    color: #6c757d;
+  }
+
+  #zoom_slider {
+    width: 70%;
+    cursor: pointer;
+  }
+
+  /* Customizing the range input */
+  input[type=range].form-control-range::-webkit-slider-thumb {
+    background: #f57421;
+  }
+
+  input[type=range].form-control-range::-moz-range-thumb {
+    background: #f57421;
+  }
+
+  .err-msg {
+    font-size: 0.85rem;
   }
 </style>
 
 <body>
-  <section class="py-3">
+  <section class="pb-5">
     <div class="container">
       <div class="row mt-n4 justify-content-center align-items-center flex-column">
         <div class="col-lg-10 col-md-11 col-sm-12 col-xs-12">
@@ -115,25 +212,25 @@
                   <div class="row justify-content-center">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group d-flex justify-content-center mt-2">
-                        <img src="uploads/customers/default_user.png" alt="" id="cimg"
-                          class="img-fluid img-thumbnail" style="max-width: 200px; object-fit: cover; border-radius: 100%;">
+                        <img src="uploads/customers/default_user.png" alt="Avatar Preview" id="cimg" class="img-fluid">
                       </div>
-                      <div class="custom-file custom-input">
-                        <input type="file" class="custom-file-input custom-input" id="customFile" name="img"
-                          onchange="displayImg(this,$(this))" accept="image/png, image/jpeg">
-                        <label class="custom-file-label custom-input" for="customFile">เลือกรูปจากไฟล์ในเครื่อง</label>
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="customFile" name="img" accept="image/png, image/jpeg">
+                        <label class="custom-file-label" for="customFile">เลือกรูปโปรไฟล์</label>
                       </div>
+                      <input type="hidden" name="cropped_image" id="cropped_image">
                     </div>
                   </div>
 
-                  <div class="section-title-with-line mb-4">
+                  <div class="section-title-with-line mb-4 mt-4">
                     <h3>ข้อมูลส่วนตัว</h3>
                   </div>
                   <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group">
                         <label for="firstname" class="control-label">ชื่อ</label>
-                        <input type="text" class="form-control form-control-sm" required name="firstname" id="firstname">
+                        <input type="text" class="form-control form-control-sm" required name="firstname" id="firstname"
+                          title="กรุณาใส่ชื่อตามจริงเพื่อที่จะสามารถจัดส่งได้ง่าย">
                       </div>
                       <div class="form-group">
                         <label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
@@ -141,11 +238,12 @@
                       </div>
                       <div class="form-group">
                         <label for="lastname" class="control-label">นามสกุล</label>
-                        <input type="text" class="form-control form-control-sm" required name="lastname" id="lastname">
+                        <input type="text" class="form-control form-control-sm" required name="lastname" id="lastname"
+                          title="กรุณาใส่นามสกุลตามจริงเพื่อที่จะสามารถจัดส่งได้ง่าย">
                       </div>
                       <div class="form-group">
                         <label for="gender" class="control-label">เพศ</label>
-                        <select class="custom-select custom-select-sm custom-input" required name="gender" id="gender">
+                        <select class="custom-select custom-select-sm" required name="gender" id="gender">
                           <option value="Male">ชาย</option>
                           <option value="Female">หญิง</option>
                         </select>
@@ -154,19 +252,25 @@
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group">
                         <label for="email" class="control-label">Email</label>
-                        <input type="email" class="form-control form-control-sm" required name="email" id="email">
+                        <input type="email" class="form-control form-control-sm" required name="email" id="email"
+                          title="กรุณาใส่อีเมล">
                       </div>
                       <div class="form-group">
                         <label for="contact" class="control-label">เบอร์โทร</label>
-                        <input type="text" class="form-control form-control-sm" required name="contact" id="contact">
+                        <input type="text" class="form-control form-control-sm" required name="contact" id="contact"
+                          maxlength="15"
+                          pattern="\d{10,}"
+                          title="กรุณาใส่ตัวเลขอย่างน้อย 10 ตัว">
                       </div>
                       <div class="form-group">
                         <label for="password" class="control-label">รหัสผ่าน</label>
-                        <input type="password" class="form-control form-control-sm" required name="password" id="password">
+                        <input type="password" class="form-control form-control-sm" required name="password" id="password"
+                          title="กรุณาใส่รหัสผ่าน">
                       </div>
                       <div class="form-group">
                         <label for="cpassword" class="control-label">ยืนยัน รหัสผ่าน</label>
-                        <input type="password" class="form-control form-control-sm" required id="cpassword">
+                        <input type="password" class="form-control form-control-sm" required id="cpassword"
+                          title="ยืนยันรหัสผ่าน">
                       </div>
                     </div>
                   </div>
@@ -200,6 +304,7 @@
                       </div>
                     </div>
                   </div>
+
                   <div class="row justify-content-center">
                     <div class="col-md-5 col-12 text-center">
                       <button type="submit" class="btn btn-regis btn-block rounded-pill">สร้างบัญชี</button>
@@ -207,99 +312,208 @@
                   </div>
                   <div class="col-12 text-center mt-3">
                     <p>มีบัญชีอยู่แล้ว? <a href="./login.php">เข้าสู่ระบบที่นี่</a></p>
-
                   </div>
                 </form>
               </div>
-            </div> <!-- /.card-body -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="img-container">
+              <img id="image_to_crop" src="">
+            </div>
+            <div class="zoom-controls">
+              <i class="fas fa-search-minus"></i>
+              <input type="range" class="form-control-range" id="zoom_slider" min="0.1" max="2" step="0.01">
+              <i class="fas fa-search-plus"></i>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+            <button type="button" class="btn btn-primary" id="crop_button">บันทึก</button>
           </div>
         </div>
       </div>
     </div>
   </section>
-  <!-- jQuery -->
+
   <script src="<?= base_url ?>plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
   <script src="<?= base_url ?>plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- AdminLTE App -->
   <script src="<?= base_url ?>dist/js/adminlte.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
   <script>
-    function displayImg(input, _this) {
-      if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          $('#cimg').attr('src', e.target.result);
+    $('#register-form [required]').each(function() {
+      var $input = $(this);
+      $input.on('invalid', function(e) {
+        e.preventDefault(); // ป้องกัน browser default
+        // ถ้ายังไม่มี error message ใต้ input ให้สร้าง
+        if ($input.next('.err-msg').length === 0) {
+          $input.after('<div class="err-msg text-danger mt-1">' + $input.attr('title') + '</div>');
         }
-
-        reader.readAsDataURL(input.files[0]);
-      } else {
-        $('#cimg').attr('src', "<?php echo validate_image('') ?>");
-      }
-    }
+      });
+      $input.on('input', function() {
+        // ลบ error message ถ้ามีการกรอกข้อมูล
+        $input.next('.err-msg').remove();
+      });
+    });
+    const contactInput = document.getElementById('contact');
+    contactInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, ''); // ลบทุกตัวที่ไม่ใช่เลข
+    });
     $(document).ready(function() {
       end_loader();
-      $('.pass_view').click(function() {
-        var input = $(this).siblings('input')
-        var type = input.attr('type')
-        if (type == 'password') {
-          $(this).html('<i class="fa fa-eye"></i>')
-          input.attr('type', 'text').focus()
-        } else {
-          $(this).html('<i class="fa fa-eye-slash"></i>')
-          input.attr('type', 'password').focus()
-        }
-      })
+
+      // === ส่วนของ Form Submit และอื่นๆ (เหมือนเดิม) ===
       $('#register-form').submit(function(e) {
-        e.preventDefault()
-        var _this = $(this)
-        var el = $('<div>')
-        el.addClass('alert alert-danger err_msg')
-        el.hide()
-        $('.err_msg').remove()
+        e.preventDefault();
+        var _this = $(this);
+        var el = $('<div>');
+        el.addClass('alert alert-danger err_msg');
+        el.hide();
+        $('.err_msg').remove();
+
         if ($('#password').val() != $('#cpassword').val()) {
-          el.text('รหัสผ่านไม่ถูกต้อง')
-          _this.prepend(el)
-          el.show('slow')
-          $('html, body').scrollTop(0)
+          el.text('รหัสผ่านไม่ตรงกัน');
+          _this.prepend(el);
+          el.show('slow');
+          $('html, body').scrollTop(0);
           return false;
         }
+
         if (_this[0].checkValidity() == false) {
           _this[0].reportValidity();
           return false;
         }
-        start_loader()
+
+        start_loader();
         $.ajax({
           url: _base_url_ + "classes/Users.php?f=registration",
           method: 'POST',
-          type: 'POST',
           data: new FormData($(this)[0]),
           dataType: 'json',
           cache: false,
-          processData: false,
           contentType: false,
+          processData: false,
           error: err => {
-            console.log(err)
-            alert('An error occurred')
-            end_loader()
+            console.log(err);
+            alert('An error occurred');
+            end_loader();
           },
           success: function(resp) {
             if (resp.status == 'success') {
-              location.href = ('./')
+              location.href = ('./login.php');
             } else if (!!resp.msg) {
-              el.html(resp.msg)
-              el.show('slow')
-              _this.prepend(el)
-              $('html, body').scrollTop(0)
+              el.html(resp.msg);
+              el.show('slow');
+              _this.prepend(el);
+              $('html, body').scrollTop(0);
             } else {
-              alert('An error occurred')
-              console.log(resp)
+              alert('An error occurred');
+              console.log(resp);
             }
-            end_loader()
+            end_loader();
           }
-        })
-      })
-    })
+        });
+      });
+
+      // === ส่วนของ Cropper.js (ปรับปรุงใหม่ทั้งหมด) ===
+      var $modal = $('#cropModal');
+      var image = document.getElementById('image_to_crop');
+      var cropper;
+      var zoomSlider = document.getElementById('zoom_slider');
+
+      // 1. เมื่อผู้ใช้เลือกไฟล์รูปภาพ
+      $('#customFile').on('change', function(e) {
+        var files = e.target.files;
+        if (files && files.length > 0) {
+          var reader = new FileReader();
+          reader.onload = function(event) {
+            image.src = event.target.result;
+            $modal.modal({
+              backdrop: false, // ป้องกันการปิด modal เมื่อคลิกด้านนอก
+              keyboard: false, // ป้องกันการปิด modal ด้วยปุ่ม Esc
+              show: true
+            });
+          };
+          reader.readAsDataURL(files[0]);
+          var fileName = $(this).val().split('\\').pop();
+          $(this).next('.custom-file-label').html(fileName);
+        }
+      });
+
+      // 2. เมื่อ Modal แสดงขึ้นมา
+      $modal.on('shown.bs.modal', function() {
+        cropper = new Cropper(image, {
+          // --- CHANGED: Options for Discord-like cropping ---
+          aspectRatio: 1,
+          viewMode: 1, // จำกัดให้ cropbox อยู่ในกรอบของรูปเท่านั้น
+          dragMode: 'move', // ตั้งค่าเริ่มต้นให้เป็นการ "ลากรูป"
+
+          // --- ADDED: Lock the crop box ---
+          cropBoxMovable: false, // ไม่ให้ขยับกรอบ
+          cropBoxResizable: false, // ไม่ให้ย่อขยายกรอบ
+
+          // --- ADDED: Disable mouse wheel zoom ---
+          wheelZoomRatio: 0, // ปิดการซูมด้วย mouse wheel
+
+          background: false,
+          responsive: true,
+          autoCropArea: 1, // ให้กรอบ crop เต็มพื้นที่
+
+          // --- ADDED: Event when cropper is ready ---
+          ready: function() {
+            // ดึงค่า zoom ratio ปัจจุบันหลังจาก cropper จัดรูปให้พอดีแล้ว
+            let canvasData = cropper.getCanvasData();
+            let initialZoom = canvasData.width / canvasData.naturalWidth;
+            // ตั้งค่า min, max, และ value ของ slider
+            zoomSlider.min = initialZoom; // ค่าซูมต่ำสุดคือขนาดที่พอดีกับกรอบ
+            zoomSlider.max = initialZoom * 3; // อนุญาตให้ซูมได้สูงสุด 3 เท่า
+            zoomSlider.value = initialZoom; // ตั้งค่าเริ่มต้นของ slider
+          }
+        });
+      }).on('hidden.bs.modal', function() {
+        // 3. เมื่อ Modal ถูกปิด
+        cropper.destroy();
+        cropper = null;
+        // Reset file input to allow selecting the same file again
+        $('#customFile').val('');
+        $('#customFile').next('.custom-file-label').html('เลือกรูปโปรไฟล์');
+      });
+
+      // --- ADDED: Event listener for the zoom slider ---
+      zoomSlider.addEventListener('input', function() {
+        if (cropper) {
+          cropper.zoomTo(this.value);
+        }
+      });
+
+      // 4. เมื่อผู้ใช้กดปุ่ม "บันทึก"
+      $('#crop_button').on('click', function() {
+        var canvas = cropper.getCroppedCanvas({
+          width: 400,
+          height: 400,
+          imageSmoothingQuality: 'high',
+        });
+
+        var base64data = canvas.toDataURL('image/jpeg');
+        $('#cimg').attr('src', base64data);
+        $('#cropped_image').val(base64data);
+        $modal.modal('hide');
+      });
+    });
   </script>
 </body>
 
