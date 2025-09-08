@@ -135,7 +135,7 @@ if ($_settings->userdata('id') != '') {
 </section>
 
 <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-user " role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
@@ -231,6 +231,40 @@ if ($_settings->userdata('id') != '') {
         var image = document.getElementById('image_to_crop');
         var cropper;
         var zoomSlider = document.getElementById('zoom_slider');
+
+        function resizeImage(file, maxWidth, maxHeight, callback) {
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var img = new Image();
+                img.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    var ctx = canvas.getContext('2d');
+                    var width = img.width;
+                    var height = img.height;
+
+                    // คำนวณขนาดใหม่
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = Math.round(height * (maxWidth / width));
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = Math.round(width * (maxHeight / height));
+                            height = maxHeight;
+                        }
+                    }
+
+                    // กำหนดขนาดใหม่ให้กับ canvas
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg'));
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
 
         $('#customFile').on('change', function(e) {
             var files = e.target.files;
