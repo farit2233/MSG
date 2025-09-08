@@ -1,0 +1,173 @@
+  /* --- General Styles (No changes needed) --- */
+  .register {
+    padding-top: 0px !important;
+    background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow-x: hidden;
+  }
+
+  .register label {
+    font-size: 18px;
+  }
+
+  .register input {
+    border-radius: 13px;
+    font-size: 16px;
+  }
+
+  .register-img {
+    border-radius: 13px;
+    font-size: 16px !important;
+  }
+
+  .register-section-title-with-line h3 {
+    position: relative;
+    border-bottom: 2px solid #f57421 !important;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .register-section-title-with-line h3::after {
+    content: none !important;
+  }
+
+  .register-cart-header-bar {
+    border-left: 4px solid #ff6600;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .register-card {
+    border-radius: 13px;
+    max-width: 767.98px;
+    margin: auto;
+    width: 100%;
+  }
+
+  #page-title {
+    text-shadow: 6px 4px 7px black;
+    font-size: 3.5em;
+    color: #fff4f4 !important;
+    background: #8080801c;
+  }
+
+  img#cimg {
+    height: 10em;
+    width: 10em;
+    object-fit: cover;
+    border-radius: 100%;
+    border: 3px solid #f57421;
+    padding: 4px;
+  }
+
+  .custom-file-input:focus~.custom-file-label {
+    border-color: #f57421;
+    box-shadow: 0 0 0 0.2rem rgba(245, 116, 33, 0.25);
+  }
+
+  .btn-regis {
+    background: none;
+    color: #f57421;
+    border: 2px solid #f57421;
+    padding: 10px 10px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+  }
+
+  .btn-regis:hover {
+    background-color: #f57421;
+    color: white;
+  }
+
+  /* --- Styles for Circular Cropper Modal (Updated) --- */
+  #cropModal .modal-dialog {
+    position: fixed !important;
+    /* ทำให้ dialog ล็อกตาม viewport */
+    top: 30%;
+    /* กึ่งกลางแนวตั้ง */
+    left: 50%;
+    /* กึ่งกลางแนวนอน */
+    transform: translate(-50%, -50%);
+    /* ปรับให้ตรงกลางพอดี */
+    max-width: 600px;
+    width: 100%;
+    margin: 0;
+    max-height: 100px;
+    height: 100%;
+    /* ไม่ให้ Bootstrap ใส่ margin */
+  }
+
+  #cropModal .modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .img-container {
+    max-height: 500px;
+    overflow: hidden;
+    background-color: #2c2f33;
+    /* Discord-like background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .img-container img {
+    max-width: 90%;
+    max-height: 90%;
+  }
+
+  /* ทำให้กรอบ crop เป็นวงกลม */
+  .cropper-view-box,
+  .cropper-face {
+    border-radius: 50%;
+  }
+
+  /* ADDED: ทำให้ cursor เป็นรูปมือเมื่อลาก */
+  .cropper-container .cropper-move {
+    cursor: grab !important;
+  }
+
+  .cropper-container .cropper-move:active {
+    cursor: grabbing !important;
+  }
+
+  #crop_button {
+    background-color: #f57421;
+    border-color: #f57421;
+  }
+
+  /* ADDED: Styles for the zoom slider */
+  .zoom-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .zoom-controls i {
+    color: #6c757d;
+  }
+
+  #zoom_slider {
+    width: 70%;
+    cursor: pointer;
+  }
+
+  /* Customizing the range input */
+  input[type=range].form-control-range::-webkit-slider-thumb {
+    background: #f57421;
+  }
+
+  input[type=range].form-control-range::-moz-range-thumb {
+    background: #f57421;
+  }
+
+  .err-msg {
+    font-size: 0.85rem;
+  }
