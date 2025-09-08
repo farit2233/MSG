@@ -59,6 +59,7 @@
   <link rel="stylesheet" href="assets/css/promotions.css">
   <link rel="stylesheet" href="assets/css/register.css">
   <link rel="stylesheet" href="assets/css/search.css">
+  <link rel="stylesheet" href="assets/css/user.css">
   <link rel="stylesheet" href="assets/css/vieworder.css">
 
 

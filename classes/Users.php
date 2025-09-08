@@ -208,12 +208,9 @@
 						$resp['msg'] .= " (แต่ไม่สามารถบันทึกรูปโปรไฟล์ได้)";
 					}
 				} else {
-					// กรณีไม่มีการอัปโหลดรูป ให้ใช้รูป default (โค้ดเดิม)
-					if (!is_dir(base_app . "uploads/customers"))
-						mkdir(base_app . "uploads/customers");
-					$fname = "uploads/customers/$uid.png";
-					copy(base_app . "uploads/customers/default_user.png", base_app . $fname);
-					$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
+					// ใช้รูปเก่าถ้าผู้ใช้ไม่ได้เลือกใหม่
+					$avatar = isset($_POST['old_avatar']) ? $_POST['old_avatar'] : "uploads/customers/default_user.png";
+					$this->conn->query("UPDATE `customer_list` SET `avatar` = '{$avatar}' WHERE id = '{$uid}'");
 				}
 				if (!empty($uid) && $this->settings->userdata('login_type') != 1) {
 					$user = $this->conn->query("SELECT * FROM `customer_list` where id = '{$uid}' ");

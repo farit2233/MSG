@@ -1,0 +1,144 @@
+ /* --- Styles from Registration page theme --- */
+    .profile-page {
+        padding-top: 0px !important;
+        background-size: cover;
+        background-repeat: no-repeat;
+        overflow-x: hidden;
+    }
+
+    .profile-page label {
+        font-size: 18px;
+    }
+
+    .profile-page input,
+    .profile-page select {
+        border-radius: 13px;
+        font-size: 16px;
+    }
+
+    .profile-page .custom-file-label {
+        border-radius: 13px;
+        font-size: 16px !important;
+    }
+
+    .profile-section-title-with-line h3 {
+        position: relative;
+        border-bottom: 2px solid #f57421 !important;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-section-title-with-line h3::after {
+        content: none !important;
+    }
+
+    .profile-cart-header-bar {
+        border-left: 4px solid #ff6600;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-card {
+        border-radius: 13px;
+        max-width: 767.98px;
+        margin: auto;
+        width: 100%;
+    }
+
+    img#cimg {
+        height: 10em;
+        width: 10em;
+        object-fit: cover;
+        border-radius: 100%;
+        border: 3px solid #f57421;
+        padding: 4px;
+    }
+
+    .custom-file-input:focus~.custom-file-label {
+        border-color: #f57421;
+        box-shadow: 0 0 0 0.2rem rgba(245, 116, 33, 0.25);
+    }
+
+    .btn-update {
+        background: none;
+        color: #f57421;
+        border: 2px solid #f57421;
+        padding: 10px 10px;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .btn-update:hover {
+        background-color: #f57421;
+        color: white;
+    }
+
+    /* --- Styles for Circular Cropper Modal --- */
+    #cropModal .modal-dialog {
+        max-width: 600px;
+        margin: 1.75rem auto;
+    }
+
+    #cropModal .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .img-container {
+        max-height: 500px;
+        overflow: hidden;
+        background-color: #2c2f33;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .img-container img {
+        max-width: 100%;
+    }
+
+    .cropper-view-box,
+    .cropper-face {
+        border-radius: 50%;
+    }
+
+    .cropper-container .cropper-move {
+        cursor: grab !important;
+    }
+
+    .cropper-container .cropper-move:active {
+        cursor: grabbing !important;
+    }
+
+    #crop_button {
+        background-color: #f57421;
+        border-color: #f57421;
+    }
+
+    .zoom-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .zoom-controls i {
+        color: #6c757d;
+    }
+
+    #zoom_slider {
+        width: 70%;
+        cursor: pointer;
+    }
+
+    input[type=range].form-control-range::-webkit-slider-thumb {
+        background: #f57421;
+    }
+
+    input[type=range].form-control-range::-moz-range-thumb {
+        background: #f57421;
+    }
