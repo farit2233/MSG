@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@cropper/element-canvas": "^2.0.1",
+    "cropperjs": "^2.0.1"
+  }
+}
