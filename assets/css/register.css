@@ -82,21 +82,20 @@
     color: white;
   }
 
-  /* --- Styles for Circular Cropper Modal (Updated) --- */
-  #cropModal .modal-dialog {
+    #cropModal .modal-dialog-register {
     position: fixed !important;
     /* ทำให้ dialog ล็อกตาม viewport */
-    top: 30%;
+    top: 50% !important;
     /* กึ่งกลางแนวตั้ง */
-    left: 50%;
+    left: 50% !important;
     /* กึ่งกลางแนวนอน */
     transform: translate(-50%, -50%);
     /* ปรับให้ตรงกลางพอดี */
-    max-width: 600px;
-    width: 100%;
+    max-width: 600px !important;
+    width: 100% !important;
     margin: 0;
-    max-height: 100px;
-    height: 100%;
+    max-height: 100px !important;
+    height: 100% !important;
     /* ไม่ให้ Bootstrap ใส่ margin */
   }
 

@@ -140,7 +140,7 @@ if ($_settings->userdata('id') != '') {
             <div class="modal-header">
                 <h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <i class="fa fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
@@ -161,7 +161,6 @@ if ($_settings->userdata('id') != '') {
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
 <script>
     $(document).ready(function() {

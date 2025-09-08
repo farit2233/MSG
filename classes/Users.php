@@ -13,109 +13,92 @@
 		{
 			parent::__destruct();
 		}
-		public function save_users()
+
+		function save_users()
 		{
-			if (empty($_POST['password']))
+			// --- ส่วนจัดการรหัสผ่าน (เหมือนเดิม) ---
+			if (empty($_POST['password'])) {
 				unset($_POST['password']);
-			else
+			} else {
 				$_POST['password'] = md5($_POST['password']);
+			}
+
+			// 1. แยกข้อมูลรูปภาพ base64 ออกมาเก็บไว้ก่อน
+			$cropped_image_data = isset($_POST['cropped_image']) ? $_POST['cropped_image'] : null;
+			unset($_POST['cropped_image']); // เอาออกจาก $_POST หลัก
+			unset($_POST['old_avatar']);    // เอาออกจาก $_POST หลัก
+
 			extract($_POST);
 			$data = '';
+
+			// 2. เตรียมข้อมูลฟิลด์อื่นๆ ที่จะบันทึกลง DB (ยกเว้น id)
 			foreach ($_POST as $k => $v) {
 				if (!in_array($k, array('id'))) {
 					if (!empty($data)) $data .= " , ";
-					$data .= " {$k} = '{$v}' ";
+					$v = $this->conn->real_escape_string($v); // ป้องกัน SQL Injection
+					$data .= " `{$k}` = '{$v}' ";
 				}
 			}
+
+			// 3. บันทึก/อัปเดตข้อมูลหลัก
 			if (empty($id)) {
-				$qry = $this->conn->query("INSERT INTO users set {$data}");
-				if ($qry) {
-					$id = $this->conn->insert_id;
-					$this->settings->set_flashdata('success', 'แก้ไขข้อมูลส่วนตัวเรียบร้อย');
-					foreach ($_POST as $k => $v) {
-						if ($k != 'id') {
-							if (!empty($data)) $data .= " , ";
-							if ($this->settings->userdata('id') == $id)
-								$this->settings->set_userdata($k, $v);
-						}
-					}
-					if (!empty($_FILES['img']['tmp_name'])) {
-						if (!is_dir(base_app . "uploads/avatars"))
-							mkdir(base_app . "uploads/avatars");
-						$ext = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-						$fname = "uploads/avatars/$id.png";
-						$accept = array('image/jpeg', 'image/png');
-						if (!in_array($_FILES['img']['type'], $accept)) {
-							$err = "Image file type is invalid";
-						}
-						if ($_FILES['img']['type'] == 'image/jpeg')
-							$uploadfile = imagecreatefromjpeg($_FILES['img']['tmp_name']);
-						elseif ($_FILES['img']['type'] == 'image/png')
-							$uploadfile = imagecreatefrompng($_FILES['img']['tmp_name']);
-						if (!$uploadfile) {
-							$err = "Image is invalid";
-						}
-						$temp = imagescale($uploadfile, 200, 200);
-						if (is_file(base_app . $fname))
-							unlink(base_app . $fname);
-						$upload = imagepng($temp, base_app . $fname);
-						if ($upload) {
-							$this->conn->query("UPDATE `users` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$id}'");
-							if ($this->settings->userdata('id') == $id)
-								$this->settings->set_userdata('avatar', $fname . "?v=" . time());
-						}
-
-						imagedestroy($temp);
-					}
-					return 1;
-				} else {
-					return 2;
-				}
+				// กรณีสร้าง User ใหม่ (ถ้ามี)
+				$sql = "INSERT INTO `users` set {$data}";
 			} else {
-				$qry = $this->conn->query("UPDATE users set $data where id = {$id}");
-				if ($qry) {
-					$this->settings->set_flashdata('success', 'แก้ไขข้อมูลส่วนตัวเรียบร้อย');
+				// กรณีอัปเดต User เดิม
+				$sql = "UPDATE `users` set {$data} where id = '{$id}'";
+			}
+
+			$save = $this->conn->query($sql);
+
+			if ($save) {
+				$uid = !empty($id) ? $id : $this->conn->insert_id;
+				$resp['status'] = 'success';
+				$this->settings->set_flashdata('success', 'แก้ไขข้อมูลส่วนตัวเรียบร้อย');
+
+				// 4. จัดการไฟล์รูปภาพ (ส่วนที่แก้ไขใหม่ทั้งหมด)
+				if (!empty($cropped_image_data)) {
+					// สร้างโฟลเดอร์ถ้ายังไม่มี
+					if (!is_dir(base_app . "uploads/avatars")) {
+						mkdir(base_app . "uploads/avatars", 0777, true);
+					}
+
+					// ถอดรหัส base64
+					$image_parts = explode(";base64,", $cropped_image_data);
+					$image_base64 = base64_decode($image_parts[1]);
+
+					// กำหนดชื่อไฟล์และ path (เปลี่ยนเป็นโฟลเดอร์ avatars)
+					$fname = "uploads/avatars/{$uid}.png";
+
+					// บันทึกไฟล์
+					if (file_put_contents(base_app . $fname, $image_base64)) {
+						// อัปเดต path รูปในฐานข้อมูล
+						$this->conn->query("UPDATE `users` set `avatar` = CONCAT('{$fname}', '?v=', unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
+
+						// อัปเดต session ของ user ที่ login อยู่
+						if ($this->settings->userdata('id') == $uid) {
+							$this->settings->set_userdata('avatar', $fname . "?v=" . time());
+						}
+					}
+				}
+
+				// อัปเดตข้อมูลอื่นๆ ใน session
+				if ($this->settings->userdata('id') == $uid) {
 					foreach ($_POST as $k => $v) {
 						if ($k != 'id') {
-							if (!empty($data)) $data .= " , ";
-							if ($this->settings->userdata('id') == $id)
-								$this->settings->set_userdata($k, $v);
+							$this->settings->set_userdata($k, $v);
 						}
 					}
-					if (!empty($_FILES['img']['tmp_name'])) {
-						if (!is_dir(base_app . "uploads/avatars"))
-							mkdir(base_app . "uploads/avatars");
-						$ext = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-						$fname = "uploads/avatars/$id.png";
-						$accept = array('image/jpeg', 'image/png');
-						if (!in_array($_FILES['img']['type'], $accept)) {
-							$err = "Image file type is invalid";
-						}
-						if ($_FILES['img']['type'] == 'image/jpeg')
-							$uploadfile = imagecreatefromjpeg($_FILES['img']['tmp_name']);
-						elseif ($_FILES['img']['type'] == 'image/png')
-							$uploadfile = imagecreatefrompng($_FILES['img']['tmp_name']);
-						if (!$uploadfile) {
-							$err = "Image is invalid";
-						}
-						$temp = imagescale($uploadfile, 200, 200);
-						if (is_file(base_app . $fname))
-							unlink(base_app . $fname);
-						$upload = imagepng($temp, base_app . $fname);
-						if ($upload) {
-							$this->conn->query("UPDATE `users` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$id}'");
-							if ($this->settings->userdata('id') == $id)
-								$this->settings->set_userdata('avatar', $fname . "?v=" . time());
-						}
-
-						imagedestroy($temp);
-					}
-
-					return 1;
-				} else {
-					return "UPDATE users set $data where id = {$id}";
 				}
+				// ไม่ต้อง return 1 หรือ 2 แล้ว ใช้ json response เพื่อความชัดเจน
+			} else {
+				$resp['status'] = 'failed';
+				$resp['msg'] = $this->conn->error;
+				$resp['sql'] = $sql;
 			}
+
+			// ส่งผลลัพธ์กลับเป็น JSON ให้ AJAX
+			return json_encode($resp);
 		}
 		public function delete_users()
 		{

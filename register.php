@@ -147,7 +147,7 @@
     </div>
 
     <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-register" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
@@ -177,7 +177,7 @@
   <script src="<?= base_url ?>plugins/jquery/jquery.min.js"></script>
   <script src="<?= base_url ?>plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="<?= base_url ?>dist/js/adminlte.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+  <script src="<?php echo base_url ?>plugins/cropper.js/cropper.min.js"></script>
 
   <script>
     $(document).ready(function() {
