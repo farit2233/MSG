@@ -1,7 +1,6 @@
   /* --- General Styles (No changes needed) --- */
   .register {
     padding-top: 0px !important;
-    background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
     background-size: cover;
     background-repeat: no-repeat;
     overflow-x: hidden;

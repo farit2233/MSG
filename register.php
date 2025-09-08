@@ -11,6 +11,11 @@
 <script>
   start_loader()
 </script>
+<style>
+  .register {
+    background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
+  }
+</style>
 
 <body class="register">
   <section class="pb-5">
