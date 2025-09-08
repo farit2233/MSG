@@ -13,7 +13,7 @@
 </script>
 <style>
   /* --- General Styles (No changes needed) --- */
-  body {
+  .register {
     padding-top: 0px !important;
     background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
     background-size: cover;
@@ -22,18 +22,32 @@
     overflow-x: hidden;
   }
 
-  .section-title-with-line h3 {
+  .register label {
+    font-size: 18px;
+  }
+
+  .register input {
+    border-radius: 13px;
+    font-size: 16px;
+  }
+
+  .register-img {
+    border-radius: 13px;
+    font-size: 16px !important;
+  }
+
+  .register-section-title-with-line h3 {
     position: relative;
     border-bottom: 2px solid #f57421 !important;
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
   }
 
-  .section-title-with-line h3::after {
+  .register-section-title-with-line h3::after {
     content: none !important;
   }
 
-  .cart-header-bar {
+  .register-cart-header-bar {
     border-left: 4px solid #ff6600;
     padding: 16px 20px;
     border-radius: 12px;
@@ -41,7 +55,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
-  .card {
+  .register-card {
     border-radius: 13px;
     max-width: 767.98px;
     margin: auto;
@@ -64,17 +78,6 @@
     padding: 4px;
   }
 
-  label {
-    font-size: 18px;
-  }
-
-  input.form-control,
-  .custom-select,
-  .custom-file-label {
-    border-radius: 13px;
-    font-size: 16px;
-  }
-
   .custom-file-input:focus~.custom-file-label {
     border-color: #f57421;
     box-shadow: 0 0 0 0.2rem rgba(245, 116, 33, 0.25);
@@ -88,14 +91,12 @@
     margin-top: 1rem;
     margin-bottom: 1rem;
     width: 100%;
-    font-weight: bold;
   }
 
   .btn-regis:hover {
     background-color: #f57421;
     color: white;
   }
-
 
   /* --- Styles for Circular Cropper Modal (Updated) --- */
   #cropModal .modal-dialog {
@@ -150,11 +151,6 @@
     cursor: grabbing !important;
   }
 
-  .preview-container {
-    display: none;
-    /* ซ่อน preview เพราะ view-box เป็นตัวอย่างอยู่แล้ว */
-  }
-
   #crop_button {
     background-color: #f57421;
     border-color: #f57421;
@@ -192,21 +188,21 @@
   }
 </style>
 
-<body>
+<body class="register">
   <section class="pb-5">
     <div class="container">
       <div class="row mt-n4 justify-content-center align-items-center flex-column">
         <div class="col-lg-10 col-md-11 col-sm-12 col-xs-12">
-          <div class="card shadow" style="margin-top: 3rem;">
+          <div class="card register-card shadow " style="margin-top: 3rem;">
             <div class="card-body">
               <div class="container-fluid">
-                <div class="cart-header-bar">
+                <div class="register-cart-header-bar">
                   <h3 class="mb-0"><i class="fa-solid fa-user-plus"></i> สมัครสมาชิก</h3>
                 </div>
                 <form id="register-form" method="post" enctype="multipart/form-data">
                   <input type="hidden" name="id">
 
-                  <div class="section-title-with-line mb-4">
+                  <div class="register-section-title-with-line  mb-4">
                     <h3>โปรไฟล์</h3>
                   </div>
                   <div class="row justify-content-center">
@@ -216,13 +212,13 @@
                       </div>
                       <div class="custom-file">
                         <input type="file" class="custom-file-input" id="customFile" name="img" accept="image/png, image/jpeg">
-                        <label class="custom-file-label" for="customFile">เลือกรูปโปรไฟล์</label>
+                        <label class="custom-file-label register-img" for="customFile">เลือกรูปโปรไฟล์</label>
                       </div>
                       <input type="hidden" name="cropped_image" id="cropped_image">
                     </div>
                   </div>
 
-                  <div class="section-title-with-line mb-4 mt-4">
+                  <div class="register-section-title-with-line mb-4 mt-4">
                     <h3>ข้อมูลส่วนตัว</h3>
                   </div>
                   <div class="row">
@@ -230,7 +226,7 @@
                       <div class="form-group">
                         <label for="firstname" class="control-label">ชื่อ</label>
                         <input type="text" class="form-control form-control-sm" required name="firstname" id="firstname"
-                          title="กรุณาใส่ชื่อตามจริงเพื่อที่จะสามารถจัดส่งได้ง่าย">
+                          title="กรุณาใส่ชื่อตามจริง เพื่อที่จะสามารถจัดส่งได้ง่าย">
                       </div>
                       <div class="form-group">
                         <label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
@@ -239,7 +235,7 @@
                       <div class="form-group">
                         <label for="lastname" class="control-label">นามสกุล</label>
                         <input type="text" class="form-control form-control-sm" required name="lastname" id="lastname"
-                          title="กรุณาใส่นามสกุลตามจริงเพื่อที่จะสามารถจัดส่งได้ง่าย">
+                          title="กรุณาใส่นามสกุลตามจริง เพื่อที่จะสามารถจัดส่งได้ง่าย">
                       </div>
                       <div class="form-group">
                         <label for="gender" class="control-label">เพศ</label>
@@ -275,7 +271,7 @@
                     </div>
                   </div>
 
-                  <div class="section-title-with-line mb-4">
+                  <div class="register-section-title-with-line mb-4">
                     <h3>ที่อยู่จัดส่ง</h3>
                   </div>
                   <div class="row">
@@ -355,20 +351,27 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
   <script>
-    $('#register-form [required]').each(function() {
-      var $input = $(this);
-      $input.on('invalid', function(e) {
-        e.preventDefault(); // ป้องกัน browser default
-        // ถ้ายังไม่มี error message ใต้ input ให้สร้าง
-        if ($input.next('.err-msg').length === 0) {
-          $input.after('<div class="err-msg text-danger mt-1">' + $input.attr('title') + '</div>');
-        }
-      });
-      $input.on('input', function() {
-        // ลบ error message ถ้ามีการกรอกข้อมูล
-        $input.next('.err-msg').remove();
+    $(document).ready(function() {
+      // ดักทุก input, select ที่มี required
+      $('#register-form [required]').each(function() {
+        var $input = $(this);
+
+        // เมื่อ input invalid
+        $input.on('invalid', function(e) {
+          e.preventDefault(); // ป้องกัน default browser
+          // ถ้ายังไม่มี error message ให้สร้าง
+          if ($input.next('.err-msg').length === 0) {
+            $input.after('<div class="err-msg text-danger mt-1">' + $input.attr('title') + '</div>');
+          }
+        });
+
+        // เมื่อกรอกหรือแก้ไข input ลบข้อความ error
+        $input.on('input change', function() {
+          $input.next('.err-msg').remove();
+        });
       });
     });
+
     const contactInput = document.getElementById('contact');
     contactInput.addEventListener('input', function() {
       this.value = this.value.replace(/\D/g, ''); // ลบทุกตัวที่ไม่ใช่เลข
