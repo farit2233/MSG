@@ -299,7 +299,7 @@ if (isset($id)) {
 							<div class="form-group">
 								<label>ภาษี VAT <span class="text-danger">*</span></label>
 								<div class="input-group">
-									<input type="number" step="1" min="7" max="100" name="vat_percent" class="form-control" value="<?= isset($vat_percent) ? $vat_percent : '7' ?>" required>
+									<input type="number" step="1" max="100" name="vat_percent" class="form-control" value="<?= isset($vat_percent) ? $vat_percent : '7' ?>" required>
 									<div class="input-group-append">
 										<span class="input-group-text">%</span>
 									</div>
