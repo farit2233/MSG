@@ -71,6 +71,9 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 							case 5:
 								$where = " where o.`payment_status` = 5 ";
 								break;
+							case 6:
+								$where = " where o.`payment_status` = 6 ";
+								break;
 						}
 						switch ($delivery_status) {
 							case 0:
@@ -102,6 +105,9 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 								break;
 							case 9:
 								$where = " where o.`delivery_status` = 9 ";
+								break;
+							case 10:
+								$where = " where o.`delivery_status` = 10 ";
 								break;
 						}
 						$qry = $conn->query("SELECT o.*, 
@@ -138,6 +144,9 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 											echo '<span class="badge bg-secondary">รอการยกเลิกคำสั่งซื้อ</span>';
 											break;
 										case 5:
+											echo '<span class="badge bg-secondary">ขอคืนเงิน</span>';
+											break;
+										case 6:
 											echo '<span class="badge bg-dark">คืนเงินแล้ว</span>';
 											break;
 										default:
@@ -174,9 +183,12 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 											echo '<span class="badge bg-dark">คืนระหว่างทาง</span>';
 											break;
 										case 8:
-											echo '<span class="badge bg-secondary">คืนของแล้ว</span>';
+											echo '<span class="badge bg-secondary">ขอคืนสินค้า</span>';
 											break;
 										case 9:
+											echo '<span class="badge bg-dark">คืนของสำเร็จ</span>';
+											break;
+										case 10:
 											echo '<span class="badge bg-danger">ยกเลิกแล้ว</span>';
 											break;
 										default:

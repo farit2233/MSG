@@ -194,10 +194,16 @@
                   <li class="nav-item">
                     <a href="./?page=orders&payment_status=5" class="nav-link tree-item nav-payment_status_5">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>คืนเงินแล้ว</p>
+                      <p>กำลังคืนเงิน</p>
                     </a>
                   </li>
 
+                  <li class="nav-item">
+                    <a href="./?page=orders&payment_status=6" class="nav-link tree-item nav-payment_status_6">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>คืนเงินแล้ว</p>
+                    </a>
+                  </li>
                 </ul>
 
                 <ul class="nav-treeview">
@@ -263,12 +269,19 @@
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=8" class="nav-link tree-item nav-delivery_status_8">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>คืนของแล้ว</p>
+                      <p>กำลังคืนสินค้า</p>
                     </a>
                   </li>
 
                   <li class="nav-item">
                     <a href="./?page=orders&delivery_status=9" class="nav-link tree-item nav-delivery_status_9">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>คืนของสำเร็จ</p>
+                    </a>
+                  </li>
+
+                  <li class="nav-item">
+                    <a href="./?page=orders&delivery_status=10" class="nav-link tree-item nav-delivery_status_10">
                       <i class="far fa-circle nav-icon"></i>
                       <p>ยกเลิกแล้ว</p>
                     </a>

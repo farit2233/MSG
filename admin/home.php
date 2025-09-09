@@ -102,7 +102,8 @@
     2 => ['label' => 'ชำระเงินแล้ว', 'bg' => 'bg-white', 'icon' => 'fas fa-check-circle'],
     3 => ['label' => 'ชำระเงินล้มเหลว', 'bg' => 'bg-white', 'icon' => 'fa fa-exclamation'],
     4 => ['label' => 'รอการยกเลิกคำสั่งซื้อ ', 'bg' => 'bg-white', 'icon' => 'fas fa-clock'],
-    5 => ['label' => 'คืนเงินแล้ว', 'bg' => 'bg-white', 'icon' => 'fas fa-undo-alt'],
+    5 => ['label' => 'คำขอคืนเงิน', 'bg' => 'bg-white', 'icon' => 'fas fa-reply'],
+    6 => ['label' => 'คืนเงินแล้ว', 'bg' => 'bg-white', 'icon' => 'fas fa-undo-alt'],
   ];
   ?>
   <h4 class="mt-4">สถานะการชำระเงิน</h4>
@@ -143,9 +144,10 @@
     4 => ['label' => 'จัดส่งสำเร็จ', 'bg' => 'bg-white', 'icon' => 'fas fa-check-circle'],
     5 => ['label' => 'จัดส่งไม่สำเร็จ', 'bg' => 'bg-white', 'icon' => 'fas fa-exclamation-triangle'],
     6 => ['label' => 'รอการยกเลิกคำสั่งซื้อ ', 'bg' => 'bg-white', 'icon' => 'fas fa-clock'],
-    7 => ['label' => 'คืนของระหว่างทาง', 'bg' => 'bg-white', 'icon' => 'fas fa-undo-alt'],
-    8 => ['label' => 'คืนของสำเร็จ', 'bg' => 'bg-white', 'icon' => 'fas fa-box-open'],
-    9 => ['label' => 'ยกเลิกแล้ว', 'bg' => 'bg-white', 'icon' => 'fa-solid fa-circle-xmark'],
+    7 => ['label' => 'คืนของระหว่างทาง', 'bg' => 'bg-white', 'icon' => 'fas fa-truck-moving'],
+    8 => ['label' => 'คำขอคืนสินค้า', 'bg' => 'bg-white', 'icon' => 'fas fa-reply'],
+    9 => ['label' => 'คืนของสำเร็จ', 'bg' => 'bg-white', 'icon' => 'fas fa-box-open'],
+    10 => ['label' => 'ยกเลิกแล้ว', 'bg' => 'bg-white', 'icon' => 'fa-solid fa-circle-xmark'],
   ];
   ?>
   <h4 class="mt-4">สถานะการจัดส่ง</h4>

@@ -144,6 +144,9 @@ if (!empty($customer_id)) {
                                 echo '<span class="badge bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>';
                                 break;
                             case 5:
+                                echo '<span class="badge bg-secondary">กำลังคืนเงิน</span>';
+                                break;
+                            case 6:
                                 echo '<span class="badge bg-dark">คืนเงินแล้ว</span>';
                                 break;
                             default:
@@ -185,9 +188,12 @@ if (!empty($customer_id)) {
                                 echo '<span class="badge bg-dark">คืนระหว่างทาง</span>';
                                 break;
                             case 8:
-                                echo '<span class="badge bg-secondary">คืนของแล้ว</span>';
+                                echo '<span class="badge bg-secondary">กำลังคืนสินค้า</span>';
                                 break;
                             case 9:
+                                echo '<span class="badge bg-dark">คืนของสำเร็จ</span>';
+                                break;
+                            case 10:
                                 echo '<span class="badge bg-danger">ยกเลิกแล้ว</span>';
                                 break;
                             default:

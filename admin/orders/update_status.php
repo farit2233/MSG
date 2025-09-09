@@ -21,7 +21,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 <option value="2" <?= isset($payment_status) && $payment_status == 2 ? 'selected' : '' ?>>ชำระเงินแล้ว</option>
                 <option value="3" <?= isset($payment_status) && $payment_status == 3 ? 'selected' : '' ?>>ชำระเงินล้มเหลว</option>
                 <option value="4" <?= isset($payment_status) && $payment_status == 4 ? 'selected' : '' ?>>รอการยกเลิกคำสั่งซื้อ</option>
-                <option value="5" <?= isset($payment_status) && $payment_status == 5 ? 'selected' : '' ?>>คืนเงินแล้ว</option>
+                <option value="5" <?= isset($payment_status) && $payment_status == 5 ? 'selected' : '' ?>>ขอคืนเงิน</option>
+                <option value="6" <?= isset($payment_status) && $payment_status == 6 ? 'selected' : '' ?>>คืนเงินแล้ว</option>
             </select>
         </div>
 
@@ -36,8 +37,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 <option value="5" <?= isset($delivery_status) && $delivery_status == 5 ? 'selected' : '' ?>>จัดส่งไม่สำเร็จ</option>
                 <option value="6" <?= isset($delivery_status) && $delivery_status == 6 ? 'selected' : '' ?>>รอการยกเลิกคำสั่งซื้อ</option>
                 <option value="7" <?= isset($delivery_status) && $delivery_status == 7 ? 'selected' : '' ?>>คืนของระหว่างทาง</option>
-                <option value="8" <?= isset($delivery_status) && $delivery_status == 8 ? 'selected' : '' ?>>คืนของสำเร็จ</option>
-                <option value="9" <?= isset($delivery_status) && $delivery_status == 9 ? 'selected' : '' ?>>ยกเลิกแล้ว</option>
+                <option value="8" <?= isset($delivery_status) && $delivery_status == 8 ? 'selected' : '' ?>>ขอคืนสินค้า</option>
+                <option value="9" <?= isset($delivery_status) && $delivery_status == 9 ? 'selected' : '' ?>>คืนของสำเร็จ</option>
+                <option value="10" <?= isset($delivery_status) && $delivery_status == 10 ? 'selected' : '' ?>>ยกเลิกแล้ว</option>
             </select>
         </div>
     </form>

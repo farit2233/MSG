@@ -6,9 +6,8 @@ $filter_options = [
     'shipping_required' => 'ที่ต้องจัดส่ง',
     'in_transit' => 'ที่ต้องได้รับ',
     'completed' => 'สำเร็จแล้ว',
-    'returned' => 'คืนเงิน/คืนสินค้า',
     'cancelled' => 'ยกเลิกแล้ว',
-
+    'returned' => 'คืนเงิน/คืนสินค้า',
 ];
 ?>
 <section class="py-3">
@@ -85,7 +84,8 @@ $filter_options = [
                                         2 => '<span class="badge badge-order bg-success text-dark">ชำระเงินแล้ว</span>',
                                         3 => '<span class="badge badge-order bg-danger">ชำระเงินล้มเหลว</span>',
                                         4 => '<span class="badge badge-order bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
-                                        5 => '<span class="badge badge-order bg-dark">คืนเงินแล้ว</span>',
+                                        5 => '<span class="badge badge-order bg-secondary">กำลังคืนเงิน</span>',
+                                        6 => '<span class="badge badge-order bg-dark">คืนเงินแล้ว</span>',
                                         default => '<span class="badge badge-order bg-light">N/A</span>'
                                     };
                                     $badge_delivery = match ($delivery_status) {
@@ -97,8 +97,9 @@ $filter_options = [
                                         5 => '<span class="badge badge-order bg-danger">จัดส่งไม่สำเร็จ</span>',
                                         6 => '<span class="badge badge-order bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
                                         7 => '<span class="badge badge-order bg-dark">คืนของระหว่างทาง</span>',
-                                        8 => '<span class="badge badge-order bg-secondary">คืนของแล้ว</span>',
-                                        9 => '<span class="badge badge-order bg-danger">ยกเลิกแล้ว</span>',
+                                        8 => '<span class="badge badge-order bg-secondary">กำลังคืนสินค้า</span>',
+                                        9 => '<span class="badge badge-order bg-secondary">คืนของสำเร็จ</span>',
+                                        10 => '<span class="badge badge-order bg-danger">ยกเลิกแล้ว</span>',
                                         default => '<span class="badge badge-order bg-light">N/A</span>'
                                     };
                             ?>
@@ -114,10 +115,18 @@ $filter_options = [
                                                 </button>
 
                                                 <?php
-                                                if ($delivery_status < 3 && $payment_status < 3) :
+                                                if ($payment_status < 2 && $delivery_status < 3) :
                                                 ?>
                                                     <button class="btn btn-cancel btn-danger cancel-order" data-id="<?= $row['id'] ?>">
                                                         <i class="fa fa-times"></i> ยกเลิกคำสั่งซื้อ
+                                                    </button>
+                                                <?php endif; ?>
+
+                                                <?php
+                                                if ($payment_status == 2 || $delivery_status == 4) :
+                                                ?>
+                                                    <button class="btn btn-cancel btn-danger return-order" data-id="<?= $row['id'] ?>">
+                                                        <i class="fa fa-times"></i> ขอคืนเงิน/คืนสินค้า
                                                     </button>
                                                 <?php endif; ?>
 
@@ -157,14 +166,15 @@ $filter_options = [
 
             // 1. เปลี่ยนจาก confirm() มาใช้ Swal.fire()
             Swal.fire({
-                title: 'ยืนยันการยกเลิก',
-                text: "คุณต้องการยกเลิกคำสั่งซื้อนี้ใช่หรือไม่?",
+                title: 'ยืนยันการยกเลิกคำสั่งซื้อ',
+                html: "คุณต้องการ <b>ยกเลิกคำสั่งซื้อ</b> นี้ใช่หรือไม่?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'ใช่, ยกเลิกเลย',
-                cancelButtonText: 'ไม่'
+                confirmButtonText: 'ใช่',
+                cancelButtonText: 'ไม่',
+                reverseButtons: true
             }).then((result) => {
                 // ตรวจสอบว่าผู้ใช้กดปุ่ม "ยืนยัน" (ใช่, ยกเลิกเลย)
                 if (result.isConfirmed) {
@@ -183,7 +193,73 @@ $filter_options = [
                                 // 2. เปลี่ยน alert() สำเร็จเป็น Swal.fire()
                                 Swal.fire({
                                     title: 'สำเร็จ!',
-                                    text: 'ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว',
+                                    html: '<b>ยกเลิกคำสั่งซื้อ</b> เรียบร้อย',
+                                    icon: 'success'
+                                }).then(() => {
+                                    location.reload(); // รีโหลดหน้าหลังจากกด OK
+                                });
+                            } else {
+                                // 3. เปลี่ยน alert() ข้อผิดพลาดเป็น Swal.fire()
+                                Swal.fire({
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: resp,
+                                    icon: 'error'
+                                });
+                                // คืนค่าปุ่ม
+                                $this.prop('disabled', false);
+                                $this.html(originalHtml);
+                            }
+                        },
+                        error: function() {
+                            // 4. เปลี่ยน alert() ข้อผิดพลาด Network เป็น Swal.fire()
+                            Swal.fire({
+                                title: 'เกิดข้อผิดพลาด',
+                                text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
+                                icon: 'error'
+                            });
+                            // คืนค่าปุ่ม
+                            $this.prop('disabled', false);
+                            $this.html(originalHtml);
+                        }
+                    });
+                }
+            });
+        });
+        $(".return-order").click(function() {
+            let orderId = $(this).data("id");
+            const $this = $(this);
+            const originalHtml = $this.html();
+
+            // 1. เปลี่ยนจาก confirm() มาใช้ Swal.fire()
+            Swal.fire({
+                title: 'ยืนยันคำขอ คืนเงิน/คืนสินค้า',
+                html: "คุณต้องการยืนยันคำขอ <b>คืนเงิน/คืนสินค้า</b> นี้ใช่หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'ใช่',
+                cancelButtonText: 'ไม่',
+                reverseButtons: true
+            }).then((result) => {
+                // ตรวจสอบว่าผู้ใช้กดปุ่ม "ยืนยัน" (ใช่, ยกเลิกเลย)
+                if (result.isConfirmed) {
+                    // เปลี่ยนสถานะปุ่มเป็นกำลังโหลด
+                    $this.prop('disabled', true);
+                    $this.html('<i class="fa fa-spinner fa-spin"></i> กำลังดำเนินการ...');
+
+                    $.ajax({
+                        url: "classes/Master.php?f=return_order",
+                        method: "POST",
+                        data: {
+                            order_id: orderId
+                        },
+                        success: function(resp) {
+                            if (resp == 1) {
+                                // 2. เปลี่ยน alert() สำเร็จเป็น Swal.fire()
+                                Swal.fire({
+                                    title: 'สำเร็จ!',
+                                    html: 'ส่งคำขอ <b>คืนเงิน/คืนสินค้า</b> เรียบร้อย',
                                     icon: 'success'
                                 }).then(() => {
                                     location.reload(); // รีโหลดหน้าหลังจากกด OK
