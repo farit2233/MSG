@@ -41,7 +41,8 @@ require_once('sess_auth.php');
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <!-- Cropper.JS -->
+  <link rel="stylesheet" href="<?php echo base_url ?>plugins/cropper.js/cropper.min.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="assets/css/promotion_products.css">
 
@@ -106,6 +107,8 @@ require_once('sess_auth.php');
   <script src="<?php echo base_url ?>plugins/sweetalert2/sweetalert2.min.js"></script>
   <!-- Toastr -->
   <script src="<?php echo base_url ?>plugins/toastr/toastr.min.js"></script>
+  <!-- Cropper.JS -->
+  <script src="<?php echo base_url ?>plugins/cropper.js/cropper.min.js"></script>
   <script>
     var _base_url_ = '<?php echo base_url ?>';
   </script>
