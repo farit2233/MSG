@@ -9,7 +9,6 @@ foreach ($user->fetch_array() as $k => $v) {
 		alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
 	</script>
 <?php endif; ?>
-
 <style>
 	/* --- Styles from Registration page theme --- */
 	.profile-page {
@@ -167,7 +166,6 @@ foreach ($user->fetch_array() as $k => $v) {
 		background: #f57421;
 	}
 </style>
-
 <section class="py-3 profile-page">
 	<div class="container">
 		<div class="row mt-n4 justify-content-center align-items-center flex-column">
@@ -178,13 +176,14 @@ foreach ($user->fetch_array() as $k => $v) {
 							<div class="profile-cart-header-bar">
 								<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลส่วนตัว</h3>
 							</div>
-							<form id="update-form" method="post">
-								<input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
+							<form action="" id="update-profile-form">
+								<input type="hidden" name="id" value="<?php echo $_settings->userdata('id') ?>">
 								<input type="hidden" name="cropped_image" id="cropped_image">
-								<input type="hidden" name="old_avatar" value="<?= isset($avatar) ? $avatar : '' ?>">
+
 								<div class="profile-section-title-with-line mb-4">
 									<h3>โปรไฟล์</h3>
 								</div>
+
 								<div class="row justify-content-center">
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group d-flex justify-content-center mt-2">
@@ -200,6 +199,7 @@ foreach ($user->fetch_array() as $k => $v) {
 								<div class="profile-section-title-with-line mb-4 mt-4">
 									<h3>ข้อมูลส่วนตัว</h3>
 								</div>
+
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
@@ -217,16 +217,13 @@ foreach ($user->fetch_array() as $k => $v) {
 									</div>
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
-											<label for="lastname" class="control-label">ID</label>
-											<input type="text" class="form-control form-control-sm" name="lastname" id="lastname" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required>
+											<label for="username" class="control-label">ID</label>
+											<input type="text" class="form-control form-control-sm" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required autocomplete="off">
 										</div>
 										<div class="form-group">
 											<label for="password" class="control-label">รหัสผ่านใหม่</label>
-											<input type="password" class="form-control form-control-sm" name="password" id="password">
-										</div>
-										<div class="form-group">
-											<label for="cpassword" class="control-label">ยืนยัน รหัสผ่านใหม่</label>
-											<input type="password" class="form-control form-control-sm" id="cpassword">
+											<input type="password" name="password" id="password" class="form-control form-control-sm" value="" autocomplete="off">
+											<small><i>ปล่อยว่างไว้ถ้าคุณไม่ต้องการเปลี่ยนรหัสผ่าน</i></small>
 										</div>
 									</div>
 								</div>
@@ -245,12 +242,12 @@ foreach ($user->fetch_array() as $k => $v) {
 </section>
 
 <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered modal-dialog-admin" role="document">
+	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<i class="fa fa-times"></i>
+					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
@@ -271,112 +268,15 @@ foreach ($user->fetch_array() as $k => $v) {
 	</div>
 </div>
 
-<script src="<?php echo base_url ?>plugins/cropper.js/cropper.min.js"></script>
-<script src="<?php echo base_url ?>plugins/cropper.js/cropper.min.css"></script>
-
 <script>
 	$(document).ready(function() {
-		end_loader();
-
-		// --- Form Submission Logic ---
-		$('#update-form').submit(function(e) {
-			e.preventDefault();
-			var _this = $(this);
-			var el = $('<div>');
-			el.addClass('alert alert-danger err_msg');
-			el.hide();
-			$('.err_msg').remove();
-
-			if ($('#password').val() != '' && $('#password').val() != $('#cpassword').val()) {
-				el.text('รหัสผ่านใหม่ไม่ตรงกัน');
-				_this.prepend(el);
-				el.show('slow');
-				$('html, body').scrollTop(0);
-				return false;
-			}
-
-			if (_this[0].checkValidity() == false) {
-				_this[0].reportValidity();
-				return false;
-			}
-
-			start_loader();
-			var formData = new FormData($(this)[0]);
-
-			// เช็คว่ามีการเลือกไฟล์ใหม่ไหม ถ้าไม่มีให้ส่งรูปเก่าที่มี
-			if (!$('#customFile').val()) {
-				formData.append('cropped_image', $('#cropped_image').val()); // รูปเก่าที่ถูกบันทึกไว้
-			}
-
-			$.ajax({
-				url: _base_url_ + "classes/Users.php?f=save_users", // Make sure this endpoint is correct for updates
-				method: 'POST',
-				data: formData,
-				dataType: 'json',
-				cache: false,
-				contentType: false,
-				processData: false,
-				error: err => {
-					console.log(err);
-					alert('An error occurred');
-					end_loader();
-				},
-				success: function(resp) {
-					if (resp.status == 'success') {
-						location.reload();
-					} else if (!!resp.msg) {
-						el.html(resp.msg);
-						el.show('slow');
-						_this.prepend(el);
-						$('html, body').scrollTop(0);
-					} else {
-						alert('An error occurred');
-						console.log(resp);
-					}
-					end_loader();
-				}
-			});
-		});
-		// --- Cropper.js Logic ---
+		// --- ADDED: Cropper.js and new Form Submission Logic ---
 		var $modal = $('#cropModal');
 		var image = document.getElementById('image_to_crop');
 		var cropper;
 		var zoomSlider = document.getElementById('zoom_slider');
 
-		function resizeImage(file, maxWidth, maxHeight, callback) {
-			var reader = new FileReader();
-			reader.onload = function(event) {
-				var img = new Image();
-				img.onload = function() {
-					var canvas = document.createElement('canvas');
-					var ctx = canvas.getContext('2d');
-					var width = img.width;
-					var height = img.height;
-
-					// คำนวณขนาดใหม่
-					if (width > height) {
-						if (width > maxWidth) {
-							height = Math.round(height * (maxWidth / width));
-							width = maxWidth;
-						}
-					} else {
-						if (height > maxHeight) {
-							width = Math.round(width * (maxHeight / height));
-							height = maxHeight;
-						}
-					}
-
-					// กำหนดขนาดใหม่ให้กับ canvas
-					canvas.width = width;
-					canvas.height = height;
-					ctx.drawImage(img, 0, 0, width, height);
-					callback(canvas.toDataURL('image/jpeg'));
-				};
-				img.src = event.target.result;
-			};
-			reader.readAsDataURL(file);
-		}
-
+		// Event: When a new file is selected
 		$('#customFile').on('change', function(e) {
 			var files = e.target.files;
 			if (files && files.length > 0) {
@@ -395,6 +295,7 @@ foreach ($user->fetch_array() as $k => $v) {
 			}
 		});
 
+		// Event: When modal is shown, initialize Cropper
 		$modal.on('shown.bs.modal', function() {
 			cropper = new Cropper(image, {
 				aspectRatio: 1,
@@ -402,16 +303,19 @@ foreach ($user->fetch_array() as $k => $v) {
 				dragMode: 'move',
 				cropBoxMovable: false,
 				cropBoxResizable: false,
-				wheelZoomRatio: 0,
 				background: false,
 				responsive: true,
 				autoCropArea: 1,
+				// Make the crop area circular for preview
 				ready: function() {
-					let canvasData = cropper.getCanvasData();
-					let initialZoom = canvasData.width / canvasData.naturalWidth;
-					zoomSlider.min = initialZoom;
-					zoomSlider.max = initialZoom * 3;
-					zoomSlider.value = initialZoom;
+					cropper.getCropBoxData().cropper.getContainerData().width / 2;
+					$(this).cropper('getCropBoxData').width;
+					var cropBoxData = $(this).cropper('getCropBoxData');
+					var containerData = $(this).cropper('getContainerData');
+					$(this).cropper('setCropBoxData', {
+						width: Math.min(containerData.width, containerData.height),
+						height: Math.min(containerData.width, containerData.height)
+					});
 				}
 			});
 		}).on('hidden.bs.modal', function() {
@@ -421,23 +325,70 @@ foreach ($user->fetch_array() as $k => $v) {
 			$('#customFile').next('.custom-file-label').html('เปลี่ยนรูปโปรไฟล์');
 		});
 
+		// Event: Zoom slider
 		zoomSlider.addEventListener('input', function() {
 			if (cropper) {
 				cropper.zoomTo(this.value);
 			}
 		});
 
+		// Event: When crop button is clicked
 		$('#crop_button').on('click', function() {
 			var canvas = cropper.getCroppedCanvas({
-				width: 400,
-				height: 400,
+				width: 400, // Set desired output width
+				height: 400, // Set desired output height
 				imageSmoothingQuality: 'high',
 			});
 
 			var base64data = canvas.toDataURL('image/jpeg');
 			$('#cimg').attr('src', base64data);
-			$('#cropped_image').val(base64data);
+			$('#cropped_image').val(base64data); // Store base64 data in hidden input
 			$modal.modal('hide');
 		});
+
+		// --- UPDATED: Form submission logic ---
+		$('#update-profile-form').submit(function(e) {
+			e.preventDefault();
+			var _this = $(this)
+			$('.err-msg').remove();
+			start_loader();
+			$.ajax({
+				url: _base_url_ + "classes/Users.php?f=save_users",
+				data: new FormData($(this)[0]),
+				cache: false,
+				contentType: false,
+				processData: false,
+				method: 'POST',
+				type: 'POST',
+				dataType: 'json', // Expect a JSON response
+				error: err => {
+					console.log(err)
+					alert_toast("An error occured", 'error');
+					end_loader();
+				},
+				success: function(resp) {
+					if (typeof resp == 'object' && resp.status == 'success') {
+						alert_toast(resp.msg, 'success');
+						// Reload after a short delay to show the toast
+						setTimeout(function() {
+							location.reload();
+						}, 800)
+					} else if (resp.status == 'failed' && !!resp.msg) {
+						var el = $('<div>')
+						el.addClass("alert alert-danger err-msg").text(resp.msg)
+						_this.prepend(el)
+						el.show('slow')
+						$("html, body").animate({
+							scrollTop: _this.closest('.card').offset().top
+						}, "fast");
+						end_loader()
+					} else {
+						alert_toast("An error occured", 'error');
+						end_loader();
+						console.log(resp)
+					}
+				}
+			})
+		})
 	});
 </script>

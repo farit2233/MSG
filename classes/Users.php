@@ -14,91 +14,91 @@
 			parent::__destruct();
 		}
 
-		function save_users()
+		public function save_users()
 		{
-			// --- ส่วนจัดการรหัสผ่าน (เหมือนเดิม) ---
-			if (empty($_POST['password'])) {
-				unset($_POST['password']);
-			} else {
-				$_POST['password'] = md5($_POST['password']);
-			}
-
-			// 1. แยกข้อมูลรูปภาพ base64 ออกมาเก็บไว้ก่อน
+			// --- Start: New logic for handling cropped images ---
 			$cropped_image_data = isset($_POST['cropped_image']) ? $_POST['cropped_image'] : null;
-			unset($_POST['cropped_image']); // เอาออกจาก $_POST หลัก
-			unset($_POST['old_avatar']);    // เอาออกจาก $_POST หลัก
+			unset($_POST['cropped_image']); // Remove from POST to avoid database error
+			// --- End: New logic ---
+
+			if (empty($_POST['password']))
+				unset($_POST['password']);
+			else
+				$_POST['password'] = md5($_POST['password']);
 
 			extract($_POST);
 			$data = '';
 
-			// 2. เตรียมข้อมูลฟิลด์อื่นๆ ที่จะบันทึกลง DB (ยกเว้น id)
+			// Whitelist of allowed fields to prevent mass assignment vulnerabilities
+			$allowed_fields = ['firstname', 'middlename', 'lastname', 'username', 'password', 'type'];
+
 			foreach ($_POST as $k => $v) {
-				if (!in_array($k, array('id'))) {
-					if (!empty($data)) $data .= " , ";
-					$v = $this->conn->real_escape_string($v); // ป้องกัน SQL Injection
+				if (in_array($k, $allowed_fields) && !is_numeric($k)) {
+					$v = $this->conn->real_escape_string($v);
+					if (!empty($data)) $data .= ", ";
 					$data .= " `{$k}` = '{$v}' ";
 				}
 			}
 
-			// 3. บันทึก/อัปเดตข้อมูลหลัก
-			if (empty($id)) {
-				// กรณีสร้าง User ใหม่ (ถ้ามี)
-				$sql = "INSERT INTO `users` set {$data}";
-			} else {
-				// กรณีอัปเดต User เดิม
-				$sql = "UPDATE `users` set {$data} where id = '{$id}'";
+			$check = $this->conn->query("SELECT * FROM `users` where username = '{$username}' and id !='{$id}' ")->num_rows;
+			if ($check > 0) {
+				$resp['status'] = 'failed';
+				$resp['msg'] = 'Username already exists.';
+				return json_encode($resp);
+				exit;
 			}
 
+			$sql = "UPDATE users set $data where id = '{$id}'";
 			$save = $this->conn->query($sql);
 
+			$resp = array(); // Initialize response array
+
 			if ($save) {
-				$uid = !empty($id) ? $id : $this->conn->insert_id;
 				$resp['status'] = 'success';
-				$this->settings->set_flashdata('success', 'แก้ไขข้อมูลส่วนตัวเรียบร้อย');
+				$resp['msg'] = 'User Details successfully updated.';
+				$this->settings->set_flashdata('success', 'User Details successfully updated.');
 
-				// 4. จัดการไฟล์รูปภาพ (ส่วนที่แก้ไขใหม่ทั้งหมด)
+				// Update session data
+				foreach ($_POST as $k => $v) {
+					if ($this->settings->userdata('id') == $id)
+						$this->settings->set_userdata($k, $v);
+				}
+
+				// --- Start: New logic to save cropped image file from Base64 data ---
 				if (!empty($cropped_image_data)) {
-					// สร้างโฟลเดอร์ถ้ายังไม่มี
-					if (!is_dir(base_app . "uploads/avatars")) {
-						mkdir(base_app . "uploads/avatars", 0777, true);
-					}
+					$upload_path = base_app . "uploads/avatars/";
+					if (!is_dir($upload_path))
+						mkdir($upload_path, 0777, true);
 
-					// ถอดรหัส base64
+					// Decode the base64 string
 					$image_parts = explode(";base64,", $cropped_image_data);
 					$image_base64 = base64_decode($image_parts[1]);
 
-					// กำหนดชื่อไฟล์และ path (เปลี่ยนเป็นโฟลเดอร์ avatars)
-					$fname = "uploads/avatars/{$uid}.png";
+					// Define file name and path
+					$fname = "{$upload_path}{$id}.png"; // Standardize as .png
 
-					// บันทึกไฟล์
-					if (file_put_contents(base_app . $fname, $image_base64)) {
-						// อัปเดต path รูปในฐานข้อมูล
-						$this->conn->query("UPDATE `users` set `avatar` = CONCAT('{$fname}', '?v=', unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
+					// Save the file
+					if (file_put_contents($fname, $image_base64)) {
+						// Update database with the new avatar path
+						$avatar_path = "uploads/avatars/{$id}.png";
+						$this->conn->query("UPDATE `users` set `avatar` = CONCAT('{$avatar_path}', '?v=', unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$id}'");
 
-						// อัปเดต session ของ user ที่ login อยู่
-						if ($this->settings->userdata('id') == $uid) {
-							$this->settings->set_userdata('avatar', $fname . "?v=" . time());
-						}
+						// Update session avatar
+						if ($this->settings->userdata('id') == $id)
+							$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
+					} else {
+						$resp['msg'] .= " (but failed to save profile picture)";
 					}
 				}
+				// --- End: New logic ---
 
-				// อัปเดตข้อมูลอื่นๆ ใน session
-				if ($this->settings->userdata('id') == $uid) {
-					foreach ($_POST as $k => $v) {
-						if ($k != 'id') {
-							$this->settings->set_userdata($k, $v);
-						}
-					}
-				}
-				// ไม่ต้อง return 1 หรือ 2 แล้ว ใช้ json response เพื่อความชัดเจน
 			} else {
 				$resp['status'] = 'failed';
 				$resp['msg'] = $this->conn->error;
-				$resp['sql'] = $sql;
 			}
 
-			// ส่งผลลัพธ์กลับเป็น JSON ให้ AJAX
-			return json_encode($resp);
+			// Return JSON response
+			echo json_encode($resp);
 		}
 		public function delete_users()
 		{
@@ -113,6 +113,7 @@
 				return false;
 			}
 		}
+
 		function registration()
 		{
 			if (!empty($_POST['password']))
@@ -191,9 +192,12 @@
 						$resp['msg'] .= " (แต่ไม่สามารถบันทึกรูปโปรไฟล์ได้)";
 					}
 				} else {
-					// ใช้รูปเก่าถ้าผู้ใช้ไม่ได้เลือกใหม่
-					$avatar = isset($_POST['old_avatar']) ? $_POST['old_avatar'] : "uploads/customers/default_user.png";
-					$this->conn->query("UPDATE `customer_list` SET `avatar` = '{$avatar}' WHERE id = '{$uid}'");
+					// กรณีไม่มีการอัปโหลดรูป ให้ใช้รูป default (โค้ดเดิม)
+					if (!is_dir(base_app . "uploads/customers"))
+						mkdir(base_app . "uploads/customers");
+					$fname = "uploads/customers/$uid.png";
+					copy(base_app . "uploads/customers/default_user.png", base_app . $fname);
+					$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
 				}
 				if (!empty($uid) && $this->settings->userdata('login_type') != 1) {
 					$user = $this->conn->query("SELECT * FROM `customer_list` where id = '{$uid}' ");
@@ -270,7 +274,7 @@
 	$users = new users();
 	$action = !isset($_GET['f']) ? 'none' : strtolower($_GET['f']);
 	switch ($action) {
-		case 'save':
+		case 'save_users':
 			echo $users->save_users();
 			break;
 		case 'delete':
