@@ -3,6 +3,10 @@ $i = 1;
 $qry = $conn->query("
     SELECT * 
     FROM coupon_code_list 
+    WHERE status = 1 
+      AND delete_flag = 0
+      AND start_date <= NOW() 
+      AND end_date >= NOW() 
     ORDER BY 
         type = 'free_shipping' DESC,  -- free_shipping อยู่หน้าสุด
         discount_value DESC,           -- จัดลำดับตามส่วนลดจากมากไปหาน้อย
@@ -32,14 +36,6 @@ $qry_promo_recommand = $conn->query("
     LIMIT 8
 ");
 
-
-// ตรวจสอบวันหมดอายุของโปรโมชัน
-$current_time = time(); // เวลาปัจจุบัน
-$pro_qry = $conn->query("SELECT * FROM `promotions_list` 
-                           WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
-                           ORDER BY `date_created` ASC");
-
-$has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชันที่ยังคงใช้งานได้หรือไม่
 
 
 function formatDateThai($date)
@@ -155,16 +151,6 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
             <div class="container-custom">
                 <div class="card-group">
                     <div class="row g-4">
-                        <?php
-                        // ตรวจสอบวันหมดอายุของโปรโมชัน
-                        $current_time = time(); // เวลาปัจจุบัน
-                        $pro_qry = $conn->query("SELECT * FROM `promotions_list` 
-                           WHERE `status` = 1 AND `delete_flag` = 0 AND `promotion_category_id` = {$pcid} 
-                           ORDER BY `date_created` ASC");
-
-                        $has_active_promotions = false; // ตัวแปรเพื่อตรวจสอบว่ามีโปรโมชันที่ยังคงใช้งานได้หรือไม่
-
-                        ?>
 
                         <?php
                         // ใช้ลูปเดียวสำหรับการแสดงข้อมูล

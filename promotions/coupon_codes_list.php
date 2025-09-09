@@ -3,6 +3,10 @@ $i = 1;
 $qry_limit = $conn->query("
     SELECT * 
     FROM coupon_code_list 
+    WHERE status = 1 
+      AND delete_flag = 0
+      AND start_date <= NOW() 
+      AND end_date >= NOW() 
     ORDER BY 
         type = 'free_shipping' DESC,  -- free_shipping อยู่หน้าสุด
         discount_value DESC,           -- จัดลำดับตามส่วนลดจากมากไปหาน้อย
@@ -11,7 +15,13 @@ $qry_limit = $conn->query("
 ");
 
 $qry_free_shipping = $conn->query("SELECT * FROM coupon_code_list WHERE type = 'free_shipping' ORDER BY date_created ASC, name ASC");
-$qry = $conn->query("SELECT * FROM coupon_code_list ORDER BY date_created ASC, name ASC");
+$qry = $conn->query("SELECT * 
+    FROM coupon_code_list 
+    WHERE status = 1 
+      AND delete_flag = 0
+      AND start_date <= NOW() 
+      AND end_date >= NOW() 
+    ORDER BY date_created ASC, name ASC");
 function formatDateThai($date)
 {
     // แปลงวันที่เป็นตัวแปร timestamp
