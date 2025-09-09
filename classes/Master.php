@@ -1241,8 +1241,8 @@ class Master extends DBConnection
 
 			// 2. อัปเดตสถานะ payment_status เป็น 4 และ delivery_status เป็น 6
 			$update = $this->conn->query("UPDATE order_list 
-            SET payment_status = 4, delivery_status = 6, date_updated = NOW() 
-            WHERE id = {$order_id}");
+			SET payment_status = 4, delivery_status = 6, is_seen = 0, date_updated = NOW() 
+			WHERE id = {$order_id}");
 
 			if (!$update) {
 				throw new Exception("ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้: " . $this->conn->error);
@@ -1370,6 +1370,7 @@ class Master extends DBConnection
 			echo $e->getMessage();
 		}
 	}
+
 	function return_order()
 	{
 		// ใช้ extract เพื่อรับค่า 'order_id' จาก AJAX POST request
@@ -1394,8 +1395,9 @@ class Master extends DBConnection
 			$customer_name = $order['customer_name'];
 
 			$update = $this->conn->query("UPDATE order_list 
-            SET payment_status = 5, delivery_status = 8, date_updated = NOW() 
-            WHERE id = {$order_id}");
+			SET payment_status = 5, delivery_status = 8, is_seen = 0, date_updated = NOW() 
+			WHERE id = {$order_id}");
+
 
 			if (!$update) {
 				throw new Exception("ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้: " . $this->conn->error);
@@ -1523,6 +1525,7 @@ class Master extends DBConnection
 			echo $e->getMessage();
 		}
 	}
+
 	function log_promotion_usage($promotion_id, $customer_id, $order_id, $discount_amount, $items_in_order)
 	{
 		$query = "
@@ -1560,13 +1563,12 @@ class Master extends DBConnection
 		$payment_status = isset($_POST['payment_status']) ? (int)$_POST['payment_status'] : 0;
 		$delivery_status = isset($_POST['delivery_status']) ? (int)$_POST['delivery_status'] : 0;
 
-
-
+		// อัปเดตสถานะและตั้ง is_seen เป็น 0
 		$update = $this->conn->query("UPDATE `order_list` 
         SET 
             `payment_status` = '{$payment_status}',
             `delivery_status` = '{$delivery_status}',
-			`status` = 0  
+            `is_seen` = 0
         WHERE id = '{$id}'");
 
 		if ($update) {
@@ -1581,6 +1583,7 @@ class Master extends DBConnection
 
 		return json_encode($resp);
 	}
+
 
 	function send_order_status_email($order_id, $payment_status, $delivery_status)
 	{
