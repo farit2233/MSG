@@ -54,21 +54,21 @@
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group">
                         <label for="firstname" class="control-label">ชื่อ</label>
-                        <input type="text" class="form-control form-control-sm" required name="firstname" id="firstname"
+                        <input type="text" class="form-control" required name="firstname" id="firstname"
                           title="กรุณาใส่ชื่อตามจริง เพื่อที่จะสามารถจัดส่งได้ง่าย">
                       </div>
                       <div class="form-group">
                         <label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
-                        <input type="text" class="form-control form-control-sm" name="middlename" id="middlename">
+                        <input type="text" class="form-control" name="middlename" id="middlename">
                       </div>
                       <div class="form-group">
                         <label for="lastname" class="control-label">นามสกุล</label>
-                        <input type="text" class="form-control form-control-sm" required name="lastname" id="lastname"
+                        <input type="text" class="form-control" required name="lastname" id="lastname"
                           title="กรุณาใส่นามสกุลตามจริง เพื่อที่จะสามารถจัดส่งได้ง่าย">
                       </div>
                       <div class="form-group">
                         <label for="gender" class="control-label">เพศ</label>
-                        <select class="custom-select custom-select-sm" required name="gender" id="gender">
+                        <select class="custom-select custom-select" required name="gender" id="gender">
                           <option value="Male">ชาย</option>
                           <option value="Female">หญิง</option>
                         </select>
@@ -77,24 +77,24 @@
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group">
                         <label for="email" class="control-label">Email</label>
-                        <input type="email" class="form-control form-control-sm" required name="email" id="email"
+                        <input type="email" class="form-control" required name="email" id="email"
                           title="กรุณาใส่อีเมล">
                       </div>
                       <div class="form-group">
                         <label for="contact" class="control-label">เบอร์โทร</label>
-                        <input type="text" class="form-control form-control-sm" required name="contact" id="contact"
+                        <input type="text" class="form-control" required name="contact" id="contact"
                           maxlength="15"
                           pattern="\d{10,}"
                           title="กรุณาใส่ตัวเลขอย่างน้อย 10 ตัว">
                       </div>
                       <div class="form-group">
                         <label for="password" class="control-label">รหัสผ่าน</label>
-                        <input type="password" class="form-control form-control-sm" required name="password" id="password"
+                        <input type="password" class="form-control" required name="password" id="password"
                           title="กรุณาใส่รหัสผ่าน">
                       </div>
                       <div class="form-group">
                         <label for="cpassword" class="control-label">ยืนยัน รหัสผ่าน</label>
-                        <input type="password" class="form-control form-control-sm" required id="cpassword"
+                        <input type="password" class="form-control" required id="cpassword"
                           title="ยืนยันรหัสผ่าน">
                       </div>
                     </div>
@@ -107,25 +107,25 @@
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group">
                         <label for="address" class="control-label">บ้านเลขที่ ถนน</label>
-                        <input type="text" class="form-control form-control-sm" name="address" id="address">
+                        <input type="text" class="form-control" name="address" id="address">
                       </div>
                       <div class="form-group">
                         <label for="sub_district" class="control-label">ตำบล</label>
-                        <input type="text" class="form-control form-control-sm" name="sub_district" id="sub_district">
+                        <input type="text" class="form-control" name="sub_district" id="sub_district">
                       </div>
                       <div class="form-group">
                         <label for="district" class="control-label">อำเภอ</label>
-                        <input type="text" class="form-control form-control-sm" name="district" id="district">
+                        <input type="text" class="form-control" name="district" id="district">
                       </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group">
                         <label for="province" class="control-label">จังหวัด</label>
-                        <input type="text" class="form-control form-control-sm" name="province" id="province">
+                        <input type="text" class="form-control" name="province" id="province">
                       </div>
                       <div class="form-group">
                         <label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
-                        <input type="text" class="form-control form-control-sm" name="postal_code" id="postal_code">
+                        <input type="text" class="form-control" name="postal_code" id="postal_code">
                       </div>
                     </div>
                   </div>
