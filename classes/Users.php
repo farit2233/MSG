@@ -21,10 +21,11 @@
 			unset($_POST['cropped_image']); // Remove from POST to avoid database error
 			// --- End: New logic ---
 
+			// Check if password is empty (for new user, it will be set)
 			if (empty($_POST['password']))
 				unset($_POST['password']);
 			else
-				$_POST['password'] = md5($_POST['password']);
+				$_POST['password'] = md5($_POST['password']); // Hash the password
 
 			extract($_POST);
 			$data = '';
@@ -40,66 +41,122 @@
 				}
 			}
 
-			$check = $this->conn->query("SELECT * FROM `users` where username = '{$username}' and id !='{$id}' ")->num_rows;
-			if ($check > 0) {
-				$resp['status'] = 'failed';
-				$resp['msg'] = 'Username already exists.';
-				return json_encode($resp);
-				exit;
-			}
-
-			$sql = "UPDATE users set $data where id = '{$id}'";
-			$save = $this->conn->query($sql);
-
-			$resp = array(); // Initialize response array
-
-			if ($save) {
-				$resp['status'] = 'success';
-				$resp['msg'] = 'User Details successfully updated.';
-				$this->settings->set_flashdata('success', 'User Details successfully updated.');
-
-				// Update session data
-				foreach ($_POST as $k => $v) {
-					if ($this->settings->userdata('id') == $id)
-						$this->settings->set_userdata($k, $v);
+			// --- Check if it's a new user ---
+			if (empty($id)) {
+				// Check if the username already exists
+				$check = $this->conn->query("SELECT * FROM `users` WHERE username = '{$username}'")->num_rows;
+				if ($check > 0) {
+					$resp['status'] = 'failed';
+					$resp['msg'] = 'Username already exists.';
+					return json_encode($resp);
+					exit;
 				}
 
-				// --- Start: New logic to save cropped image file from Base64 data ---
-				if (!empty($cropped_image_data)) {
-					$upload_path = base_app . "uploads/avatars/";
-					if (!is_dir($upload_path))
-						mkdir($upload_path, 0777, true);
+				// --- Insert new user ---
+				$sql = "INSERT INTO `users` SET $data";
+				$save = $this->conn->query($sql);
+				$new_user_id = $this->conn->insert_id; // Get the new user ID after insert
 
-					// Decode the base64 string
-					$image_parts = explode(";base64,", $cropped_image_data);
-					$image_base64 = base64_decode($image_parts[1]);
+				if ($save) {
+					$resp['status'] = 'success';
+					$resp['msg'] = 'บัญชีสมาชิกสร้างเรียบร้อย';
 
-					// Define file name and path
-					$fname = "{$upload_path}{$id}.png"; // Standardize as .png
+					// --- Start: Save cropped image logic ---
+					if (!empty($cropped_image_data)) {
+						$upload_path = base_app . "uploads/avatars/";
+						if (!is_dir($upload_path))
+							mkdir($upload_path, 0777, true);
 
-					// Save the file
-					if (file_put_contents($fname, $image_base64)) {
-						// Update database with the new avatar path
-						$avatar_path = "uploads/avatars/{$id}.png";
-						$this->conn->query("UPDATE `users` set `avatar` = CONCAT('{$avatar_path}', '?v=', unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$id}'");
+						// Decode base64 image
+						$image_parts = explode(";base64,", $cropped_image_data);
+						$image_base64 = base64_decode($image_parts[1]);
 
-						// Update session avatar
-						if ($this->settings->userdata('id') == $id)
-							$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
-					} else {
-						$resp['msg'] .= " (but failed to save profile picture)";
+						// Define file name
+						$fname = "{$upload_path}{$new_user_id}.png"; // Standardize as .png
+
+						// Save the file
+						if (file_put_contents($fname, $image_base64)) {
+							// Update database with new avatar path
+							$avatar_path = "uploads/avatars/{$new_user_id}.png";
+							$this->conn->query("UPDATE `users` SET `avatar` = '{$avatar_path}' WHERE id = '{$new_user_id}'");
+
+							// Update session avatar
+							if ($this->settings->userdata('id') == $new_user_id)
+								$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
+						} else {
+							$resp['msg'] .= " (but failed to save profile picture)";
+						}
 					}
+					// --- End: Save cropped image logic ---
+				} else {
+					$resp['status'] = 'failed';
+					$resp['msg'] = $this->conn->error;
 				}
-				// --- End: New logic ---
-
 			} else {
-				$resp['status'] = 'failed';
-				$resp['msg'] = $this->conn->error;
+				// --- Update existing user ---
+				// Check if the username already exists
+				$check = $this->conn->query("SELECT * FROM `users` WHERE username = '{$username}' AND id != '{$id}'")->num_rows;
+				if ($check > 0) {
+					$resp['status'] = 'failed';
+					$resp['msg'] = 'Username already exists.';
+					return json_encode($resp);
+					exit;
+				}
+
+				// Update the user
+				$sql = "UPDATE users SET $data WHERE id = '{$id}'";
+				$save = $this->conn->query($sql);
+
+				$resp = array(); // Initialize response array
+
+				if ($save) {
+					$resp['status'] = 'success';
+					$resp['msg'] = 'บัญชีสมาชิกอัปเดตเรียบร้อย';
+					$this->settings->set_flashdata('success', 'บัญชีสมาชิกอัปเดตเรียบร้อย');
+
+					// Update session data
+					foreach ($_POST as $k => $v) {
+						if ($this->settings->userdata('id') == $id)
+							$this->settings->set_userdata($k, $v);
+					}
+
+					// --- Start: Save cropped image logic ---
+					if (!empty($cropped_image_data)) {
+						$upload_path = base_app . "uploads/avatars/";
+						if (!is_dir($upload_path))
+							mkdir($upload_path, 0777, true);
+
+						// Decode base64 image
+						$image_parts = explode(";base64,", $cropped_image_data);
+						$image_base64 = base64_decode($image_parts[1]);
+
+						// Define file name
+						$fname = "{$upload_path}{$id}.png"; // Standardize as .png
+
+						// Save the file
+						if (file_put_contents($fname, $image_base64)) {
+							// Update database with new avatar path
+							$avatar_path = "uploads/avatars/{$id}.png";
+							$this->conn->query("UPDATE `users` SET `avatar` = '{$avatar_path}' WHERE id = '{$id}'");
+
+							// Update session avatar
+							if ($this->settings->userdata('id') == $id)
+								$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
+						} else {
+							$resp['msg'] .= " (but failed to save profile picture)";
+						}
+					}
+					// --- End: Save cropped image logic ---
+				} else {
+					$resp['status'] = 'failed';
+					$resp['msg'] = $this->conn->error;
+				}
 			}
 
 			// Return JSON response
 			echo json_encode($resp);
 		}
+
 		public function delete_users()
 		{
 			extract($_POST);
