@@ -221,7 +221,7 @@ foreach ($user->fetch_array() as $k => $v) {
 											<input type="text" class="form-control form-control-sm" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required autocomplete="off">
 										</div>
 										<div class="form-group">
-											<label for="password" class="control-label">รหัสผ่านใหม่</label>
+											<label for="password" class="control-label">รหัสผ่าน</label>
 											<input type="password" name="password" id="password" class="form-control form-control-sm" value="" autocomplete="off">
 											<small><i>ปล่อยว่างไว้ถ้าคุณไม่ต้องการเปลี่ยนรหัสผ่าน</i></small>
 										</div>
