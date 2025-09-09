@@ -217,7 +217,7 @@ foreach ($user->fetch_array() as $k => $v) {
 									</div>
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
-											<label for="username" class="control-label">ID</label>
+											<label for="username" class="control-label">ชื่อบัญชี</label>
 											<input type="text" class="form-control form-control-sm" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required autocomplete="off">
 										</div>
 										<div class="form-group">
