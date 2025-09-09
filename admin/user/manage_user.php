@@ -176,7 +176,7 @@ if (isset($_GET['id'])) {
 					<div class="card-body">
 						<div class="container-fluid">
 							<div class="profile-cart-header-bar">
-								<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i><?= isset($meta['id']) ? "แก้ไขข้อมูลบัญชี" : "สร้างบัญชีใหม่" ?></h3>
+								<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i><?= isset($meta['id']) ? "แก้ไขข้อมูลบัญชีสมาชิก" : "สร้างบัญชีใหม่สมาชิกใหม่" ?></h3>
 							</div>
 							<form id="manage-user" action="" method="post">
 								<input type="hidden" name="id" value="<?= isset($meta['id']) ? $meta['id'] : '' ?>">
