@@ -15,33 +15,41 @@ if (isset($_GET['id'])) {
 <?php endif; ?>
 
 <style>
-	img#cimg {
-		height: 10em;
-		width: 10em;
-		object-fit: cover;
-		border-radius: 100% 100%;
+	/* --- Styles from Registration page theme --- */
+	.profile-page {
+		padding-top: 0px !important;
+		background-size: cover;
+		background-repeat: no-repeat;
+		overflow-x: hidden;
 	}
 
-	.bg-gradient-dark-FIXX {
-		background-color: #202020;
+	.profile-page label {
+		font-size: 18px;
 	}
 
-	.bg-btn-update {
-		background: none;
-		color: #f57421;
-		border: 2px solid #f57421;
-		padding: 10px 50px;
-		margin-top: 1rem;
+	.profile-page input,
+	.profile-page select {
+		border-radius: 13px;
+		font-size: 16px;
+	}
+
+	.profile-page .custom-file-label {
+		border-radius: 13px;
+		font-size: 16px !important;
+	}
+
+	.profile-section-title-with-line h3 {
+		position: relative;
+		border-bottom: 2px solid #f57421 !important;
+		padding-bottom: 0.5rem;
 		margin-bottom: 1rem;
 	}
 
-	.bg-btn-update:hover {
-		background-color: #f57421;
-		color: white;
-		display: inline-block;
+	.profile-section-title-with-line h3::after {
+		content: none !important;
 	}
 
-	.cart-header-bar {
+	.profile-cart-header-bar {
 		border-left: 4px solid #ff6600;
 		padding: 16px 20px;
 		border-radius: 12px;
@@ -49,226 +57,430 @@ if (isset($_GET['id'])) {
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 	}
 
-	input.form-control {
+	.profile-card {
 		border-radius: 13px;
-		font-size: 16px;
+		max-width: 767.98px;
+		margin: auto;
+		width: 100%;
 	}
 
-	label {
-		font-size: 18px;
+	img#cimg {
+		height: 10em;
+		width: 10em;
+		object-fit: cover;
+		border-radius: 100%;
+		border: 3px solid #f57421;
+		padding: 4px;
 	}
 
-	.custom-input {
-		border-radius: 13px;
-		font-size: 16px;
+	.custom-file-input:focus~.custom-file-label {
+		border-color: #f57421;
+		box-shadow: 0 0 0 0.2rem rgba(245, 116, 33, 0.25);
 	}
 
-	.section-title-with-line h3 {
-		position: relative;
-		border-bottom: 2px solid #f57421 !important;
-		padding-bottom: 0.5rem;
+	.btn-update {
+		background: none;
+		color: #f57421;
+		border: 2px solid #f57421;
+		padding: 10px 10px;
+		margin-top: 1rem;
 		margin-bottom: 1rem;
-
+		width: 100%;
 	}
 
-	.section-title-with-line h3::after {
-		content: none !important;
-		/* ปิดการสร้างเส้นซ้อนแบบ pseudo element */
+	.btn-update:hover {
+		background-color: #f57421;
+		color: white;
 	}
 
-	@media (max-width: 767.98px) {
-		.bg-btn-update {
-			width: 100%;
-		}
+	#cropModal .modal-dialog-user {
+		position: fixed !important;
+		/* ทำให้ dialog ล็อกตาม viewport */
+		top: 50%;
+		/* กึ่งกลางแนวตั้ง */
+		left: 50%;
+		/* กึ่งกลางแนวนอน */
+		transform: translate(-50%, -50%);
+		/* ปรับให้ตรงกลางพอดี */
+		max-width: 600px;
+		width: 100%;
+		margin: 0;
+		max-height: 100px;
+		height: 100%;
+		/* ไม่ให้ Bootstrap ใส่ margin */
+	}
+
+	#cropModal .modal-content {
+		border-radius: 15px;
+		overflow: hidden;
+	}
+
+	.img-container {
+		max-height: 500px;
+		overflow: hidden;
+		background-color: #2c2f33;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.img-container img {
+		max-width: 100%;
+	}
+
+	.cropper-view-box,
+	.cropper-face {
+		border-radius: 50%;
+	}
+
+	.cropper-container .cropper-move {
+		cursor: grab !important;
+	}
+
+	.cropper-container .cropper-move:active {
+		cursor: grabbing !important;
+	}
+
+	#crop_button {
+		background-color: #f57421;
+		border-color: #f57421;
+	}
+
+	.zoom-controls {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		margin-top: 15px;
+	}
+
+	.zoom-controls i {
+		color: #6c757d;
+	}
+
+	#zoom_slider {
+		width: 70%;
+		cursor: pointer;
+	}
+
+	input[type=range].form-control-range::-webkit-slider-thumb {
+		background: #f57421;
+	}
+
+	input[type=range].form-control-range::-moz-range-thumb {
+		background: #f57421;
 	}
 </style>
-<div class="card rounded-1">
-	<div class="cart-header-bar">
-		<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i><?= isset($id) ? "แก้ไขข้อมูลบัญชี" : "สร้างบัญชีใหม่" ?></h3>
+<section class="py-3 profile-page">
+	<div class="container">
+		<div class="row mt-n4 justify-content-center align-items-center flex-column">
+			<div class="col-lg-10 col-md-11 col-sm-12 col-xs-12">
+				<div class="card profile-card shadow" style="margin-top: 3rem;">
+					<div class="card-body">
+						<div class="container-fluid">
+							<div class="profile-cart-header-bar">
+								<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i><?= isset($id) ? "แก้ไขข้อมูลบัญชี" : "สร้างบัญชีใหม่" ?></h3>
+							</div>
+							<form id="update-form" action="" method="post">
+								<div class="profile-section-title-with-line mb-4">
+									<h3>โปรไฟล์</h3>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+										<div class="form-group">
+											<div class="form-group d-flex justify-content-center mt-2">
+												<img src="<?php echo validate_image(isset($avatar) ? $avatar : '') ?>" alt="Avatar Preview" id="cimg" class="img-fluid">
+											</div>
+											<div class="custom-file custom-input">
+												<input type="file" class="custom-file-input custom-input" id="customFile" name="img"
+													onchange="displayImg(this,$(this))" accept="image/png, image/jpeg">
+												<label class="custom-file-label custom-input" for="customFile">เลือกรูปจากไฟล์ในเครื่อง</label>
+
+											</div>
+										</div>
+									</div>
+								</div>
+								<input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
+								<input type="hidden" name="cropped_image" id="cropped_image">
+								<input type="hidden" name="old_avatar" value="<?= isset($avatar) ? $avatar : '' ?>">
+								<div class="profile-section-title-with-line mb-4">
+									<h3>ข้อมูลส่วนตัว</h3>
+								</div>
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+										<div class="form-group">
+											<label for="firstname" class="control-label">ชื่อ</label>
+											<input type="text" class="form-control form-control-sm" required name="firstname" id="firstname" value="<?= isset($firstname) ? $firstname : '' ?>">
+										</div>
+										<div class="form-group">
+											<label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
+											<input type="text" class="form-control form-control-sm" name="middlename" id="middlename" value="<?= isset($middlename) ? $middlename : '' ?>">
+										</div>
+										<div class="form-group">
+											<label for="lastname" class="control-label">นามสกุล</label>
+											<input type="text" class="form-control form-control-sm" required name="lastname" id="lastname" value="<?= isset($lastname) ? $lastname : '' ?>">
+										</div>
+										<div class="form-group">
+											<label for="gender" class="control-label custom-input">เพศ</label>
+											<select class="custom-select custom-select-sm custom-input" reqiured="" name="gender" id="gender">
+												<option value="Male" <?= isset($gender) && $gender == 'Male' ? "selected" : '' ?>>ชาย</option>
+												<option value="Female" <?= isset($gender) && $gender == 'Female' ? "selected" : '' ?>>หญิง</option>
+											</select>
+										</div>
+									</div>
+									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+										<div class="form-group">
+											<label for="email" class="control-label">Email</label>
+											<input type="text" class="form-control form-control-sm" required name="email" id="email" value="<?= isset($email) ? $email : '' ?>">
+										</div>
+										<div class="form-group">
+											<label for="contact" class="control-label">เบอร์โทร</label>
+											<input type="text" class="form-control form-control-sm" required name="contact" id="contact" value="<?= isset($contact) ? $contact : '' ?>">
+										</div>
+										<div class="form-group">
+											<label for="password" class="control-label">รหัสผ่านใหม่</label>
+											<input type="password" class="form-control form-control-sm" name="password" id="password">
+										</div>
+										<div class="form-group">
+											<label for="cpassword" class="control-label">ยืนยัน รหัสผ่านใหม่</label>
+											<input type="password" class="form-control form-control-sm" id="cpassword">
+										</div>
+									</div>
+								</div>
+								<div class="profile-section-title-with-line mb-4">
+									<h3>ที่อยู่จัดส่ง</h3>
+								</div>
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+										<div class="form-group">
+											<label for="address" class="control-label">บ้านเลขที่ ถนน</label>
+											<input type="text" class="form-control form-control-sm" name="address" id="address" value="<?= isset($address) ? $address : '' ?>">
+										</div>
+
+										<div class="form-group">
+											<label for="city" class="control-label">ตำบล</label>
+											<input type="text" class="form-control form-control-sm" name="sub_district" id="sub_district" value="<?= isset($sub_district) ? $sub_district : '' ?>">
+										</div>
+										<div class="form-group">
+											<label for="city" class="control-label">อำเภอ</label>
+											<input type="text" class="form-control form-control-sm" name="district" id="district" value="<?= isset($district) ? $district : '' ?>">
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+										<div class="form-group">
+											<label for="state_province" class="control-label">จังหวัด</label>
+											<input type="text" class="form-control form-control-sm" name="province" id="province" value="<?= isset($province) ? $province : '' ?>">
+										</div>
+										<div class="form-group">
+											<label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
+											<input type="text" class="form-control form-control-sm" name="postal_code" id="postal_code" value="<?= isset($postal_code) ? $postal_code : '' ?>">
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-md-5 col-12 text-center">
+										<button type="submit" class="btn btn-update btn-block rounded-pill">บันทึกการเปลี่ยนแปลง</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div class="card-body">
-		<form id="update-form" action="" method="post">
-			<div class="section-title-with-line mb-4">
-				<h3>โปรไฟล์</h3>
+</section>
+<div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-dialog-user " role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<i class="fa fa-times"></i>
+				</button>
 			</div>
-			<div class="row justify-content-center">
-				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-					<div class="form-group">
-						<div class="form-group d-flex justify-content-center mt-2">
-							<img src="<?php echo validate_image(isset($avatar) ? $avatar : '') ?>" alt="" id="cimg"
-								class="img-fluid img-thumbnail" style="max-width: 200px;">
-						</div>
-						<div class="custom-file custom-input">
-							<input type="file" class="custom-file-input custom-input" id="customFile" name="img"
-								onchange="displayImg(this,$(this))" accept="image/png, image/jpeg">
-							<label class="custom-file-label custom-input" for="customFile">เลือกรูปจากไฟล์ในเครื่อง</label>
-
-						</div>
-					</div>
+			<div class="modal-body">
+				<div class="img-container">
+					<img id="image_to_crop" src="">
+				</div>
+				<div class="zoom-controls">
+					<i class="fas fa-search-minus"></i>
+					<input type="range" class="form-control-range" id="zoom_slider" min="0.1" max="2" step="0.01">
+					<i class="fas fa-search-plus"></i>
 				</div>
 			</div>
-			<input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
-			<div class="section-title-with-line mb-4">
-				<h3>ข้อมูลส่วนตัว</h3>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+				<button type="button" class="btn btn-primary" id="crop_button">บันทึก</button>
 			</div>
-			<div class="row">
-				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-					<div class="form-group">
-						<label for="firstname" class="control-label">ชื่อ</label>
-						<input type="text" class="form-control form-control-sm" required name="firstname" id="firstname" value="<?= isset($firstname) ? $firstname : '' ?>">
-					</div>
-					<div class="form-group">
-						<label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
-						<input type="text" class="form-control form-control-sm" name="middlename" id="middlename" value="<?= isset($middlename) ? $middlename : '' ?>">
-					</div>
-					<div class="form-group">
-						<label for="lastname" class="control-label">นามสกุล</label>
-						<input type="text" class="form-control form-control-sm" required name="lastname" id="lastname" value="<?= isset($lastname) ? $lastname : '' ?>">
-					</div>
-					<div class="form-group">
-						<label for="gender" class="control-label custom-input">เพศ</label>
-						<select class="custom-select custom-select-sm custom-input" reqiured="" name="gender" id="gender">
-							<option value="Male" <?= isset($gender) && $gender == 'Male' ? "selected" : '' ?>>ชาย</option>
-							<option value="Female" <?= isset($gender) && $gender == 'Female' ? "selected" : '' ?>>หญิง</option>
-						</select>
-					</div>
-				</div>
-				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-					<div class="form-group">
-						<label for="email" class="control-label">Email</label>
-						<input type="text" class="form-control form-control-sm" required name="email" id="email" value="<?= isset($email) ? $email : '' ?>">
-					</div>
-					<div class="form-group">
-						<label for="contact" class="control-label">เบอร์โทร</label>
-						<input type="text" class="form-control form-control-sm" required name="contact" id="contact" value="<?= isset($contact) ? $contact : '' ?>">
-					</div>
-					<div class="form-group">
-						<label for="password" class="control-label">รหัสผ่านใหม่</label>
-						<input type="password" class="form-control form-control-sm" name="password" id="password">
-					</div>
-					<div class="form-group">
-						<label for="cpassword" class="control-label">ยืนยัน รหัสผ่านใหม่</label>
-						<input type="password" class="form-control form-control-sm" id="cpassword">
-					</div>
-				</div>
-			</div>
-			<div class="section-title-with-line mb-4">
-				<h3>ที่อยู่จัดส่ง</h3>
-			</div>
-			<div class="row">
-				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-					<div class="form-group">
-						<label for="address" class="control-label">บ้านเลขที่ ถนน</label>
-						<input type="text" class="form-control form-control-sm" name="address" id="address" value="<?= isset($address) ? $address : '' ?>">
-					</div>
-
-					<div class="form-group">
-						<label for="city" class="control-label">ตำบล</label>
-						<input type="text" class="form-control form-control-sm" name="sub_district" id="sub_district" value="<?= isset($sub_district) ? $sub_district : '' ?>">
-					</div>
-					<div class="form-group">
-						<label for="city" class="control-label">อำเภอ</label>
-						<input type="text" class="form-control form-control-sm" name="district" id="district" value="<?= isset($district) ? $district : '' ?>">
-					</div>
-				</div>
-
-				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-					<div class="form-group">
-						<label for="state_province" class="control-label">จังหวัด</label>
-						<input type="text" class="form-control form-control-sm" name="province" id="province" value="<?= isset($province) ? $province : '' ?>">
-					</div>
-					<div class="form-group">
-						<label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
-						<input type="text" class="form-control form-control-sm" name="postal_code" id="postal_code" value="<?= isset($postal_code) ? $postal_code : '' ?>">
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-8 col-12 text-md-left text-center mb-2 mb-md-0">
-				</div>
-				<div class="col-md-4 col-12 text-md-right text-center">
-					<button type="submit" class="btn bg-btn-update btn-block rounded-pill">บันทึกข้อมูล</button>
-				</div>
-			</div>
-		</form>
+		</div>
 	</div>
 </div>
-
 <script>
-	function displayImg(input, _this) {
-		if (input.files && input.files[0]) {
-			var reader = new FileReader();
-			reader.onload = function(e) {
-				$('#cimg').attr('src', e.target.result);
-			}
-			reader.readAsDataURL(input.files[0]);
-		} else {
-			// ปรับปรุงให้ใช้ข้อมูล avatar ที่มีอยู่ หากไม่ได้เลือกรูปใหม่
-			$('#cimg').attr('src', "<?php echo validate_image(isset($avatar) ? $avatar : '') ?>");
-		}
-	}
 	$(document).ready(function() {
 		end_loader();
-		$('.pass_view').click(function() {
-			var input = $(this).siblings('input')
-			var type = input.attr('type')
-			if (type == 'password') {
-				$(this).html('<i class="fa fa-eye"></i>')
-				input.attr('type', 'text').focus()
-			} else {
-				$(this).html('<i class="fa fa-eye-slash"></i>')
-				input.attr('type', 'password').focus()
-			}
-		})
+
+		// --- Form Submission Logic ---
 		$('#update-form').submit(function(e) {
 			e.preventDefault();
-			var _this = $(this)
-			var el = $('<div>')
-			el.addClass('alert alert-danger err_msg')
-			el.hide()
-			$('.err_msg').remove()
-			// เพิ่มการตรวจสอบว่ารหัสผ่านตรงกันหรือไม่
-			if ($('#password').val() != $('#cpassword').val()) {
-				el.text('รหัสผ่านไม่ตรงกัน')
-				_this.prepend(el)
-				el.show('slow')
-				$('html, body').scrollTop(0)
+			var _this = $(this);
+			var el = $('<div>');
+			el.addClass('alert alert-danger err_msg');
+			el.hide();
+			$('.err_msg').remove();
+
+			if ($('#password').val() != '' && $('#password').val() != $('#cpassword').val()) {
+				el.text('รหัสผ่านใหม่ไม่ตรงกัน');
+				_this.prepend(el);
+				el.show('slow');
+				$('html, body').scrollTop(0);
 				return false;
 			}
+
 			if (_this[0].checkValidity() == false) {
 				_this[0].reportValidity();
 				return false;
 			}
-			start_loader()
+
+			start_loader();
+			var formData = new FormData($(this)[0]);
+
+			// เช็คว่ามีการเลือกไฟล์ใหม่ไหม ถ้าไม่มีให้ส่งรูปเก่าที่มี
+			if (!$('#customFile').val()) {
+				formData.append('cropped_image', $('#cropped_image').val()); // รูปเก่าที่ถูกบันทึกไว้
+			}
+
 			$.ajax({
-				url: _base_url_ + "classes/Users.php?f=registration", // ใช้ URL เดิม
+				url: _base_url_ + "classes/Users.php?f=registration", // Make sure this endpoint is correct for updates
 				method: 'POST',
-				type: 'POST',
-				data: new FormData($(this)[0]),
+				data: formData,
 				dataType: 'json',
 				cache: false,
-				processData: false,
 				contentType: false,
+				processData: false,
 				error: err => {
-					console.log(err)
-					alert('An error occurred')
-					end_loader()
+					console.log(err);
+					alert('An error occurred');
+					end_loader();
 				},
 				success: function(resp) {
 					if (resp.status == 'success') {
-						location.reload()
+						location.reload();
 					} else if (!!resp.msg) {
-						el.html(resp.msg)
-						el.show('slow')
-						_this.prepend(el)
-						$('html, body').scrollTop(0)
+						el.html(resp.msg);
+						el.show('slow');
+						_this.prepend(el);
+						$('html, body').scrollTop(0);
 					} else {
-						alert('An error occurred')
-						console.log(resp)
+						alert('An error occurred');
+						console.log(resp);
 					}
-					end_loader()
+					end_loader();
 				}
-			})
-		})
-	})
+			});
+		});
+		// --- Cropper.js Logic ---
+		var $modal = $('#cropModal');
+		var image = document.getElementById('image_to_crop');
+		var cropper;
+		var zoomSlider = document.getElementById('zoom_slider');
+
+		function resizeImage(file, maxWidth, maxHeight, callback) {
+			var reader = new FileReader();
+			reader.onload = function(event) {
+				var img = new Image();
+				img.onload = function() {
+					var canvas = document.createElement('canvas');
+					var ctx = canvas.getContext('2d');
+					var width = img.width;
+					var height = img.height;
+
+					// คำนวณขนาดใหม่
+					if (width > height) {
+						if (width > maxWidth) {
+							height = Math.round(height * (maxWidth / width));
+							width = maxWidth;
+						}
+					} else {
+						if (height > maxHeight) {
+							width = Math.round(width * (maxHeight / height));
+							height = maxHeight;
+						}
+					}
+
+					// กำหนดขนาดใหม่ให้กับ canvas
+					canvas.width = width;
+					canvas.height = height;
+					ctx.drawImage(img, 0, 0, width, height);
+					callback(canvas.toDataURL('image/jpeg'));
+				};
+				img.src = event.target.result;
+			};
+			reader.readAsDataURL(file);
+		}
+
+		$('#customFile').on('change', function(e) {
+			var files = e.target.files;
+			if (files && files.length > 0) {
+				var reader = new FileReader();
+				reader.onload = function(event) {
+					image.src = event.target.result;
+					$modal.modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});
+				};
+				reader.readAsDataURL(files[0]);
+				var fileName = $(this).val().split('\\').pop();
+				$(this).next('.custom-file-label').html(fileName);
+			}
+		});
+
+		$modal.on('shown.bs.modal', function() {
+			cropper = new Cropper(image, {
+				aspectRatio: 1,
+				viewMode: 1,
+				dragMode: 'move',
+				cropBoxMovable: false,
+				cropBoxResizable: false,
+				wheelZoomRatio: 0,
+				background: false,
+				responsive: true,
+				autoCropArea: 1,
+				ready: function() {
+					let canvasData = cropper.getCanvasData();
+					let initialZoom = canvasData.width / canvasData.naturalWidth;
+					zoomSlider.min = initialZoom;
+					zoomSlider.max = initialZoom * 3;
+					zoomSlider.value = initialZoom;
+				}
+			});
+		}).on('hidden.bs.modal', function() {
+			cropper.destroy();
+			cropper = null;
+			$('#customFile').val('');
+			$('#customFile').next('.custom-file-label').html('เปลี่ยนรูปโปรไฟล์');
+		});
+
+		zoomSlider.addEventListener('input', function() {
+			if (cropper) {
+				cropper.zoomTo(this.value);
+			}
+		});
+
+		$('#crop_button').on('click', function() {
+			var canvas = cropper.getCroppedCanvas({
+				width: 400,
+				height: 400,
+				imageSmoothingQuality: 'high',
+			});
+
+			var base64data = canvas.toDataURL('image/jpeg');
+			$('#cimg').attr('src', base64data);
+			$('#cropped_image').val(base64data);
+			$modal.modal('hide');
+		});
+	});
 </script>
