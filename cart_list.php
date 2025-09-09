@@ -285,7 +285,7 @@ if (!function_exists('format_price_custom')) {
 
                                     <label class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
                                         data-id='<?= $row['id'] ?>'
-                                        data-max='<?= format_num($row['available'], 0) ?>'
+                                        data-max='<?= floor($row['available'] / 3) ?>'
                                         style="cursor: pointer;">
 
                                         <div class="col-auto pr-2">
@@ -560,7 +560,11 @@ if (!function_exists('format_price_custom')) {
             grandTotal += subtotal;
 
             html += `
-<label class="list-group-item cart-item d-flex w-100" data-id="${index}" data-max="999" style="cursor: pointer;">
+<label class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
+    data-id='<?= $row['id'] ?>'
+    data-max='<?= floor($row['available'] / 3) ?>'
+    style="cursor: pointer;">
+    style="cursor: pointer;">   
 	<div class="col-auto pr-2">
 		<input type="checkbox" class="form-check-input cart-check" data-price="${subtotal}" />
 	</div>
