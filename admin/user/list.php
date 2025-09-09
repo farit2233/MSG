@@ -45,7 +45,7 @@
 							<th class="text-center">ที่</th>
 							<th class="text-center">รูปโปรไฟล์</th>
 							<th class="text-center">ชื่อ</th>
-							<th class="text-center">Username</th>
+							<th class="text-center">ชื่อบัญชี</th>
 							<th class="text-center">ประเภท</th>
 							<th class="text-center">วันที่สร้าง</th>
 							<th class="text-center">จัดการ</th>
@@ -66,9 +66,9 @@
 								<td><?php echo $row['username'] ?></td>
 								<td class="text-center">
 									<?php if ($row['type'] == 1): ?>
-										Administrator
+										แอดมิน
 									<?php elseif ($row['type'] == 2): ?>
-										Staff
+										สต๊าฟ
 									<?php else: ?>
 										N/A
 									<?php endif; ?>
