@@ -50,7 +50,7 @@ if (isset($_GET['search'])) {
                         <div class="row gy-3 gx-3" id="product-list-container">
                             <div class="col-12 text-center py-5" id="loading-spinner">
                                 <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+                                    <span class="visually-hidden"></span>
                                 </div>
                                 <p class="mt-2">กำลังโหลดสินค้า...</p>
                             </div>
