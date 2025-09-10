@@ -46,13 +46,6 @@
     width: 100%;
   }
 
-  #page-title {
-    text-shadow: 6px 4px 7px black;
-    font-size: 3.5em;
-    color: #fff4f4 !important;
-    background: #8080801c;
-  }
-
   img#cimg {
     height: 10em;
     width: 10em;
