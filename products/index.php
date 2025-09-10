@@ -1,120 +1,76 @@
 <style>
-    .plain-link {
-        color: inherit;
-        text-decoration: none;
-        cursor: pointer;
-        margin-left: 0.5rem;
-    }
-
-    .plain-link,
-    .plain-link:visited,
-    .plain-link:hover,
-    .plain-link:active {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .product-img-holder {
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        /* ทำให้กล่องภาพเป็นจัตุรัส */
-        overflow: hidden;
-        background: #f5f5f5;
-        position: relative;
-    }
-
-    .product-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center center;
-        transition: all .3s ease-in-out;
-    }
-
-    .product-item {
-        cursor: pointer;
-        /* แสดง pointer เมื่อ hover */
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        /* เพิ่ม transition สำหรับ effect */
-    }
-
-    /* เมื่อ hover ที่การ์ด จะขยายขนาดเล็กน้อย */
-    .product-item:hover {
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        /* เพิ่มเงาเมื่อ hover */
-    }
-
-    .product-item:hover .product-img {
-        transform: scale(1.1)
-    }
-
-    .bg-gradient-dark-FIXX {
-        background-color: #202020;
-    }
-
-    .card-title {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        /* จำนวนบรรทัด */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .banner-price {
-        font-size: 20px;
-        color: #f57421;
-    }
-
-    /* สำหรับป้ายสินค้าหมด */
-    .out-of-stock-label {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(255, 0, 0, 0.7);
-        /* สีแดงโปร่งแสง */
-        color: white;
-        padding: 8px 15px;
-        border-radius: 13px;
+    .separator {
+        font-size: 18px;
+        padding: 0 10px;
         font-weight: bold;
-        z-index: 10;
-        /* ให้แสดงทับบนรูปภาพ */
-        text-align: center;
-        white-space: nowrap;
+        color: #333;
     }
 
-    /* สำหรับสินค้าที่หมดสต็อก */
-    .out-of-stock .product-img {
-        filter: grayscale(100%);
-        /* ทำให้รูปภาพเป็นขาวดำ */
-        opacity: 0.6;
-        /* ทำให้รูปภาพจางลง */
+    .shopee-style-filter {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background-color: #ffffff;
     }
 
-    /* อาจจะเพิ่ม Overlay เมื่อสินค้าหมด */
-    .out-of-stock .product-img-holder::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.3);
-        /* Overlay สีดำโปร่งแสง */
-        z-index: 5;
-        /* อยู่ใต้ label แต่ทับรูปภาพ */
+    .filter-header {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        text-transform: uppercase;
     }
 
-    .badge-sm {
-        font-size: 12px;
-        /* ลดขนาดฟอนต์ */
-        padding: 4px 5px;
-        /* ปรับ padding */
-        background-color: #f79c60;
+    .price-inputs .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 2px;
+        font-size: 14px;
+        height: 34px;
+    }
+
+    .price-inputs .form-control::placeholder {
+        color: #bbb;
+    }
+
+    .price-inputs .form-control:focus {
+        border-color: #f57421;
+        box-shadow: 0 0 0 0.2rem rgba(238, 77, 45, 0.25);
+    }
+
+    .price-inputs .separator {
+        color: #757575;
+    }
+
+    .btn-filter {
+        background-color: #f57421;
+        color: #fff;
+        border: 1px solid #ee4d2d;
+        border-radius: 2px;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-filter:hover {
+        filter: brightness(90%);
+        color: white;
+    }
+
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=number] {
+        -webkit-appearance: none;
+        -moz-appearance: textfield;
+        appearance: none;
     }
 </style>
 <?php
-$page_title = "สินค้าทั้งหมด"; // ตั้งชื่อหน้าเริ่มต้น
+$page_title = "สินค้าทั้งหมด";
 $page_description = "";
 $current_cid = '';
 $current_tid = '';
@@ -207,8 +163,50 @@ if (!function_exists('format_price_custom')) {
                 <?= $breadcrumb_item_2_html ?>
             </ol>
         </nav>
-        <div class="row mt-n3 justify-content-center">
-            <div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
+        <div class="row">
+            <div class="col-lg-3 col-md-4">
+                <div class="card rounded-0 mb-3">
+                    <div class="card-body">
+                        <h5 class="mb-3">หมวดหมู่สินค้า</h5>
+                        <div id="category-filter-group">
+                            <?php
+                            $categories_qry = $conn->query("
+                                SELECT id, `name`, `other` 
+                                FROM `category_list` 
+                                WHERE `status` = 1 AND `delete_flag` = 0 
+                                ORDER BY `other` ASC, `name` DESC
+                            ");
+                            $counter = 0; // นับจำนวนหมวดหมู่
+                            $max_categories = 10; // จำนวนหมวดหมู่ที่จะแสดงเริ่มต้น
+                            while ($cat = $categories_qry->fetch_assoc()):
+                                $counter++;
+                            ?>
+                                <div class="form-check category-item <?= $counter > $max_categories ? 'd-none' : '' ?>">
+                                    <input class="form-check-input category-filter" type="checkbox" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>" <?= ($current_cid == $cat['id']) ? 'checked' : '' ?>>
+                                    <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
+                                        <?= $cat['name'] ?>
+                                    </label>
+                                </div>
+                            <?php endwhile; ?>
+                        </div>
+                        <button class="btn btn-link w-100" id="toggle-categories">
+                            <span id="toggle-text">แสดงผลเพิ่มเติม</span>
+                        </button>
+
+                    </div>
+                    <hr>
+                    <div class="card-body">
+                        <h5 class="filter-header mb-3">กรองตามราคา</h5>
+                        <div class="price-inputs d-flex align-items-center mb-3">
+                            <input type="number" class="form-control text-center me-2" id="min_price" placeholder="฿ ต่ำสุด">
+                            <div class="separator">-</div>
+                            <input type="number" class="form-control text-center ms-2" id="max_price" placeholder="฿ สูงสุด">
+                        </div>
+                        <button class="btn btn-filter w-100" id="apply-price-filter">กรอง <i class="fas fa-filter"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-8">
                 <div class="card card-outline rounded-0">
                     <div class="card-body">
                         <div class="row mb-3 align-items-center justify-content-end">
@@ -216,20 +214,20 @@ if (!function_exists('format_price_custom')) {
                                 <label for="sort_by" class="form-label mb-0">เรียงตาม:</label>
                             </div>
                             <div class="col-auto">
-                                <select class="form-select form-select-sm" id="sort_by" onchange="sortProducts()">
-                                    <option value="date_desc" <?= (!isset($_GET['sort']) || $_GET['sort'] == 'date_desc') ? 'selected' : '' ?>>สินค้าใหม่ล่าสุด</option>
-                                    <option value="date_asc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'date_asc') ? 'selected' : '' ?>>สินค้าเก่าสุด</option>
-                                    <option value="price_asc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'price_asc') ? 'selected' : '' ?>>ราคา: น้อยไปมาก</option>
-                                    <option value="price_desc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'price_desc') ? 'selected' : '' ?>>ราคา: มากไปน้อย</option>
-                                    <option value="name_asc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'name_asc') ? 'selected' : '' ?>>ชื่อ: A-Z</option>
-                                    <option value="name_desc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'name_desc') ? 'selected' : '' ?>>ชื่อ: Z-A</option>
+                                <select class="form-select form-select-sm" id="sort_by">
+                                    <option value="date_desc">สินค้าใหม่ล่าสุด</option>
+                                    <option value="date_asc">สินค้าเก่าสุด</option>
+                                    <option value="price_asc">ราคา: น้อยไปมาก</option>
+                                    <option value="price_desc">ราคา: มากไปน้อย</option>
+                                    <option value="name_asc">ชื่อ: A-Z</option>
+                                    <option value="name_desc">ชื่อ: Z-A</option>
                                 </select>
                             </div>
                         </div>
                         <div class="row gy-3 gx-3" id="product-list-container">
-                            <div class="col-12 text-center py-5" id="loading-spinner">
+                            <div class="col-12 text-center py-5">
                                 <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">Loading...</span>
+                                    <span class="sr-only"></span>
                                 </div>
                                 <p class="mt-2">กำลังโหลดสินค้า...</p>
                             </div>
@@ -242,45 +240,41 @@ if (!function_exists('format_price_custom')) {
 </section>
 <script>
     $(document).ready(function() {
-
-        // เก็บค่า filter ID จาก PHP
-        var currentCid = "<?= $current_cid ?>";
         var currentTid = "<?= $current_tid ?>";
         var currentPid = "<?= $current_pid ?>";
 
-        // ฟังก์ชันหลักสำหรับโหลดสินค้า
         function loadProducts(page = 1) {
             var sortBy = $('#sort_by').val();
             var productContainer = $('#product-list-container');
-            var loadingSpinnerHTML = `
-            <div class="col-12 text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
+            var loadingSpinnerHTML = `<div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status"><span class="sr-only"></span></div>
                 <p class="mt-2">กำลังโหลดสินค้า...</p>
             </div>`;
 
-            // แสดง loading spinner
             productContainer.html(loadingSpinnerHTML);
 
-            // **หมายเหตุ:** แก้ไข path 'url' ให้ตรงกับที่อยู่ของไฟล์ fetch_product.php ของคุณ
+            var selectedCategories = [];
+            $('.category-filter:checked').each(function() {
+                selectedCategories.push($(this).val());
+            });
+
+            var minPrice = $('#min_price').val();
+            var maxPrice = $('#max_price').val();
+
             $.ajax({
-                url: './ajax/fetch_products.php', // <-- **สำคัญมาก!** แก้ไข path ตรงนี้
+                url: './ajax/fetch_products.php',
                 method: 'GET',
                 data: {
-                    page: page, // ส่งเลขหน้าไปด้วย
+                    page: page,
                     sort: sortBy,
-                    cid: currentCid,
+                    cids: selectedCategories,
+                    min_price: minPrice,
+                    max_price: maxPrice,
                     tid: currentTid,
                     pid: currentPid
                 },
                 success: function(response) {
-                    // นำ HTML ที่ได้ (ทั้งสินค้าและเลขหน้า) มาแสดงผล
                     productContainer.html(response);
-                    // เลื่อนหน้าจอขึ้นไปบนสุดของรายการสินค้า (เผื่อผู้ใช้คลิกจากเลขหน้าด้านล่าง)
-                    $('html, body').animate({
-                        scrollTop: productContainer.offset().top - 80 // -80 คือ offset เผื่อมี header fixed
-                    }, 'fast');
                 },
                 error: function(xhr, status, error) {
                     console.error("AJAX Error: ", status, error);
@@ -289,27 +283,45 @@ if (!function_exists('format_price_custom')) {
             });
         }
 
-        // --- Event Listeners ---
-
-        // 1. โหลดสินค้าครั้งแรกเมื่อหน้าเว็บพร้อม (โหลดหน้า 1)
         loadProducts(1);
 
-        // 2. เมื่อมีการเปลี่ยนการเรียงลำดับ ให้โหลดหน้า 1 ใหม่
         $('#sort_by').on('change', function() {
             loadProducts(1);
         });
-
-        // 3. เมื่อมีการคลิกที่เลขหน้า (Pagination)
-        // ใช้ Event Delegation เพื่อให้ทำงานกับ element ของเลขหน้าที่ถูกโหลดมาทีหลังได้
+        $('.category-filter').on('change', function() {
+            loadProducts(1);
+        });
+        $('#apply-price-filter').on('click', function() {
+            loadProducts(1);
+        });
+        $('#min_price, #max_price').on('keypress', function(e) {
+            if (e.which == 13) {
+                loadProducts(1);
+            }
+        });
         $(document).on('click', '.pagination .page-link', function(e) {
-            e.preventDefault(); // ป้องกันไม่ให้หน้าเว็บรีโหลด
-
-            var page = $(this).data('page'); // ดึงเลขหน้าจาก attribute 'data-page'
-
+            e.preventDefault();
+            var page = $(this).data('page');
             if (page) {
                 loadProducts(page);
             }
         });
+        $('#toggle-categories').on('click', function() {
+            var categoryItems = $('.category-item');
+            var maxCategories = 10;
+            var toggleText = $('#toggle-text');
 
+            if (categoryItems.hasClass('d-none')) {
+                categoryItems.removeClass('d-none');
+                toggleText.text('แสดงผลน้อยลง');
+            } else {
+                categoryItems.each(function(index) {
+                    if (index >= maxCategories) {
+                        $(this).addClass('d-none');
+                    }
+                });
+                toggleText.text('แสดงผลเพิ่มเติม');
+            }
+        });
     });
 </script>

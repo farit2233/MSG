@@ -37,11 +37,21 @@ if (isset($_GET['sort'])) {
 }
 
 // สร้างเงื่อนไขเพิ่มเติมจาก GET
+// สร้างเงื่อนไขเพิ่มเติมจาก GET
 $additional_where = "";
-if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
-    $cid = intval($_GET['cid']);
-    $additional_where .= " AND pl.category_id = {$cid}";
+
+// A. จัดการตัวกรองหมวดหมู่ (แบบเลือกได้หลายอัน)
+if (isset($_GET['cids']) && is_array($_GET['cids']) && count($_GET['cids']) > 0) {
+    // Sanitize input: แปลงทุกค่าใน array ให้เป็น integer เพื่อความปลอดภัย
+    $cids_sanitized = array_map('intval', $_GET['cids']);
+    $cids_list = implode(',', $cids_sanitized);
+    if (!empty($cids_list)) {
+        $additional_where .= " AND pl.category_id IN ({$cids_list})";
+    }
 }
+// หมายเหตุ: โค้ดกรอง cid แบบเดี่ยวเดิมสามารถลบออกได้ 
+// if (isset($_GET['cid']) && is_numeric($_GET['cid'])) { ... } // <-- ลบส่วนนี้ทิ้ง
+
 if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
     $tid = intval($_GET['tid']);
     $additional_where .= " AND cl.product_type_id = {$tid}";
@@ -51,6 +61,22 @@ if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
 if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
     $pid = intval($_GET['pid']);
     $additional_where .= " AND pp.promotion_id = {$pid}";
+}
+
+// B. จัดการตัวกรองราคา
+// สร้างตัวแปรเก็บ Logic การเช็คราคาจริง (ราคาลด vs ราคาปกติ) เพื่อนำไปใช้ซ้ำ
+$price_logic = "IF(pl.discounted_price IS NOT NULL AND pl.discounted_price > 0 AND pl.discounted_price < pl.vat_price, pl.discounted_price, pl.vat_price)";
+
+// กรองราคาขั้นต่ำ
+if (isset($_GET['min_price']) && is_numeric($_GET['min_price']) && $_GET['min_price'] >= 0) {
+    $min_price = floatval($_GET['min_price']);
+    $additional_where .= " AND {$price_logic} >= {$min_price}";
+}
+
+// กรองราคาขั้นสูงสุด
+if (isset($_GET['max_price']) && is_numeric($_GET['max_price']) && $_GET['max_price'] > 0) {
+    $max_price = floatval($_GET['max_price']);
+    $additional_where .= " AND {$price_logic} <= {$max_price}";
 }
 
 // === START: QUERY FOR TOTAL COUNT ===
@@ -135,7 +161,7 @@ ob_start();
                 </div>
                 <div class="card-body d-flex flex-column">
                     <div>
-                        <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
+                        <div class="card-title card-title-product w-100 mb-0"><?= $row['name'] ?></div>
                         <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
                             <div class="w-100">
                                 <small class="text-muted" style="line-height: 1.25em; display: block;"><?= $row['brand'] ?></small>
@@ -149,7 +175,7 @@ ob_start();
                             // มีราคาส่วนลด → แสดง discounted_price + %
                             $discount_percentage = round((($row['vat_price'] - $row['discounted_price']) / $row['vat_price']) * 100);
                             echo '<span class="banner-price fw-bold me-2">' . format_price_custom($row['discounted_price']) . ' ฿</span>';
-                            echo '<span class="badge badge-sm text-white">- ' . $discount_percentage . '%</span>';
+                            echo '<span class="badge badge-sm prdouct-badge text-white">- ' . $discount_percentage . '%</span>';
                         } elseif (!is_null($row['vat_price']) && $row['vat_price'] > 0) {
                             // ไม่มีส่วนลด แต่มี VAT → แสดง vat_price
                             echo '<span class="banner-price">' . format_price_custom($row['vat_price']) . ' ฿</span>';
