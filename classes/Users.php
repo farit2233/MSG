@@ -1,5 +1,10 @@
 	<?php
 	require_once('../config.php');
+	require_once(__DIR__ . '/../vendor/autoload.php');
+
+	use PHPMailer\PHPMailer\PHPMailer;
+	use PHPMailer\PHPMailer\Exception;
+
 	class Users extends DBConnection
 	{
 		private $settings;
@@ -59,7 +64,8 @@
 
 				if ($save) {
 					$resp['status'] = 'success';
-					$resp['msg'] = 'บัญชีสมาชิกสร้างเรียบร้อย';
+					$resp['msg'] = 'สร้างบัญชีสมาชิกเรียบร้อย';
+
 
 					// --- Start: Save cropped image logic ---
 					if (!empty($cropped_image_data)) {
@@ -224,6 +230,13 @@
 				$resp['status'] = 'success';
 				$resp['uid'] = $uid;
 				$resp['msg'] = !empty($id) ? 'แก้ไขข้อมูลส่วนตัวเรียบร้อย' : 'สร้างบัญชีเรียบร้อยแล้ว';
+				$welcome_subject = "ยินดีต้อนรับสู่ MSG.com!";
+				$welcome_body = "สวัสดีคุณ {$firstname}, ขอบคุณที่สมัครสมาชิกกับเรา";
+				$recipient = [$email => $firstname]; // ส่งหาผู้ใช้ใหม่
+				$this->send_email($recipient, $welcome_subject, $welcome_body);
+
+				// ส่งแจ้งเตือนไปที่ Telegram
+				$this->send_telegram_message("มีสมาชิกใหม่: {$firstname} ({$email})");
 
 				// === ส่วนจัดการรูปภาพที่แก้ไขใหม่ ===
 				if (!empty($cropped_image_data)) {
@@ -326,6 +339,161 @@
 			}
 			return json_encode($resp);
 		}
+
+		// 1. ฟังก์ชันสำหรับส่งอีเมล (แยกออกมาใหม่)
+		// ====================================================================
+		/**
+		 * Sends an email using PHPMailer.
+		 *
+		 * @param array $recipients An associative array of recipients [email => name].
+		 * @param string $subject The subject of the email.
+		 * @param string $body The HTML body of the email.
+		 * @return bool True on success, false on failure.
+		 */
+		public function send_email(array $recipients, string $subject, string $body): bool
+		{
+			$mail = new PHPMailer(true);
+			try {
+				// *** Best Practice: ควรย้ายข้อมูลเหล่านี้ไปไว้ในไฟล์ config.php ***
+				$mail->isSMTP();
+				$mail->Host       = 'smtp.gmail.com';
+				$mail->Port       = 465;
+				$mail->SMTPAuth   = true;
+				$mail->Username   = "faritre5566@gmail.com"; // ใช้อีเมลของคุณ
+				$mail->Password   = "bchljhaxoqflmbys";      // ใช้รหัสผ่านสำหรับแอป (App Password)
+				$mail->SMTPSecure = "ssl";
+				$mail->CharSet    = 'UTF-8';
+
+				// Sender
+				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+
+				// Recipients
+				foreach ($recipients as $email => $name) {
+					$mail->addAddress($email, $name);
+				}
+
+				// Content
+				$mail->isHTML(true);
+				$mail->Subject = $subject;
+				$mail->Body    = $body;
+
+				$mail->send();
+				return true; // ส่งสำเร็จ
+			} catch (Exception $e) {
+				// บันทึก error ไว้ดูภายหลัง แทนที่จะแสดงผลออกมา
+				error_log("❌ ส่งอีเมลไม่สำเร็จ: " . $mail->ErrorInfo);
+				return false; // ส่งไม่สำเร็จ
+			}
+		}
+
+		// ====================================================================
+		// 2. ฟังก์ชันสำหรับส่งข้อความ Telegram (แยกออกมาใหม่)
+		// ====================================================================
+		/**
+		 * Sends a message to a Telegram chat.
+		 *
+		 * @param string $message The message text to send.
+		 * @return bool True on success, false on failure.
+		 */
+		public function send_telegram_message(string $message): bool
+		{
+			// *** Best Practice: ควรย้ายข้อมูลเหล่านี้ไปไว้ในไฟล์ config.php ***
+			$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk"; // ใช้ Bot Token ของคุณ
+			$chat_id   = "-4869854888";                                   // ใช้ Chat ID ของแอดมินหรือกลุ่ม
+
+			$url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
+			$data = [
+				'chat_id'    => $chat_id,
+				'text'       => $message,
+				'parse_mode' => 'HTML',
+			];
+
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_POST, true);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For development only
+
+			$response = curl_exec($ch);
+			$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+
+			if ($http_code == 200 && $response) {
+				return true; // ส่งสำเร็จ
+			} else {
+				error_log("❌ ส่ง Telegram ไม่สำเร็จ: " . $response);
+				return false; // ส่งไม่สำเร็จ
+			}
+		}
+
+
+		// ====================================================================
+		// 3. ฟังก์ชัน forgot_password ที่เรียกใช้ฟังก์ชันใหม่
+		// ====================================================================
+		public function forgot_password()
+		{
+			if (isset($_POST['email'])) {
+				$email = $_POST['email'];
+				$name = $_POST['name'];
+
+				// ตรวจสอบว่าอีเมลในฐานข้อมูล customer_list มีอยู่หรือไม่
+				$query = "SELECT * FROM customer_list WHERE email = ?";
+				$stmt = $this->conn->prepare($query);
+				$stmt->bind_param('s', $email);
+				$stmt->execute();
+				$result = $stmt->get_result();
+
+				if ($result->num_rows > 0) {
+					$user = $result->fetch_assoc();
+
+					// ดึงข้อมูลผู้ใช้
+					$first_name = $user['firstname'];
+					$middle_name = $user['middlename'] ?? '';
+					$last_name = $user['lastname'];
+					$contact = $user['contact'];
+					$email_costumer = $user['email'];
+
+					// ---- เตรียมข้อความและข้อมูลสำหรับส่ง ----
+
+					// สำหรับอีเมล
+					$email_subject = "คำขอรีเซ็ตรหัสผ่านจากผู้ใช้";
+					$email_body = "
+						<div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto;'>
+							<h2 style='text-align:center;'>คำขอรีเซ็ตรหัสผ่านจากผู้ใช้</h2>
+							<p><strong>อีเมล: </strong>{$email_costumer}</p>
+							<p><strong>ชื่อ: </strong>{$name}</p>
+							<p><strong>ชื่อในระบบ: </strong>{$first_name} {$middle_name} {$last_name}</p>
+							<p><strong>เบอร์ติดต่อ: </strong>{$contact}</p>
+						</div>
+					";
+					$admin_emails = [
+						'faritre5566@gmail.com' => 'Admin',
+						'faritre1@gmail.com'    => 'Admin',
+						'faritre4@gmail.com'    => 'Admin'
+					];
+
+					// สำหรับ Telegram
+					$telegram_message = "
+					🔔 <b>คำขอรีเซ็ตรหัสผ่าน</b>
+					- <b>อีเมล:</b> {$email_costumer}
+					- <b>ชื่อ:</b> {$name}
+					- <b>ชื่อในระบบ:</b> {$first_name} {$middle_name} {$last_name}
+					- <b>เบอร์ติดต่อ:</b> {$contact}
+                	";
+
+					// ---- เรียกใช้ฟังก์ชันเพื่อส่งการแจ้งเตือน ----
+					$this->send_email($admin_emails, $email_subject, $email_body);
+					$this->send_telegram_message($telegram_message);
+
+					echo json_encode(['status' => 'success', 'msg' => 'คำขอของคุณถูกส่งไปยังทีมงานแล้ว']);
+				} else {
+					echo json_encode(['status' => 'error', 'msg' => 'ไม่พบข้อมูลอีเมลนี้ในระบบ']);
+				}
+			} else {
+				echo json_encode(['status' => 'error', 'msg' => 'กรุณากรอกอีเมล']);
+			}
+		}
 	}
 
 	$users = new users();
@@ -343,12 +511,15 @@
 		case 'delete_customer':
 			echo $users->delete_customer();
 			break;
-		default:
-			// echo $sysset->index();
-			break;
-
 		// Users.php
 		case 'update_profile':
-			echo $user->update_profile();
+			echo $users->update_profile();
+			break;
+		// Users.php
+		case 'forgot_password':
+			echo $users->forgot_password();
+			break;
+		default:
+			// echo $sysset->index();
 			break;
 	}
