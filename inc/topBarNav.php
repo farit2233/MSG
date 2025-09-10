@@ -72,7 +72,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     <a class="navbar-brand" href="./">
       <img src="<?php echo validate_image($_settings->info('logo')) ?>" width="80" height="80" class="d-inline-block align-top" alt="" loading="lazy">
-      <?php echo $_settings->info('short_name') ?>
+      <!--?php echo $_settings->info('short_name') ?-->
     </a>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
