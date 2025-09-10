@@ -41,7 +41,7 @@
                       </div>
                       <div class="custom-file">
                         <input type="file" class="custom-file-input" id="customFile" name="img" accept="image/png, image/jpeg">
-                        <label class="custom-file-label register-img" for="customFile">เลือกรูปโปรไฟล์</label>
+                        <label class="custom-file-label register-img" for="customFile">เลือกรูปจากเครื่อง</label>
                       </div>
                       <input type="hidden" name="cropped_image" id="cropped_image">
                     </div>
@@ -356,7 +356,7 @@
         cropper = null;
         // Reset file input to allow selecting the same file again
         $('#customFile').val('');
-        $('#customFile').next('.custom-file-label').html('เลือกรูปโปรไฟล์');
+        $('#customFile').next('.custom-file-label').html('เลือกรูปจากเครื่อง');
       });
 
       // --- ADDED: Event listener for the zoom slider ---
