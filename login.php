@@ -60,6 +60,14 @@
             -webkit-text-stroke: 1px #f57421;
         }
 
+        .login-cart-header-bar {
+            border-left: 4px solid #ff6600;
+            padding: 16px 20px;
+            border-radius: 12px;
+
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
         .btn-login {
             background: none;
             color: #f57421;
@@ -76,8 +84,8 @@
             display: inline-block;
         }
 
-        .card {
-            border-radius: 1rem;
+        .card-login {
+            border-radius: 16px;
             /* หรือ 10px, 20px แล้วแต่ต้องการ */
         }
 
@@ -112,13 +120,15 @@
     </style>
     <div class="container d-flex justify-content-center align-items-center">
         <div class="col-lg-5 col-md-7 col-sm-10 col-12">
-            <div class="card card-navy my-3 shadow">
+            <div class="card card-login card-navy my-3 shadow">
                 <div class="card-body bg-color rounded-0 px-3">
                     <!--img src="<?php echo $_settings->info('logo') ?>" class="img-fluid logo">
                     <h1 class="text-center" id="page-title"><b><?php echo $_settings->info('name') ?></b></h1-->
-                    <h3 class="text-dark mb-2 text-center pt-4">เข้าสู่ระบบ</h3>
-                    <p class="text-muted small text-center">กรุณาเข้าสู่ระบบบัญชีของคุณเพื่อดำเนินการต่อ</p>
-                    <hr>
+                    <!--h3 class="text-dark mb-2 text-center pt-4">เข้าสู่ระบบ</h3-->
+                    <div class="login-cart-header-bar">
+                        <h3 class="mb-2"><i class="fa-solid fa-user-plus"></i> เข้าสู่ระบบ</h3>
+                        <p class="text-muted small">กรุณาเข้าสู่ระบบบัญชีของคุณเพื่อดำเนินการต่อ</p>
+                    </div>
                     <form id="login-form" action="" method="post">
 
                         <div class="form-group">

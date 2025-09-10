@@ -22,7 +22,7 @@
     <div class="container">
       <div class="row mt-n4 justify-content-center align-items-center flex-column">
         <div class="col-lg-10 col-md-11 col-sm-12 col-xs-12">
-          <div class="card register-card shadow " style="margin-top: 3rem;">
+          <div class="card card-register shadow " style="margin-top: 3rem;">
             <div class="card-body">
               <div class="container-fluid">
                 <div class="register-cart-header-bar">
@@ -32,7 +32,7 @@
                   <input type="hidden" name="id">
 
                   <div class="register-section-title-with-line  mb-4">
-                    <h3>โปรไฟล์</h3>
+                    <h4>โปรไฟล์</h4>
                   </div>
                   <div class="row justify-content-center">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
@@ -48,7 +48,7 @@
                   </div>
 
                   <div class="register-section-title-with-line mb-4 mt-4">
-                    <h3>ข้อมูลส่วนตัว</h3>
+                    <h4>ข้อมูลส่วนตัว</h4>
                   </div>
                   <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
@@ -101,7 +101,7 @@
                   </div>
 
                   <div class="register-section-title-with-line mb-4">
-                    <h3>ที่อยู่จัดส่ง</h3>
+                    <h4>ที่อยู่จัดส่ง</h4>
                   </div>
                   <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">

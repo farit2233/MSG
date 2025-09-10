@@ -58,8 +58,8 @@
             display: inline-block;
         }
 
-        .card {
-            border-radius: 1rem;
+        .card-password {
+            border-radius: 16px;
         }
 
         .padding-top {
@@ -85,7 +85,7 @@
 
     <div class="container d-flex justify-content-center align-items-center">
         <div class="col-lg-5 col-md-7 col-sm-10 col-12">
-            <div class="card card-navy my-3 shadow">
+            <div class="card card-password card-navy my-3 shadow">
                 <div class="card-body bg-color rounded-0 px-3">
                     <h3 class="text-dark mb-2 text-center pt-4">ลืมรหัสผ่าน</h3>
                     <p class="text-muted small text-center">กรุณากรอกอีเมล และชื่อของคุณเพื่อขอรีเซ็ตรหัสผ่าน</p>

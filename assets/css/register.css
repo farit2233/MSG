@@ -7,7 +7,8 @@
   }
 
   .register label {
-    font-size: 18px;
+    font-size: 16px;
+    font-weight: bold;
   }
 
   .register input {
@@ -18,16 +19,17 @@
   .register-img {
     border-radius: 13px;
     font-size: 16px !important;
+    font-weight: normal !important;
   }
 
-  .register-section-title-with-line h3 {
+  .register-section-title-with-line h4 {
     position: relative;
     border-bottom: 2px solid #f57421 !important;
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
   }
 
-  .register-section-title-with-line h3::after {
+  .register-section-title-with-line h4::after {
     content: none !important;
   }
 
@@ -39,8 +41,8 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
-  .register-card {
-    border-radius: 13px;
+  .card-register {
+    border-radius: 16px;
     max-width: 767.98px;
     margin: auto;
     width: 100%;
