@@ -1,24 +1,63 @@
-<?php require_once('./config.php') ?>
+<?php require_once('./config.php'); ?>
 <!DOCTYPE html>
-<html lang="en" class="" style="height: auto;">
-<?php require_once('inc/header.php') ?>
+<html lang="en">
+<?php require_once('inc/header.php'); ?>
 
 <body class="hold-transition login-page">
     <script>
-        start_loader()
+        start_loader();
     </script>
     <style>
+        html,
+        body {
+            height: 100%;
+            /* กำหนดความสูงเต็มหน้าจอ */
+            margin: 0;
+            /* ลบค่า margin ของทั้ง html และ body */
+            padding: 0;
+            /* ลบค่า padding */
+        }
+
         body {
             background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
             background-size: cover;
+            /* ปรับขนาดภาพให้ครอบคลุมทั้งหน้าจอ */
             background-repeat: no-repeat;
-            backdrop-filter: contrast(1);
+            /* ไม่ให้ภาพพื้นหลังซ้ำกัน */
+            background-position: center center;
+            /* ตั้งภาพให้อยู่กลางหน้าจอ */
+            background-attachment: fixed;
+            /* ทำให้ภาพพื้นหลังไม่เลื่อนตามการ scroll */
+            min-height: 100vh;
+            /* ให้ความสูงของ body เท่ากับความสูงของหน้าจอ */
+            width: 100%;
+            /* ความกว้างเต็มหน้าจอ */
         }
 
         #page-title {
-            text-shadow: 6px 4px 7px black;
-            font-size: 3.5em;
-            color: white !important;
+            font-size: 32px;
+            /* ขนาดฟอนต์ที่ใหญ่ขึ้น */
+            font-weight: 700;
+            /* เน้นความหนาของฟอนต์ */
+            color: white;
+            /* ตัวหนังสือสีขาว */
+            -webkit-text-stroke: 1px #f57421;
+            /* ขอบตัวหนังสือสีส้ม */
+            text-transform: uppercase;
+            /* ตัวพิมพ์ใหญ่ทั้งหมด */
+            letter-spacing: 1px;
+            /* การเพิ่มระยะห่างระหว่างตัวอักษร */
+            text-align: center;
+            /* จัดตำแหน่งข้อความให้อยู่กลาง */
+            margin: 20px 0;
+            /* กำหนดระยะห่างบนและล่าง */
+            transition: all 0.3s ease;
+            /* เอฟเฟกต์สำหรับการเคลื่อนไหว */
+        }
+
+        #page-title:hover {
+            color: #f57421;
+            -webkit-text-stroke: 1px #f57421;
         }
 
         .btn-login {
@@ -43,8 +82,26 @@
         }
 
         .padding-top {
-            margin-top: 0;
-            padding-top: 4rem;
+            margin-top: 0px;
+            padding-top: 2rem;
+        }
+
+        /* CSS สำหรับ Logo */
+        .logo {
+            max-width: 100px;
+            /* กำหนดขนาดความกว้างสูงสุด */
+            height: auto;
+            /* ให้ความสูงปรับตามอัตราส่วน */
+            display: block;
+            /* ใช้เพื่อให้โลโก้เป็นบล็อก */
+            margin: 0 auto;
+            /* จัดตำแหน่งให้อยู่กลาง */
+        }
+
+        /* สำหรับภาพโลโก้ในกรณีที่ต้องการใช้แบบเต็มหน้าจอ */
+        .logo.full-width {
+            max-width: 100%;
+            height: auto;
         }
 
         @media (max-width: 767.98px) {
@@ -53,14 +110,16 @@
             }
         }
     </style>
-    <h1 class="text-center text-white px-4 padding-top" id="page-title"><b><?php echo $_settings->info('name') ?></b></h1>
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="container d-flex justify-content-center align-items-center">
         <div class="col-lg-5 col-md-7 col-sm-10 col-12">
             <div class="card card-navy my-3 shadow">
                 <div class="card-body bg-color rounded-0 px-3">
-                    <h3 class="text-dark mb-2 text-center">เข้าสู่ระบบ</h3>
+                    <!--img src="<?php echo $_settings->info('logo') ?>" class="img-fluid logo">
+                    <h1 class="text-center" id="page-title"><b><?php echo $_settings->info('name') ?></b></h1-->
+                    <h3 class="text-dark mb-2 text-center pt-4">เข้าสู่ระบบ</h3>
                     <p class="text-muted small text-center">กรุณาเข้าสู่ระบบบัญชีของคุณเพื่อดำเนินการต่อ</p>
-                    <form id="ulogin-form" action="" method="post">
+                    <hr>
+                    <form id="login-form" action="" method="post">
 
                         <div class="form-group">
                             <label for="email" class="font-weight-bold small text-secondary">อีเมล</label>
@@ -69,14 +128,18 @@
                         <div class="form-group">
                             <label for="login-password" class="font-weight-bold small text-secondary">รหัสผ่าน</label>
                             <input type="password" class="form-control form-control-lg" name="password" placeholder="รหัสผ่าน">
+                            <div class="text-right">
+                                <small><a href="<?php echo base_url ?>forgot_password.php">ลืมรหัสผ่าน?</a></small>
+                            </div>
                         </div>
+
                         <div class="row justify-content-center">
                             <div class="col-md-9 col-12 text-center">
                                 <button type="submit" class="btn btn-login btn-block rounded-pill">เข้าสู่ระบบ</button>
                             </div>
                         </div>
                         <div class="col-12 text-center mt-3">
-                            <p>ยังไม่มีบัญชี?<a href="<?php echo base_url ?>register.php"> สมัครสมาชิก</a></p>
+                            <p>ยังไม่มีบัญชี?<a href="<?php echo base_url ?>register.php"> สมัครสมาชิกเลย</a></p>
 
                         </div>
                         <div class="col-12 text-left mt-3">
@@ -87,17 +150,11 @@
             </div>
         </div>
     </div>
-    <!-- jQuery -->
-    <script src="<?= base_url ?>plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="<?= base_url ?>plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="<?= base_url ?>dist/js/adminlte.min.js"></script>
 
     <script>
         $(document).ready(function() {
             end_loader();
-            $('#ulogin-form').submit(function(e) {
+            $('#login-form').submit(function(e) {
                 e.preventDefault()
                 var _this = $(this)
                 var el = $('<div>')
