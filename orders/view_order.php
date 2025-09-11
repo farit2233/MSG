@@ -110,7 +110,7 @@ if (!empty($customer_id)) {
         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
             <div class="mb-3">
                 <label for="" class="control-label">เลขที่คำสั่งซื้อ: </label>
-                <div class="pl-4"><?= isset($coupon_code) ? $coupon_code : '' ?></div>
+                <div class="pl-4"><?= isset($code) ? $code : '' ?></div>
             </div>
             <div class="mb-3">
                 <label for="" class="control-label">ชื่อ และเบอร์โทรผู้รับสินค้า:</label>
@@ -278,7 +278,7 @@ if (!empty($customer_id)) {
                                     <b><?= format_price_custom($row['price'] * $row['quantity'], 2) ?> บาท</b>
                                 </span>
                                 <a href=".?p=products/view_product&id=<?= $row['product_id'] ?>" class="btn btn-orders mt-2 d-block">
-                                    <i class="fa fa-shopping-cart me-1"></i> ซื้ออีกครั้ง
+                                    <i class="fa fa-basket-shopping me-1"></i> ซื้ออีกครั้ง
                                 </a>
                             </div>
                         </div>
