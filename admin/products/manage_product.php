@@ -251,7 +251,7 @@ if (isset($id)) {
 							<label>หมวดหมู่สินค้า <span class="text-danger">*</span></label>
 							<select name="category_id" class="form-control select2" required>
 								<option value="">-- เลือกหมวดหมู่ --</option>
-								<?php $cat_q = $conn->query("SELECT * FROM category_list WHERE delete_flag = 0 AND status = 1 ORDER BY name ASC");
+								<?php $cat_q = $conn->query("SELECT * FROM category_list  WHERE `status` = 1 AND `delete_flag` = 0 ORDER BY `other` ASC, `name` DESC");
 								while ($cat = $cat_q->fetch_assoc()): ?>
 									<option value="<?= $cat['id'] ?>" <?= ($main_category_id == $cat['id']) ? 'selected' : '' ?>><?= $cat['name'] ?></option>
 								<?php endwhile; ?>
