@@ -2288,17 +2288,23 @@ class Master extends DBConnection
 
 	function delete_coupon_code()
 	{
+
 		extract($_POST);
-		$del = $this->conn->query("DELETE FROM `coupon_code_list` WHERE id = '{$id}'");
-		if ($del) {
+		// เปลี่ยนค่า delete_flag เป็น 1 และ status เป็น 0 แทนการลบจริง
+		$update = $this->conn->query("UPDATE `coupon_code_list` 
+                                  SET `status` = 0 ,`delete_flag` = 1
+                                  WHERE `id` = '{$id}'");
+
+		if ($update) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', "ลบโปรโมชันแล้ว");
+			$this->settings->set_flashdata('success', "ลบโค้ดคูปองแล้ว");
 		} else {
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
 		}
 		return json_encode($resp);
 	}
+
 	function save_coupon_code_products()
 	{
 		// Sanitize and escape inputs

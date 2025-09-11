@@ -140,7 +140,7 @@ function formatDateThai($date)
                     <tbody>
                         <?php
                         $i = 1;
-                        $qry = $conn->query("SELECT * FROM `coupon_code_list` ORDER BY `date_created`  ASC, `name` ASC");
+                        $qry = $conn->query("SELECT * FROM `coupon_code_list` WHERE `delete_flag` = 0 ORDER BY `date_created` ASC, `name` ASC");
                         while ($row = $qry->fetch_assoc()):
                         ?>
                             <tr>
@@ -195,9 +195,7 @@ function formatDateThai($date)
                                                 <span class="fa fa-edit text-dark"></span> แก้โปรโมชัน
                                             </a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">
-                                                <span class="fa fa-trash text-danger"></span> ลบโปรโมชัน
-                                            </a>
+                                            <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><span class="fa fa-trash text-danger"></span> ลบสินค้า</a>
                                         </div>
                                     <?php else : ?>
                                         <span class="text-center"> - </span>
@@ -214,20 +212,22 @@ function formatDateThai($date)
 
 <script>
     $(document).ready(function() {
-        $('#list').dataTable({
+        $('.delete_data').click(function() {
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้?", "delete_coupon_code", [$(this).attr('data-id')])
+        })
+
+        $('.table').dataTable({
             columnDefs: [{
                 orderable: false,
                 targets: [2, 6]
             }],
-            order: [
-                [0, 'asc']
-            ],
+            order: [0, 'asc'],
             language: {
                 lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
                 zeroRecords: "ไม่พบข้อมูล",
-                info: "หน้า _PAGE_ จาก _PAGES_ หน้า",
+                info: "แสดงหน้าที่ _PAGE_ จากทั้งหมด _PAGES_ หน้า",
                 infoEmpty: "ไม่มีข้อมูลที่จะแสดง",
-                infoFiltered: "(กรองจาก _MAX_ รายการทั้งหมด)",
+                infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
                 search: "ค้นหา:",
                 paginate: {
                     first: "หน้าแรก",
@@ -238,34 +238,32 @@ function formatDateThai($date)
             }
         });
 
-        $('.delete_data').click(function() {
-            const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_coupon_code", [id]);
-        });
-    });
+        $('.dataTable td,.dataTable th').addClass('py-1 px-2 align-middle')
+    })
 
-    function delete_coupon_code(id) {
+
+    function delete_coupon_code($id) {
         start_loader();
         $.ajax({
             url: _base_url_ + "classes/Master.php?f=delete_coupon_code",
             method: "POST",
             data: {
-                id: id
+                id: $id
             },
             dataType: "json",
             error: err => {
-                console.log(err);
-                alert_toast("เกิดข้อผิดพลาด", 'error');
+                console.log(err)
+                alert_toast("An error occured.", 'error');
                 end_loader();
             },
             success: function(resp) {
-                if (resp.status == 'success') {
+                if (typeof resp == 'object' && resp.status == 'success') {
                     location.reload();
                 } else {
-                    alert_toast("ไม่สามารถลบได้", 'error');
+                    alert_toast("An error occured.", 'error');
                     end_loader();
                 }
             }
-        });
+        })
     }
 </script>
