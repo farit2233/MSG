@@ -8,11 +8,30 @@
     start_loader()
   </script>
   <style>
+    html,
+    body {
+      height: 100%;
+      /* กำหนดความสูงเต็มหน้าจอ */
+      margin: 0;
+      /* ลบค่า margin ของทั้ง html และ body */
+      padding: 0;
+      /* ลบค่า padding */
+    }
+
     body {
       background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
       background-size: cover;
+      /* ปรับขนาดภาพให้ครอบคลุมทั้งหน้าจอ */
       background-repeat: no-repeat;
-      backdrop-filter: contrast(1);
+      /* ไม่ให้ภาพพื้นหลังซ้ำกัน */
+      background-position: center center;
+      /* ตั้งภาพให้อยู่กลางหน้าจอ */
+      background-attachment: fixed;
+      /* ทำให้ภาพพื้นหลังไม่เลื่อนตามการ scroll */
+      min-height: 100vh;
+      /* ให้ความสูงของ body เท่ากับความสูงของหน้าจอ */
+      width: 100%;
+      /* ความกว้างเต็มหน้าจอ */
     }
 
     #page-title {
@@ -42,9 +61,14 @@
       /* หรือ 10px, 20px แล้วแต่ต้องการ */
     }
 
-    .padding-top {
-      margin-top: 0;
-      padding-top: 4rem;
+    .admin-cart-header-bar {
+      padding-top: 16px;
+      padding-bottom: 4px;
+      padding-left: 16px;
+      padding-right: 16px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     @media (max-width: 767.98px) {
@@ -53,12 +77,15 @@
       }
     }
   </style>
-  <h1 class="text-center text-white px-4 padding-top" id="page-title"><b><?php echo $_settings->info('name') ?></b></h1>
-  <div class="container d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+  <!--h1 class="text-center text-white px-4" id="page-title"><b><?php echo $_settings->info('name') ?></b></h1-->
+  <div class="container d-flex justify-content-center align-items-center">
     <div class="col-lg-5 col-md-7 col-sm-10 col-12">
       <div class="card card-navy my-3 shadow">
         <div class="card-body bg-color rounded-0 px-3">
-          <h4 class="text-center mb-4">เข้าสู่ระบบ</h4>
+          <div class="admin-cart-header-bar text-center">
+            <h4 class="mb-2">เข้าสู่ระบบ</h4>
+            <p class="text-muted small">กรุณาเข้าสู่ระบบบัญชีของคุณเพื่อดำเนินการต่อ</p>
+          </div>
           <form id="login-frm" action="" method="post">
             <div class="input-group mb-3">
               <input type="text" class="form-control" name="username" autofocus placeholder="Username">
