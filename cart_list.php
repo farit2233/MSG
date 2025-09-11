@@ -1,10 +1,31 @@
 <?php
 
 if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) {
-    // โหลดจาก database (สำหรับคน login)
+    // โหลดจากฐานข้อมูลสำหรับผู้ที่ล็อกอิน
+    $cart = $conn->query("SELECT 
+        c.*, 
+        p.name as product, 
+        p.brand as brand, 
+        p.price, 
+        p.discounted_price, 
+        p.vat_price,
+        p.discount_type,
+        cc.name as category, 
+        p.image_path,
+        (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
+        - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
+    FROM `cart_list` c 
+    INNER JOIN product_list p ON c.product_id = p.id 
+    INNER JOIN category_list cc ON p.category_id = cc.id 
+    WHERE customer_id = '{$_settings->userdata('id')}'");
+
+    while ($row = $cart->fetch_assoc()):
+    // Your code for displaying items goes here...
+    endwhile;
 } else {
-    // ใช้ JavaScript อ่านจาก localStorage แล้วแสดงรายการตะกร้า
+    // ใช้ข้อมูลจาก localStorage เมื่อไม่ได้ล็อกอิน
 }
+
 
 
 /*if ($_settings->userdata('id') == '' || $_settings->userdata('login_type') != 2) {
@@ -421,7 +442,8 @@ if (!function_exists('format_price_custom')) {
                 confirmButtonColor: '#e74c3c', // สีแดงปุ่มยืนยัน
                 cancelButtonColor: '#95a5a6', // สีเทาปุ่มยกเลิก
                 confirmButtonText: 'ใช่ ลบเลย!',
-                cancelButtonText: 'ยกเลิก'
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     delete_cart(id); // ฟังก์ชันลบจริง
@@ -560,42 +582,41 @@ if (!function_exists('format_price_custom')) {
             grandTotal += subtotal;
 
             html += `
-<label class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
-    data-id='<?= $row['id'] ?>'
-    data-max='<?= floor($row['available'] / 3) ?>'
+<label class="list-group-item cart-item d-flex w-100 ${item.available <= 0 ? 'out-of-stock' : ''}"
+    data-id='${item.id}'
+    data-max='${item.available}'
     style="cursor: pointer;">
-    style="cursor: pointer;">   
-	<div class="col-auto pr-2">
-		<input type="checkbox" class="form-check-input cart-check" data-price="${subtotal}" />
-	</div>
+    <div class="col-auto pr-2">
+        <input type="checkbox" class="form-check-input cart-check" data-price="${subtotal}" />
+    </div>
 
-	<div class="cart-item-content d-flex w-100 align-items-start">
-		<div class="col-3 text-center">
-			<img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt="">
-		</div>
+    <div class="cart-item-content d-flex w-100 align-items-start">
+        <div class="col-3 text-center">
+            <img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt="">
+        </div>
 
-		<div class="col-auto flex-shrink-1 flex-grow-1">
-			<h4 class="product-title">${item.name}</h4>
-			<div class="text-muted d-flex w-100">
-				<div class="input-group" style="width: 20rem;">
-					<button class="btn addcart-plus minus-qty guest" type="button">−</button>
-					<input type="number" class="form-control text-center qty" value="${item.qty}" min="1" max="999" required>
-					<button class="btn addcart-plus add-qty guest" type="button">+</button>
-					<button class="btn btn-danger ms-2 del-item guest" type="button">
-						<i class="fa-solid fa-trash-can"></i>
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
+        <div class="col-auto flex-shrink-1 flex-grow-1">
+            <h4 class="product-title">${item.name}</h4>
+            <div class="text-muted d-flex w-100">
+                <div class="input-group" style="width: 20rem;">
+                    <button class="btn addcart-plus minus-qty guest" type="button">−</button>
+                    <input type="number" class="form-control text-center qty" value="${item.qty}" min="1" max="${item.available}" required>
+                    <button class="btn addcart-plus add-qty guest" type="button">+</button>
+                    <button class="btn btn-danger ms-2 del-item guest" type="button">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<div class="col-auto text-right">
-		${show_discount
-			? `<h5 class="text-muted mb-0"><del>${(item.price * item.qty).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</del></h5>
-			   <h4><b class="text-danger">ลดเหลือ: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
-			: `<h4><b>ราคา: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
-		}
-	</div>
+    <div class="col-auto text-right">
+        ${show_discount
+            ? `<h5 class="text-muted mb-0"><del>${(item.price * item.qty).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</del></h5>
+               <h4><b class="text-danger">ลดเหลือ: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
+            : `<h4><b>ราคา: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
+        }
+    </div>
 </label>`;
         });
 
@@ -603,6 +624,7 @@ if (!function_exists('format_price_custom')) {
         container.style.display = 'block';
         calculateSelectedTotal(); // เรียกทันทีตอนโหลด
     });
+
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('add-qty') && e.target.classList.contains('guest')) {
             const itemEl = e.target.closest('.cart-item');
