@@ -326,14 +326,14 @@
                     </p>
                   </a>
                 </li>
-                <li class="nav-item dropdown">
+                <!--li class="nav-item dropdown">
                   <a href="<?php echo base_url ?>admin/?page=system_info/help_info" class="nav-link nav-system_info_help_info">
                     <i class="nav-icon fas fa-question"></i>
                     <p>
                       หน้าช่วยเหลือ
                     </p>
                   </a>
-                </li>
+                </li-->
                 <li class="nav-item dropdown">
                   <a href="<?php echo base_url ?>admin/?page=system_info/contact_info" class="nav-link nav-system_info_contact_info">
                     <i class="nav-icon fas fa-phone-square-alt"></i>
