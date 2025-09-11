@@ -184,7 +184,6 @@
 			else
 				unset($_POST['password']);
 
-			// ลบ cropped_image ออกจาก $_POST ก่อน เพราะเราจะ xử lý มันแยกต่างหาก
 			$cropped_image_data = isset($_POST['cropped_image']) ? $_POST['cropped_image'] : null;
 			unset($_POST['cropped_image']);
 
@@ -212,6 +211,7 @@
 				$resp['msg'] = 'Email already exists.';
 				return json_encode($resp);
 			}
+
 			foreach ($_POST as $k => $v) {
 				$v = $this->conn->real_escape_string($v);
 				if (in_array($k, $main_field)) {
@@ -219,6 +219,7 @@
 					$data .= " `{$k}` = '{$v}' ";
 				}
 			}
+
 			if (empty($id)) {
 				$sql = "INSERT INTO `customer_list` set {$data} ";
 			} else {
@@ -230,13 +231,6 @@
 				$resp['status'] = 'success';
 				$resp['uid'] = $uid;
 				$resp['msg'] = !empty($id) ? 'แก้ไขข้อมูลส่วนตัวเรียบร้อย' : 'สร้างบัญชีเรียบร้อยแล้ว';
-				$welcome_subject = "ยินดีต้อนรับสู่ MSG.com!";
-				$welcome_body = "สวัสดีคุณ {$firstname}, ขอบคุณที่สมัครสมาชิกกับเรา";
-				$recipient = [$email => $firstname]; // ส่งหาผู้ใช้ใหม่
-				$this->send_email($recipient, $welcome_subject, $welcome_body);
-
-				// ส่งแจ้งเตือนไปที่ Telegram
-				$this->send_telegram_message("มีสมาชิกใหม่: {$firstname} ({$email})");
 
 				// === ส่วนจัดการรูปภาพที่แก้ไขใหม่ ===
 				if (!empty($cropped_image_data)) {
@@ -262,13 +256,13 @@
 						$resp['msg'] .= " (แต่ไม่สามารถบันทึกรูปโปรไฟล์ได้)";
 					}
 				} else {
-					// กรณีไม่มีการอัปโหลดรูป ให้ใช้รูป default (โค้ดเดิม)
-					if (!is_dir(base_app . "uploads/customers"))
-						mkdir(base_app . "uploads/customers");
-					$fname = "uploads/customers/$uid.png";
-					copy(base_app . "uploads/customers/default_user.png", base_app . $fname);
-					$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
+					// กรณีไม่มีการอัปโหลดรูป ให้ใช้รูป default หรือรูปเก่าจากฐานข้อมูล
+					$existing_avatar = $this->conn->query("SELECT avatar FROM `customer_list` WHERE id = '{$uid}'")->fetch_object()->avatar;
+					if ($existing_avatar) {
+						$this->conn->query("UPDATE `customer_list` set `avatar` = '{$existing_avatar}' where id = '{$uid}'");
+					}
 				}
+
 				if (!empty($uid) && $this->settings->userdata('login_type') != 1) {
 					$user = $this->conn->query("SELECT * FROM `customer_list` where id = '{$uid}' ");
 					if ($user->num_rows > 0) {
@@ -291,6 +285,7 @@
 				$this->settings->set_flashdata('success', $resp['msg']);
 			return json_encode($resp);
 		}
+
 
 		public function delete_customer()
 		{
