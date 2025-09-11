@@ -317,7 +317,7 @@ if (!function_exists('format_price_custom')) {
 														<span class="badge badge-success" style="font-size: 0.8rem; padding: 4px 8px;">-<?= $percent_off ?>%</span>
 													</div>
 													<div class="price-old m-0 mr-2 px-3" style="text-decoration: line-through; color: #888;">
-														<?= format_price_custom($price, 2) ?> ฿
+														<?= format_price_custom($vat_price, 2) ?> ฿
 													</div>
 												</div>
 											</div>
@@ -337,7 +337,7 @@ if (!function_exists('format_price_custom')) {
 														<span class="badge badge-success" style="font-size: 0.8rem; padding: 4px 8px;">-<?= $percent_off ?>%</span>
 													</div>
 													<div class="price-old m-0 mr-2 px-3" style="text-decoration: line-through; color: #888;">
-														<?= format_price_custom($price, 2) ?> ฿
+														<?= format_price_custom($vat_price, 2) ?> ฿
 													</div>
 												</div>
 											</div>
