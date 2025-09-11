@@ -42,6 +42,16 @@
             -webkit-text-stroke: 1px #f57421;
         }
 
+        .fgpw-cart-header-bar {
+            padding-top: 16px;
+            padding-bottom: 4px;
+            padding-left: 16px;
+            padding-right: 16px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
         .btn-login {
             background: none;
             color: #f57421;
@@ -60,11 +70,6 @@
 
         .card-password {
             border-radius: 16px;
-        }
-
-        .padding-top {
-            margin-top: 0;
-            padding-top: 2rem;
         }
 
         .icon-success {
@@ -87,9 +92,10 @@
         <div class="col-lg-5 col-md-7 col-sm-10 col-12">
             <div class="card card-password card-navy my-3 shadow">
                 <div class="card-body bg-color rounded-0 px-3">
-                    <h3 class="text-dark mb-2 text-center pt-4">ลืมรหัสผ่าน</h3>
-                    <p class="text-muted small text-center">กรุณากรอกอีเมล และชื่อของคุณเพื่อขอรีเซ็ตรหัสผ่าน</p>
-                    <hr>
+                    <div class="fgpw-cart-header-bar text-center">
+                        <h3 class="mb-2">ลืมรหัสผ่าน</h3>
+                        <p class="text-muted small">กรุณากรอกอีเมล และชื่อของคุณเพื่อขอรีเซ็ตรหัสผ่าน</p>
+                    </div>
                     <form id="forgot-password-form" action="reset_password.php" method="post">
                         <div class="form-group">
                             <label for="email" class="font-weight-bold small text-secondary">อีเมล</label>

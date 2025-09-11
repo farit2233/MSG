@@ -61,10 +61,12 @@
         }
 
         .login-cart-header-bar {
-            border-left: 4px solid #ff6600;
-            padding: 16px 20px;
+            padding-top: 16px;
+            padding-bottom: 4px;
+            padding-left: 16px;
+            padding-right: 16px;
+            margin-bottom: 20px;
             border-radius: 12px;
-
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
@@ -125,8 +127,8 @@
                     <!--img src="<?php echo $_settings->info('logo') ?>" class="img-fluid logo">
                     <h1 class="text-center" id="page-title"><b><?php echo $_settings->info('name') ?></b></h1-->
                     <!--h3 class="text-dark mb-2 text-center pt-4">เข้าสู่ระบบ</h3-->
-                    <div class="login-cart-header-bar">
-                        <h3 class="mb-2"><i class="fa-solid fa-user-plus"></i> เข้าสู่ระบบ</h3>
+                    <div class="login-cart-header-bar text-center">
+                        <h3 class="mb-2">เข้าสู่ระบบ</h3>
                         <p class="text-muted small">กรุณาเข้าสู่ระบบบัญชีของคุณเพื่อดำเนินการต่อ</p>
                     </div>
                     <form id="login-form" action="" method="post">
