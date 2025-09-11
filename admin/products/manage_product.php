@@ -1,35 +1,53 @@
 <?php
-$main_category_id = null; // ป้องกัน warning
+$main_category_id = null;
 $selected_extra_categories = [];
-$has_discount = (!empty($discount_type) && $discount_value > 0);
-if (isset($_GET['id']) && $_GET['id'] > 0) {
-	$qry = $conn->query("SELECT * from `product_list` where id = '{$_GET['id']}' ");
-	if ($qry->num_rows > 0) {
-		foreach ($qry->fetch_assoc() as $k => $v) {
+$has_discount = false;
+
+// --- START: CODE EDITED ---
+
+// 1. ตรวจสอบว่า id ถูกส่งมา, เป็นตัวเลข และมากกว่า 0
+if (isset($_GET['id']) && is_numeric($_GET['id']) && $_GET['id'] > 0) {
+	// 2. ใช้ Prepared Statement เพื่อความปลอดภัย
+	$stmt = $conn->prepare("SELECT * FROM `product_list` WHERE id = ?");
+	$stmt->bind_param("i", $_GET['id']); // "i" คือ integer
+	$stmt->execute();
+	$result = $stmt->get_result();
+
+	if ($result->num_rows > 0) {
+		foreach ($result->fetch_assoc() as $k => $v) {
 			$$k = $v;
 		}
-
-		// ตั้งค่าหมวดหมู่หลักแยกชัดเจน
 		$main_category_id = $category_id;
+		$has_discount = (!empty($discount_type) && $discount_value > 0);
 	}
 }
 
 function get_platform_link($conn, $product_id, $platform)
 {
-	$col = "{$platform}_url"; // เช่น shopee_url
-	$q = $conn->query("SELECT `{$col}` FROM product_links WHERE product_id = {$product_id}");
-	if ($q && $q->num_rows > 0) {
-		return $q->fetch_assoc()[$col];
+	$col = "{$platform}_url";
+	// 3. ใช้ Prepared Statement ในฟังก์ชันด้วย
+	$stmt = $conn->prepare("SELECT `{$col}` FROM product_links WHERE product_id = ?");
+	$stmt->bind_param("i", $product_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	if ($result && $result->num_rows > 0) {
+		return $result->fetch_assoc()[$col];
 	}
 	return '';
 }
+
 $gallery_images = [];
 if (isset($id)) {
-	$img_qry = $conn->query("SELECT * FROM `product_image_path` WHERE product_id = '{$id}' ORDER BY `id` ASC");
-	while ($row = $img_qry->fetch_assoc()) {
+	// 4. ใช้ Prepared Statement กับรูปภาพแกลเลอรี
+	$img_stmt = $conn->prepare("SELECT * FROM `product_image_path` WHERE product_id = ? ORDER BY `id` ASC");
+	$img_stmt->bind_param("i", $id);
+	$img_stmt->execute();
+	$img_result = $img_stmt->get_result();
+	while ($row = $img_result->fetch_assoc()) {
 		$gallery_images[] = $row;
 	}
 }
+
 ?>
 <style>
 	#cimg {
@@ -439,10 +457,10 @@ if (isset($id)) {
 
 									// หา rate ตามช่วงน้ำหนัก
 									$qry = $conn->query("SELECT * FROM shipping_prices 
-								WHERE shipping_methods_id = {$method_id} 
-								AND min_weight <= {$product_weight} 
-								AND max_weight >= {$product_weight}
-								ORDER BY min_weight ASC LIMIT 1");
+									WHERE shipping_methods_id = {$method_id} 
+									AND min_weight <= {$product_weight} 
+									AND max_weight >= {$product_weight}
+									ORDER BY min_weight ASC LIMIT 1");
 
 									$matched_row = $qry && $qry->num_rows ? $qry->fetch_assoc() : null;
 
@@ -733,73 +751,56 @@ if (isset($id)) {
 			const weight = parseFloat($(this).val()) || 0;
 			updateShippingPrices(weight);
 		});
+		// จัดการการ submit ฟอร์ม
 		$('#product-form').submit(function(e) {
-			e.preventDefault(); // ป้องกันการ submit ปกติ
+			e.preventDefault();
+			var _this = $(this);
+			$('.err-msg').remove();
+			start_loader();
 
-			// เช็คว่ามีน้ำหนักเกินขีดจำกัดหรือไม่
-			const weight = parseFloat($('[name="product_weight"]').val()) || 0;
-			if (weight > 25000) {
-				$('#weight-error').text('น้ำหนักสินค้าสูงเกินขีดจำกัด (25,000 กรัม)').show(); // แสดงข้อความเตือน
-				Swal.fire({
-					icon: 'error',
-					title: 'น้ำหนักสินค้าสูงเกินขีดจำกัด',
-					text: 'น้ำหนักไม่สามารถเกิน 25,000 กรัมได้',
-				});
-				return; // ไม่ส่งฟอร์ม
+			// ใส่ไฟล์ที่เลือกไว้ใหม่ลงใน FormData
+			const formData = new FormData($(this)[0]);
+			const galleryInput = document.getElementById('gallery-imgs');
+			const galleryFiles = galleryInput.files;
+
+			for (let i = 0; i < galleryFiles.length; i++) {
+				formData.append('gallery_imgs[]', galleryFiles[i]);
 			}
-
-
-			// หากผ่านเงื่อนไข
-			$('.err-msg').remove(); // ลบ error ที่เก่าก่อนหน้า
-			start_loader(); // เริ่มโหลดหน้า
-			const formData = new FormData();
-
-			$(this).find('input, select, textarea').not('input[type=file]').each(function() {
-				if ($(this).is(':checkbox') || $(this).is(':radio')) {
-					if ($(this).is(':checked')) {
-						formData.append($(this).attr('name'), $(this).val());
-					}
-				} else {
-					formData.append($(this).attr('name'), $(this).val());
-				}
-			});
-
-			// 2. ใส่ไฟล์รูปภาพหลัก (ถ้ามี)
-			if ($('#img')[0].files[0]) {
-				formData.append('img', $('#img')[0].files[0]);
-			}
-
-			// 3. วนลูปใส่ไฟล์จาก Array `galleryFiles` ของเรา
-			galleryFiles.forEach(file => {
-				formData.append('gallery_imgs[]', file);
-			});
 
 			$.ajax({
-				url: _base_url_ + "classes/Master.php?f=save_product", // ส่งฟอร์ม
-				data: new FormData(this),
+				url: _base_url_ + "classes/Master.php?f=save_product",
+				data: formData,
 				cache: false,
 				contentType: false,
 				processData: false,
 				method: 'POST',
+				type: 'POST',
 				dataType: 'json',
-				error: function(err) {
-					console.error(err);
-					alert_toast("เกิดข้อผิดพลาด", 'error');
+				error: err => {
+					console.log(err);
+					alert_toast("An error occurred", 'error');
 					end_loader();
 				},
 				success: function(resp) {
-					if (resp.status === 'success') {
-						location.reload();
-					} else {
-						const el = $('<div>').addClass("alert alert-dark err-msg").text(resp.msg);
-						$('#product-form').prepend(el);
+					if (typeof resp == 'object' && resp.status == 'success') {
+						location.href = "./?page=products/manage_product&id=" + resp.pid;
+					} else if (resp.status == 'failed' && !!resp.msg) {
+						var el = $('<div>');
+						el.addClass("alert alert-danger err-msg").text(resp.msg);
+						_this.prepend(el);
 						el.show('slow');
-						$("html, body").scrollTop(0);
+						$("html, body").animate({
+							scrollTop: _this.closest('.card').offset().top
+						}, "fast");
+					} else {
+						alert_toast("An error occurred", 'error');
+						console.log(resp);
 					}
 					end_loader();
 				}
 			});
 		});
+
 		$('.btn-delete-img').on('click', function() {
 			const imageId = $(this).data('id');
 			const galleryItem = $(`#gallery-item-${imageId}`);
