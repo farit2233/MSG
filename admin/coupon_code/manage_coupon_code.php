@@ -195,14 +195,14 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         let formChanged = false;
 
         // ตรวจสอบการเปลี่ยนแปลงของฟอร์ม
-        $('#coupon-code-form input, #coupon-code-form textarea').on('input', function() {
+        $('#coupon-code-form input, #coupon-code-form textarea, #coupon-code-form select, #coupon-code-form input[type="radio"], #coupon-code-form input[type="checkbox"]').on('change input', function() {
             formChanged = true;
         });
+
 
         // เมื่อกดปุ่ม "ยกเลิก"
         $('#cancelBtn').click(function() {
             if (formChanged) {
-                // ถ้ามีการเปลี่ยนแปลงข้อมูล
                 Swal.fire({
                     title: 'คุณแน่ใจหรือไม่?',
                     text: "การเปลี่ยนแปลงจะหายไปทั้งหมด และหน้าเพจจะรีเฟรช",
@@ -213,12 +213,10 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // รีเฟรชหน้า
                         location.reload();
                     }
                 });
             } else {
-                // ถ้าไม่มีการเปลี่ยนแปลงก็รีเฟรชหน้า
                 location.reload();
             }
         });
@@ -226,10 +224,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         // เมื่อกดปุ่ม "กลับ"
         $('#backBtn').click(function() {
             if (formChanged) {
-                // ถ้ามีการเปลี่ยนแปลงข้อมูล
                 Swal.fire({
                     title: 'คุณแน่ใจหรือไม่?',
-                    text: "การเปลี่ยนแปลงจะหายไปทั้งหมด และหน้าเพจจะรีเฟรช",
+                    text: "การเปลี่ยนแปลงจะหายไปทั้งหมด และจะกลับไปหน้าหลัก",
                     icon: 'warning',
                     showCancelButton: true,
                     cancelButtonText: '<i class="fa fa-times"></i> ยกเลิก',
@@ -237,109 +234,62 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // กลับไปหน้าหมวดหมู่โปรโมชัน
                         window.location.href = './?page=coupon_code';
                     }
                 });
             } else {
-                // ถ้าไม่มีการเปลี่ยนแปลงก็กลับไปหน้าหมวดหมู่โปรโมชัน
                 window.location.href = './?page=coupon_code';
             }
         });
 
-        const limitcouponInput = document.getElementById('limit_coupon');
-        const unlimitedCheckbox = document.getElementById('unl_coupon');
 
-        // ฟังก์ชันสำหรับอัปเดตสถานะ validation ของ unl_amount
-        const updateUnlAmountValidation = () => {
-            // เงื่อนไข: ถ้าช่องตัวเลข 'ว่าง' และ checkbox 'ไม่ได้ถูกติ๊ก'
-            if (limitcouponInput.value === '' && !unlimitedCheckbox.checked) {
-                // ให้ช่องตัวเลขเป็น 'required' (บังคับกรอก)
-                limitcouponInput.setAttribute('required', 'required');
-                limitcouponInput.placeholder = "กรุณากำหนดจำนวนครั้ง"; // ตั้งค่า placeholder สำหรับบังคับกรอก
-            } else {
-                // ถ้ามีข้อมูลอย่างใดอย่างหนึ่งแล้ว ให้เอา 'required' ออก
-                limitcouponInput.removeAttribute('required');
-                if (unlimitedCheckbox.checked) {
-                    limitcouponInput.placeholder = "ไม่จำกัดจำนวนครั้ง";
+        /**
+         * ฟังก์ชันสำหรับจัดการ Logic การบังคับกรอกข้อมูลระหว่าง Input กับ Radio
+         * @param {string} inputId - ID ของช่อง input type="number"
+         * @param {string} radioId - ID ของช่อง input type="radio"
+         */
+        const setupValidationLogic = (inputId, radioId) => {
+            const numberInput = document.getElementById(inputId);
+            const unlimitedRadio = document.getElementById(radioId);
+
+            // ฟังก์ชันสำหรับอัปเดตสถานะ required
+            const updateValidationState = () => {
+                // ถ้าช่องตัวเลขว่าง และ Radio ไม่ได้ถูกติ๊ก -> ให้บังคับกรอก (required)
+                if (numberInput.value === '' && !unlimitedRadio.checked) {
+                    numberInput.required = true;
                 } else {
-                    limitcouponInput.placeholder = "กรอกจำนวนครั้ง";
+                    // มิเช่นนั้น ไม่ต้องบังคับกรอก
+                    numberInput.required = false;
                 }
-            }
+            };
+
+            // เมื่อพิมพ์ในช่องตัวเลข
+            numberInput.addEventListener('input', function() {
+                if (this.value !== '') {
+                    // ถ้ามีค่า ให้เอาติ๊กออกจาก Radio
+                    unlimitedRadio.checked = false;
+                }
+                // อัปเดตสถานะ validation
+                updateValidationState();
+            });
+
+            // เมื่อติ๊กที่ Radio
+            unlimitedRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    // ถ้าติ๊ก ให้ลบค่าในช่องตัวเลข
+                    numberInput.value = '';
+                }
+                // อัปเดตสถานะ validation
+                updateValidationState();
+            });
+
+            // เรียกใช้ฟังก์ชันครั้งแรกเมื่อโหลดหน้าเว็บ เพื่อกำหนดสถานะให้ถูกต้อง
+            updateValidationState();
         };
 
-        // 1. เมื่อมีการพิมพ์ในช่อง 'จำนวนคูปอง'
-        limitcouponInput.addEventListener('input', function() {
-            // ถ้ามีการกรอกตัวเลขเข้ามา
-            if (this.value !== '') {
-                // ให้ยกเลิกการติ๊ก 'ไม่จำกัดจำนวน' ทันที
-                unlimitedCheckbox.checked = false;
-            }
-            // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่พิมพ์
-            updateValidation();
-        });
-
-        // 2. เมื่อมีการติ๊กที่ checkbox 'ไม่จำกัดจำนวน'
-        unlimitedCheckbox.addEventListener('change', function() {
-            // ถ้า checkbox ถูกติ๊ก
-            if (this.checked) {
-                // ให้ลบตัวเลขในช่องกรอกทิ้ง
-                limitcouponInput.value = '';
-            }
-            // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่ติ๊ก
-            updateValidation();
-        });
-
-        // 3. เรียกใช้ฟังก์ชันครั้งแรกเมื่อหน้าเว็บโหลดเสร็จ
-        // เพื่อกำหนดสถานะ required ให้ถูกต้องตั้งแต่แรก (สำคัญมากตอนแก้ไขข้อมูล)
-        updateUnlAmountValidation();
-
-
-        const amountInput = document.getElementById('coupon_amount');
-        const unlimitedamountCheckbox = document.getElementById('unl_amount');
-        // ฟังก์ชันสำหรับอัปเดตสถานะ validation ของ unl_coupon
-        const updateLimitCouponValidation = () => {
-            // เงื่อนไข: ถ้าช่องตัวเลข 'ว่าง' และ checkbox 'ไม่ได้ถูกติ๊ก'
-            if (amountInput.value === '' && !unlimitedamountCheckbox.checked) {
-                // ให้ช่องตัวเลขเป็น 'required' (บังคับกรอก)
-                amountInput.setAttribute('required', 'required');
-                amountInput.placeholder = "กรุณากำหนดจำนวน"; // ตั้งค่า placeholder สำหรับบังคับกรอก
-            } else {
-                // ถ้ามีข้อมูลอย่างใดอย่างหนึ่งแล้ว ให้เอา 'required' ออก
-                amountInput.removeAttribute('required');
-                if (unlimitedamountCheckbox.checked) {
-                    amountInput.placeholder = "ไม่จำกัดจำนวน";
-                } else {
-                    amountInput.placeholder = "กรอกจำนวน";
-                }
-            }
-        };
-
-        // 1. เมื่อมีการพิมพ์ในช่อง 'จำนวนคูปอง'
-        amountInput.addEventListener('input', function() {
-            // ถ้ามีการกรอกตัวเลขเข้ามา
-            if (this.value !== '') {
-                // ให้ยกเลิกการติ๊ก 'ไม่จำกัดจำนวน' ทันที
-                unlimitedamountCheckbox.checked = false;
-            }
-            // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่พิมพ์
-            updateValidation();
-        });
-
-        // 2. เมื่อมีการติ๊กที่ checkbox 'ไม่จำกัดจำนวน'
-        unlimitedamountCheckbox.addEventListener('change', function() {
-            // ถ้า checkbox ถูกติ๊ก
-            if (this.checked) {
-                // ให้ลบตัวเลขในช่องกรอกทิ้ง
-                amountInput.value = '';
-            }
-            // เรียกฟังก์ชันเพื่ออัปเดต validation ทุกครั้งที่ติ๊ก
-            updateValidation();
-        });
-
-        // 3. เรียกใช้ฟังก์ชันครั้งแรกเมื่อหน้าเว็บโหลดเสร็จ
-        // เพื่อกำหนดสถานะ required ให้ถูกต้องตั้งแต่แรก (สำคัญมากตอนแก้ไขข้อมูล)
-        updateLimitCouponValidation();
+        // เรียกใช้งานฟังก์ชันกับคู่ฟอร์มทั้งสอง
+        setupValidationLogic('limit_coupon', 'unl_coupon');
+        setupValidationLogic('coupon_amount', 'unl_amount');
 
 
         // ฟังก์ชัน submit
@@ -347,23 +297,16 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             e.preventDefault();
             var _this = $(this);
             $('.err-msg').remove();
+
+            // ตรวจสอบ validation อีกครั้งก่อนส่ง
+            if (document.getElementById('limit_coupon').hasAttribute('required') && document.getElementById('limit_coupon').value === '' ||
+                document.getElementById('coupon_amount').hasAttribute('required') && document.getElementById('coupon_amount').value === '') {
+                // ไม่ต้องทำอะไร ปล่อยให้ HTML5 validation จัดการ
+                // หรือจะแสดง alert เองก็ได้
+                return false;
+            }
+
             start_loader();
-
-            // ตรวจสอบให้แน่ใจว่า coupon_amount มีค่า
-            var limitcoupon = document.getElementById('limit_coupon').value;
-            if (!limitcoupon && !document.getElementById('unl_coupon').checked) {
-                alert('กรุณากรอกจำนวนครั้งหรือเลือก "ไม่จำกัดจำนวนครั้ง"');
-                end_loader();
-                return;
-            }
-
-            // ตรวจสอบให้แน่ใจว่า coupon_amount มีค่า
-            var couponAmount = document.getElementById('coupon_amount').value;
-            if (!couponAmount && !document.getElementById('unl_amount').checked) {
-                alert('กรุณากรอกจำนวนคูปองหรือเลือก "ไม่จำกัดจำนวนคูปอง"');
-                end_loader();
-                return;
-            }
 
             // ส่งข้อมูลฟอร์มด้วย Ajax
             $.ajax({
