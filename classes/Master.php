@@ -2356,12 +2356,42 @@ class Master extends DBConnection
 		$resp = $qry->execute();
 
 		if ($resp) {
-			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโปรโมชันเรียบร้อยแล้ว");
+			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโค้ดคูปองเรียบร้อยแล้ว");
 			return json_encode(array('status' => 'success'));
 		} else {
 			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
 		}
 	}
+
+	function delete_coupon_code_all_products()
+	{
+		// 1. เพิ่ม: ดึงค่า id จาก $_POST ที่ส่งมาจาก AJAX
+		extract($_POST);
+
+		// 2. เปลี่ยน: ตรวจสอบตัวแปร $id ที่ได้มาจาก extract($_POST)
+		if (!empty($id)) {
+			// ลบสินค้าทั้งหมดที่มี coupon_code_id เท่ากับ $id
+			// ส่วนนี้ดีอยู่แล้วครับ
+			$qry = $this->conn->prepare("DELETE FROM coupon_code_products WHERE coupon_code_id = ?");
+			$qry->bind_param("i", $id);
+			$resp = $qry->execute();
+
+			if ($resp) {
+				$this->settings->set_flashdata('success', "ลบสินค้าทั้งหมดออกจากโค้ดคูปองเรียบร้อยแล้ว");
+				// ส่งผลลัพธ์กลับเป็น JSON
+				$response_data = array('status' => 'success');
+			} else {
+				// ส่งข้อผิดพลาดกลับเป็น JSON
+				$response_data = array('status' => 'failed', 'error' => $this->conn->error);
+			}
+		} else {
+			$response_data = array('status' => 'failed', 'error' => 'ไม่พบข้อมูล ID ของคูปอง');
+		}
+
+		// 3. เปลี่ยน: ส่งคืนค่า JSON เสมอเพื่อให้ AJAX จัดการได้
+		return json_encode($response_data);
+	}
+
 
 	function apply_coupon($conn, $post_data)
 	{
@@ -2639,6 +2669,9 @@ switch ($action) {
 		break;
 	case 'delete_coupon_code_products':
 		echo $Master->delete_coupon_code_products();
+		break;
+	case 'delete_coupon_code_all_products':
+		echo $Master->delete_coupon_code_all_products();
 		break;
 	case 'apply_coupon':
 		header('Content-Type: application/json');

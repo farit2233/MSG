@@ -187,6 +187,9 @@ function formatDateThai($date)
             <div class="card-header">
                 <div class="card-title">สินค้าที่มีโปรโมชัน</div>
                 <div class="card-tools">
+                    <button class="btn btn-flat btn-danger delete_all_data" type="button" data-id="<?= $id ?>">
+                        <i class="fas fa-trash"></i> ลบสินค้าทั้งหมด
+                    </button>
                     <button class="btn btn-flat btn-dark" type="button" id="coupon_code_products">
                         <i class="fas fa-plus"></i> เพิ่มสินค้า
                     </button>
@@ -318,18 +321,6 @@ function formatDateThai($date)
             }
         });
 
-        $('.delete_data').click(function() {
-            const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_coupon_code", [id]);
-        });
-    });
-    $(function() {
-        $('#delete_data').click(function() {
-            _conf("Are you sure to delete this product_type permanently?", "delete_product_type", ["<?= isset($id) ? $id : '' ?>"])
-        })
-    })
-
-    $(function() {
         // เมื่อคลิกปุ่ม "เพิ่มสินค้า"
         $('#coupon_code_products').click(function() {
             var all_products_status = <?= $all_products_status ?? 0 ?>; // ค่าของ all_products_status จาก PHP
@@ -355,34 +346,65 @@ function formatDateThai($date)
 
         // ฟังก์ชันลบสินค้าออกจากโปรโมชัน
         $('.delete_data').click(function() {
-            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชัน?", "delete_coupon_code_products", [$(this).attr('data-id')])
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโค้ดคูปองนี้?", "delete_coupon_code_products", [$(this).attr('data-id')])
         });
-    });
+        $('.delete_all_data').click(function() {
+            const id = $(this).data('id'); // รับค่า id ของคูปอง
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้าทั้งหมดออกจากโค้ดคูปองนี้?", "delete_coupon_code_all_products", [id]);
+        });
 
-    // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชัน
-    function delete_coupon_code_products(id) {
-        start_loader();
-        $.ajax({
-            url: _base_url_ + "classes/Master.php?f=delete_coupon_code_products",
-            method: "POST",
-            data: {
-                id: id
-            },
-            dataType: "json",
-            error: function(err) {
-                console.log(err);
-                alert_toast("เกิดข้อผิดพลาด", 'error');
-                end_loader();
-            },
-            success: function(resp) {
-                if (resp.status == 'success') {
-                    alert_toast(resp.message, 'success');
-                    location.reload();
-                } else {
-                    alert_toast(resp.error, 'error');
+
+        // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชัน
+        function delete_coupon_code_products(id) {
+            start_loader();
+            $.ajax({
+                url: _base_url_ + "classes/Master.php?f=delete_coupon_code_products",
+                method: "POST",
+                data: {
+                    id: id
+                },
+                dataType: "json",
+                error: function(err) {
+                    console.log(err);
+                    alert_toast("เกิดข้อผิดพลาด", 'error');
                     end_loader();
+                },
+                success: function(resp) {
+                    if (resp.status == 'success') {
+                        alert_toast(resp.message, 'success');
+                        location.reload();
+                    } else {
+                        alert_toast(resp.error, 'error');
+                        end_loader();
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
+
+        function delete_coupon_code_all_products(id) {
+            start_loader();
+            $.ajax({
+                url: _base_url_ + "classes/Master.php?f=delete_coupon_code_all_products",
+                method: "POST",
+                data: {
+                    id: id
+                },
+                dataType: "json",
+                error: function(err) {
+                    console.log(err);
+                    alert_toast("เกิดข้อผิดพลาด", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (resp.status == 'success') {
+                        alert_toast(resp.message, 'success');
+                        location.reload();
+                    } else {
+                        alert_toast(resp.error, 'error');
+                        end_loader();
+                    }
+                }
+            });
+        }
+    });
 </script>
