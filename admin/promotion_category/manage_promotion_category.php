@@ -155,7 +155,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 },
                 success: function(resp) {
                     if (typeof resp == 'object' && resp.status == 'success') {
-                        location.reload();
+                        location.replace('./?page=promotion_category/manage_promotion_category&id=' + resp.cid);
                     } else if (resp.status == 'failed' && !!resp.msg) {
                         var el = $('<div>');
                         el.addClass("alert alert-danger err-msg").text(resp.msg);
@@ -164,7 +164,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                         $("html, body").scrollTop(0);
                         end_loader();
                     } else {
-                        alert_toast("เกิดข้อผิดพลาด", 'error');
+                        alert_toast("An error occurred", 'error');
                         end_loader();
                         console.log(resp);
                     }

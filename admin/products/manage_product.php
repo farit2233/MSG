@@ -1,11 +1,7 @@
 <?php
-$main_category_id = null;
+$main_category_id = null; // ป้องกัน warning
 $selected_extra_categories = [];
-$has_discount = false;
-
-// --- START: CODE EDITED ---
-
-// 1. ตรวจสอบว่า id ถูกส่งมา, เป็นตัวเลข และมากกว่า 0
+$has_discount = (!empty($discount_type) && $discount_value > 0);
 if (isset($_GET['id']) && is_numeric($_GET['id']) && $_GET['id'] > 0) {
 	// 2. ใช้ Prepared Statement เพื่อความปลอดภัย
 	$stmt = $conn->prepare("SELECT * FROM `product_list` WHERE id = ?");
@@ -47,7 +43,6 @@ if (isset($id)) {
 		$gallery_images[] = $row;
 	}
 }
-
 ?>
 <style>
 	#cimg {
@@ -751,34 +746,58 @@ if (isset($id)) {
 			const weight = parseFloat($(this).val()) || 0;
 			updateShippingPrices(weight);
 		});
-		// จัดการการ submit ฟอร์ม
 		$('#product-form').submit(function(e) {
-			e.preventDefault();
-			var _this = $(this);
-			$('.err-msg').remove();
-			start_loader();
+			e.preventDefault(); // ป้องกันการ submit ปกติ
 
-			// ใส่ไฟล์ที่เลือกไว้ใหม่ลงใน FormData
-			const formData = new FormData($(this)[0]);
-			const galleryInput = document.getElementById('gallery-imgs');
-			const galleryFiles = galleryInput.files;
-
-			for (let i = 0; i < galleryFiles.length; i++) {
-				formData.append('gallery_imgs[]', galleryFiles[i]);
+			// เช็คว่ามีน้ำหนักเกินขีดจำกัดหรือไม่
+			const weight = parseFloat($('[name="product_weight"]').val()) || 0;
+			if (weight > 25000) {
+				$('#weight-error').text('น้ำหนักสินค้าสูงเกินขีดจำกัด (25,000 กรัม)').show(); // แสดงข้อความเตือน
+				Swal.fire({
+					icon: 'error',
+					title: 'น้ำหนักสินค้าสูงเกินขีดจำกัด',
+					text: 'น้ำหนักไม่สามารถเกิน 25,000 กรัมได้',
+				});
+				return; // ไม่ส่งฟอร์ม
 			}
 
+
+			// หากผ่านเงื่อนไข
+			$('.err-msg').remove(); // ลบ error ที่เก่าก่อนหน้า
+			start_loader(); // เริ่มโหลดหน้า
+			const formData = new FormData();
+
+			$(this).find('input, select, textarea').not('input[type=file]').each(function() {
+				if ($(this).is(':checkbox') || $(this).is(':radio')) {
+					if ($(this).is(':checked')) {
+						formData.append($(this).attr('name'), $(this).val());
+					}
+				} else {
+					formData.append($(this).attr('name'), $(this).val());
+				}
+			});
+
+			// 2. ใส่ไฟล์รูปภาพหลัก (ถ้ามี)
+			if ($('#img')[0].files[0]) {
+				formData.append('img', $('#img')[0].files[0]);
+			}
+
+			// 3. วนลูปใส่ไฟล์จาก Array `galleryFiles` ของเรา
+			galleryFiles.forEach(file => {
+				formData.append('gallery_imgs[]', file);
+			});
+
 			$.ajax({
-				url: _base_url_ + "classes/Master.php?f=save_product",
-				data: formData,
+				url: _base_url_ + "classes/Master.php?f=save_product", // ส่งฟอร์ม
+				data: new FormData(this),
 				cache: false,
 				contentType: false,
 				processData: false,
 				method: 'POST',
-				type: 'POST',
 				dataType: 'json',
-				error: err => {
-					console.log(err);
-					alert_toast("An error occurred", 'error');
+				error: function(err) {
+					console.error(err);
+					alert_toast("เกิดข้อผิดพลาด", 'error');
 					end_loader();
 				},
 				success: function(resp) {
@@ -800,7 +819,6 @@ if (isset($id)) {
 				}
 			});
 		});
-
 		$('.btn-delete-img').on('click', function() {
 			const imageId = $(this).data('id');
 			const galleryItem = $(`#gallery-item-${imageId}`);
