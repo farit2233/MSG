@@ -111,7 +111,7 @@ class Master extends DBConnection
 			return $this->capture_err();
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "ประเภท already exists.";
+			$resp['msg'] = "มีประเภทสินค้านี้อยู่แล้ว";
 			return json_encode($resp);
 			exit;
 		}
@@ -168,7 +168,7 @@ class Master extends DBConnection
 			return $this->capture_err();
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "Category already exists.";
+			$resp['msg'] = "มีหมวดหมู่นี้อยู่แล้ว";
 			return json_encode($resp);
 			exit;
 		}
@@ -278,7 +278,7 @@ class Master extends DBConnection
 		$check = $this->conn->query("SELECT * FROM `product_list` where `brand` = '{$brand}' and `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
 		if ($this->capture_err()) return $this->capture_err();
 		if ($check > 0) {
-			return json_encode(['status' => 'failed', 'msg' => "Product already exists."]);
+			return json_encode(['status' => 'failed', 'msg' => "มีสินค้านี้อยู่แล้ว"]);
 		}
 
 		// SQL บันทึก
@@ -441,7 +441,7 @@ class Master extends DBConnection
 			return $this->capture_err();
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "Code is already taken.";
+			$resp['msg'] = "มีรหัสสต๊อกนี้อยู่แล้ว";
 			return json_encode($resp);
 			exit;
 		}
@@ -1758,10 +1758,11 @@ class Master extends DBConnection
 			$resp['error'] = $this->conn->error;
 		}
 		if ($resp['status'] == 'success') {
-			$this->settings->set_flashdata('success', 'Order has been deleted successfully.');
+			$this->settings->set_flashdata('success', 'ลบคำสั่งซื้อเรียบร้อย');
 		}
 		return json_encode($resp);
 	}
+
 	function save_inquiry()
 	{
 		$_POST['message'] = addslashes(htmlspecialchars($_POST['message']));
@@ -1793,6 +1794,7 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+
 	function delete_inquiry()
 	{
 		extract($_POST);
@@ -1895,8 +1897,6 @@ class Master extends DBConnection
 		}
 	}
 
-
-
 	function delete_shipping()
 	{
 		extract($_POST);
@@ -1908,10 +1908,11 @@ class Master extends DBConnection
 			$resp['error'] = $this->conn->error;
 		}
 		if ($resp['status'] == 'success') {
-			$this->settings->set_flashdata('success', 'Order has been deleted successfully.');
+			$this->settings->set_flashdata('success', 'ลบขนส่งเรียบร้อย');
 		}
 		return json_encode($resp);
 	}
+
 	function migrate_guest_cart()
 	{
 		$data = json_decode(file_get_contents('php://input'), true);
@@ -1962,7 +1963,7 @@ class Master extends DBConnection
 			// ตรวจสอบว่ามีไฟล์ถูกอัปโหลดมาหรือไม่
 			if ($_FILES['img']['error'] != UPLOAD_ERR_OK) {
 				$resp['status'] = 'failed';
-				$resp['msg'] = "An error occurred during file upload.";
+				$resp['msg'] = "ไม่สามารถอัปโหลดไฟล์ได้";
 				return json_encode($resp);
 			}
 
@@ -1974,7 +1975,7 @@ class Master extends DBConnection
 			$accept = ['image/jpeg', 'image/png'];
 			if (!in_array($_FILES['img']['type'], $accept)) {
 				$resp['status'] = 'failed';
-				$resp['msg'] = "Invalid image file type. Only JPG and PNG are allowed.";
+				$resp['msg'] = "อัปโหลดไฟล์ได้แค่ .JPG / .PNG";
 				return json_encode($resp);
 			}
 
@@ -1993,7 +1994,7 @@ class Master extends DBConnection
 				$image_path_sql = ", `image_path` = '{$db_path}?v=" . time() . "'";
 			} else {
 				$resp['status'] = 'failed';
-				$resp['msg'] = "Failed to upload or resize the image.";
+				$resp['msg'] = "ไม่สามารถอัปโหลดรูปภาพ หรือปรับขนาดรูปภาพได้";
 				return json_encode($resp);
 			}
 		}
@@ -2008,7 +2009,7 @@ class Master extends DBConnection
 		$check = $this->conn->query("SELECT * FROM `promotions_list` where `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "A promotion with the same name already exists.";
+			$resp['msg'] = "มีโปรโมชันนี้อยู่แล้ว";
 			return json_encode($resp);
 		}
 
@@ -2024,7 +2025,7 @@ class Master extends DBConnection
 			$cid = !empty($id) ? $id : $this->conn->insert_id;
 			$resp['cid'] = $cid;
 			$resp['status'] = 'success';
-			$resp['msg'] = empty($id) ? "New promotion successfully saved." : "Promotion successfully updated.";
+			$resp['msg'] = empty($id) ? "สร้างโปรโมชั่นใหม่เรียบร้อย" : "อัปเดตโปรโมชั่นเรียบร้อย";
 		} else {
 			$resp['status'] = 'failed';
 			$resp['err'] = $this->conn->error . "[{$sql}]";
@@ -2058,13 +2059,13 @@ class Master extends DBConnection
 		// Check if promotion_id is provided
 		if (empty($promotion_id)) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = 'Promotion ID is required.';
+			$resp['msg'] = 'จำเป็นต้องมีรหัสโปรโมชั่น';
 			return json_encode($resp);
 		}
 
 		if (empty($product_ids)) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = 'At least one product must be selected.';
+			$resp['msg'] = 'กรุณาเลือกสินค้าอย่างน้อยหนึ่งรายการ';
 			return json_encode($resp);
 		}
 
@@ -2082,10 +2083,10 @@ class Master extends DBConnection
 		// Check for errors
 		if ($this->conn->affected_rows > 0) {
 			$resp['status'] = 'success';
-			$resp['msg'] = 'Products successfully saved to promotion.';
+			$resp['msg'] = 'เพิ่มสินค้าในโปรโมชั่นเรียบร้อย';
 		} else {
 			$resp['status'] = 'failed';
-			$resp['msg'] = 'Failed to save products.';
+			$resp['msg'] = 'เพิ่มสินค้าในโปรโมชั่นล้มเหลว';
 		}
 
 		return json_encode($resp);
@@ -2123,7 +2124,7 @@ class Master extends DBConnection
 			return $this->capture_err();
 		if ($check > 0) {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "ประเภท already exists.";
+			$resp['msg'] = "มีหมวดหมู่โปรโมชันนี้อยู่แล้ว";
 			return json_encode($resp);
 			exit;
 		}
@@ -2338,14 +2339,15 @@ class Master extends DBConnection
 		// Check for errors
 		if ($this->conn->affected_rows > 0) {
 			$resp['status'] = 'success';
-			$resp['msg'] = 'Products successfully saved to promotion.';
+			$resp['msg'] = 'เพิ่มสินค้าในโปรโมชั่นเรียบร้อย';
 		} else {
 			$resp['status'] = 'failed';
-			$resp['msg'] = 'Failed to save products.';
+			$resp['msg'] = 'เพิ่มสินค้าในโปรโมชั่นล้มเหลว';
 		}
 
 		return json_encode($resp);
 	}
+
 	function delete_coupon_code_products()
 	{
 		extract($_POST);
@@ -2360,6 +2362,7 @@ class Master extends DBConnection
 			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
 		}
 	}
+
 	function apply_coupon($conn, $post_data)
 	{
 		// ตรวจสอบให้แน่ใจว่าลูกค้า login อยู่ และมี customer_id
@@ -2453,10 +2456,6 @@ class Master extends DBConnection
 			}
 		}
 
-		// =================================================================
-		// >> จบส่วนที่เพิ่มเข้ามาใหม่ <<
-		// =================================================================
-
 
 		// 3. คำนวณส่วนลดตามเงื่อนไข all_products_status
 		$discount_amount = 0;
@@ -2466,8 +2465,6 @@ class Master extends DBConnection
 			// ---- กรณี 1: ใช้ได้กับสินค้าทุกชิ้น ----
 			$base_total_for_discount = $cart_total;
 		} else {
-			// ---- กรณี 0: ใช้ได้กับสินค้าที่กำหนด ----
-			// ดึง ID สินค้าที่ร่วมรายการของคูปองนี้
 			$product_qry = $conn->prepare("SELECT product_id FROM coupon_code_products WHERE coupon_code_id = ?");
 			$product_qry->bind_param("i", $coupon_code_id);
 			$product_qry->execute();
