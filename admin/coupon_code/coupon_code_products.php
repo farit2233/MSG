@@ -157,6 +157,7 @@ if (isset($id)) {
             var _this = $(this);
             $('.err-msg').remove();
             start_loader();
+            alert_toast('กำลังเพิ่มสินค้า...', 'info');
             $.ajax({
                 url: _base_url_ + "classes/Master.php?f=save_coupon_code_products",
                 data: new FormData(this),
@@ -166,15 +167,14 @@ if (isset($id)) {
                 method: 'POST',
                 dataType: 'json',
                 success: function(resp) {
-                    if (resp.status == 'success') {
-                        location.reload();
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
                     } else {
-                        let el = $('<div>').addClass('alert alert-danger err-msg').text(resp.msg || 'เกิดข้อผิดพลาด');
-                        _this.prepend(el);
-                        el.show('slow');
-                        $("html, body, .modal").scrollTop(0);
+                        alert_toast("เกิดข้อผิดพลาด: " + (resp.msg || ''), 'error');
+                        end_loader();
                     }
-                    end_loader();
                 },
                 error: function(err) {
                     console.log(err);

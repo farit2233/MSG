@@ -2060,13 +2060,13 @@ class Master extends DBConnection
 		if (empty($promotion_id)) {
 			$resp['status'] = 'failed';
 			$resp['msg'] = 'จำเป็นต้องมีรหัสโปรโมชั่น';
-			return json_encode($resp);
+			return json_encode($resp); // ส่งผลลัพธ์กลับเป็น JSON
 		}
 
 		if (empty($product_ids)) {
 			$resp['status'] = 'failed';
 			$resp['msg'] = 'กรุณาเลือกสินค้าอย่างน้อยหนึ่งรายการ';
-			return json_encode($resp);
+			return json_encode($resp); // ส่งผลลัพธ์กลับเป็น JSON
 		}
 
 		// Delete existing products for this promotion (if any)
@@ -2082,15 +2082,15 @@ class Master extends DBConnection
 
 		// Check for errors
 		if ($this->conn->affected_rows > 0) {
-			$resp['status'] = 'success';
-			$resp['msg'] = 'เพิ่มสินค้าในโปรโมชั่นเรียบร้อย';
+			// ถ้าสำเร็จ
+			$this->settings->set_flashdata('success', "เพิ่มสินค้าสำเร็จ");
+			return json_encode(array('status' => 'success'));
 		} else {
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'เพิ่มสินค้าในโปรโมชั่นล้มเหลว';
+			// ถ้าล้มเหลว
+			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
 		}
-
-		return json_encode($resp);
 	}
+
 
 	function delete_promotion_product()
 	{
@@ -2100,12 +2100,50 @@ class Master extends DBConnection
 		$resp = $qry->execute();
 
 		if ($resp) {
-			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโปรโมชันเรียบร้อยแล้ว");
+			$this->settings->set_flashdata('success', "ลบสินค้าออกจากโปรโมชันสำเร็จ");
 			return json_encode(array('status' => 'success'));
 		} else {
 			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
 		}
 	}
+
+	function delete_all_promotion_products()
+	{
+		// รับค่า promotion_id ที่ส่งมาจาก AJAX
+		extract($_POST);
+
+		// ตรวจสอบว่ามี promotion_id ส่งมาหรือไม่
+		if (!isset($promotion_id)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'Promotion ID is missing.';
+			return json_encode($resp);
+		}
+
+		// สร้างคำสั่ง SQL เพื่อลบข้อมูล
+		// ใช้ prepared statement เพื่อความปลอดภัย
+		$sql = "DELETE FROM `promotion_products` WHERE promotion_id = ?";
+		$stmt = $this->conn->prepare($sql);
+
+		// ผูกค่า promotion_id เข้ากับคำสั่ง SQL
+		$stmt->bind_param("i", $promotion_id);
+
+		// สั่งให้คำสั่ง SQL ทำงาน
+		$delete = $stmt->execute();
+
+		if ($delete) {
+			// หากลบสำเร็จ
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success', "ลบสินค้าทั้งหมดออกจากโปรโมชันเรียบร้อยแล้ว");
+		} else {
+			// หากลบไม่สำเร็จ
+			$resp['status'] = 'failed';
+			$resp['msg'] = "เกิดข้อผิดพลาดในการลบข้อมูล: " . $this->conn->error;
+		}
+
+		// ส่งผลลัพธ์กลับไปให้ JavaScript ในรูปแบบ JSON
+		return json_encode($resp);
+	}
+
 
 	function save_promotion_category()
 	{
@@ -2316,13 +2354,13 @@ class Master extends DBConnection
 		if (empty($coupon_code_id)) {
 			$resp['status'] = 'failed';
 			$resp['msg'] = 'Coupon Code ID is required.';
-			return json_encode($resp);
+			return json_encode($resp); // ส่งผลลัพธ์กลับเป็น JSON
 		}
 
 		if (empty($product_ids)) {
 			$resp['status'] = 'failed';
 			$resp['msg'] = 'At least one product must be selected.';
-			return json_encode($resp);
+			return json_encode($resp); // ส่งผลลัพธ์กลับเป็น JSON
 		}
 
 		// Delete existing products for this promotion (if any)
@@ -2338,15 +2376,16 @@ class Master extends DBConnection
 
 		// Check for errors
 		if ($this->conn->affected_rows > 0) {
-			$resp['status'] = 'success';
-			$resp['msg'] = 'เพิ่มสินค้าในโปรโมชั่นเรียบร้อย';
+			// ถ้าสำเร็จ
+			$this->settings->set_flashdata('success', "เพิ่มสินค้าสำเร็จ");
+			return json_encode(array('status' => 'success'));
 		} else {
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'เพิ่มสินค้าในโปรโมชั่นล้มเหลว';
+			// ถ้าล้มเหลว
+			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
 		}
-
-		return json_encode($resp);
 	}
+
+
 
 	function delete_coupon_code_products()
 	{
@@ -2362,36 +2401,45 @@ class Master extends DBConnection
 			return json_encode(array('status' => 'failed', 'error' => $this->conn->error));
 		}
 	}
+	// ใส่ฟังก์ชันนี้ภายใน Class Master ของคุณในไฟล์ classes/Master.php
 
-	function delete_coupon_code_all_products()
+	function delete_all_coupon_products()
 	{
-		// 1. เพิ่ม: ดึงค่า id จาก $_POST ที่ส่งมาจาก AJAX
+		// รับค่า coupon_id ที่ส่งมาจาก AJAX
 		extract($_POST);
 
-		// 2. เปลี่ยน: ตรวจสอบตัวแปร $id ที่ได้มาจาก extract($_POST)
-		if (!empty($id)) {
-			// ลบสินค้าทั้งหมดที่มี coupon_code_id เท่ากับ $id
-			// ส่วนนี้ดีอยู่แล้วครับ
-			$qry = $this->conn->prepare("DELETE FROM coupon_code_products WHERE coupon_code_id = ?");
-			$qry->bind_param("i", $id);
-			$resp = $qry->execute();
-
-			if ($resp) {
-				$this->settings->set_flashdata('success', "ลบสินค้าทั้งหมดออกจากโค้ดคูปองเรียบร้อยแล้ว");
-				// ส่งผลลัพธ์กลับเป็น JSON
-				$response_data = array('status' => 'success');
-			} else {
-				// ส่งข้อผิดพลาดกลับเป็น JSON
-				$response_data = array('status' => 'failed', 'error' => $this->conn->error);
-			}
-		} else {
-			$response_data = array('status' => 'failed', 'error' => 'ไม่พบข้อมูล ID ของคูปอง');
+		// ตรวจสอบว่ามี coupon_id ส่งมาหรือไม่
+		if (!isset($coupon_id)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'Coupon ID is missing.';
+			return json_encode($resp);
 		}
 
-		// 3. เปลี่ยน: ส่งคืนค่า JSON เสมอเพื่อให้ AJAX จัดการได้
-		return json_encode($response_data);
-	}
+		// สร้างคำสั่ง SQL เพื่อลบข้อมูล
+		// ใช้ prepared statement เพื่อความปลอดภัย
+		$sql = "DELETE FROM `coupon_code_products` WHERE coupon_code_id = ?";
+		$stmt = $this->conn->prepare($sql);
 
+		// ผูกค่า coupon_id เข้ากับคำสั่ง SQL
+		$stmt->bind_param("i", $coupon_id);
+
+		// สั่งให้คำสั่ง SQL ทำงาน
+		$delete = $stmt->execute();
+
+		if ($delete) {
+			// หากลบสำเร็จ
+			$resp['status'] = 'success';
+			// สามารถตั้งค่า flash message เพื่อแสดงผลหลัง reload ได้ (ถ้ามีระบบรองรับ)
+			$this->settings->set_flashdata('success', "ลบสินค้าทั้งหมดออกจากคูปองเรียบร้อยแล้ว");
+		} else {
+			// หากลบไม่สำเร็จ
+			$resp['status'] = 'failed';
+			$resp['msg'] = "เกิดข้อผิดพลาดในการลบข้อมูล: " . $this->conn->error;
+		}
+
+		// ส่งผลลัพธ์กลับไปให้ JavaScript ในรูปแบบ JSON
+		return json_encode($resp);
+	}
 
 	function apply_coupon($conn, $post_data)
 	{
@@ -2652,6 +2700,9 @@ switch ($action) {
 	case 'delete_promotion_product':
 		echo $Master->delete_promotion_product();
 		break;
+	case 'delete_all_promotion_products':
+		echo $Master->delete_all_promotion_products();
+		break;
 	case 'save_promotion_category':
 		echo $Master->save_promotion_category();
 		break;
@@ -2670,8 +2721,8 @@ switch ($action) {
 	case 'delete_coupon_code_products':
 		echo $Master->delete_coupon_code_products();
 		break;
-	case 'delete_coupon_code_all_products':
-		echo $Master->delete_coupon_code_all_products();
+	case 'delete_all_coupon_products':
+		echo $Master->delete_all_coupon_products();
 		break;
 	case 'apply_coupon':
 		header('Content-Type: application/json');

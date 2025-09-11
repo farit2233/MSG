@@ -321,90 +321,89 @@ function formatDateThai($date)
             }
         });
 
-        // เมื่อคลิกปุ่ม "เพิ่มสินค้า"
         $('#coupon_code_products').click(function() {
-            var all_products_status = <?= $all_products_status ?? 0 ?>; // ค่าของ all_products_status จาก PHP
-
-            // เช็คว่า all_products_status == 1 หรือไม่
+            var all_products_status = <?= $all_products_status ?? 0 ?>;
             if (all_products_status == 1) {
-                // ถ้า all_products_status == 1 แสดง alert แจ้งว่าไม่จำเป็นต้องเพิ่มสินค้า
                 Swal.fire({
                     title: 'คูปองนี้สามารถใช้ได้กับทุกสินค้าแล้ว',
                     text: 'คุณไม่จำเป็นต้องเพิ่มสินค้าอีก',
-                    icon: 'success',
+                    icon: 'info',
                     confirmButtonText: 'ตกลง',
                     confirmButtonColor: '#3085d6',
-                    onClose: () => {
-                        // เมื่อคลิก "ตกลง" ปิด alert
-                    }
                 });
             } else {
-                // ถ้า all_products_status == 0 ให้เปิด modal เพิ่มสินค้า
                 uni_modal_promotion("เพิ่มสินค้า", "coupon_code/coupon_code_products.php?id=<?= isset($id) ? $id : '' ?>");
             }
         });
 
-        // ฟังก์ชันลบสินค้าออกจากโปรโมชัน
+        // Event listener สำหรับปุ่มลบทีละรายการ
         $('.delete_data').click(function() {
             _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโค้ดคูปองนี้?", "delete_coupon_code_products", [$(this).attr('data-id')])
         });
+
+        // Event listener สำหรับปุ่มลบทั้งหมด
         $('.delete_all_data').click(function() {
-            const id = $(this).data('id'); // รับค่า id ของคูปอง
-            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้าทั้งหมดออกจากโค้ดคูปองนี้?", "delete_coupon_code_all_products", [id]);
+            const coupon_id = $(this).data('id');
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้าทั้งหมดออกจากโค้ดคูปองนี้?", "delete_all_coupon_products", [coupon_id]);
         });
-
-
-        // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชัน
-        function delete_coupon_code_products(id) {
-            start_loader();
-            $.ajax({
-                url: _base_url_ + "classes/Master.php?f=delete_coupon_code_products",
-                method: "POST",
-                data: {
-                    id: id
-                },
-                dataType: "json",
-                error: function(err) {
-                    console.log(err);
-                    alert_toast("เกิดข้อผิดพลาด", 'error');
-                    end_loader();
-                },
-                success: function(resp) {
-                    if (resp.status == 'success') {
-                        alert_toast(resp.message, 'success');
-                        location.reload();
-                    } else {
-                        alert_toast(resp.error, 'error');
-                        end_loader();
-                    }
-                }
-            });
-        }
-
-        function delete_coupon_code_all_products(id) {
-            start_loader();
-            $.ajax({
-                url: _base_url_ + "classes/Master.php?f=delete_coupon_code_all_products",
-                method: "POST",
-                data: {
-                    id: id
-                },
-                dataType: "json",
-                error: function(err) {
-                    console.log(err);
-                    alert_toast("เกิดข้อผิดพลาด", 'error');
-                    end_loader();
-                },
-                success: function(resp) {
-                    if (resp.status == 'success') {
-                        alert_toast(resp.message, 'success');
-                        location.reload();
-                    } else {
-                        alert_toast(resp.error, 'error');
-                        end_loader();
-                    }
-                }
-            });
-        }
     });
+
+
+    // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชัน
+    function delete_coupon_code_products(id) {
+        start_loader();
+        alert_toast('กำลังลบสินค้าออกจากโค้ดคูปอง...', 'info');
+        $.ajax({
+            url: _base_url_ + "classes/Master.php?f=delete_coupon_code_products",
+            method: "POST",
+            data: {
+                id: id
+            },
+            dataType: "json",
+            error: function(err) {
+                console.log(err);
+                alert_toast("เกิดข้อผิดพลาด", 'error');
+                end_loader();
+            },
+            success: function(resp) {
+                if (resp.status == 'success') {
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    alert_toast('เกิดข้อผิดพลาด', 'error');
+                    end_loader();
+                }
+            }
+        });
+    }
+
+    // ฟังก์ชันสำหรับลบสินค้าทั้งหมดของคูปอง
+    function delete_all_coupon_products(coupon_id) {
+        start_loader();
+        alert_toast('กำลังลบสินค้าออกจากโค้ดคูปองทั้งหมด...', 'info');
+        $.ajax({
+            url: _base_url_ + "classes/Master.php?f=delete_all_coupon_products",
+            method: "POST",
+            data: {
+                coupon_id: coupon_id
+            },
+            dataType: "json",
+            error: function(err) {
+                console.log(err);
+                alert_toast("เกิดข้อผิดพลาด", 'error');
+                end_loader();
+            },
+            success: function(resp) {
+                if (typeof resp == 'object' && resp.status == 'success') {
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    alert_toast("เกิดข้อผิดพลาด: " + (resp.msg || ''), 'error');
+                    end_loader();
+                }
+            }
+        });
+    }
 </script>

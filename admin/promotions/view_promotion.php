@@ -139,10 +139,14 @@ function formatDateThai($date)
             <div class="card-header">
                 <div class="card-title">สินค้าที่มีโปรโมชัน</div>
                 <div class="card-tools">
+                    <button class="btn btn-flat btn-danger delete_all_data" type="button" data-id="<?= $id ?>">
+                        <i class="fas fa-trash"></i> ลบสินค้าทั้งหมด
+                    </button>
                     <button class="btn btn-flat btn-dark" type="button" id="promotion_products">
                         <i class="fas fa-plus"></i> เพิ่มสินค้า
                     </button>
                 </div>
+
             </div>
             <div class="card-body">
                 <div class="container-fluid">
@@ -273,6 +277,10 @@ function formatDateThai($date)
             const id = $(this).data('id');
             _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_promotion", [id]);
         });
+        $('.delete_all_data').click(function() {
+            const promotion_id = $(this).data('id');
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้าทั้งหมดออกจากโปรโมชันนี้?", "delete_all_promotion_products", [promotion_id]);
+        });
     });
     $(function() {
         $('#delete_data').click(function() {
@@ -292,6 +300,7 @@ function formatDateThai($date)
     // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชัน
     function delete_promotion_product($id) {
         start_loader();
+        alert_toast('กำลังลบสินค้าออกจากโปรโมชัน...', 'info');
         $.ajax({
             // ส่งไปที่ฟังก์ชันใหม่ใน Master.php
             url: _base_url_ + "classes/Master.php?f=delete_promotion_product",
@@ -314,6 +323,34 @@ function formatDateThai($date)
                     end_loader();
                 }
             }
-        })
+        });
+    }
+    // ฟังก์ชันสำหรับลบสินค้าทั้งหมดออกจากโปรโมชัน
+    function delete_all_promotion_products(promotion_id) {
+        start_loader();
+        alert_toast('กำลังลบสินค้าทั้งหมดออกจากโปรโมชัน...', 'info');
+        $.ajax({
+            url: _base_url_ + "classes/Master.php?f=delete_all_promotion_products",
+            method: "POST",
+            data: {
+                promotion_id: promotion_id
+            },
+            dataType: "json",
+            error: function(err) {
+                console.log(err);
+                alert_toast("เกิดข้อผิดพลาด", 'error');
+                end_loader();
+            },
+            success: function(resp) {
+                if (resp.status == 'success') {
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    alert_toast('เกิดข้อผิดพลาด', 'error');
+                    end_loader();
+                }
+            }
+        });
     }
 </script>
