@@ -300,7 +300,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
               </button>
               <div class="dropdown-menu user-dropdown-menu dropdown-menu-right">
                 <a class="dropdown-item" href="<?= base_url . '?p=user' ?>"><i class="fa fa-user"></i> บัญชีของฉัน</a>
-                <a class="dropdown-item" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-shopping-cart"></i> ตะกร้าของฉัน</a>
+                <a class="dropdown-item" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-basket-shopping"></i> ตะกร้าของฉัน</a>
                 <a class="dropdown-item" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>"><i class="fa fa-sign-out-alt"></i> ออกจากระบบ</a>
@@ -423,7 +423,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
       <div class="sidebar-panel sidebar-main-panel">
         <nav class="nav flex-column pt-3">
           <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
-            <a class="nav-link" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-shopping-cart"></i> ตะกร้าของฉัน</a>
+            <a class="nav-link" href="<?= base_url . '?p=cart_list' ?>"> <i class="fa fa-basket-shopping"></i> ตะกร้าของฉัน</a>
             <a class="nav-link" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
             <div class="dropdown-divider"></div>
           <?php endif; ?>
