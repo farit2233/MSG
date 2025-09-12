@@ -343,6 +343,23 @@
     .modal-dialog-image {
         margin-top: 170px !important;
     }
+    
+    .btn-filter {
+        background-color: #f57421;
+        color: #fff;
+        border: 1px solid #ee4d2d;
+        border-radius: 2px;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-filter:hover {
+        filter: brightness(90%);
+        color: white;
+    }
+
 
     @media (max-width: 932px) {
         .modal-dialog-image {
