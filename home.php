@@ -134,18 +134,20 @@
                             }
 
                             $qry = $conn->query("
-                                    SELECT *, 
-                                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
-                                        COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
-                                    FROM `product_list` 
-                                    WHERE 
-                                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
-                                        COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
-                                    ORDER BY 
-                                        IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
-                                        RAND() 
-                                    LIMIT 8
-                                ");
+                                SELECT *, 
+                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                    COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+                                FROM `product_list` 
+                                WHERE 
+                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                    COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
+                                    AND `status` = 1
+                                    AND `delete_flag` = 0
+                                ORDER BY 
+                                    IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
+                                    RAND() 
+                                LIMIT 8
+                            ");
                             while ($row = $qry->fetch_assoc()):
                             ?>
                                 <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
@@ -238,6 +240,8 @@
                                 WHERE 
                                     (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
                                     COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
+                                    AND `status` = 1
+                                    AND `delete_flag` = 0
                                 ORDER BY 
                                     `date_created` DESC 
                                 LIMIT 8
