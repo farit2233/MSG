@@ -1,5 +1,5 @@
 <?php
-$product_types_result = $conn->query("SELECT id, name FROM `product_type` WHERE status = 1 AND delete_flag = 0 ORDER BY `other` ASC, `name` DESC");
+$product_types_result = $conn->query("SELECT id, name FROM `product_type` WHERE status = 1 AND delete_flag = 0 ORDER BY `other` ASC, `name` ASC");
 
 
 if (isset($_GET['id']) && $_GET['id'] > 0) {

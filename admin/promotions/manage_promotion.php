@@ -1,5 +1,5 @@
 <?php
-$promotion_category_result = $conn->query("SELECT id, name FROM promotion_category WHERE status = 1 ORDER BY id ASC");
+$promotion_category_result = $conn->query("SELECT id, name FROM promotion_category WHERE status = 1 ORDER BY name ASC");
 
 if (isset($_GET['id']) && $_GET['id'] > 0) {
     $qry = $conn->query("SELECT * FROM promotions_list WHERE id = '{$_GET['id']}'");
