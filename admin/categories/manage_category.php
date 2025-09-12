@@ -1,5 +1,5 @@
 <?php
-$product_types_result = $conn->query("SELECT id, name FROM `product_type` WHERE status = 1 AND delete_flag = 0 ORDER BY name ASC");
+$product_types_result = $conn->query("SELECT id, name FROM `product_type` WHERE status = 1 AND delete_flag = 0 ORDER BY `other` ASC, `name` DESC");
 
 
 if (isset($_GET['id']) && $_GET['id'] > 0) {
@@ -60,7 +60,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 					</div>
 					<div class="form-group col-lg-6 col-md-6 col-sm-12 col-xs-12">
 						<label for="product_type_id" class="control-label">เลือกประเภทสินค้า</label>
-						<select name="product_type_id" id="product_type_id" class="form-control form-control-sm rounded-0" required>
+						<select name="product_type_id" id="product_type_id" class="form-control rounded-0 select2" required>
 							<option value="" disabled <?= !isset($product_type_id) ? 'selected' : '' ?>>-- กรุณาเลือก --</option>
 							<?php
 							while ($pt_row = $product_types_result->fetch_assoc()) :
@@ -98,6 +98,9 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 <script>
 	$(document).ready(function() {
+		$('.select2').select2({
+			width: '100%'
+		});
 
 		let formChanged = false;
 		$('#category-form input, #category-form textarea').on('input', function() {
