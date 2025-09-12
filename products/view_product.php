@@ -566,7 +566,7 @@ if (!function_exists('format_price_custom')) {
 															$display_price = $rel['discounted_price'];
 															$discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100);
 															echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
-															echo '<span class="badge badge-sm text-white">ลด ' . $discount_percentage . '%</span>';
+															echo '<span class="badge badge-sm prdouct-badge text-white">ลด ' . $discount_percentage . '%</span>';
 														} elseif (!is_null($rel['vat_price']) && $rel['vat_price'] > 0) {
 															$display_price = $rel['vat_price'];
 															echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
