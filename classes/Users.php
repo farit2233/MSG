@@ -293,7 +293,7 @@
 			$avatar = $this->conn->query("SELECT avatar FROM customer_list where id = $id");
 			$qry = $this->conn->query("DELETE FROM customer_list where id = $id");
 			if ($qry) {
-				$this->settings->set_flashdata('success', 'Customer Details has been deleted successfully.');
+				$this->settings->set_flashdata('success', 'ลบบัญชีผู้ใช้เรียบร้อย');
 				$resp['status'] = 'success';
 				if ($avatar->num_rows > 0) {
 					$avatar = explode("?", $avatar->fetch_array()[0])[0];
