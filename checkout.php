@@ -9,6 +9,7 @@ if ($_settings->userdata('id') == '' || $_settings->userdata('login_type') != 2)
 $selected_items = isset($_POST['selected_items']) ? explode(',', $_POST['selected_items']) : [];
 
 $cart_total = 0;
+$cart_total_before_vat = 0; // << เพิ่มบรรทัดนี้
 $cart_items = [];
 $total_weight = 0;
 
@@ -45,6 +46,7 @@ if (!empty($selected_items)) {
 
         $row['final_price'] = $final_price;
         $cart_total += $final_price * $row['quantity'];
+        $cart_total_before_vat += $row['price'] * $row['quantity'];
 
         // น้ำหนักรวม
         $total_weight += ($row['product_weight'] ?? 0) * $row['quantity'];
