@@ -29,3 +29,17 @@
         /* สีข้อความของปุ่มที่ไม่สามารถคลิกได้ */
         pointer-events: none;
     }
+    
+    .prdouct-badge {
+        font-size: 12px;
+        /* ลดขนาดฟอนต์ */
+        padding: 4px 5px;
+        /* ปรับ padding */
+        background-color: #f57421;
+        position: absolute;
+        top: 1px;
+        right: 1px;
+        color: white;
+        padding: 5px 10px;
+        z-index: 10;
+    }

@@ -256,16 +256,7 @@
 		color: #333;
 		word-break: break-word;
 	}
-
-	.badge-sm {
-		font-size: 12px;
-		/* ลดขนาดฟอนต์ */
-		padding: 4px 5px;
-		/* ปรับ padding */
-		background-color: #f79c60;
-	}
-
-
+	
 	.btn-readmore {
 		min-width: 120px;
 		/* ความกว้างขั้นต่ำ */
