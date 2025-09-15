@@ -1,31 +1,10 @@
 <?php
 
 if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) {
-    // โหลดจากฐานข้อมูลสำหรับผู้ที่ล็อกอิน
-    $cart = $conn->query("SELECT 
-        c.*, 
-        p.name as product, 
-        p.brand as brand, 
-        p.price, 
-        p.discounted_price, 
-        p.vat_price,
-        p.discount_type,
-        cc.name as category, 
-        p.image_path,
-        (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
-        - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
-    FROM `cart_list` c 
-    INNER JOIN product_list p ON c.product_id = p.id 
-    INNER JOIN category_list cc ON p.category_id = cc.id 
-    WHERE customer_id = '{$_settings->userdata('id')}'");
-
-    while ($row = $cart->fetch_assoc()):
-    // Your code for displaying items goes here...
-    endwhile;
+    // โหลดจาก database (สำหรับคน login)
 } else {
-    // ใช้ข้อมูลจาก localStorage เมื่อไม่ได้ล็อกอิน
+    // ใช้ JavaScript อ่านจาก localStorage แล้วแสดงรายการตะกร้า
 }
-
 
 
 /*if ($_settings->userdata('id') == '' || $_settings->userdata('login_type') != 2) {
@@ -46,17 +25,6 @@ allowEscapeKey: false
 </script>";
 exit;
 }*/
-
-if (!function_exists('format_price_custom')) {
-    function format_price_custom($price)
-    {
-        $formatted_price = format_num($price, 2);
-        if (substr($formatted_price, -3) == '.00') {
-            return format_num($price, 0);
-        }
-        return $formatted_price;
-    }
-}
 ?>
 <style>
     /* ปรับให้ทันสมัย */
@@ -276,7 +244,6 @@ if (!function_exists('format_price_custom')) {
                                     p.brand as brand, 
                                     p.price, 
                                     p.discounted_price, 
-                                    p.vat_price,
                                     p.discount_type,
                                     cc.name as category, 
                                     p.image_path,
@@ -288,34 +255,22 @@ if (!function_exists('format_price_custom')) {
                                 WHERE customer_id = '{$_settings->userdata('id')}'");
 
                                 while ($row = $cart->fetch_assoc()):
-                                    // เงื่อนไขเลือกใช้ราคา
-                                    if (!empty($row['discounted_price']) && $row['discounted_price'] < $row['vat_price']) {
-                                        $price_to_use = $row['discounted_price'];
-                                        $show_discount = true;
-                                    } elseif (!empty($row['vat_price']) && $row['vat_price'] > 0) {
-                                        $price_to_use = $row['vat_price'];
-                                        $show_discount = false;
-                                    } else {
-                                        $price_to_use = $row['vat_price'];
-                                        $show_discount = false;
-                                    }
-
-                                    $subtotal = $price_to_use * $row['quantity'];
-                                    $gt += $subtotal;
+                                    $show_discount = !empty($row['discounted_price']) && $row['discounted_price'] < $row['price'];
+                                    $price_to_use = $show_discount ? $row['discounted_price'] : $row['price'];
+                                    $gt += $price_to_use * $row['quantity'];
                                 ?>
 
                                     <label class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
                                         data-id='<?= $row['id'] ?>'
-                                        data-max='<?= floor($row['available'] / 3) ?>'
+                                        data-max='<?= format_num($row['available'], 0) ?>'
                                         style="cursor: pointer;">
-
                                         <div class="col-auto pr-2">
                                             <input type="checkbox"
                                                 class="form-check-input cart-check"
                                                 name="selected_cart[]"
                                                 value="<?= $row['id'] ?>"
                                                 id="cart_check_<?= $row['id'] ?>"
-                                                data-price="<?= $subtotal ?>"
+                                                data-price="<?= $price_to_use * $row['quantity'] ?>"
                                                 <?= $row['available'] <= 0 ? 'disabled' : '' ?>>
                                         </div>
 
@@ -338,19 +293,19 @@ if (!function_exists('format_price_custom')) {
                                                 </div>
                                             </div>
                                         </div>
-
                                         <div class="col-auto text-right">
                                             <?php if ($show_discount): ?>
                                                 <h5 class="text-muted mb-0">
-                                                    <del><?= format_price_custom($row['vat_price'] * $row['quantity']) ?> บาท</del>
+                                                    <del><?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</del>
                                                 </h5>
-                                                <h4><b class="text-danger">ลดเหลือ: <?= format_price_custom($row['discounted_price'] * $row['quantity']) ?> บาท</b></h4>
+                                                <h4><b class="text-danger">ลดเหลือ: <?= format_num($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
                                             <?php else: ?>
-                                                <h4><b>ราคา: <?= format_price_custom($subtotal) ?> บาท</b></h4>
+
+                                                <h4><b>ราคา: <?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
                                             <?php endif; ?>
                                         </div>
-                                    </label>
 
+                                    </label>
                                 <?php endwhile; ?>
 
                             </div>
@@ -360,7 +315,7 @@ if (!function_exists('format_price_custom')) {
                             <?php endif; ?>
                             <div class="d-flex justify-content-end py-3">
                                 <div class="col-auto">
-                                    <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0</span></b> บาท</h3>
+                                    <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0.00</span></b> บาท</h3>
                                 </div>
                             </div>
                             <?php if ($gt > 0): ?>
@@ -442,8 +397,7 @@ if (!function_exists('format_price_custom')) {
                 confirmButtonColor: '#e74c3c', // สีแดงปุ่มยืนยัน
                 cancelButtonColor: '#95a5a6', // สีเทาปุ่มยกเลิก
                 confirmButtonText: 'ใช่ ลบเลย!',
-                cancelButtonText: 'ยกเลิก',
-                reverseButtons: true
+                cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
                     delete_cart(id); // ฟังก์ชันลบจริง
@@ -525,29 +479,12 @@ if (!function_exists('format_price_custom')) {
         $('.cart-check:checked').each(function() {
             total += parseFloat($(this).data('price'));
         });
+        $('#selected-total').text(total.toLocaleString('th-TH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }));
 
-        let formattedTotal;
-
-        // ถ้าทศนิยมเป็น .00 ให้ลบออก
-        if (total % 1 === 0) {
-            formattedTotal = total.toLocaleString('th-TH', {
-                maximumFractionDigits: 0
-            });
-        } else {
-            formattedTotal = total.toLocaleString('th-TH', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
-
-        $('#selected-total').text(formattedTotal);
     }
-
-    // ตัวอย่าง: เรียกฟังก์ชันตอนโหลดหน้าและทุกครั้งที่เช็ค/ยกเลิก
-    $(document).ready(function() {
-        calculateSelectedTotal();
-        $('.cart-check').on('change', calculateSelectedTotal);
-    });
 
     $(function() {
         // เรียกเมื่อมีการเปลี่ยนสถานะ checkbox
@@ -576,47 +513,44 @@ if (!function_exists('format_price_custom')) {
         let grandTotal = 0;
 
         cart.forEach((item, index) => {
-            const show_discount = item.discounted_price && item.discounted_price < item.price;
-            const price_to_use = show_discount ? item.discounted_price : item.price;
+            const show_discount = item.discounted_price && item.discounted_price < item.vat_price;
+            const price_to_use = show_discount ? item.discounted_price : item.vat_price;
             const subtotal = price_to_use * item.qty;
             grandTotal += subtotal;
 
             html += `
-<label class="list-group-item cart-item d-flex w-100 ${item.available <= 0 ? 'out-of-stock' : ''}"
-    data-id='${item.id}'
-    data-max='${item.available}'
-    style="cursor: pointer;">
-    <div class="col-auto pr-2">
-        <input type="checkbox" class="form-check-input cart-check" data-price="${subtotal}" />
-    </div>
+<label class="list-group-item cart-item d-flex w-100" data-id="${index}" data-max="999" style="cursor: pointer;">
+	<div class="col-auto pr-2">
+		<input type="checkbox" class="form-check-input cart-check" data-price="${subtotal}" />
+	</div>
 
-    <div class="cart-item-content d-flex w-100 align-items-start">
-        <div class="col-3 text-center">
-            <img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt="">
-        </div>
+	<div class="cart-item-content d-flex w-100 align-items-start">
+		<div class="col-3 text-center">
+			<img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt="">
+		</div>
 
-        <div class="col-auto flex-shrink-1 flex-grow-1">
-            <h4 class="product-title">${item.name}</h4>
-            <div class="text-muted d-flex w-100">
-                <div class="input-group" style="width: 20rem;">
-                    <button class="btn addcart-plus minus-qty guest" type="button">−</button>
-                    <input type="number" class="form-control text-center qty" value="${item.qty}" min="1" max="${item.available}" required>
-                    <button class="btn addcart-plus add-qty guest" type="button">+</button>
-                    <button class="btn btn-danger ms-2 del-item guest" type="button">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+		<div class="col-auto flex-shrink-1 flex-grow-1">
+			<h4 class="product-title">${item.name}</h4>
+			<div class="text-muted d-flex w-100">
+				<div class="input-group" style="width: 20rem;">
+					<button class="btn addcart-plus minus-qty guest" type="button">−</button>
+					<input type="number" class="form-control text-center qty" value="${item.qty}" min="1" max="999" required>
+					<button class="btn addcart-plus add-qty guest" type="button">+</button>
+					<button class="btn btn-danger ms-2 del-item guest" type="button">
+						<i class="fa-solid fa-trash-can"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <div class="col-auto text-right">
-        ${show_discount
-            ? `<h5 class="text-muted mb-0"><del>${(item.price * item.qty).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</del></h5>
-               <h4><b class="text-danger">ลดเหลือ: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
-            : `<h4><b>ราคา: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
-        }
-    </div>
+	<div class="col-auto text-right">
+		${show_discount
+			? `<h5 class="text-muted mb-0"><del>${(item.vat_price * item.qty).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</del></h5>
+			   <h4><b class="text-danger">ลดเหลือ: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
+			: `<h4><b>ราคา: ${subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</b></h4>`
+		}
+	</div>
 </label>`;
         });
 
@@ -624,7 +558,6 @@ if (!function_exists('format_price_custom')) {
         container.style.display = 'block';
         calculateSelectedTotal(); // เรียกทันทีตอนโหลด
     });
-
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('add-qty') && e.target.classList.contains('guest')) {
             const itemEl = e.target.closest('.cart-item');

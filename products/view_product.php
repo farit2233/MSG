@@ -710,15 +710,15 @@ if (!function_exists('format_price_custom')) {
 		if (current < max) {
 			qtyInput.value = current + 1;
 		} else {
-			alert_toast(`จำกัดสูงสุด ${max} ชิ้นต่อคำสั่งซื้อนะครับ 🧾`, 'warning');
+			alert_toast(`จำกัดสูงสุด ${max} ชิ้นต่อคำสั่งซื้อ`, 'warning');
 		}
 	}
 
 	function guest_add_to_cart() {
 		const product_id = "<?= $id ?>";
 		const name = "<?= $name ?>";
-		const price = <?= $price ?>;
-		const discounted_price = <?= ($discounted_price && $discounted_price < $price) ? $discounted_price : 'null' ?>;
+		const vat_price = <?= $vat_price ?>;
+		const discounted_price = <?= ($discounted_price && $discounted_price < $vat_price) ? $discounted_price : 'null' ?>;
 		const qty = parseInt(document.getElementById('qty').value) || 1;
 		const image = "<?= validate_image($image_path) ?>";
 
@@ -731,7 +731,7 @@ if (!function_exists('format_price_custom')) {
 			cart.push({
 				id: product_id,
 				name,
-				price,
+				vat_price,
 				discounted_price,
 				qty,
 				image
