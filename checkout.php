@@ -273,6 +273,7 @@ if ($is_coupon_applicable) {
 }
 
 $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_shipping_cost;
+$vat_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_shipping_cost;
 
 if (!function_exists('format_price_custom')) {
     function format_price_custom($vat_price)
@@ -289,6 +290,7 @@ if (!function_exists('format_price_custom')) {
     // ส่งค่าจาก PHP มาให้ JavaScript
     var cartItems = <?= json_encode(array_values($cart_items)); ?>;
     var initialGrandTotal = <?= $grand_total; ?>;
+    var initialVatTotal = <?= $vat_total; ?>;
     var shippingCost = <?= $final_shipping_cost; ?>;
 </script>
 <section class="py-3">
@@ -489,7 +491,7 @@ if (!function_exists('format_price_custom')) {
                                                 </th>
                                                 <td colspan=" 5">
                                                     <p class="text-bold text-right">
-                                                        <span id="order-total-text"><?= format_price_custom($grand_total, 2) ?></span> บาท
+                                                        <span id="order-vat-total"><?= format_price_custom($vat_total, 2) ?></span> บาท
                                                     </p>
                                                 </td>
                                             </tr>
@@ -717,6 +719,7 @@ if (!function_exists('format_price_custom')) {
             }
 
             document.getElementById('order-total-text').innerText = formattedTotal;
+            document.getElementById('order-vat-total').innerText = formattedTotal;
         }
 
         // ตัวอย่างการเรียกใช้งาน
