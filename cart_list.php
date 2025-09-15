@@ -257,7 +257,6 @@ exit;
                                 while ($row = $cart->fetch_assoc()):
                                     $available = $row['available'];
 
-                                    // ✨ ตรรกะการคำนวณจำนวนสั่งซื้อสูงสุด (มีอยู่แล้ว)
                                     if ($available >= 100) {
                                         $max_order_qty = floor($available / 3);
                                     } elseif ($available >= 50) {
@@ -282,7 +281,7 @@ exit;
 
                                     <label class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
                                         data-id='<?= $row['id'] ?>'
-                                        data-max='<?= format_num($row['available'], 0) ?>'
+                                        data-max='<?= $max_order_qty ?>'
                                         style="cursor: pointer;">
                                         <div class="col-auto pr-2">
                                             <input type="checkbox"
@@ -452,7 +451,8 @@ exit;
                 confirmButtonColor: '#e74c3c',
                 cancelButtonColor: '#95a5a6',
                 confirmButtonText: 'ใช่ ลบเลย!',
-                cancelButtonText: 'ยกเลิก'
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     delete_cart(id);
@@ -482,23 +482,26 @@ exit;
         e.target.value = newQty; // อัปเดตค่าในช่อง input ทันที
         updateGuestCartQty(index, newQty, true); // true หมายถึงการตั้งค่าใหม่ ไม่ใช่การบวกลบ
     });
-    // ===================================
-    // ✨ SECTION: For Guest Users (Vanilla JS) - แก้ไขทั้งหมด
-    // ===================================
-    document.addEventListener('DOMContentLoaded', function() {
+
+    function renderGuestCart() {
         const container = document.getElementById('guest_cart_container');
         if (!container) return;
-        const userLoggedIn = <?= ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) ? 'true' : 'false' ?>;
-        if (userLoggedIn) return;
 
         let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
         if (cart.length === 0) {
             container.innerHTML = '<h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>';
             container.style.display = 'block';
+            // ซ่อนปุ่มชำระเงินเมื่อตะกร้าว่าง
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) checkoutForm.style.display = 'none';
+            calculateSelectedTotal(); // อัปเดตยอดรวมเป็น 0
             return;
+        } else {
+            // แสดงปุ่มชำระเงินเมื่อมีของในตะกร้า
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) checkoutForm.style.display = 'block';
         }
 
-        // ✨ FIX: ดึง ID สินค้าทั้งหมดเพื่อส่งไปขอข้อมูลสต็อก
         const productIds = cart.map(item => item.id).join(',');
 
         fetch(_base_url_ + 'classes/get_product_stock.php', {
@@ -513,63 +516,62 @@ exit;
                 let html = '';
                 cart.forEach((item, index) => {
                     const available = stockData[item.id] || 0;
-
-                    // ✨ FIX: นำ Logic การหาร 3 มาใช้กับ Guest
                     let max_order_qty = 0;
                     if (available > 0) {
-                        if (available >= 100) {
-                            max_order_qty = Math.floor(available / 3);
-                        } else if (available >= 50) {
-                            max_order_qty = Math.floor(available / 2);
-                        } else if (available >= 30) {
-                            max_order_qty = Math.floor(available / 1.5);
-                        } else {
-                            max_order_qty = Math.max(1, Math.floor(available / 1));
-                        }
+                        if (available >= 100) max_order_qty = Math.floor(available / 3);
+                        else if (available >= 50) max_order_qty = Math.floor(available / 2);
+                        else if (available >= 30) max_order_qty = Math.floor(available / 1.5);
+                        else max_order_qty = Math.max(1, Math.floor(available / 1));
                     }
 
                     const isOutOfStock = available <= 0;
-                    const currentQty = Math.min(item.qty, max_order_qty); // ปรับจำนวนในตะกร้าไม่ให้เกินสต็อก
-                    if (item.qty > currentQty) { // อัปเดต localStorage หากจำนวนเดิมเกิน
+                    const currentQty = Math.min(item.qty, max_order_qty);
+                    if (item.qty > currentQty) {
                         cart[index].qty = currentQty;
                         localStorage.setItem('guest_cart', JSON.stringify(cart));
                     }
-
                     const show_discount = item.discounted_price && item.discounted_price < item.vat_price;
                     const price_to_use = show_discount ? item.discounted_price : item.vat_price;
                     const subtotal = price_to_use * currentQty;
 
                     html += `
-            <label class="list-group-item cart-item d-flex w-100 ${isOutOfStock ? 'out-of-stock' : ''}" data-id="${index}" data-product-id="${item.id}" data-max="${max_order_qty}">
-                <div class="col-auto pr-2">
-                    <input type="checkbox" class="form-check-input cart-check guest" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''} />
-                </div>
-                <div class="cart-item-content d-flex w-100 align-items-start">
-                    <div class="col-3 text-center"><img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt=""></div>
-                    <div class="col-auto flex-shrink-1 flex-grow-1">
-                        <h4 class="product-title">${item.name}</h4>
-                        <div class="text-muted d-flex w-100">
-                            <div class="input-group" style="width: 20rem;">
-                                <button class="btn addcart-plus minus-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>−</button>
-                                <input type="number" class="form-control text-center qty guest" value="${currentQty}" min="1" max="${max_order_qty}" ${isOutOfStock ? 'disabled' : ''}>
-                                <button class="btn addcart-plus add-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>+</button>
-                                <button class="btn btn-danger ms-2 del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
+                <label class="list-group-item cart-item d-flex w-100 ${isOutOfStock ? 'out-of-stock' : ''}" data-id="${index}" data-product-id="${item.id}" data-max="${max_order_qty}">
+                    <div class="col-auto pr-2">
+                        <input type="checkbox" class="form-check-input cart-check guest" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''} />
+                    </div>
+                    <div class="cart-item-content d-flex w-100 align-items-start">
+                        <div class="col-3 text-center"><img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt=""></div>
+                        <div class="col-auto flex-shrink-1 flex-grow-1">
+                            <h4 class="product-title">${item.name}</h4>
+                            <div class="text-muted d-flex w-100">
+                                <div class="input-group" style="width: 20rem;">
+                                    <button class="btn addcart-plus minus-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>−</button>
+                                    <input type="number" class="form-control text-center qty guest" value="${currentQty}" min="1" max="${max_order_qty}" ${isOutOfStock ? 'disabled' : ''}>
+                                    <button class="btn addcart-plus add-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>+</button>
+                                    <button class="btn btn-danger ms-2 del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-auto text-right">
-                    ${show_discount
-                        ? `<h5 class="text-muted mb-0"><del>${formatPriceForGuest(item.vat_price * currentQty)} บาท</del></h5><h4><b class="text-danger">ลดเหลือ: ${formatPriceForGuest(subtotal)} บาท</b></h4>`
-                        : `<h4><b>ราคา: ${formatPriceForGuest(subtotal)} บาท</b></h4>`
-                    }
-                </div>
-            </label>`;
+                    <div class="col-auto text-right">
+                        ${show_discount
+                            ? `<h5 class="text-muted mb-0"><del>${formatPriceForGuest(item.vat_price * currentQty)} บาท</del></h5><h4><b class="text-danger">ลดเหลือ: ${formatPriceForGuest(subtotal)} บาท</b></h4>`
+                            : `<h4><b>ราคา: ${formatPriceForGuest(subtotal)} บาท</b></h4>`
+                        }
+                    </div>
+                </label>`;
                 });
                 container.innerHTML = html;
                 container.style.display = 'block';
                 calculateSelectedTotal();
             });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const userLoggedIn = <?= ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) ? 'true' : 'false' ?>;
+        if (userLoggedIn) return;
+
+        // เรียกใช้ฟังก์ชันเพื่อวาดตะกร้าครั้งแรก
+        renderGuestCart();
     });
 
     document.addEventListener('click', function(e) {
@@ -594,7 +596,8 @@ exit;
                 confirmButtonColor: '#e74c3c',
                 cancelButtonColor: '#95a5a6',
                 confirmButtonText: 'ใช่ ลบเลย!',
-                cancelButtonText: 'ยกเลิก'
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
             }).then(result => result.isConfirmed && deleteGuestCartItem(index));
         }
     });
@@ -660,31 +663,17 @@ exit;
     function deleteGuestCartItem(index) {
         let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
 
-        // ✨ ค้นหา Element ของสินค้าที่จะลบ
-        const itemEl = document.querySelector(`.cart-item[data-id="${index}"]`);
-
-        // ✨ ลบข้อมูลออกจาก Array และอัปเดต localStorage
+        // ลบข้อมูลออกจาก Array ตาม index ที่ได้รับมา
         cart.splice(index, 1);
+
+        // บันทึก Array ใหม่กลับลง localStorage
         localStorage.setItem('guest_cart', JSON.stringify(cart));
-        updateCartCounter(); // ✨ อย่าลืมเรียกใช้ฟังก์ชันอัปเดตตัวเลขบนไอคอนตะกร้า (ถ้ามี)
 
-        // ✨ ลบ Element ของสินค้านั้นออกจากหน้าเว็บ
-        if (itemEl) {
-            itemEl.remove();
-        }
+        // (ถ้ามี) ฟังก์ชันอัปเดตตัวเลขบนไอคอนตะกร้า
+        if (typeof updateCartCounter === 'function') updateCartCounter();
 
-        // ✨ คำนวณยอดรวมใหม่
-        calculateSelectedTotal();
-
-        // ✨ ตรวจสอบว่าถ้าตะกร้าว่าง ให้แสดงข้อความ "ตะกร้าว่างเปล่า"
-        if (cart.length === 0) {
-            document.getElementById('guest_cart_container').innerHTML = '<h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>';
-            // ซ่อนปุ่มชำระเงิน (ถ้ามี)
-            const checkoutForm = document.getElementById('checkout-form');
-            if (checkoutForm) {
-                checkoutForm.style.display = 'none';
-            }
-        }
+        // เรียกฟังก์ชันวาดตะกร้าใหม่ทั้งหมด!
+        renderGuestCart();
     }
 
     function formatPriceForGuest(value) {
