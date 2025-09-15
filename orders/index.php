@@ -98,7 +98,7 @@ $filter_options = [
                                         6 => '<span class="badge badge-order bg-secondary">กำลังยกเลิกคำสั่งซื้อ</span>',
                                         7 => '<span class="badge badge-order bg-dark">คืนของระหว่างทาง</span>',
                                         8 => '<span class="badge badge-order bg-secondary">กำลังคืนสินค้า</span>',
-                                        9 => '<span class="badge badge-order bg-secondary">คืนของสำเร็จ</span>',
+                                        9 => '<span class="badge badge-order bg-dark">คืนของสำเร็จ</span>',
                                         10 => '<span class="badge badge-order bg-danger">ยกเลิกแล้ว</span>',
                                         default => '<span class="badge badge-order bg-light">N/A</span>'
                                     };
