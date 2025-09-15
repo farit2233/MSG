@@ -31,7 +31,7 @@ if ($_settings->userdata('id') != '') {
                                 <input type="hidden" name="cropped_image" id="cropped_image">
                                 <input type="hidden" name="old_avatar" value="<?= isset($avatar) ? $avatar : '' ?>">
                                 <div class="profile-section-title-with-line mb-4">
-                                    <h3>โปรไฟล์</h3>
+                                    <h4>โปรไฟล์</h4>
                                 </div>
                                 <div class="row justify-content-center">
                                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
@@ -40,13 +40,13 @@ if ($_settings->userdata('id') != '') {
                                         </div>
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input" id="customFile" name="img" accept="image/png, image/jpeg">
-                                            <label class="custom-file-label" for="customFile">เปลี่ยนรูปโปรไฟล์</label>
+                                            <label class="custom-file-label profile-img" for="customFile">เปลี่ยนรูปโปรไฟล์</label>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="profile-section-title-with-line mb-4 mt-4">
-                                    <h3>ข้อมูลส่วนตัว</h3>
+                                    <h4>ข้อมูลส่วนตัว</h4>
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
@@ -91,7 +91,7 @@ if ($_settings->userdata('id') != '') {
                                 </div>
 
                                 <div class="profile-section-title-with-line mb-4">
-                                    <h3>ที่อยู่จัดส่ง</h3>
+                                    <h4>ที่อยู่จัดส่ง</h4>
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">

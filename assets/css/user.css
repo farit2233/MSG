@@ -7,7 +7,8 @@
     }
 
     .profile-page label {
-        font-size: 18px;
+        font-size: 16px;
+        font-weight: bold;
     }
 
     .profile-page input,
@@ -21,14 +22,14 @@
         font-size: 16px !important;
     }
 
-    .profile-section-title-with-line h3 {
+    .profile-section-title-with-line h4 {
         position: relative;
         border-bottom: 2px solid #f57421 !important;
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
     }
 
-    .profile-section-title-with-line h3::after {
+    .profile-section-title-with-line h4::after {
         content: none !important;
     }
 
@@ -152,3 +153,10 @@
     input[type=range].form-control-range::-moz-range-thumb {
         background: #f57421;
     }
+
+    
+  .profile-img {
+    border-radius: 13px;
+    font-size: 16px !important;
+    font-weight: normal !important;
+  }
