@@ -208,7 +208,7 @@
 			$check = $this->conn->query("SELECT * FROM `customer_list` where email = '{$email}' " . (!empty($id) > 0 ? " and id!='{$id}'" : "") . " ")->num_rows;
 			if ($check > 0) {
 				$resp['status'] = 'failed';
-				$resp['msg'] = 'Email already exists.';
+				$resp['msg'] = 'อีเมลนี้ถูกใช้แล้ว';
 				return json_encode($resp);
 			}
 
