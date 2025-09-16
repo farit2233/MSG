@@ -422,10 +422,56 @@
 			}
 		}
 
+		function password()
+		{
+			global $conn; // เชื่อมต่อกับฐานข้อมูล
 
-		// ====================================================================
-		// 3. ฟังก์ชัน forgot_password ที่เรียกใช้ฟังก์ชันใหม่
-		// ====================================================================
+			// ตรวจสอบว่ามีการส่งข้อมูลจากฟอร์มหรือไม่
+			if (isset($_POST['password']) && isset($_POST['new_password']) && isset($_POST['confirm_password']) && isset($_GET['id']) && $_GET['id'] > 0) {
+				// รับค่า id ของผู้ใช้ที่กำลังจะเปลี่ยนรหัสผ่าน
+				$user_id = $_GET['id'];
+
+				// รับค่า รหัสผ่านเดิม, รหัสผ่านใหม่ และยืนยันรหัสผ่านใหม่
+				$old_password = md5($_POST['password']);
+				$new_password = md5($_POST['new_password']);
+				$confirm_password = md5($_POST['confirm_password']);
+
+				// ตรวจสอบว่ารหัสผ่านเดิมถูกต้องหรือไม่
+				$qry = $conn->query("SELECT password FROM customer_list WHERE id = '$user_id'");
+
+				if ($qry->num_rows > 0) {
+					$row = $qry->fetch_assoc();
+					if ($row['password'] === $old_password) {
+						// ตรวจสอบว่ารหัสใหม่และยืนยันรหัสตรงกันหรือไม่
+						if ($new_password === $confirm_password) {
+							// อัปเดตรหัสผ่านใหม่ในฐานข้อมูล
+							$update = $conn->query("UPDATE customer_list SET password = '$new_password' WHERE id = '$user_id'");
+
+							if ($update) {
+								// หากอัปเดตสำเร็จ, ส่งข้อความสำเร็จ
+								echo json_encode(['status' => 'success', 'msg' => 'รหัสผ่านถูกอัปเดตเรียบร้อยแล้ว']);
+							} else {
+								// หากไม่สามารถอัปเดตได้, ส่งข้อความผิดพลาด
+								echo json_encode(['status' => 'failed', 'msg' => 'ไม่สามารถอัปเดตรหัสผ่านได้']);
+							}
+						} else {
+							// หากรหัสใหม่และยืนยันรหัสไม่ตรงกัน
+							echo json_encode(['status' => 'failed', 'msg' => 'รหัสใหม่และยืนยันรหัสไม่ตรงกัน']);
+						}
+					} else {
+						// หากรหัสเดิมไม่ถูกต้อง
+						echo json_encode(['status' => 'failed', 'msg' => 'รหัสผ่านเดิมไม่ถูกต้อง']);
+					}
+				} else {
+					// หากไม่พบผู้ใช้
+					echo json_encode(['status' => 'failed', 'msg' => 'ไม่พบผู้ใช้']);
+				}
+			} else {
+				// หากไม่ได้ส่งข้อมูลมาครบ
+				echo json_encode(['status' => 'failed', 'msg' => 'ข้อมูลไม่ครบ']);
+			}
+		}
+
 		public function forgot_password()
 		{
 			if (isset($_POST['email'])) {
@@ -510,7 +556,9 @@
 		case 'update_profile':
 			echo $users->update_profile();
 			break;
-		// Users.php
+		case 'password':
+			echo $users->password();
+			break;
 		case 'forgot_password':
 			echo $users->forgot_password();
 			break;

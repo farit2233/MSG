@@ -132,6 +132,50 @@
     </div>
   </div>
 
+  <div class="modal fade" id="password_modal" role='dialog'>
+    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">เปลี่ยนรหัสผ่าน</h5>
+        </div>
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary" id="btn_change_password" form="change_password_form">ยืนยัน</button>
+          <button type="submit" class="btn btn-primary" id="btn_forgot_password" form="forgot_password_form" style="display:none;">ส่งคำขอ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-user " role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="img-container">
+            <img id="image_to_crop" src="">
+          </div>
+          <div class="zoom-controls">
+            <i class="fas fa-search-minus"></i>
+            <input type="range" class="form-control-range" id="zoom_slider" min="0.1" max="2" step="0.01">
+            <i class="fas fa-search-plus"></i>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+          <button type="button" class="btn btn-primary" id="crop_button">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

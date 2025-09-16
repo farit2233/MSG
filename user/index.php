@@ -16,6 +16,26 @@ if ($_settings->userdata('id') != '') {
 }
 ?>
 
+<style>
+    #password {
+        border: none;
+        /* ลบกรอบ */
+        background: transparent;
+        /* กำหนดให้พื้นหลังเป็นโปร่งใส */
+        padding: 10px 15px;
+        /* เพิ่มระยะห่างข้างใน */
+        font-size: 16px;
+        /* ขนาดตัวอักษร */
+
+    }
+
+    #password:focus {
+        outline: none;
+        /* ลบกรอบที่แสดงเวลาโฟกัส */
+        text-decoration: underline !important;
+        /* เพิ่มเส้นใต้เมื่อมีการ focus */
+    }
+</style>
 <section class="py-3 profile-page">
     <div class="container">
         <div class="row mt-n4 justify-content-center align-items-center flex-column">
@@ -72,21 +92,19 @@ if ($_settings->userdata('id') != '') {
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                         <div class="form-group">
-                                            <label for="email" class="control-label">Email</label>
-                                            <input type="email" class="form-control" required name="email" id="email" value="<?= isset($email) ? $email : '' ?>">
-                                        </div>
-                                        <div class="form-group">
                                             <label for="contact" class="control-label">เบอร์โทร</label>
                                             <input type="text" class="form-control" required name="contact" id="contact" value="<?= isset($contact) ? $contact : '' ?>">
                                         </div>
                                         <div class="form-group">
-                                            <label for="password" class="control-label">รหัสผ่านใหม่</label>
-                                            <input type="password" class="form-control" name="password" id="password">
+                                            <label for="email" class="control-label">Email</label>
+                                            <input type="email" class="form-control" required name="email" id="email" value="<?= isset($email) ? $email : '' ?>">
                                         </div>
+
                                         <div class="form-group">
-                                            <label for="cpassword" class="control-label">ยืนยัน รหัสผ่านใหม่</label>
-                                            <input type="password" class="form-control" id="cpassword">
+                                            <label for="contact" class="control-label">รหัสผ่าน</label>
+                                            <a class="form-control" type="button" id="password">เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i></a>
                                         </div>
+
                                     </div>
                                 </div>
 
@@ -134,38 +152,13 @@ if ($_settings->userdata('id') != '') {
     </div>
 </section>
 
-<div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-user " role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="img-container">
-                    <img id="image_to_crop" src="">
-                </div>
-                <div class="zoom-controls">
-                    <i class="fas fa-search-minus"></i>
-                    <input type="range" class="form-control-range" id="zoom_slider" min="0.1" max="2" step="0.01">
-                    <i class="fas fa-search-plus"></i>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-                <button type="button" class="btn btn-primary" id="crop_button">บันทึก</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 
 <script>
     $(document).ready(function() {
         end_loader();
-
+        $('#password').click(function() {
+            password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/password.php?pid=<?= isset($id) ? $id : '' ?>')
+        })
         // --- Form Submission Logic ---
         $('#update-form').submit(function(e) {
             e.preventDefault();
