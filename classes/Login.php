@@ -23,23 +23,37 @@ class Login extends DBConnection
 	{
 		extract($_POST);
 
-		$stmt = $this->conn->prepare("SELECT * from users where username = ? and password = ? ");
-		$password = md5($password);
+		// เตรียมคำสั่ง SQL เพื่อตรวจสอบชื่อผู้ใช้และรหัสผ่าน
+		$stmt = $this->conn->prepare("SELECT * from users where username = ? and password = ?");
+		$password = md5($password);  // แฮชรหัสผ่าน
 		$stmt->bind_param('ss', $username, $password);
 		$stmt->execute();
 		$result = $stmt->get_result();
+
 		if ($result->num_rows > 0) {
+			// ถ้าพบผู้ใช้
 			foreach ($result->fetch_array() as $k => $v) {
 				if (!is_numeric($k) && $k != 'password') {
 					$this->settings->set_userdata($k, $v);
 				}
 			}
+
+			// อัปเดตการเข้าสู่ระบบล่าสุด
+			$last_login = date('Y-m-d H:i:s'); // วันที่และเวลาปัจจุบัน
+			$update_stmt = $this->conn->prepare("UPDATE users SET last_login = ? WHERE username = ?");
+			$update_stmt->bind_param('ss', $last_login, $username);
+			$update_stmt->execute();
+
+			// ตั้งค่า login_type เป็น 1
 			$this->settings->set_userdata('login_type', 1);
+
 			return json_encode(array('status' => 'success'));
 		} else {
+			// ถ้าชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
 			return json_encode(array('status' => 'incorrect', 'last_qry' => "SELECT * from users where username = '$username' and password = md5('$password') "));
 		}
 	}
+
 	public function logout()
 	{
 		if ($this->settings->sess_des()) {
@@ -49,28 +63,49 @@ class Login extends DBConnection
 	function login_customer()
 	{
 		extract($_POST);
+
+		// เตรียมคำสั่ง SQL เพื่อตรวจสอบอีเมลและรหัสผ่าน
 		$stmt = $this->conn->prepare("SELECT * from customer_list where email = ? and `password` = ? ");
-		$password = md5($password);
+		$password = md5($password); // แฮชรหัสผ่าน
 		$stmt->bind_param('ss', $email, $password);
 		$stmt->execute();
 		$result = $stmt->get_result();
+
 		if ($result->num_rows > 0) {
 			$res = $result->fetch_array();
+
+			// ตั้งค่าข้อมูลผู้ใช้ใน session หรือ userdata
 			foreach ($res as $k => $v) {
 				$this->settings->set_userdata($k, $v);
 			}
+
+			// ตั้งค่า login_type เป็น 2 สำหรับลูกค้า
 			$this->settings->set_userdata('login_type', 2);
+
+			// อัปเดต last_login
+			$last_login = date('Y-m-d H:i:s'); // วันที่และเวลาปัจจุบัน
+			$update_stmt = $this->conn->prepare("UPDATE customer_list SET last_login = ? WHERE email = ?");
+			$update_stmt->bind_param('ss', $last_login, $email);
+			$update_stmt->execute();
+
+			// ส่งผลลัพธ์ที่สำเร็จ
 			$resp['status'] = 'success';
 		} else {
+			// ถ้าชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
 			$resp['status'] = 'failed';
 			$resp['msg'] = "<i class='fa fa-exclamation-triangle'></i> บัญชี หรือรหัสผ่านไม่ถูกต้อง";
 		}
+
+		// ตรวจสอบข้อผิดพลาดจากการเชื่อมต่อ
 		if ($this->conn->error) {
 			$resp['status'] = 'failed';
 			$resp['_error'] = $this->conn->error;
 		}
+
+		// คืนค่า JSON response
 		return json_encode($resp);
 	}
+
 	public function logout_customer()
 	{
 		if ($this->settings->sess_des()) {
