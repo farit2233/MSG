@@ -179,15 +179,47 @@
 
 		function registration()
 		{
+
+			extract($_POST);
+
+			// === 1. เพิ่มการตรวจสอบรหัสผ่านฝั่ง Server ===
+			if (isset($password)) {
+				$errors = [];
+				if (strlen($password) < 8) {
+					$errors[] = "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร";
+				}
+				if (!preg_match('/[a-z]/', $password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว";
+				}
+				if (!preg_match('/[0-9]/', $password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว";
+				}
+
+				if (!empty($errors)) {
+					$resp['status'] = 'failed';
+					// รวม error ทั้งหมดมาแสดง
+					$resp['msg'] = '<ul><li>' . implode('</li><li>', $errors) . '</li></ul>';
+					return json_encode($resp);
+				}
+			}
+
+			// === 2. เปลี่ยนจาก md5() เป็น password_hash() ===
+			if (!empty($_POST['password'])) {
+				// ใช้ BCRYPT ซึ่งเป็น default และปลอดภัย
+				$_POST['password'] = password_hash($_POST['password'], PASSWORD_BCRYPT);
+			} else {
+				unset($_POST['password']);
+			}
+			/*
 			if (!empty($_POST['password']))
 				$_POST['password'] = md5($_POST['password']);
 			else
-				unset($_POST['password']);
+				unset($_POST['password']);*/
 
 			$cropped_image_data = isset($_POST['cropped_image']) ? $_POST['cropped_image'] : null;
 			unset($_POST['cropped_image']);
 
-			extract($_POST);
+			// extract($_POST); // ย้ายไปไว้ด้านบนแล้ว
 			$main_field = [
 				'firstname',
 				'middlename',
@@ -285,7 +317,6 @@
 				$this->settings->set_flashdata('success', $resp['msg']);
 			return json_encode($resp);
 		}
-
 
 		public function delete_customer()
 		{

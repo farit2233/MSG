@@ -65,33 +65,39 @@ class Login extends DBConnection
 		extract($_POST);
 
 		// เตรียมคำสั่ง SQL เพื่อตรวจสอบอีเมลและรหัสผ่าน
-		$stmt = $this->conn->prepare("SELECT * from customer_list where email = ? and `password` = ? ");
-		$password = md5($password); // แฮชรหัสผ่าน
-		$stmt->bind_param('ss', $email, $password);
+		$stmt = $this->conn->prepare("SELECT * from customer_list where email = ? ");
+		$stmt->bind_param('s', $email);
 		$stmt->execute();
 		$result = $stmt->get_result();
 
 		if ($result->num_rows > 0) {
 			$res = $result->fetch_array();
 
-			// ตั้งค่าข้อมูลผู้ใช้ใน session หรือ userdata
-			foreach ($res as $k => $v) {
-				$this->settings->set_userdata($k, $v);
+			// ตรวจสอบรหัสผ่านที่กรอกกับรหัสผ่านที่เก็บไว้ในฐานข้อมูล
+			if (password_verify($password, $res['password'])) {
+				// ตั้งค่าข้อมูลผู้ใช้ใน session หรือ userdata
+				foreach ($res as $k => $v) {
+					$this->settings->set_userdata($k, $v);
+				}
+
+				// ตั้งค่า login_type เป็น 2 สำหรับลูกค้า
+				$this->settings->set_userdata('login_type', 2);
+
+				// อัปเดต last_login
+				$last_login = date('Y-m-d H:i:s'); // วันที่และเวลาปัจจุบัน
+				$update_stmt = $this->conn->prepare("UPDATE customer_list SET last_login = ? WHERE email = ?");
+				$update_stmt->bind_param('ss', $last_login, $email);
+				$update_stmt->execute();
+
+				// ส่งผลลัพธ์ที่สำเร็จ
+				$resp['status'] = 'success';
+			} else {
+				// ถ้ารหัสผ่านไม่ตรง
+				$resp['status'] = 'failed';
+				$resp['msg'] = "<i class='fa fa-exclamation-triangle'></i> บัญชี หรือรหัสผ่านไม่ถูกต้อง";
 			}
-
-			// ตั้งค่า login_type เป็น 2 สำหรับลูกค้า
-			$this->settings->set_userdata('login_type', 2);
-
-			// อัปเดต last_login
-			$last_login = date('Y-m-d H:i:s'); // วันที่และเวลาปัจจุบัน
-			$update_stmt = $this->conn->prepare("UPDATE customer_list SET last_login = ? WHERE email = ?");
-			$update_stmt->bind_param('ss', $last_login, $email);
-			$update_stmt->execute();
-
-			// ส่งผลลัพธ์ที่สำเร็จ
-			$resp['status'] = 'success';
 		} else {
-			// ถ้าชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
+			// ถ้าอีเมลไม่พบในฐานข้อมูล
 			$resp['status'] = 'failed';
 			$resp['msg'] = "<i class='fa fa-exclamation-triangle'></i> บัญชี หรือรหัสผ่านไม่ถูกต้อง";
 		}
@@ -105,6 +111,7 @@ class Login extends DBConnection
 		// คืนค่า JSON response
 		return json_encode($resp);
 	}
+
 
 	public function logout_customer()
 	{

@@ -90,13 +90,35 @@
                       <div class="form-group">
                         <label for="password" class="control-label">รหัสผ่าน</label>
                         <input type="password" class="form-control" required name="password" id="password"
-                          title="กรุณาใส่รหัสผ่าน">
+                          pattern="(?=.*\d)(?=.*[a-z]).{8,}"
+                          title="รหัสผ่านต้องมีอย่างน้อย 8 ตัว, มีตัวพิมพ์เล็ก, และตัวเลข">
                       </div>
+
+                      <div id="password-requirements" class="mb-2" style="display: none;">
+                        <small>เงื่อนไขรหัสผ่าน:</small>
+                        <ul class="list-unstyled text-danger text-sm">
+                          <li id="length" class="invalid"><i class="fas fa-times-circle"></i> มีความยาวอย่างน้อย 8 ตัวอักษร</li>
+                          <li id="lowercase" class="invalid"><i class="fas fa-times-circle"></i> มีตัวอักษรพิมพ์เล็ก (a-z)</li>
+                          <li id="number" class="invalid"><i class="fas fa-times-circle"></i> มีตัวเลข (0-9)</li>
+                        </ul>
+                      </div>
+
                       <div class="form-group">
-                        <label for="cpassword" class="control-label">ยืนยัน รหัสผ่าน</label>
+                        <label for="cpassword" class="control-label">ยืนยันรหัสผ่าน</label>
                         <input type="password" class="form-control" required id="cpassword"
                           title="ยืนยันรหัสผ่าน">
                       </div>
+
+                      <style>
+                        #password-requirements .valid {
+                          color: #28a745;
+                        }
+
+                        #password-requirements .valid .fa-times-circle::before {
+                          content: "\f058";
+                          /* fa-check-circle */
+                        }
+                      </style>
                     </div>
                   </div>
 
@@ -181,6 +203,51 @@
 
   <script>
     $(document).ready(function() {
+
+      var passwordInput = $('#password');
+      var requirementsDiv = $('#password-requirements');
+
+      var lengthReq = $('#length');
+      var lowerReq = $('#lowercase');
+      var numReq = $('#number');
+
+      // เมื่อเริ่มพิมพ์ในช่องรหัสผ่าน
+      passwordInput.on('focus', function() {
+        requirementsDiv.slideDown('fast');
+      });
+
+      passwordInput.on('keyup', function() {
+        var password = $(this).val();
+
+        // ตรวจสอบความยาว
+        if (password.length >= 8) {
+          lengthReq.removeClass('invalid').addClass('valid');
+        } else {
+          lengthReq.removeClass('valid').addClass('invalid');
+        }
+
+        // ตรวจสอบตัวพิมพ์เล็ก
+        if (password.match(/[a-z]/)) {
+          lowerReq.removeClass('invalid').addClass('valid');
+        } else {
+          lowerReq.removeClass('valid').addClass('invalid');
+        }
+
+        // ตรวจสอบตัวเลข
+        if (password.match(/\d/)) {
+          numReq.removeClass('invalid').addClass('valid');
+        } else {
+          numReq.removeClass('valid').addClass('invalid');
+        }
+      });
+
+      // ซ่อนเมื่อไม่ได้โฟกัสและช่องว่าง
+      passwordInput.on('blur', function() {
+        if ($(this).val() === '') {
+          requirementsDiv.slideUp('fast');
+        }
+      });
+
       // ดักทุก input, select ที่มี required
       $('#register-form [required]').each(function() {
         var $input = $(this);
@@ -188,6 +255,7 @@
         // เมื่อ input invalid
         $input.on('invalid', function(e) {
           e.preventDefault(); // ป้องกัน default browser
+          $input.next('.err-msg').remove(); // ลบ error เก่า (ถ้ามี)
           // ถ้ายังไม่มี error message ให้สร้าง
           if ($input.next('.err-msg').length === 0) {
             $input.after('<div class="err-msg text-danger mt-1">' + $input.attr('title') + '</div>');
@@ -205,23 +273,21 @@
     contactInput.addEventListener('input', function() {
       this.value = this.value.replace(/\D/g, ''); // ลบทุกตัวที่ไม่ใช่เลข
     });
+
     $(document).ready(function() {
       end_loader();
 
-      // === ส่วนของ Form Submit และอื่นๆ (เหมือนเดิม) ===
       $('#register-form').submit(function(e) {
         e.preventDefault();
         var _this = $(this);
-        var el = $('<div>');
-        el.addClass('alert alert-danger err_msg');
-        el.hide();
-        $('.err_msg').remove();
+
+        $('.err-msg').remove();
 
         if ($('#password').val() != $('#cpassword').val()) {
-          el.text('รหัสผ่านไม่ตรงกัน');
-          _this.prepend(el);
-          el.show('slow');
-          $('html, body').scrollTop(0);
+          $('#cpassword').after('<div class="err-msg text-danger mt-1">รหัสผ่านไม่ตรงกัน</div>');
+          $('html, body').animate({
+            scrollTop: $('#cpassword').offset().top - 100
+          }, 'slow');
           return false;
         }
 
@@ -241,67 +307,35 @@
           processData: false,
           error: err => {
             console.log(err);
-            alert('An error occurred');
             end_loader();
           },
           success: function(resp) {
             if (resp.status == 'success') {
               location.href = ('./login.php');
+              // --- START: แก้ไขส่วนนี้ ---
             } else if (!!resp.msg) {
-              el.html(resp.msg);
-              el.show('slow');
-              _this.prepend(el);
-              $('html, body').scrollTop(0);
+              // หาก Server ตอบกลับมาว่ามี Error (ซึ่งในฟอร์มนี้คืออีเมลซ้ำ)
+              // ให้แสดงข้อความใต้ช่องอีเมลทันที โดยไม่ใช้ alert
+              $('#email').after('<div class="err-msg text-danger mt-1">อีเมลนี้ถูกใช้แล้ว</div>');
+              $('html, body').animate({
+                scrollTop: $('#email').offset().top - 100
+              }, 'slow');
             } else {
-              alert('An error occurred');
-              console.log(resp);
+              // กรณีเกิด Error อื่นๆ ที่ไม่คาดคิด ให้แสดงใน console แทน alert
+              console.error("An unknown registration error occurred.", resp);
             }
+            // --- END: แก้ไขส่วนนี้ ---
             end_loader();
           }
         });
       });
 
-      // === ส่วนของ Cropper.js (ปรับปรุงใหม่ทั้งหมด) ===
+      // === ส่วนของ Cropper.js (เหมือนเดิม) ===
       var $modal = $('#cropModal');
       var image = document.getElementById('image_to_crop');
       var cropper;
       var zoomSlider = document.getElementById('zoom_slider');
 
-      function resizeImage(file, maxWidth, maxHeight, callback) {
-        var reader = new FileReader();
-        reader.onload = function(event) {
-          var img = new Image();
-          img.onload = function() {
-            var canvas = document.createElement('canvas');
-            var ctx = canvas.getContext('2d');
-            var width = img.width;
-            var height = img.height;
-
-            // คำนวณขนาดใหม่
-            if (width > height) {
-              if (width > maxWidth) {
-                height = Math.round(height * (maxWidth / width));
-                width = maxWidth;
-              }
-            } else {
-              if (height > maxHeight) {
-                width = Math.round(width * (maxHeight / height));
-                height = maxHeight;
-              }
-            }
-
-            // กำหนดขนาดใหม่ให้กับ canvas
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
-            callback(canvas.toDataURL('image/jpeg'));
-          };
-          img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-
-      // 1. เมื่อผู้ใช้เลือกไฟล์รูปภาพ
       $('#customFile').on('change', function(e) {
         var files = e.target.files;
         if (files && files.length > 0) {
@@ -309,8 +343,8 @@
           reader.onload = function(event) {
             image.src = event.target.result;
             $modal.modal({
-              backdrop: false, // ป้องกันการปิด modal เมื่อคลิกด้านนอก
-              keyboard: false, // ป้องกันการปิด modal ด้วยปุ่ม Esc
+              backdrop: false,
+              keyboard: false,
               show: true
             });
           };
@@ -320,60 +354,44 @@
         }
       });
 
-      // 2. เมื่อ Modal แสดงขึ้นมา
       $modal.on('shown.bs.modal', function() {
         cropper = new Cropper(image, {
-          // --- CHANGED: Options for Discord-like cropping ---
           aspectRatio: 1,
-          viewMode: 1, // จำกัดให้ cropbox อยู่ในกรอบของรูปเท่านั้น
-          dragMode: 'move', // ตั้งค่าเริ่มต้นให้เป็นการ "ลากรูป"
-
-          // --- ADDED: Lock the crop box ---
-          cropBoxMovable: false, // ไม่ให้ขยับกรอบ
-          cropBoxResizable: false, // ไม่ให้ย่อขยายกรอบ
-
-          // --- ADDED: Disable mouse wheel zoom ---
-          wheelZoomRatio: 0, // ปิดการซูมด้วย mouse wheel
-
+          viewMode: 1,
+          dragMode: 'move',
+          cropBoxMovable: false,
+          cropBoxResizable: false,
+          wheelZoomRatio: 0,
           background: false,
           responsive: true,
-          autoCropArea: 1, // ให้กรอบ crop เต็มพื้นที่
-
-          // --- ADDED: Event when cropper is ready ---
+          autoCropArea: 1,
           ready: function() {
-            // ดึงค่า zoom ratio ปัจจุบันหลังจาก cropper จัดรูปให้พอดีแล้ว
             let canvasData = cropper.getCanvasData();
             let initialZoom = canvasData.width / canvasData.naturalWidth;
-            // ตั้งค่า min, max, และ value ของ slider
-            zoomSlider.min = initialZoom; // ค่าซูมต่ำสุดคือขนาดที่พอดีกับกรอบ
-            zoomSlider.max = initialZoom * 3; // อนุญาตให้ซูมได้สูงสุด 3 เท่า
-            zoomSlider.value = initialZoom; // ตั้งค่าเริ่มต้นของ slider
+            zoomSlider.min = initialZoom;
+            zoomSlider.max = initialZoom * 3;
+            zoomSlider.value = initialZoom;
           }
         });
       }).on('hidden.bs.modal', function() {
-        // 3. เมื่อ Modal ถูกปิด
         cropper.destroy();
         cropper = null;
-        // Reset file input to allow selecting the same file again
         $('#customFile').val('');
         $('#customFile').next('.custom-file-label').html('เลือกรูปจากเครื่อง');
       });
 
-      // --- ADDED: Event listener for the zoom slider ---
       zoomSlider.addEventListener('input', function() {
         if (cropper) {
           cropper.zoomTo(this.value);
         }
       });
 
-      // 4. เมื่อผู้ใช้กดปุ่ม "บันทึก"
       $('#crop_button').on('click', function() {
         var canvas = cropper.getCroppedCanvas({
           width: 400,
           height: 400,
           imageSmoothingQuality: 'high',
         });
-
         var base64data = canvas.toDataURL('image/jpeg');
         $('#cimg').attr('src', base64data);
         $('#cropped_image').val(base64data);
