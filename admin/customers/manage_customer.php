@@ -170,6 +170,25 @@
 		input[type=range].form-control-range::-moz-range-thumb {
 			background: #f57421;
 		}
+
+		#password {
+			border: none;
+			/* ลบกรอบ */
+			background: transparent;
+			/* กำหนดให้พื้นหลังเป็นโปร่งใส */
+			padding: 10px 15px;
+			/* เพิ่มระยะห่างข้างใน */
+			font-size: 16px;
+			/* ขนาดตัวอักษร */
+
+		}
+
+		#password:focus {
+			outline: none;
+			/* ลบกรอบที่แสดงเวลาโฟกัส */
+			text-decoration: underline !important;
+			/* เพิ่มเส้นใต้เมื่อมีการ focus */
+		}
 	</style>
 	<section class="py-3 profile-page">
 		<div class="container">
@@ -211,19 +230,19 @@
 										<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 											<div class="form-group">
 												<label for="firstname" class="control-label">ชื่อ</label>
-												<input type="text" class="form-control form-control-sm" required name="firstname" id="firstname" value="<?= isset($firstname) ? $firstname : '' ?>">
+												<input type="text" class="form-control " required name="firstname" id="firstname" value="<?= isset($firstname) ? $firstname : '' ?>">
 											</div>
 											<div class="form-group">
 												<label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
-												<input type="text" class="form-control form-control-sm" name="middlename" id="middlename" value="<?= isset($middlename) ? $middlename : '' ?>">
+												<input type="text" class="form-control " name="middlename" id="middlename" value="<?= isset($middlename) ? $middlename : '' ?>">
 											</div>
 											<div class="form-group">
 												<label for="lastname" class="control-label">นามสกุล</label>
-												<input type="text" class="form-control form-control-sm" required name="lastname" id="lastname" value="<?= isset($lastname) ? $lastname : '' ?>">
+												<input type="text" class="form-control " required name="lastname" id="lastname" value="<?= isset($lastname) ? $lastname : '' ?>">
 											</div>
 											<div class="form-group">
 												<label for="gender" class="control-label custom-input">เพศ</label>
-												<select class="custom-select custom-select-sm custom-input" reqiured="" name="gender" id="gender">
+												<select class="custom-select custom-input" reqiured="" name="gender" id="gender">
 													<option value="Male" <?= isset($gender) && $gender == 'Male' ? "selected" : '' ?>>ชาย</option>
 													<option value="Female" <?= isset($gender) && $gender == 'Female' ? "selected" : '' ?>>หญิง</option>
 												</select>
@@ -232,19 +251,23 @@
 										<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 											<div class="form-group">
 												<label for="email" class="control-label">Email</label>
-												<input type="text" class="form-control form-control-sm" required name="email" id="email" value="<?= isset($email) ? $email : '' ?>">
+												<input type="text" class="form-control " required name="email" id="email" value="<?= isset($email) ? $email : '' ?>">
 											</div>
 											<div class="form-group">
 												<label for="contact" class="control-label">เบอร์โทร</label>
-												<input type="text" class="form-control form-control-sm" required name="contact" id="contact" value="<?= isset($contact) ? $contact : '' ?>">
+												<input type="text" class="form-control " required name="contact" id="contact" value="<?= isset($contact) ? $contact : '' ?>">
 											</div>
-											<div class="form-group">
+											<!--div class="form-group">
 												<label for="password" class="control-label">รหัสผ่านใหม่</label>
-												<input type="password" class="form-control form-control-sm" name="password" id="password">
+												<input type="password" class="form-control " name="password" id="password">
 											</div>
 											<div class="form-group">
 												<label for="cpassword" class="control-label">ยืนยัน รหัสผ่านใหม่</label>
-												<input type="password" class="form-control form-control-sm" id="cpassword">
+												<input type="password" class="form-control " id="cpassword">
+											</div-->
+											<div class="form-group">
+												<label for="contact" class="control-label">รหัสผ่าน</label>
+												<a class="form-control" type="button" id="password">เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i></a>
 											</div>
 										</div>
 									</div>
@@ -255,27 +278,27 @@
 										<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 											<div class="form-group">
 												<label for="address" class="control-label">บ้านเลขที่ ถนน</label>
-												<input type="text" class="form-control form-control-sm" name="address" id="address" value="<?= isset($address) ? $address : '' ?>">
+												<input type="text" class="form-control " name="address" id="address" value="<?= isset($address) ? $address : '' ?>">
 											</div>
 
 											<div class="form-group">
 												<label for="city" class="control-label">ตำบล</label>
-												<input type="text" class="form-control form-control-sm" name="sub_district" id="sub_district" value="<?= isset($sub_district) ? $sub_district : '' ?>">
+												<input type="text" class="form-control " name="sub_district" id="sub_district" value="<?= isset($sub_district) ? $sub_district : '' ?>">
 											</div>
 											<div class="form-group">
 												<label for="city" class="control-label">อำเภอ</label>
-												<input type="text" class="form-control form-control-sm" name="district" id="district" value="<?= isset($district) ? $district : '' ?>">
+												<input type="text" class="form-control " name="district" id="district" value="<?= isset($district) ? $district : '' ?>">
 											</div>
 										</div>
 
 										<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 											<div class="form-group">
 												<label for="state_province" class="control-label">จังหวัด</label>
-												<input type="text" class="form-control form-control-sm" name="province" id="province" value="<?= isset($province) ? $province : '' ?>">
+												<input type="text" class="form-control " name="province" id="province" value="<?= isset($province) ? $province : '' ?>">
 											</div>
 											<div class="form-group">
 												<label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
-												<input type="text" class="form-control form-control-sm" name="postal_code" id="postal_code" value="<?= isset($postal_code) ? $postal_code : '' ?>">
+												<input type="text" class="form-control " name="postal_code" id="postal_code" value="<?= isset($postal_code) ? $postal_code : '' ?>">
 											</div>
 										</div>
 									</div>
@@ -321,7 +344,9 @@
 	<script>
 		$(document).ready(function() {
 			end_loader();
-
+			$('#password').click(function() {
+				password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/password.php?pid=<?= isset($id) ? $id : '' ?>')
+			})
 			// --- Form Submission Logic ---
 			$('#update-form').submit(function(e) {
 				e.preventDefault();

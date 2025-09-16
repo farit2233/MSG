@@ -57,6 +57,24 @@
         </div>
       </div>
 
+      <div class="modal fade" id="password_modal" role='dialog'>
+        <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">เปลี่ยนรหัสผ่าน</h5>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+              <button type="submit" class="btn btn-primary" id="btn_change_password" form="change_password_form">ยืนยัน</button>
+              <button type="submit" class="btn btn-primary" id="btn_forgot_password" form="forgot_password_form" style="display:none;">ส่งคำขอ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="modal fade" id="uni_modal_order" role='dialog'>
         <div class="modal-dialog modal-md modal-dialog-centered rounded-0" role="document">
           <div class="modal-content rounded-0">
