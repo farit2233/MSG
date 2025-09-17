@@ -28,7 +28,7 @@ if (isset($_GET['id'])) {
 
 <div class="container-fluid password">
     <form id="change_password_form">
-        <input type="hidden" name="id" value="<?php echo $_settings->userdata('id') ?>">
+        <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
         <div class="form-group">
             <label for="new_password" class="control-label">รหัสผ่านใหม่</label>
             <input type="password" class="form-control" name="new_password" required id="new_password"
