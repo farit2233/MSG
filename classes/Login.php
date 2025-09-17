@@ -72,8 +72,8 @@ class Login extends DBConnection
 	{
 		extract($_POST);
 
-		// เตรียมคำสั่ง SQL เพื่อตรวจสอบอีเมลและรหัสผ่าน
-		$stmt = $this->conn->prepare("SELECT * from customer_list where email = ? ");
+		// เตรียมคำสั่ง SQL เพื่อตรวจสอบอีเมล
+		$stmt = $this->conn->prepare("SELECT * from customer_list WHERE email = ?");
 		$stmt->bind_param('s', $email);
 		$stmt->execute();
 		$result = $stmt->get_result();
@@ -99,27 +99,27 @@ class Login extends DBConnection
 
 				// ส่งผลลัพธ์ที่สำเร็จ
 				$resp['status'] = 'success';
+				$resp['msg'] = "เข้าสู่ระบบสำเร็จ";
 			} else {
 				// ถ้ารหัสผ่านไม่ตรง
-				$resp['status'] = 'failed';
+				$resp['status'] = 'error';
 				$resp['msg'] = "<i class='fa fa-exclamation-triangle'></i> บัญชี หรือรหัสผ่านไม่ถูกต้อง";
 			}
 		} else {
 			// ถ้าอีเมลไม่พบในฐานข้อมูล
-			$resp['status'] = 'failed';
+			$resp['status'] = 'error';
 			$resp['msg'] = "<i class='fa fa-exclamation-triangle'></i> บัญชี หรือรหัสผ่านไม่ถูกต้อง";
 		}
 
 		// ตรวจสอบข้อผิดพลาดจากการเชื่อมต่อ
 		if ($this->conn->error) {
-			$resp['status'] = 'failed';
+			$resp['status'] = 'error';
 			$resp['_error'] = $this->conn->error;
 		}
 
 		// คืนค่า JSON response
 		return json_encode($resp);
 	}
-
 
 	public function logout_customer()
 	{
