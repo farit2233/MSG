@@ -1,8 +1,12 @@
 <?php
+$meta = [];
+
 if (isset($_GET['id'])) {
 	$user = $conn->query("SELECT * FROM users where id ='{$_GET['id']}' ");
-	foreach ($user->fetch_array() as $k => $v) {
-		$meta[$k] = $v;
+	if ($user->num_rows > 0) { // เพิ่มการตรวจสอบว่ามีข้อมูลหรือไม่
+		foreach ($user->fetch_array() as $k => $v) {
+			$meta[$k] = $v;
+		}
 	}
 }
 ?>
@@ -90,7 +94,7 @@ if (isset($_GET['id'])) {
 		color: white;
 	}
 
-	#cropModal .modal-dialog-admin {
+	#cropModal .modal-dialog-user {
 		position: fixed !important;
 		/* ทำให้ dialog ล็อกตาม viewport */
 		top: 50%;
@@ -167,6 +171,25 @@ if (isset($_GET['id'])) {
 	input[type=range].form-control-range::-moz-range-thumb {
 		background: #f57421;
 	}
+
+	#change_password {
+		border: none;
+		/* ลบกรอบ */
+		background: transparent;
+		/* กำหนดให้พื้นหลังเป็นโปร่งใส */
+		padding: 10px 15px;
+		/* เพิ่มระยะห่างข้างใน */
+		font-size: 16px;
+		/* ขนาดตัวอักษร */
+
+	}
+
+	#change_password:focus {
+		outline: none;
+		/* ลบกรอบที่แสดงเวลาโฟกัส */
+		text-decoration: underline !important;
+		/* เพิ่มเส้นใต้เมื่อมีการ focus */
+	}
 </style>
 <section class="py-3 profile-page">
 	<div class="container">
@@ -176,11 +199,10 @@ if (isset($_GET['id'])) {
 					<div class="card-body">
 						<div class="container-fluid">
 							<div class="profile-cart-header-bar">
-								<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i><?= isset($meta['id']) ? "แก้ไขข้อมูลบัญชีสมาชิก" : "สร้างบัญชีใหม่สมาชิกใหม่" ?></h3>
+								<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i><?= isset($meta['id']) ? "แก้ไขข้อมูลบัญชี" : "สร้างบัญชีใหม่" ?></h3>
 							</div>
-							<form id="manage-user" action="" method="post">
-								<input type="hidden" name="id" value="<?= isset($meta['id']) ? $meta['id'] : '' ?>">
-								<input type="hidden" name="cropped_image" id="cropped_image">
+							<form id="update-form" action="" method="post">
+								<input type="hidden" name="id" value="<?php echo $_settings->userdata('id') ?>">
 								<div class="profile-section-title-with-line mb-4">
 									<h3>โปรไฟล์</h3>
 								</div>
@@ -194,45 +216,82 @@ if (isset($_GET['id'])) {
 												<input type="file" class="custom-file-input custom-input" id="customFile" name="img"
 													onchange="displayImg(this,$(this))" accept="image/png, image/jpeg">
 												<label class="custom-file-label custom-input" for="customFile">เลือกรูปจากไฟล์ในเครื่อง</label>
+
 											</div>
 										</div>
 									</div>
 								</div>
-								<div class="profile-section-title-with-line mb-4 mt-4">
+
+								<input type="hidden" name="id" value="<?= isset($meta['id']) ? $meta['id'] : '' ?>">
+								<input type="hidden" name="cropped_image" id="cropped_image">
+
+								<div class="profile-section-title-with-line mb-4">
 									<h3>ข้อมูลส่วนตัว</h3>
 								</div>
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
 											<label for="firstname" class="control-label">ชื่อ</label>
-											<input type="text" class="form-control form-control-sm" required name="firstname" id="firstname" value="<?php echo isset($meta['firstname']) ? $meta['firstname'] : '' ?>">
+											<input type="text" class="form-control" name="firstname" id="firstname" value="<?php echo isset($meta['firstname']) ? $meta['firstname'] : '' ?>" required>
 										</div>
 										<div class="form-group">
 											<label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
-											<input type="text" class="form-control form-control-sm" name="middlename" id="middlename" value="<?php echo isset($meta['middlename']) ? $meta['middlename'] : '' ?>">
+											<input type="text" class="form-control " name="middlename" id="middlename" value="<?php echo isset($meta['middlename']) ? $meta['middlename'] : '' ?>">
 										</div>
 										<div class="form-group">
 											<label for="lastname" class="control-label">นามสกุล</label>
-											<input type="text" class="form-control form-control-sm" required name="lastname" id="lastname" value="<?php echo isset($meta['lastname']) ? $meta['lastname'] : '' ?>">
+											<input type="text" class="form-control " required name="lastname" id="lastname" value="<?php echo isset($meta['lastname']) ? $meta['lastname'] : '' ?>">
 										</div>
-									</div>
-									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
-											<label for="type" class="control-label">ประเภทบัญชี</label>
-											<select name="type" id="type" class="form-control form-control-sm rounded-0" required>
-												<option value="1" <?php echo isset($meta['type']) && $meta['type'] == 1 ? 'selected' : '' ?>>แอดมิน</option>
-												<option value="2" <?php echo isset($meta['type']) && $meta['type'] == 2 ? 'selected' : '' ?>>สต๊าฟ</option>
+											<label for="type" class="control-label">Type</label>
+											<select name="type" id="type" class="form-control" required>
+												<option value="1" <?php echo isset($meta['type']) && $meta['type'] == 1 ? 'selected' : '' ?>>Administrator</option>
+												<option value="2" <?php echo isset($meta['type']) && $meta['type'] == 2 ? 'selected' : '' ?>>Staff</option>
 											</select>
 										</div>
+									</div>
+									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 password-requirements">
 										<div class="form-group">
-											<label for="username">ชื่อบัญชี</label>
-											<input type="text" name="username" id="username" class="form-control form-control-sm" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required autocomplete="off">
+											<label for="username" class="control-label">ชื่อผู้ใช้</label>
+											<input type="text" class="form-control" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required>
 										</div>
-										<div class="form-group">
-											<label for="password" class="control-label">รหัสผ่าน</label>
-											<input type="password" name="password" id="password" class="form-control form-control-sm" value="" autocomplete="off">
-											<small><i>ปล่อยว่างไว้ถ้าคุณไม่ต้องการเปลี่ยนรหัสผ่าน</i></small>
-										</div>
+										<?php if (isset($meta['id'])): ?>
+											<div class="form-group">
+												<label for="contact" class="control-label">รหัสผ่าน</label>
+												<a class="form-control" type="button" id="change_password" data-id="<?= isset($meta['id']) ? $meta['id'] : '' ?>">เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i></a>
+											</div>
+										<?php else: ?>
+											<div class="form-group">
+												<label for="password" class="control-label">รหัสผ่านใหม่</label>
+												<input type="password" class="form-control " name="password" id="password"
+													pattern="(?=.*\d)(?=.*[a-z]).{8,}"
+													title="รหัสผ่านต้องมีอย่างน้อย 8 ตัว, มีตัวพิมพ์เล็ก, และตัวเลข">
+											</div>
+											<div class="form-group">
+												<label for="cpassword" class="control-label">ยืนยัน รหัสผ่านใหม่</label>
+												<input type="password" class="form-control " id="cpassword">
+											</div>
+											<style>
+												#password-requirements .valid {
+													color: #28a745;
+												}
+
+												#password-requirements .valid .fa-times-circle::before {
+													content: "\f058";
+													/* fa-check-circle */
+												}
+											</style>
+											<div id="password-requirements" class="mb-2" style="display: none;">
+												<small>เงื่อนไขรหัสผ่าน:</small>
+												<ul class="list-unstyled text-danger text-sm">
+													<li id="length" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีความยาวอย่างน้อย 8 ตัวอักษร</li>
+													<li id="lowercase" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวอักษรพิมพ์เล็ก (a-z)</li>
+													<li id="number" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวเลข (0-9)</li>
+												</ul>
+											</div>
+										<?php endif; ?>
+
+
 									</div>
 								</div>
 								<div class="row justify-content-center">
@@ -254,7 +313,7 @@ if (isset($_GET['id'])) {
 			<div class="modal-header">
 				<h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<i class="fa fa-times"></i>
+					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
@@ -276,13 +335,155 @@ if (isset($_GET['id'])) {
 </div>
 <script>
 	$(document).ready(function() {
-		// --- ADDED: Cropper.js and new Form Submission Logic ---
+		end_loader();
+
+		var passwordInput = $('#password');
+		var requirementsDiv = $('#password-requirements');
+		var lengthReq = $('#length');
+		var lowerReq = $('#lowercase');
+		var numReq = $('#number');
+
+		// เมื่อเริ่มพิมพ์ในช่องรหัสผ่าน
+		passwordInput.on('focus', function() {
+			requirementsDiv.slideDown('fast');
+		});
+
+		passwordInput.on('keyup', function() {
+			var password = $(this).val();
+
+			// ตรวจสอบความยาว
+			if (password.length >= 8) {
+				lengthReq.removeClass('invalid').addClass('valid');
+			} else {
+				lengthReq.removeClass('valid').addClass('invalid');
+			}
+
+			// ตรวจสอบตัวพิมพ์เล็ก
+			if (password.match(/[a-z]/)) {
+				lowerReq.removeClass('invalid').addClass('valid');
+			} else {
+				lowerReq.removeClass('valid').addClass('invalid');
+			}
+
+			// ตรวจสอบตัวเลข
+			if (password.match(/\d/)) {
+				numReq.removeClass('invalid').addClass('valid');
+			} else {
+				numReq.removeClass('valid').addClass('invalid');
+			}
+		});
+
+		// ซ่อนเมื่อไม่ได้โฟกัสและช่องว่าง
+		passwordInput.on('blur', function() {
+			if ($(this).val() === '') {
+				requirementsDiv.slideUp('fast');
+			}
+		});
+
+		$('#change_password').click(function() {
+			var userId = $(this).data('id'); // ดึงค่า id จาก data-id ของปุ่ม
+			password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'User/password.php?pid=' + userId); // ส่งไปที่ modal
+		});
+		// --- Form Submission Logic ---
+		$('#update-form').submit(function(e) {
+			e.preventDefault();
+			var _this = $(this);
+			var el = $('<div>');
+			el.addClass('alert alert-danger err_msg');
+			el.hide();
+			$('.err_msg').remove();
+
+			if ($('#password').val() != '' && $('#password').val() != $('#cpassword').val()) {
+				el.text('รหัสผ่านใหม่ไม่ตรงกัน');
+				_this.prepend(el);
+				el.show('slow');
+				$('html, body').scrollTop(0);
+				return false;
+			}
+
+			if (_this[0].checkValidity() == false) {
+				_this[0].reportValidity();
+				return false;
+			}
+
+			start_loader();
+			var formData = new FormData($(this)[0]);
+
+			// เช็คว่ามีการเลือกไฟล์ใหม่ไหม ถ้าไม่มีให้ส่งรูปเก่าที่มี
+			if (!$('#customFile').val()) {
+				formData.append('cropped_image', $('#cropped_image').val()); // รูปเก่าที่ถูกบันทึกไว้
+			}
+
+			$.ajax({
+				url: _base_url_ + "classes/Users.php?f=save_users", // Make sure this endpoint is correct for updates
+				method: 'POST',
+				data: formData,
+				dataType: 'json',
+				cache: false,
+				contentType: false,
+				processData: false,
+				error: err => {
+					console.log(err);
+					alert('An error occurred');
+					end_loader();
+				},
+				success: function(resp) {
+					if (resp.status == 'success') {
+						location.replace('./?page=user/list');
+					} else if (!!resp.msg) {
+						el.html(resp.msg);
+						el.show('slow');
+						_this.prepend(el);
+						$('html, body').scrollTop(0);
+					} else {
+						alert('An error occurred');
+						console.log(resp);
+					}
+					end_loader();
+				}
+			});
+		});
+
+		// --- Cropper.js Logic ---
 		var $modal = $('#cropModal');
 		var image = document.getElementById('image_to_crop');
 		var cropper;
 		var zoomSlider = document.getElementById('zoom_slider');
 
-		// Event: When a new file is selected
+		function resizeImage(file, maxWidth, maxHeight, callback) {
+			var reader = new FileReader();
+			reader.onload = function(event) {
+				var img = new Image();
+				img.onload = function() {
+					var canvas = document.createElement('canvas');
+					var ctx = canvas.getContext('2d');
+					var width = img.width;
+					var height = img.height;
+
+					// คำนวณขนาดใหม่
+					if (width > height) {
+						if (width > maxWidth) {
+							height = Math.round(height * (maxWidth / width));
+							width = maxWidth;
+						}
+					} else {
+						if (height > maxHeight) {
+							width = Math.round(width * (maxHeight / height));
+							height = maxHeight;
+						}
+					}
+
+					// กำหนดขนาดใหม่ให้กับ canvas
+					canvas.width = width;
+					canvas.height = height;
+					ctx.drawImage(img, 0, 0, width, height);
+					callback(canvas.toDataURL('image/jpeg'));
+				};
+				img.src = event.target.result;
+			};
+			reader.readAsDataURL(file);
+		}
+
 		$('#customFile').on('change', function(e) {
 			var files = e.target.files;
 			if (files && files.length > 0) {
@@ -301,7 +502,6 @@ if (isset($_GET['id'])) {
 			}
 		});
 
-		// Event: When modal is shown, initialize Cropper
 		$modal.on('shown.bs.modal', function() {
 			cropper = new Cropper(image, {
 				aspectRatio: 1,
@@ -309,19 +509,16 @@ if (isset($_GET['id'])) {
 				dragMode: 'move',
 				cropBoxMovable: false,
 				cropBoxResizable: false,
+				wheelZoomRatio: 0,
 				background: false,
 				responsive: true,
 				autoCropArea: 1,
-				// Make the crop area circular for preview
 				ready: function() {
-					cropper.getCropBoxData().cropper.getContainerData().width / 2;
-					$(this).cropper('getCropBoxData').width;
-					var cropBoxData = $(this).cropper('getCropBoxData');
-					var containerData = $(this).cropper('getContainerData');
-					$(this).cropper('setCropBoxData', {
-						width: Math.min(containerData.width, containerData.height),
-						height: Math.min(containerData.width, containerData.height)
-					});
+					let canvasData = cropper.getCanvasData();
+					let initialZoom = canvasData.width / canvasData.naturalWidth;
+					zoomSlider.min = initialZoom;
+					zoomSlider.max = initialZoom * 3;
+					zoomSlider.value = initialZoom;
 				}
 			});
 		}).on('hidden.bs.modal', function() {
@@ -331,70 +528,23 @@ if (isset($_GET['id'])) {
 			$('#customFile').next('.custom-file-label').html('เปลี่ยนรูปโปรไฟล์');
 		});
 
-		// Event: Zoom slider
 		zoomSlider.addEventListener('input', function() {
 			if (cropper) {
 				cropper.zoomTo(this.value);
 			}
 		});
 
-		// Event: When crop button is clicked
 		$('#crop_button').on('click', function() {
 			var canvas = cropper.getCroppedCanvas({
-				width: 400, // Set desired output width
-				height: 400, // Set desired output height
+				width: 400,
+				height: 400,
 				imageSmoothingQuality: 'high',
 			});
 
 			var base64data = canvas.toDataURL('image/jpeg');
 			$('#cimg').attr('src', base64data);
-			$('#cropped_image').val(base64data); // Store base64 data in hidden input
+			$('#cropped_image').val(base64data);
 			$modal.modal('hide');
 		});
-
-		// --- UPDATED: Form submission logic ---
-		$('#manage-user').submit(function(e) {
-			e.preventDefault();
-			var _this = $(this)
-			$('.err-msg').remove();
-			start_loader();
-			$.ajax({
-				url: _base_url_ + "classes/Users.php?f=save_users",
-				data: new FormData($(this)[0]),
-				cache: false,
-				contentType: false,
-				processData: false,
-				method: 'POST',
-				type: 'POST',
-				dataType: 'json', // Expect a JSON response
-				error: err => {
-					console.log(err)
-					alert_toast("An error occured", 'error');
-					end_loader();
-				},
-				success: function(resp) {
-					if (typeof resp == 'object' && resp.status == 'success') {
-						alert_toast(resp.msg, 'success');
-						// Reload after a short delay to show the toast
-						setTimeout(function() {
-							location.reload();
-						}, 800)
-					} else if (resp.status == 'failed' && !!resp.msg) {
-						var el = $('<div>')
-						el.addClass("alert alert-danger err-msg").text(resp.msg)
-						_this.prepend(el)
-						el.show('slow')
-						$("html, body").animate({
-							scrollTop: _this.closest('.card').offset().top
-						}, "fast");
-						end_loader()
-					} else {
-						alert_toast("An error occured", 'error');
-						end_loader();
-						console.log(resp)
-					}
-				}
-			})
-		})
 	});
 </script>

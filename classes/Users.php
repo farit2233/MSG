@@ -21,75 +21,90 @@
 
 		function save_users()
 		{
-			// --- Start: New logic for handling cropped images ---
+			// --- Start: Logic for handling cropped images ---
 			$cropped_image_data = isset($_POST['cropped_image']) ? $_POST['cropped_image'] : null;
 			unset($_POST['cropped_image']); // Remove from POST to avoid database error
-			// --- End: New logic ---
+			// --- End: Logic ---
 
-			// Check if password is empty (for new user, it will be set)
-			if (empty($_POST['password']))
-				unset($_POST['password']);
-			else
-				$_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hash the password using password_hash()
-
-			extract($_POST);
-			$data = '';
-
-			// Whitelist of allowed fields to prevent mass assignment vulnerabilities
-			$allowed_fields = ['firstname', 'middlename', 'lastname', 'username', 'password', 'type'];
-
+			// Sanitize all POST data
 			foreach ($_POST as $k => $v) {
-				if (in_array($k, $allowed_fields) && !is_numeric($k)) {
-					$v = $this->conn->real_escape_string($v);
-					if (!empty($data)) $data .= ", ";
-					$data .= " `{$k}` = '{$v}' ";
+				if (!is_array($v)) {
+					$_POST[$k] = trim($v);
 				}
 			}
 
-			// --- Check if it's a new user ---
-			if (empty($id)) {
-				// Check if the username already exists
-				$check = $this->conn->query("SELECT * FROM `users` WHERE username = '{$username}'")->num_rows;
-				if ($check > 0) {
-					$resp['status'] = 'failed';
-					$resp['msg'] = 'Username already exists.';
-					return json_encode($resp);
-					exit;
+			extract($_POST);
+			$resp = array(); // Initialize response array
+
+			// Server-side validation for password if it is being set/changed
+			if (!empty($password)) {
+				$errors = [];
+				if (strlen($password) < 8) {
+					$errors[] = "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร";
+				}
+				if (!preg_match('/[a-z]/', $password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว";
+				}
+				if (!preg_match('/[0-9]/', $password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว";
 				}
 
+				if (!empty($errors)) {
+					$resp['status'] = 'failed';
+					$resp['msg'] = '<ul><li>' . implode('</li><li>', $errors) . '</li></ul>';
+					echo json_encode($resp);
+					return;
+				}
+				// Hash the password only after validation passes
+				$_POST['password'] = password_hash($password, PASSWORD_DEFAULT);
+			} else {
+				// If password is not being set, remove it from the data to be saved
+				unset($_POST['password']);
+			}
+
+			$data = '';
+
+			// Whitelist of allowed fields from the form (username removed)
+			$allowed_fields = ['firstname', 'middlename', 'lastname', 'username', 'password', 'type'];
+
+			foreach ($_POST as $k => $v) {
+				if (in_array($k, $allowed_fields) && !is_array($v)) {
+					$v_escaped = $this->conn->real_escape_string($v);
+					if (!empty($data)) $data .= ", ";
+					$data .= " `{$k}` = '{$v_escaped}' ";
+				}
+			}
+
+			// --- Check if it's a new user (INSERT) ---
+			if (empty($id)) {
 				// --- Insert new user ---
 				$sql = "INSERT INTO `users` SET $data";
 				$save = $this->conn->query($sql);
-				$new_user_id = $this->conn->insert_id; // Get the new user ID after insert
 
 				if ($save) {
+					$new_user_id = $this->conn->insert_id;
 					$resp['status'] = 'success';
 					$resp['msg'] = 'สร้างบัญชีสมาชิกเรียบร้อย';
+					$this->settings->set_flashdata('success', 'สร้างบัญชีสมาชิกเรียบร้อย');
 
-					// --- Start: Save cropped image logic ---
+					// --- Start: Save cropped image logic (UNCHANGED) ---
 					if (!empty($cropped_image_data)) {
 						$upload_path = base_app . "uploads/avatars/";
 						if (!is_dir($upload_path))
 							mkdir($upload_path, 0777, true);
 
-						// Decode base64 image
 						$image_parts = explode(";base64,", $cropped_image_data);
 						$image_base64 = base64_decode($image_parts[1]);
+						$fname = "{$upload_path}{$new_user_id}.png";
 
-						// Define file name
-						$fname = "{$upload_path}{$new_user_id}.png"; // Standardize as .png
-
-						// Save the file
 						if (file_put_contents($fname, $image_base64)) {
-							// Update database with new avatar path
 							$avatar_path = "uploads/avatars/{$new_user_id}.png";
-							$this->conn->query("UPDATE `users` SET `avatar` = '{$avatar_path}' WHERE id = '{$new_user_id}'");
+							$this->conn->query("UPDATE `users` SET `avatar` = '{$this->conn->real_escape_string($avatar_path)}' WHERE id = '{$new_user_id}'");
 
-							// Update session avatar
 							if ($this->settings->userdata('id') == $new_user_id)
 								$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
 						} else {
-							$resp['msg'] .= " (but failed to save profile picture)";
+							$resp['msg'] .= " (แต่บันทึกรูปโปรไฟล์ไม่สำเร็จ)";
 						}
 					}
 					// --- End: Save cropped image logic ---
@@ -98,57 +113,38 @@
 					$resp['msg'] = $this->conn->error;
 				}
 			} else {
-				// --- Update existing user ---
-				// Check if the username already exists
-				$check = $this->conn->query("SELECT * FROM `users` WHERE username = '{$username}' AND id != '{$id}'")->num_rows;
-				if ($check > 0) {
-					$resp['status'] = 'failed';
-					$resp['msg'] = 'Username already exists.';
-					return json_encode($resp);
-					exit;
-				}
-
-				// Update the user
+				// --- Update existing user (UPDATE) ---
 				$sql = "UPDATE users SET $data WHERE id = '{$id}'";
 				$save = $this->conn->query($sql);
-
-				$resp = array(); // Initialize response array
 
 				if ($save) {
 					$resp['status'] = 'success';
 					$resp['msg'] = 'บัญชีสมาชิกอัปเดตเรียบร้อย';
 					$this->settings->set_flashdata('success', 'บัญชีสมาชิกอัปเดตเรียบร้อย');
 
-					// Update session data
 					foreach ($_POST as $k => $v) {
-						if ($this->settings->userdata('id') == $id)
+						if ($this->settings->userdata('id') == $id && in_array($k, ['firstname', 'middlename', 'lastname', 'type']))
 							$this->settings->set_userdata($k, $v);
 					}
 
-					// --- Start: Save cropped image logic ---
+					// --- Start: Save cropped image logic (UNCHANGED) ---
 					if (!empty($cropped_image_data)) {
 						$upload_path = base_app . "uploads/avatars/";
 						if (!is_dir($upload_path))
 							mkdir($upload_path, 0777, true);
 
-						// Decode base64 image
 						$image_parts = explode(";base64,", $cropped_image_data);
 						$image_base64 = base64_decode($image_parts[1]);
+						$fname = "{$upload_path}{$id}.png";
 
-						// Define file name
-						$fname = "{$upload_path}{$id}.png"; // Standardize as .png
-
-						// Save the file
 						if (file_put_contents($fname, $image_base64)) {
-							// Update database with new avatar path
 							$avatar_path = "uploads/avatars/{$id}.png";
-							$this->conn->query("UPDATE `users` SET `avatar` = '{$avatar_path}' WHERE id = '{$id}'");
+							$this->conn->query("UPDATE `users` SET `avatar` = '{$this->conn->real_escape_string($avatar_path)}' WHERE id = '{$id}'");
 
-							// Update session avatar
 							if ($this->settings->userdata('id') == $id)
 								$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
 						} else {
-							$resp['msg'] .= " (but failed to save profile picture)";
+							$resp['msg'] .= " (แต่บันทึกรูปโปรไฟล์ไม่สำเร็จ)";
 						}
 					}
 					// --- End: Save cropped image logic ---
@@ -635,6 +631,71 @@
 				echo json_encode(['status' => 'failed', 'msg' => 'ข้อมูลไม่ครบ']);
 			}
 		}
+
+		function user_manage_password()
+		{
+			global $conn; // เชื่อมต่อกับฐานข้อมูล
+
+			// ตรวจสอบว่ามีการส่งข้อมูลจากฟอร์มหรือไม่
+			if (isset($_POST['new_password']) && isset($_POST['confirm_password']) && isset($_POST['id']) && $_POST['id'] > 0) {
+				// รับค่า id ของผู้ใช้ที่กำลังจะเปลี่ยนรหัสผ่าน
+				$user_id = $_POST['id'];
+
+				// รับค่า รหัสผ่านใหม่ และยืนยันรหัสผ่านใหม่
+				$new_password = $_POST['new_password']; // รหัสผ่านใหม่
+				$confirm_password = $_POST['confirm_password']; // ยืนยันรหัสผ่านใหม่
+
+				// === ตรวจสอบความถูกต้องของรหัสผ่าน ===
+				$errors = [];
+				if (strlen($new_password) < 8) {
+					$errors[] = "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร";
+				}
+				if (!preg_match('/[a-z]/', $new_password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว";
+				}
+				if (!preg_match('/[0-9]/', $new_password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว";
+				}
+
+				// หากมีข้อผิดพลาดในการตรวจสอบรหัสผ่าน
+				if (!empty($errors)) {
+					echo json_encode(['status' => 'failed', 'msg' => '<ul><li>' . implode('</li><li>', $errors) . '</li></ul>']);
+					return;
+				}
+
+				// ตรวจสอบว่ารหัสใหม่และยืนยันรหัสตรงกันหรือไม่
+				if ($new_password === $confirm_password) {
+					// แฮชรหัสผ่านใหม่ก่อนบันทึกลงฐานข้อมูล
+					$hashed_new_password = password_hash($new_password, PASSWORD_DEFAULT);
+
+					// อัปเดตรหัสผ่านใหม่ในฐานข้อมูล
+					$stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+
+					// ผูกตัวแปรเข้ากับ placeholder
+					$stmt->bind_param("si", $hashed_new_password, $user_id);
+
+					// สั่งให้คำสั่งทำงาน
+					$update = $stmt->execute();
+
+					// ปิด statement
+					$stmt->close();
+
+					if ($update) {
+						// หากอัปเดตสำเร็จ, ส่งข้อความสำเร็จ
+						echo json_encode(['status' => 'success', 'msg' => 'รหัสผ่านถูกอัปเดตเรียบร้อยแล้ว']);
+					} else {
+						// หากไม่สามารถอัปเดตได้, ส่งข้อความผิดพลาด
+						echo json_encode(['status' => 'failed', 'msg' => 'ไม่สามารถอัปเดตรหัสผ่านได้']);
+					}
+				} else {
+					// หากรหัสใหม่และยืนยันรหัสไม่ตรงกัน
+					echo json_encode(['status' => 'failed', 'msg' => 'รหัสใหม่และยืนยันรหัสไม่ตรงกัน']);
+				}
+			} else {
+				// หากไม่ได้ส่งข้อมูลมาครบ
+				echo json_encode(['status' => 'failed', 'msg' => 'ข้อมูลไม่ครบ']);
+			}
+		}
 	}
 
 	$users = new users();
@@ -664,6 +725,9 @@
 			break;
 		case 'manage_password':
 			echo $users->manage_password();
+			break;
+		case 'user_manage_password':
+			echo $users->user_manage_password();
 			break;
 		default:
 			// echo $sysset->index();
