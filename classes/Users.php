@@ -454,12 +454,12 @@
 			global $conn; // เชื่อมต่อกับฐานข้อมูล
 
 			// ตรวจสอบว่ามีการส่งข้อมูลจากฟอร์มหรือไม่
-			if (isset($_POST['password']) && isset($_POST['new_password']) && isset($_POST['confirm_password']) && isset($_GET['id']) && $_GET['id'] > 0) {
+			if (isset($_POST['current_password']) && isset($_POST['new_password']) && isset($_POST['confirm_password']) && isset($_GET['id']) && $_GET['id'] > 0) {
 				// รับค่า id ของผู้ใช้ที่กำลังจะเปลี่ยนรหัสผ่าน
 				$user_id = $_GET['id'];
 
 				// รับค่า รหัสผ่านเดิม, รหัสผ่านใหม่ และยืนยันรหัสผ่านใหม่
-				$old_password = $_POST['password']; // รหัสผ่านเดิม
+				$old_password = $_POST['current_password']; // รหัสผ่านเดิม
 				$new_password = $_POST['new_password']; // รหัสผ่านใหม่
 				$confirm_password = $_POST['confirm_password']; // ยืนยันรหัสผ่านใหม่
 

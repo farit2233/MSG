@@ -1,20 +1,19 @@
 <?php
 require_once('../config.php');
 // ตรวจสอบว่าเรามีการส่ง ID มาไหม (สำหรับฟังก์ชันเปลี่ยนรหัสผ่าน)
-if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $qry = $conn->query("SELECT * FROM `customer_list` WHERE id = '{$_GET['id']}'");
+if ($_settings->userdata('id') != '') {
+    $qry = $conn->query("SELECT * FROM `customer_list` WHERE id = '{$_settings->userdata('id')}'");
     if ($qry->num_rows > 0) {
-        $row = $qry->fetch_assoc();
-        $id = $row['id'];
-        // เราไม่จำเป็นต้องใช้ $email ในหน้านี้ แต่ดึงมาเผื่อไว้ได้
-        // $email = $row['email'];
+        foreach ($qry->fetch_array() as $k => $v) {
+            if (!is_numeric($k)) {
+                $$k = $v;
+            }
+        }
     } else {
-        echo "<script>
-            alert('ไม่พบผู้ใช้');
-            location.replace('./');
-        </script>";
-        exit;
+        echo "<script>alert('You don\\'t have access for this page'); location.replace('./');</script>";
     }
+} else {
+    echo "<script>alert('You don\\'t have access for this page'); location.replace('./');</script>";
 }
 ?>
 <style>
@@ -45,12 +44,32 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         </div>
         <div class="form-group">
             <label for="new_password" class="control-label">รหัสผ่านใหม่</label>
-            <input type="password" class="form-control" name="new_password" required>
+            <input type="password" class="form-control" name="new_password" required id="new_password"
+                pattern="(?=.*\d)(?=.*[a-z]).{8,}"
+                title="รหัสผ่านต้องมีอย่างน้อย 8 ตัว, มีตัวพิมพ์เล็ก, และตัวเลข">
         </div>
         <div class="form-group">
             <label for="confirm_password" class="control-label">ยืนยันรหัสผ่านใหม่</label>
-            <input type="password" class="form-control" name="confirm_password" required>
+            <input type="password" class="form-control" name="confirm_password" required id="confirm_password">
         </div>
+        <div id="password-requirements" class="mb-2" style="display: none;">
+            <small>เงื่อนไขรหัสผ่าน:</small>
+            <ul class="list-unstyled text-danger text-sm">
+                <li id="length" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีความยาวอย่างน้อย 8 ตัวอักษร</li>
+                <li id="lowercase" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวอักษรพิมพ์เล็ก (a-z)</li>
+                <li id="number" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวเลข (0-9)</li>
+            </ul>
+        </div>
+        <style>
+            #password-requirements .valid {
+                color: #28a745;
+            }
+
+            #password-requirements .valid .fa-times-circle::before {
+                content: "\f058";
+                /* fa-check-circle */
+            }
+        </style>
     </form>
 
     <form id="forgot_password_form" style="display: none;">
@@ -75,6 +94,49 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 <script>
     $(document).ready(function() {
+        var passwordInput = $('#new_password');
+        var requirementsDiv = $('#password-requirements');
+        var lengthReq = $('#length');
+        var lowerReq = $('#lowercase');
+        var numReq = $('#number');
+
+        // เมื่อเริ่มพิมพ์ในช่องรหัสผ่าน
+        passwordInput.on('focus', function() {
+            requirementsDiv.slideDown('fast');
+        });
+
+        passwordInput.on('keyup', function() {
+            var password = $(this).val();
+
+            // ตรวจสอบความยาว
+            if (password.length >= 8) {
+                lengthReq.removeClass('invalid').addClass('valid');
+            } else {
+                lengthReq.removeClass('valid').addClass('invalid');
+            }
+
+            // ตรวจสอบตัวพิมพ์เล็ก
+            if (password.match(/[a-z]/)) {
+                lowerReq.removeClass('invalid').addClass('valid');
+            } else {
+                lowerReq.removeClass('valid').addClass('invalid');
+            }
+
+            // ตรวจสอบตัวเลข
+            if (password.match(/\d/)) {
+                numReq.removeClass('invalid').addClass('valid');
+            } else {
+                numReq.removeClass('valid').addClass('invalid');
+            }
+        });
+
+        // ซ่อนเมื่อไม่ได้โฟกัสและช่องว่าง
+        passwordInput.on('blur', function() {
+            if ($(this).val() === '') {
+                requirementsDiv.slideUp('fast');
+            }
+        });
+
 
         // --- ฟังก์ชันสำหรับสลับฟอร์ม ---
         function showChangePasswordForm() {
@@ -126,7 +188,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
             start_loader(); // แสดง loader (ถ้ามี)
             $.ajax({
-                url: _base_url_ + 'classes/Users.php?f=password',
+                url: _base_url_ + 'classes/Users.php?f=password&id=' + $('input[name="id"]').val(),
                 method: 'POST',
                 data: $(this).serialize(),
                 dataType: 'json',
