@@ -2,7 +2,7 @@
 require_once('../../config.php');
 // ตรวจสอบว่าเรามีการส่ง ID มาไหม (สำหรับฟังก์ชันเปลี่ยนรหัสผ่าน)
 if (isset($_GET['pid'])) {
-    $user = $conn->query("SELECT * FROM customer_list where id ='{$_GET['pid']}' ");
+    $user = $conn->query("SELECT * FROM users where id ='{$_GET['pid']}' ");
     foreach ($user->fetch_array() as $k => $v) {
         if (!is_numeric($k)) {
             $$k = $v;

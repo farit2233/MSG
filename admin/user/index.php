@@ -165,6 +165,25 @@ foreach ($user->fetch_array() as $k => $v) {
 	input[type=range].form-control-range::-moz-range-thumb {
 		background: #f57421;
 	}
+
+	#change_password {
+		border: none;
+		/* ลบกรอบ */
+		background: transparent;
+		/* กำหนดให้พื้นหลังเป็นโปร่งใส */
+		padding: 10px 15px;
+		/* เพิ่มระยะห่างข้างใน */
+		font-size: 16px;
+		/* ขนาดตัวอักษร */
+
+	}
+
+	#change_password:focus {
+		outline: none;
+		/* ลบกรอบที่แสดงเวลาโฟกัส */
+		text-decoration: underline !important;
+		/* เพิ่มเส้นใต้เมื่อมีการ focus */
+	}
 </style>
 <section class="py-3 profile-page">
 	<div class="container">
@@ -204,26 +223,25 @@ foreach ($user->fetch_array() as $k => $v) {
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
 											<label for="firstname" class="control-label">ชื่อ</label>
-											<input type="text" class="form-control form-control-sm" name="firstname" id="firstname" value="<?php echo isset($meta['firstname']) ? $meta['firstname'] : '' ?>" required>
+											<input type="text" class="form-control" name="firstname" id="firstname" value="<?php echo isset($meta['firstname']) ? $meta['firstname'] : '' ?>" required>
 										</div>
 										<div class="form-group">
 											<label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
-											<input type="text" class="form-control form-control-sm" name="middlename" id="middlename" value="<?php echo isset($meta['middlename']) ? $meta['middlename'] : '' ?>">
+											<input type="text" class="form-control" name="middlename" id="middlename" value="<?php echo isset($meta['middlename']) ? $meta['middlename'] : '' ?>">
 										</div>
 										<div class="form-group">
 											<label for="lastname" class="control-label">นามสกุล</label>
-											<input type="text" class="form-control form-control-sm" name="lastname" id="lastname" value="<?php echo isset($meta['lastname']) ? $meta['lastname'] : '' ?>" required>
+											<input type="text" class="form-control" name="lastname" id="lastname" value="<?php echo isset($meta['lastname']) ? $meta['lastname'] : '' ?>" required>
 										</div>
 									</div>
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
 											<label for="username" class="control-label">ชื่อบัญชี</label>
-											<input type="text" class="form-control form-control-sm" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required autocomplete="off">
+											<input type="text" class="form-control" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required autocomplete="off">
 										</div>
 										<div class="form-group">
-											<label for="password" class="control-label">รหัสผ่าน</label>
-											<input type="password" name="password" id="password" class="form-control form-control-sm" value="" autocomplete="off">
-											<small><i>ปล่อยว่างไว้ถ้าคุณไม่ต้องการเปลี่ยนรหัสผ่าน</i></small>
+											<label for="contact" class="control-label">รหัสผ่าน</label>
+											<a class="form-control" type="button" id="change_password" data-id="<?= isset($meta['id']) ? $meta['id'] : '' ?>">เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i></a>
 										</div>
 									</div>
 								</div>
@@ -270,6 +288,55 @@ foreach ($user->fetch_array() as $k => $v) {
 
 <script>
 	$(document).ready(function() {
+
+		var passwordInput = $('#password');
+		var requirementsDiv = $('#password-requirements');
+		var lengthReq = $('#length');
+		var lowerReq = $('#lowercase');
+		var numReq = $('#number');
+
+		// เมื่อเริ่มพิมพ์ในช่องรหัสผ่าน
+		passwordInput.on('focus', function() {
+			requirementsDiv.slideDown('fast');
+		});
+
+		passwordInput.on('keyup', function() {
+			var password = $(this).val();
+
+			// ตรวจสอบความยาว
+			if (password.length >= 8) {
+				lengthReq.removeClass('invalid').addClass('valid');
+			} else {
+				lengthReq.removeClass('valid').addClass('invalid');
+			}
+
+			// ตรวจสอบตัวพิมพ์เล็ก
+			if (password.match(/[a-z]/)) {
+				lowerReq.removeClass('invalid').addClass('valid');
+			} else {
+				lowerReq.removeClass('valid').addClass('invalid');
+			}
+
+			// ตรวจสอบตัวเลข
+			if (password.match(/\d/)) {
+				numReq.removeClass('invalid').addClass('valid');
+			} else {
+				numReq.removeClass('valid').addClass('invalid');
+			}
+		});
+
+		// ซ่อนเมื่อไม่ได้โฟกัสและช่องว่าง
+		passwordInput.on('blur', function() {
+			if ($(this).val() === '') {
+				requirementsDiv.slideUp('fast');
+			}
+		});
+
+		$('#change_password').click(function() {
+			var userId = $(this).data('id'); // ดึงค่า id จาก data-id ของปุ่ม
+			password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'User/password.php?pid=' + userId); // ส่งไปที่ modal
+		});
+
 		// --- ADDED: Cropper.js and new Form Submission Logic ---
 		var $modal = $('#cropModal');
 		var image = document.getElementById('image_to_crop');
