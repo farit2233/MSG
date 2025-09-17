@@ -94,16 +94,17 @@
                 <div class="card-body bg-color rounded-0 px-3">
                     <div class="fgpw-cart-header-bar text-center">
                         <h3 class="mb-2">ลืมรหัสผ่าน</h3>
-                        <p class="text-muted small">กรุณากรอกอีเมลของคุณเพื่อขอรีเซ็ตรหัสผ่าน</p>
+                        <p class="text-muted small">กรุณากรอกอีเมล และชื่อของคุณเพื่อขอรีเซ็ตรหัสผ่าน</p>
                     </div>
                     <form id="forgot-password-form" action="reset_password.php" method="post">
                         <div class="form-group">
                             <label for="email" class="font-weight-bold small text-secondary">อีเมล</label>
                             <input type="email" id="email" class="form-control form-control-lg" name="email" autofocus placeholder="อีเมล" required>
                         </div>
+
                         <div class="row justify-content-center">
                             <div class="col-md-9 col-12 text-center">
-                                <button type="submit" class="btn btn-login btn-block rounded-pill">รีเซ็ตรหัสผ่าน</button>
+                                <button type="submit" class="btn btn-login btn-block rounded-pill">ส่งคำขอรีเซ็ตรหัสผ่าน</button>
                             </div>
                         </div>
 
@@ -153,7 +154,7 @@
                                <div class="text-center">
                                     <i class="fa-solid fa-check-circle icon-success pt-4"></i>
                                     <h3 class="text-success head-reset-password">คำขอรีเซ็ตรหัสผ่านของคุณ<br>ถูกส่งเรียบร้อยแล้ว</h3>
-                                    <p>กรุณารอการตอบกลับที่อีเมล</p>
+                                    <p>กรุณารอการตอบกลับจากทีมงาน</p>
                                     <p><a href="<?php echo base_url ?>login.php"><i class="fa-solid fa-arrow-left"></i> กลับสู่หน้าเข้าสู่ระบบ</a></p>
                                 </div>
                             `);

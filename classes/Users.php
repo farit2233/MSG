@@ -505,12 +505,11 @@
 
 		function forgot_password()
 		{
-			if (isset($_POST['email'])) {
+			if (isset($_POST['email']) && !empty($_POST['email'])) {
 				$email = $_POST['email'];
-				$name = $_POST['name'];
 
-				// ตรวจสอบว่าอีเมลในฐานข้อมูล customer_list มีอยู่หรือไม่
-				$query = "SELECT * FROM customer_list WHERE email = ?";
+				// 1. ตรวจสอบว่าอีเมลมีอยู่ในฐานข้อมูล customer_list หรือไม่
+				$query = "SELECT id, firstname, lastname FROM customer_list WHERE email = ? LIMIT 1";
 				$stmt = $this->conn->prepare($query);
 				$stmt->bind_param('s', $email);
 				$stmt->execute();
@@ -518,49 +517,45 @@
 
 				if ($result->num_rows > 0) {
 					$user = $result->fetch_assoc();
+					$user_id = $user['id'];
+					$user_name = $user['firstname'] . ' ' . $user['lastname'];
 
-					// ดึงข้อมูลผู้ใช้
-					$first_name = $user['firstname'];
-					$middle_name = $user['middlename'] ?? '';
-					$last_name = $user['lastname'];
-					$contact = $user['contact'];
-					$email_costumer = $user['email'];
+					// 2. สร้าง Token และกำหนดวันหมดอายุ
+					$token = bin2hex(random_bytes(32));
+					$expires_at = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-					// ---- เตรียมข้อความและข้อมูลสำหรับส่ง ----
+					// 3. **(เปลี่ยนแปลง)** บันทึก Token ลงในตารางใหม่ `password_resets`
+					$insert_query = "INSERT INTO password_resets (customer_id, token, expires_at) VALUES (?, ?, ?)";
+					$insert_stmt = $this->conn->prepare($insert_query);
+					$insert_stmt->bind_param('iss', $user_id, $token, $expires_at);
 
-					// สำหรับอีเมล
-					$email_subject = "คำขอรีเซ็ตรหัสผ่านจากผู้ใช้";
-					$email_body = "
-						<div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto;'>
-							<h2 style='text-align:center;'>คำขอรีเซ็ตรหัสผ่านจากผู้ใช้</h2>
-							<p><strong>อีเมล: </strong>{$email_costumer}</p>
-							<p><strong>ชื่อ: </strong>{$name}</p>
-							<p><strong>ชื่อในระบบ: </strong>{$first_name} {$middle_name} {$last_name}</p>
-							<p><strong>เบอร์ติดต่อ: </strong>{$contact}</p>
-						</div>
-					";
-					$admin_emails = [
-						'faritre5566@gmail.com' => 'Admin',
-						'faritre1@gmail.com'    => 'Admin',
-						'faritre4@gmail.com'    => 'Admin'
-					];
+					if ($insert_stmt->execute()) {
+						// 4. เตรียมและส่งอีเมลไปยังผู้ใช้ (ส่วนนี้เหมือนเดิม)
+						$reset_link = "https://msgtest.test/reset_password.php?token=" . $token; // **สำคัญ:** เปลี่ยน yourwebsite.com เป็นโดเมนของคุณ
 
-					// สำหรับ Telegram
-					$telegram_message = "
-					🔔 <b>คำขอรีเซ็ตรหัสผ่าน</b>
-					- <b>อีเมล:</b> {$email_costumer}
-					- <b>ชื่อ:</b> {$name}
-					- <b>ชื่อในระบบ:</b> {$first_name} {$middle_name} {$last_name}
-					- <b>เบอร์ติดต่อ:</b> {$contact}
-                	";
+						$email_subject = "คำขอรีเซ็ตรหัสผ่านของคุณ";
+						$email_body = "
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto; border: 1px solid #ddd; padding: 20px;'>
+                        <h2 style='text-align:center;'>รีเซ็ตรหัสผ่านของคุณ</h2>
+                        <p>สวัสดีคุณ {$user_name},</p>
+                        <p>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชีของคุณ กรุณาคลิกลิงก์ด้านล่างเพื่อตั้งรหัสผ่านใหม่:</p>
+                        <p style='text-align:center;'>
+                            <a href='{$reset_link}' style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>รีเซ็ตรหัสผ่าน</a>
+                        </p>
+                        <p>ลิงก์นี้จะหมดอายุใน 1 ชั่วโมง</p>
+                        <p>หากคุณไม่ได้เป็นผู้ส่งคำขอนี้ กรุณาเพิกเฉยอีเมลฉบับนี้</p>
+                    </div>
+                ";
 
-					// ---- เรียกใช้ฟังก์ชันเพื่อส่งการแจ้งเตือน ----
-					$this->send_email($admin_emails, $email_subject, $email_body);
-					$this->send_telegram_message($telegram_message);
+						$this->send_email([$email => $user_name], $email_subject, $email_body);
 
-					echo json_encode(['status' => 'success', 'msg' => 'คำขอของคุณถูกส่งไปยังทีมงานแล้ว']);
+						echo json_encode(['status' => 'success', 'msg' => 'หากอีเมลของคุณมีอยู่ในระบบ เราได้ส่งลิงก์สำหรับรีเซ็ตรหัสผ่านไปให้แล้ว']);
+					} else {
+						echo json_encode(['status' => 'error', 'msg' => 'เกิดข้อผิดพลาดในการสร้าง Token']);
+					}
 				} else {
-					echo json_encode(['status' => 'error', 'msg' => 'ไม่พบข้อมูลอีเมลนี้ในระบบ']);
+					// เพื่อความปลอดภัย: ส่งข้อความเดียวกันเสมอ ไม่ว่าจะเจออีเมลหรือไม่
+					echo json_encode(['status' => 'success', 'msg' => 'หากอีเมลของคุณมีอยู่ในระบบ เราได้ส่งลิงก์สำหรับรีเซ็ตรหัสผ่านไปให้แล้ว']);
 				}
 			} else {
 				echo json_encode(['status' => 'error', 'msg' => 'กรุณากรอกอีเมล']);
