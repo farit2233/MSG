@@ -1,13 +1,9 @@
 <?php
 require_once('../../config.php');
 // ตรวจสอบว่าเรามีการส่ง ID มาไหม (สำหรับฟังก์ชันเปลี่ยนรหัสผ่าน)
-if (isset($_GET['pid'])) {
-    $user = $conn->query("SELECT * FROM users where id ='{$_GET['pid']}' ");
-    foreach ($user->fetch_array() as $k => $v) {
-        if (!is_numeric($k)) {
-            $$k = $v;
-        }
-    }
+$user = $conn->query("SELECT * FROM users where id ='" . $_settings->userdata('id') . "'");
+foreach ($user->fetch_array() as $k => $v) {
+    $meta[$k] = $v;
 }
 ?>
 <style>
@@ -28,7 +24,7 @@ if (isset($_GET['pid'])) {
 
 <div class="container-fluid password">
     <form id="change_password_form">
-        <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
+        <input type="hidden" name="id" value="<?php echo $_settings->userdata('id') ?>">
         <div class="form-group">
             <label for="current_password" class="control-label">รหัสผ่านเดิม</label>
             <input type="password" class="form-control" name="current_password" required>
@@ -123,7 +119,7 @@ if (isset($_GET['pid'])) {
 
             start_loader();
             $.ajax({
-                url: _base_url_ + 'classes/Users.php?f=manage_password&id=' + $('input[name="id"]').val(),
+                url: _base_url_ + 'classes/Users.php?f=user_manage_password&id=' + $('input[name="id"]').val(),
                 method: 'POST',
                 data: $(this).serialize(),
                 dataType: 'json',

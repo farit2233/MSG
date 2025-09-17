@@ -321,7 +321,7 @@
 			end_loader();
 			$('#password').click(function() {
 				var userId = $(this).data('id'); // ดึงค่า id จาก data-id ของปุ่ม
-				password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'customers/password.php?pid=' + userId); // ส่งไปที่ modal
+				password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'customers/password.php?id=' + userId); // ส่งไปที่ modal
 			});
 			// --- Form Submission Logic ---
 			$('#update-form').submit(function(e) {

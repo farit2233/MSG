@@ -1,8 +1,8 @@
 <?php
 require_once('../../config.php');
 // ตรวจสอบว่าเรามีการส่ง ID มาไหม (สำหรับฟังก์ชันเปลี่ยนรหัสผ่าน)
-if (isset($_GET['pid'])) {
-    $user = $conn->query("SELECT * FROM customer_list where id ='{$_GET['pid']}' ");
+if (isset($_GET['id'])) {
+    $user = $conn->query("SELECT * FROM customer_list where id ='{$_GET['id']}' ");
     foreach ($user->fetch_array() as $k => $v) {
         if (!is_numeric($k)) {
             $$k = $v;
@@ -28,7 +28,7 @@ if (isset($_GET['pid'])) {
 
 <div class="container-fluid password">
     <form id="change_password_form">
-        <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
+        <input type="hidden" name="id" value="<?php echo $_settings->userdata('id') ?>">
         <div class="form-group">
             <label for="new_password" class="control-label">รหัสผ่านใหม่</label>
             <input type="password" class="form-control" name="new_password" required id="new_password"

@@ -334,7 +334,7 @@ foreach ($user->fetch_array() as $k => $v) {
 
 		$('#change_password').click(function() {
 			var userId = $(this).data('id'); // ดึงค่า id จาก data-id ของปุ่ม
-			password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'User/password.php?pid=' + userId); // ส่งไปที่ modal
+			password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'User/password.php?id=' + userId); // ส่งไปที่ modal
 		});
 
 		// --- ADDED: Cropper.js and new Form Submission Logic ---

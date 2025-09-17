@@ -604,7 +604,7 @@
 					$hashed_new_password = password_hash($new_password, PASSWORD_DEFAULT);
 
 					// อัปเดตรหัสผ่านใหม่ในฐานข้อมูล
-					$stmt = $conn->prepare("UPDATE customer_list SET password = ? WHERE id = ?");
+					$stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
 
 					// ผูกตัวแปรเข้ากับ placeholder
 					$stmt->bind_param("si", $hashed_new_password, $user_id);
