@@ -19,7 +19,7 @@
 			parent::__destruct();
 		}
 
-		public function save_users()
+		function save_users()
 		{
 			// --- Start: New logic for handling cropped images ---
 			$cropped_image_data = isset($_POST['cropped_image']) ? $_POST['cropped_image'] : null;
@@ -30,7 +30,7 @@
 			if (empty($_POST['password']))
 				unset($_POST['password']);
 			else
-				$_POST['password'] = md5($_POST['password']); // Hash the password
+				$_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hash the password using password_hash()
 
 			extract($_POST);
 			$data = '';
@@ -65,7 +65,6 @@
 				if ($save) {
 					$resp['status'] = 'success';
 					$resp['msg'] = 'สร้างบัญชีสมาชิกเรียบร้อย';
-
 
 					// --- Start: Save cropped image logic ---
 					if (!empty($cropped_image_data)) {
@@ -162,6 +161,7 @@
 			// Return JSON response
 			echo json_encode($resp);
 		}
+
 
 		public function delete_users()
 		{
@@ -463,20 +463,24 @@
 				$user_id = $_GET['id'];
 
 				// รับค่า รหัสผ่านเดิม, รหัสผ่านใหม่ และยืนยันรหัสผ่านใหม่
-				$old_password = md5($_POST['password']);
-				$new_password = md5($_POST['new_password']);
-				$confirm_password = md5($_POST['confirm_password']);
+				$old_password = $_POST['password']; // รหัสผ่านเดิม
+				$new_password = $_POST['new_password']; // รหัสผ่านใหม่
+				$confirm_password = $_POST['confirm_password']; // ยืนยันรหัสผ่านใหม่
 
 				// ตรวจสอบว่ารหัสผ่านเดิมถูกต้องหรือไม่
 				$qry = $conn->query("SELECT password FROM customer_list WHERE id = '$user_id'");
 
 				if ($qry->num_rows > 0) {
 					$row = $qry->fetch_assoc();
-					if ($row['password'] === $old_password) {
+					// ใช้ password_verify() เช็คว่ารหัสผ่านเดิมตรงกับที่เก็บในฐานข้อมูลหรือไม่
+					if (password_verify($old_password, $row['password'])) {
 						// ตรวจสอบว่ารหัสใหม่และยืนยันรหัสตรงกันหรือไม่
 						if ($new_password === $confirm_password) {
+							// แฮชรหัสผ่านใหม่ก่อนบันทึกลงฐานข้อมูล
+							$hashed_new_password = password_hash($new_password, PASSWORD_DEFAULT);
+
 							// อัปเดตรหัสผ่านใหม่ในฐานข้อมูล
-							$update = $conn->query("UPDATE customer_list SET password = '$new_password' WHERE id = '$user_id'");
+							$update = $conn->query("UPDATE customer_list SET password = '$hashed_new_password' WHERE id = '$user_id'");
 
 							if ($update) {
 								// หากอัปเดตสำเร็จ, ส่งข้อความสำเร็จ
@@ -503,7 +507,7 @@
 			}
 		}
 
-		public function forgot_password()
+		function forgot_password()
 		{
 			if (isset($_POST['email'])) {
 				$email = $_POST['email'];
@@ -566,6 +570,71 @@
 				echo json_encode(['status' => 'error', 'msg' => 'กรุณากรอกอีเมล']);
 			}
 		}
+
+		function manage_password()
+		{
+			global $conn; // เชื่อมต่อกับฐานข้อมูล
+
+			// ตรวจสอบว่ามีการส่งข้อมูลจากฟอร์มหรือไม่
+			if (isset($_POST['new_password']) && isset($_POST['confirm_password']) && isset($_POST['id']) && $_POST['id'] > 0) {
+				// รับค่า id ของผู้ใช้ที่กำลังจะเปลี่ยนรหัสผ่าน
+				$user_id = $_POST['id'];
+
+				// รับค่า รหัสผ่านใหม่ และยืนยันรหัสผ่านใหม่
+				$new_password = $_POST['new_password']; // รหัสผ่านใหม่
+				$confirm_password = $_POST['confirm_password']; // ยืนยันรหัสผ่านใหม่
+
+				// === ตรวจสอบความถูกต้องของรหัสผ่าน ===
+				$errors = [];
+				if (strlen($new_password) < 8) {
+					$errors[] = "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร";
+				}
+				if (!preg_match('/[a-z]/', $new_password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว";
+				}
+				if (!preg_match('/[0-9]/', $new_password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว";
+				}
+
+				// หากมีข้อผิดพลาดในการตรวจสอบรหัสผ่าน
+				if (!empty($errors)) {
+					echo json_encode(['status' => 'failed', 'msg' => '<ul><li>' . implode('</li><li>', $errors) . '</li></ul>']);
+					return;
+				}
+
+				// ตรวจสอบว่ารหัสใหม่และยืนยันรหัสตรงกันหรือไม่
+				if ($new_password === $confirm_password) {
+					// แฮชรหัสผ่านใหม่ก่อนบันทึกลงฐานข้อมูล
+					$hashed_new_password = password_hash($new_password, PASSWORD_DEFAULT);
+
+					// อัปเดตรหัสผ่านใหม่ในฐานข้อมูล
+					$stmt = $conn->prepare("UPDATE customer_list SET password = ? WHERE id = ?");
+
+					// ผูกตัวแปรเข้ากับ placeholder
+					$stmt->bind_param("si", $hashed_new_password, $user_id);
+
+					// สั่งให้คำสั่งทำงาน
+					$update = $stmt->execute();
+
+					// ปิด statement
+					$stmt->close();
+
+					if ($update) {
+						// หากอัปเดตสำเร็จ, ส่งข้อความสำเร็จ
+						echo json_encode(['status' => 'success', 'msg' => 'รหัสผ่านถูกอัปเดตเรียบร้อยแล้ว']);
+					} else {
+						// หากไม่สามารถอัปเดตได้, ส่งข้อความผิดพลาด
+						echo json_encode(['status' => 'failed', 'msg' => 'ไม่สามารถอัปเดตรหัสผ่านได้']);
+					}
+				} else {
+					// หากรหัสใหม่และยืนยันรหัสไม่ตรงกัน
+					echo json_encode(['status' => 'failed', 'msg' => 'รหัสใหม่และยืนยันรหัสไม่ตรงกัน']);
+				}
+			} else {
+				// หากไม่ได้ส่งข้อมูลมาครบ
+				echo json_encode(['status' => 'failed', 'msg' => 'ข้อมูลไม่ครบ']);
+			}
+		}
 	}
 
 	$users = new users();
@@ -592,6 +661,9 @@
 			break;
 		case 'forgot_password':
 			echo $users->forgot_password();
+			break;
+		case 'manage_password':
+			echo $users->manage_password();
 			break;
 		default:
 			// echo $sysset->index();

@@ -267,7 +267,7 @@
 											</div-->
 											<div class="form-group">
 												<label for="contact" class="control-label">รหัสผ่าน</label>
-												<a class="form-control" type="button" id="password">เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i></a>
+												<a class="form-control" type="button" id="password" data-id="<?= isset($id) ? $id : '' ?>">เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i></a>
 											</div>
 										</div>
 									</div>
@@ -315,38 +315,14 @@
 			</div>
 		</div>
 	</section>
-	<div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered modal-dialog-user " role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="modalLabel"><i class="fas fa-crop-alt"></i> ปรับแต่งรูปโปรไฟล์</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<i class="fa fa-times"></i>
-					</button>
-				</div>
-				<div class="modal-body">
-					<div class="img-container">
-						<img id="image_to_crop" src="">
-					</div>
-					<div class="zoom-controls">
-						<i class="fas fa-search-minus"></i>
-						<input type="range" class="form-control-range" id="zoom_slider" min="0.1" max="2" step="0.01">
-						<i class="fas fa-search-plus"></i>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-					<button type="button" class="btn btn-primary" id="crop_button">บันทึก</button>
-				</div>
-			</div>
-		</div>
-	</div>
+
 	<script>
 		$(document).ready(function() {
 			end_loader();
 			$('#password').click(function() {
-				password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/password.php?pid=<?= isset($id) ? $id : '' ?>')
-			})
+				var userId = $(this).data('id'); // ดึงค่า id จาก data-id ของปุ่ม
+				password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'customers/password.php?pid=' + userId); // ส่งไปที่ modal
+			});
 			// --- Form Submission Logic ---
 			$('#update-form').submit(function(e) {
 				e.preventDefault();
