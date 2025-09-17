@@ -84,11 +84,13 @@ function formatDateThai($date)
 <section class="card card-outline card-dark rounded-0">
     <div class="card-header">
         <div class="card-title">คูปองส่วนลดทั้งหมด</div>
-        <div class="card-tools">
-            <a href="./?page=coupon_code/manage_coupon_code" class="btn btn-flat btn-dark">
-                <i class="fas fa-plus"></i> สร้างคูปองส่วนลดใหม่
-            </a>
-        </div>
+        <?php if ($_settings->userdata('type') == 1): ?>
+            <div class="card-tools">
+                <a href="./?page=coupon_code/manage_coupon_code" class="btn btn-flat btn-dark">
+                    <i class="fas fa-plus"></i> สร้างคูปองส่วนลดใหม่
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
     <!--div class="d-flex flex-wrap justify-content-center mt-3">
         <?php
