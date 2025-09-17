@@ -203,6 +203,7 @@ if (isset($_GET['id'])) {
 							</div>
 							<form id="update-form" action="" method="post">
 								<input type="hidden" name="id" value="<?php echo $_settings->userdata('id') ?>">
+								<input type="hidden" name="cropped_image" id="cropped_image">
 								<div class="profile-section-title-with-line mb-4">
 									<h3>โปรไฟล์</h3>
 								</div>
@@ -221,9 +222,6 @@ if (isset($_GET['id'])) {
 										</div>
 									</div>
 								</div>
-
-								<input type="hidden" name="id" value="<?= isset($meta['id']) ? $meta['id'] : '' ?>">
-								<input type="hidden" name="cropped_image" id="cropped_image">
 
 								<div class="profile-section-title-with-line mb-4">
 									<h3>ข้อมูลส่วนตัว</h3>

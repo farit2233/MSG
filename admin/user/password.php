@@ -1,9 +1,12 @@
 <?php
 require_once('../../config.php');
 // ตรวจสอบว่าเรามีการส่ง ID มาไหม (สำหรับฟังก์ชันเปลี่ยนรหัสผ่าน)
-$user = $conn->query("SELECT * FROM users where id ='" . $_settings->userdata('id') . "'");
-foreach ($user->fetch_array() as $k => $v) {
-    $meta[$k] = $v;
+if (isset($_GET['id'])) {
+    $user = $conn->query("SELECT * FROM users where id ='{$_GET['id']}' ");
+    foreach ($user->fetch_array() as $k => $v) {
+        if (!is_numeric($k))
+            $$k = $v;
+    }
 }
 ?>
 <style>
@@ -24,7 +27,8 @@ foreach ($user->fetch_array() as $k => $v) {
 
 <div class="container-fluid password">
     <form id="change_password_form">
-        <input type="hidden" name="id" value="<?php echo $_settings->userdata('id') ?>">
+        <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
+        <input type="text" class="form-control" name="firstname" id="firstname" value="<?php echo isset($id) ? $id : '' ?>" required>
         <div class="form-group">
             <label for="current_password" class="control-label">รหัสผ่านเดิม</label>
             <input type="password" class="form-control" name="current_password" required>
@@ -44,7 +48,9 @@ foreach ($user->fetch_array() as $k => $v) {
             <ul class="list-unstyled text-danger text-sm">
                 <li id="length" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีความยาวอย่างน้อย 8 ตัวอักษร</li>
                 <li id="lowercase" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวอักษรพิมพ์เล็ก (a-z)</li>
+                <li id="uppercase" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวอักษรพิมพ์ใหญ่ (A-Z)</li>
                 <li id="number" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวเลข (0-9)</li>
+                <li id="special" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีสัญลักษณ์พิเศษ (เช่น @, #, $, %)</li>
             </ul>
         </div>
         <style>
@@ -67,6 +73,8 @@ foreach ($user->fetch_array() as $k => $v) {
         var lengthReq = $('#length');
         var lowerReq = $('#lowercase');
         var numReq = $('#number');
+        var upperReq = $('#uppercase');
+        var specialReq = $('#special');
 
         // เมื่อเริ่มพิมพ์ในช่องรหัสผ่าน
         passwordInput.on('focus', function() {
@@ -75,6 +83,7 @@ foreach ($user->fetch_array() as $k => $v) {
 
         passwordInput.on('keyup', function() {
             var password = $(this).val();
+
 
             // ตรวจสอบความยาว
             if (password.length >= 8) {
@@ -96,6 +105,20 @@ foreach ($user->fetch_array() as $k => $v) {
             } else {
                 numReq.removeClass('valid').addClass('invalid');
             }
+
+            // ตรวจสอบตัวพิมพ์ใหญ่
+            if (password.match(/[A-Z]/)) {
+                upperReq.removeClass('invalid').addClass('valid');
+            } else {
+                upperReq.removeClass('valid').addClass('invalid');
+            }
+
+            // ตรวจสอบสัญลักษณ์พิเศษ
+            if (password.match(/[\W_]/)) {
+                specialReq.removeClass('invalid').addClass('valid');
+            } else {
+                specialReq.removeClass('valid').addClass('invalid');
+            }
         });
 
         // ซ่อนเมื่อไม่ได้โฟกัสและช่องว่าง
@@ -113,6 +136,7 @@ foreach ($user->fetch_array() as $k => $v) {
             var confirmPassword = $('input[name="confirm_password"]').val();
 
             if (newPassword !== confirmPassword) {
+                // เปลี่ยนจากการแสดง alert เป็นข้อความใต้ฟอร์ม
                 Swal.fire('ข้อผิดพลาด', 'รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน', 'error');
                 return;
             }
@@ -129,6 +153,7 @@ foreach ($user->fetch_array() as $k => $v) {
                             location.reload();
                         });
                     } else {
+                        // แสดงข้อผิดพลาดในรูปแบบที่ต้องการ
                         Swal.fire('เกิดข้อผิดพลาด', resp.msg, 'error');
                     }
                     end_loader();

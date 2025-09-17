@@ -594,7 +594,7 @@
 
 				// หากมีข้อผิดพลาดในการตรวจสอบรหัสผ่าน
 				if (!empty($errors)) {
-					echo json_encode(['status' => 'failed', 'msg' => '<ul><li>' . implode('</li><li>', $errors) . '</li></ul>']);
+					echo json_encode(['status' => 'failed', 'msg' => implode('<br>', $errors)]);
 					return;
 				}
 
@@ -631,35 +631,63 @@
 				echo json_encode(['status' => 'failed', 'msg' => 'ข้อมูลไม่ครบ']);
 			}
 		}
-
 		function user_manage_password()
 		{
 			global $conn; // เชื่อมต่อกับฐานข้อมูล
 
 			// ตรวจสอบว่ามีการส่งข้อมูลจากฟอร์มหรือไม่
-			if (isset($_POST['new_password']) && isset($_POST['confirm_password']) && isset($_POST['id']) && $_POST['id'] > 0) {
+			if (isset($_POST['current_password']) && isset($_POST['new_password']) && isset($_POST['confirm_password']) && isset($_POST['id']) && $_POST['id'] > 0) {
 				// รับค่า id ของผู้ใช้ที่กำลังจะเปลี่ยนรหัสผ่าน
 				$user_id = $_POST['id'];
 
-				// รับค่า รหัสผ่านใหม่ และยืนยันรหัสผ่านใหม่
+				// รับค่า รหัสผ่านเดิม, รหัสผ่านใหม่ และยืนยันรหัสผ่านใหม่
+				$current_password = $_POST['current_password']; // รหัสผ่านเดิม
 				$new_password = $_POST['new_password']; // รหัสผ่านใหม่
 				$confirm_password = $_POST['confirm_password']; // ยืนยันรหัสผ่านใหม่
 
 				// === ตรวจสอบความถูกต้องของรหัสผ่าน ===
 				$errors = [];
+
+				// ตรวจสอบว่ารหัสผ่านเดิมตรงกับรหัสผ่านในฐานข้อมูลหรือไม่
+				$stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
+				$stmt->bind_param("i", $user_id);
+				$stmt->execute();
+				$result = $stmt->get_result();
+				$user = $result->fetch_assoc();
+
+				// ถ้ารหัสผ่านเดิมไม่ตรง
+				if (!password_verify($current_password, $user['password'])) {
+					$errors[] = "รหัสผ่านเดิมไม่ถูกต้อง";
+				}
+
+				// ตรวจสอบความยาวของรหัสผ่าน
 				if (strlen($new_password) < 8) {
 					$errors[] = "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร";
 				}
+
+				// ตรวจสอบตัวอักษรพิมพ์เล็ก
 				if (!preg_match('/[a-z]/', $new_password)) {
 					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว";
 				}
+
+				// ตรวจสอบตัวเลข
 				if (!preg_match('/[0-9]/', $new_password)) {
 					$errors[] = "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว";
 				}
 
+				// ตรวจสอบตัวอักษรพิมพ์ใหญ่
+				if (!preg_match('/[A-Z]/', $new_password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัว";
+				}
+
+				// ตรวจสอบสัญลักษณ์พิเศษ
+				if (!preg_match('/[\W_]/', $new_password)) {
+					$errors[] = "รหัสผ่านต้องมีสัญลักษณ์พิเศษอย่างน้อย 1 ตัว (เช่น @, #, $, %)";
+				}
+
 				// หากมีข้อผิดพลาดในการตรวจสอบรหัสผ่าน
 				if (!empty($errors)) {
-					echo json_encode(['status' => 'failed', 'msg' => '<ul><li>' . implode('</li><li>', $errors) . '</li></ul>']);
+					echo json_encode(['status' => 'failed', 'msg' => implode('<br>', $errors)]);
 					return;
 				}
 
@@ -670,11 +698,7 @@
 
 					// อัปเดตรหัสผ่านใหม่ในฐานข้อมูล
 					$stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
-
-					// ผูกตัวแปรเข้ากับ placeholder
 					$stmt->bind_param("si", $hashed_new_password, $user_id);
-
-					// สั่งให้คำสั่งทำงาน
 					$update = $stmt->execute();
 
 					// ปิด statement

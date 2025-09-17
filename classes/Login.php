@@ -21,48 +21,47 @@ class Login extends DBConnection
 	}
 	public function login()
 	{
-		extract($_POST);
+		// ใช้ตัวแปรโดยตรงจาก $_POST เพื่อความชัดเจนและปลอดภัยกว่า extract()
+		$username = $_POST['username'];
+		$password = $_POST['password'];
 
-		// เตรียมคำสั่ง SQL เพื่อตรวจสอบชื่อผู้ใช้
-		$stmt = $this->conn->prepare("SELECT * from users where username = ?");
+		// 1. เตรียมคำสั่ง SQL เพื่อดึงข้อมูลผู้ใช้จาก "username" เพียงอย่างเดียว
+		$stmt = $this->conn->prepare("SELECT * FROM users WHERE username = ?");
 		$stmt->bind_param('s', $username);
 		$stmt->execute();
 		$result = $stmt->get_result();
 
+		// 2. ตรวจสอบว่ามีผู้ใช้นี้ในระบบหรือไม่
 		if ($result->num_rows > 0) {
-			// ถ้าพบผู้ใช้
-			$user = $result->fetch_array();
+			$user_data = $result->fetch_assoc(); // ดึงข้อมูลผู้ใช้มาเก็บในรูปแบบ array
 
-			// ตรวจสอบรหัสผ่านที่กรอกกับรหัสผ่านที่เก็บไว้ในฐานข้อมูล
-			if (password_verify($password, $user['password'])) {
-				// ถ้ารหัสผ่านตรง
-				foreach ($user as $k => $v) {
-					if (!is_numeric($k) && $k != 'password') {
+			// 3. ใช้ password_verify() เพื่อเปรียบเทียบรหัสผ่านที่กรอกกับ hash ในฐานข้อมูล
+			if (password_verify($password, $user_data['password'])) {
+				// ถ้ารหัสผ่านถูกต้อง
+				foreach ($user_data as $k => $v) {
+					if ($k != 'password') { // ไม่ควรเก็บรหัสผ่านไว้ใน session
 						$this->settings->set_userdata($k, $v);
 					}
 				}
 
 				// อัปเดตการเข้าสู่ระบบล่าสุด
-				$last_login = date('Y-m-d H:i:s'); // วันที่และเวลาปัจจุบัน
-				$update_stmt = $this->conn->prepare("UPDATE users SET last_login = ? WHERE username = ?");
-				$update_stmt->bind_param('ss', $last_login, $username);
+				$last_login = date('Y-m-d H:i:s');
+				$update_stmt = $this->conn->prepare("UPDATE users SET last_login = ? WHERE id = ?"); // อัปเดตโดยใช้ id จะเร็วกว่า
+				$update_stmt->bind_param('si', $last_login, $user_data['id']);
 				$update_stmt->execute();
 
-				// ตั้งค่า login_type เป็น 1
 				$this->settings->set_userdata('login_type', 1);
 
 				return json_encode(array('status' => 'success'));
 			} else {
-				// ถ้ารหัสผ่านไม่ถูกต้อง
-				return json_encode(array('status' => 'incorrect', 'msg' => 'รหัสผ่านไม่ถูกต้อง'));
+				// รหัสผ่านไม่ถูกต้อง
+				return json_encode(array('status' => 'incorrect'));
 			}
 		} else {
-			// ถ้าชื่อผู้ใช้ไม่ถูกต้อง
-			return json_encode(array('status' => 'incorrect', 'msg' => 'ชื่อผู้ใช้ไม่ถูกต้อง'));
+			// ไม่มีชื่อผู้ใช้นี้ในระบบ
+			return json_encode(array('status' => 'incorrect'));
 		}
 	}
-
-
 	public function logout()
 	{
 		if ($this->settings->sess_des()) {
