@@ -202,7 +202,7 @@ if (isset($_GET['id'])) {
 								<h3 class="mb-0"><i class="fa-solid fa-pen-to-square"></i><?= isset($meta['id']) ? "แก้ไขข้อมูลบัญชี" : "สร้างบัญชีใหม่" ?></h3>
 							</div>
 							<form id="update-form" action="" method="post">
-								<input type="hidden" name="id" value="<?php echo $_settings->userdata('id') ?>">
+								<input type="hidden" name="id" value="<?= isset($meta['id']) ? $meta['id'] : '' ?>">
 								<input type="hidden" name="cropped_image" id="cropped_image">
 								<div class="profile-section-title-with-line mb-4">
 									<h3>โปรไฟล์</h3>
@@ -213,11 +213,9 @@ if (isset($_GET['id'])) {
 											<div class="form-group d-flex justify-content-center mt-2">
 												<img src="<?php echo validate_image(isset($meta['avatar']) ? $meta['avatar'] : '') ?>" alt="Avatar Preview" id="cimg" class="img-fluid">
 											</div>
-											<div class="custom-file custom-input">
-												<input type="file" class="custom-file-input custom-input" id="customFile" name="img"
-													onchange="displayImg(this,$(this))" accept="image/png, image/jpeg">
-												<label class="custom-file-label custom-input" for="customFile">เลือกรูปจากไฟล์ในเครื่อง</label>
-
+											<div class="custom-file">
+												<input type="file" class="custom-file-input" id="customFile" name="img" accept="image/png, image/jpeg">
+												<label class="custom-file-label" for="customFile">เปลี่ยนรูปโปรไฟล์</label>
 											</div>
 										</div>
 									</div>
@@ -284,7 +282,9 @@ if (isset($_GET['id'])) {
 												<ul class="list-unstyled text-danger text-sm">
 													<li id="length" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีความยาวอย่างน้อย 8 ตัวอักษร</li>
 													<li id="lowercase" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวอักษรพิมพ์เล็ก (a-z)</li>
+													<li id="uppercase" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวอักษรพิมพ์ใหญ่ (A-Z)</li>
 													<li id="number" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวเลข (0-9)</li>
+													<li id="special" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีสัญลักษณ์พิเศษ (เช่น @, #, $, %)</li>
 												</ul>
 											</div>
 										<?php endif; ?>
@@ -340,6 +340,8 @@ if (isset($_GET['id'])) {
 		var lengthReq = $('#length');
 		var lowerReq = $('#lowercase');
 		var numReq = $('#number');
+		var upperReq = $('#uppercase');
+		var specialReq = $('#special');
 
 		// เมื่อเริ่มพิมพ์ในช่องรหัสผ่าน
 		passwordInput.on('focus', function() {
@@ -368,6 +370,20 @@ if (isset($_GET['id'])) {
 				numReq.removeClass('invalid').addClass('valid');
 			} else {
 				numReq.removeClass('valid').addClass('invalid');
+			}
+
+			// ตรวจสอบตัวพิมพ์ใหญ่
+			if (password.match(/[A-Z]/)) {
+				upperReq.removeClass('invalid').addClass('valid');
+			} else {
+				upperReq.removeClass('valid').addClass('invalid');
+			}
+
+			// ตรวจสอบสัญลักษณ์พิเศษ
+			if (password.match(/[\W_]/)) {
+				specialReq.removeClass('invalid').addClass('valid');
+			} else {
+				specialReq.removeClass('valid').addClass('invalid');
 			}
 		});
 

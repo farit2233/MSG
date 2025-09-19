@@ -42,19 +42,33 @@
 				if (strlen($password) < 8) {
 					$errors[] = "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร";
 				}
+
+				// ตรวจสอบตัวอักษรพิมพ์เล็ก
 				if (!preg_match('/[a-z]/', $password)) {
 					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว";
 				}
+
+				// ตรวจสอบตัวเลข
 				if (!preg_match('/[0-9]/', $password)) {
 					$errors[] = "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว";
 				}
 
+				// ตรวจสอบตัวอักษรพิมพ์ใหญ่
+				if (!preg_match('/[A-Z]/', $password)) {
+					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัว";
+				}
+
+				// ตรวจสอบสัญลักษณ์พิเศษ
+				if (!preg_match('/[\W_]/', $password)) {
+					$errors[] = "รหัสผ่านต้องมีสัญลักษณ์พิเศษอย่างน้อย 1 ตัว (เช่น @, #, $, %)";
+				}
+
+				// หากมีข้อผิดพลาดในการตรวจสอบรหัสผ่าน
 				if (!empty($errors)) {
-					$resp['status'] = 'failed';
-					$resp['msg'] = '<ul><li>' . implode('</li><li>', $errors) . '</li></ul>';
-					echo json_encode($resp);
+					echo json_encode(['status' => 'failed', 'msg' => implode('<br>', $errors)]);
 					return;
 				}
+
 				// Hash the password only after validation passes
 				$_POST['password'] = password_hash($password, PASSWORD_DEFAULT);
 			} else {
