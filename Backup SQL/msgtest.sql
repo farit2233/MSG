@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Sep 17, 2025 at 10:01 AM
+-- Generation Time: Sep 19, 2025 at 03:54 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -33,6 +33,13 @@ CREATE TABLE `cart_list` (
   `product_id` int NOT NULL,
   `quantity` int NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cart_list`
+--
+
+INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
+(5, 19, 24, 4);
 
 -- --------------------------------------------------------
 
@@ -256,7 +263,7 @@ INSERT INTO `customer_list` (`id`, `firstname`, `middlename`, `lastname`, `gende
 (16, 'เอกไม', '', 'ไมค์ทองคำ', 'Male', '023-858-9988', 'user4@gmail.com', '32 หมู่ 8 ถนนเสียงบรรเลง', 'ทองคำเปลว', 'ร้องจนหมด', 'หนี้ไม่มี', '88994', '81dc9bdb52d04dc20036dbd8313ed055', NULL, NULL, '2025-06-17 13:17:23', '2025-06-17 13:17:23'),
 (17, 'นางสาวสามารถ', '', 'ทำได้ดี', 'Male', '068-888-9999', 'user5@gmail.com', '', '', '', '', '', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/17.png?v=1750141789', NULL, '2025-06-17 13:29:27', '2025-06-17 13:29:49'),
 (18, 'นายฉันท์ชยา', '', 'ภิญโญ', 'Male', '0828398430', 'faritre5566@gmail.com', '21 หมู่ 5 ถนนเพชรเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/18.png?v=1751264120', NULL, '2025-06-26 15:42:39', '2025-06-30 13:15:20'),
-(19, 'นางอัญมณีasdasd', '', 'คงสีaaa', 'Female', '088-115-5458', 'faritre1@gmail.com', '44 หมู่ 8', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', '$2y$10$0JAbcfh7l6pbXHM6YFfzrelL9v0mv/IjVCKY0xjA2cqMX3QXfyu6C', 'uploads/customers/19.png?v=1757991011', '2025-09-17 16:43:32', '2025-06-26 15:48:41', '2025-09-17 16:43:32'),
+(19, 'นางอัญมณีasdasd', '', 'คงสีaaa', 'Female', '088-115-5458', 'faritre1@gmail.com', '44 หมู่ 8', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', '$2y$10$oR7kMLiellDj6h/NGRcA2uZp/SYtURMJw59osFBer3VwBpPW6VsTW', 'uploads/customers/19.png?v=1757991011', '2025-09-19 10:53:21', '2025-06-26 15:48:41', '2025-09-19 10:53:21'),
 (20, 'แมวหลาม', '', 'ซาบะ', 'Male', '011-555-6687', 'faritre4@gmail.com', '55/87', 'ทะเลฟ้า', 'เรือใบ', 'ทะเลกว้าง', '99887', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/20.png?v=1752809365', NULL, '2025-07-18 10:29:25', '2025-07-18 10:29:25'),
 (25, 'แชมเบอร์', '', 'สามช่า', 'Male', '011-999-7777', '1@gmail.com', '50/5', 'บางรัก', 'บางบ่อ', 'สมุทรปราการ', '10560', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/25.png?v=1757393791', NULL, '2025-09-09 11:56:31', '2025-09-09 11:56:31'),
 (29, 'ปาล์ม', 'อมัจจ์', 'เดชสงคราม', 'Male', '0980624633', 'amat123450zx@gmail.com', '127/4', 'นาเกลือ', 'กันตัง', 'ตรัง', '92110', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/29.png?v=1757673364', NULL, '2025-09-12 17:36:04', '2025-09-12 17:40:36'),
@@ -338,7 +345,12 @@ CREATE TABLE `password_resets` (
 --
 
 INSERT INTO `password_resets` (`id`, `customer_id`, `token`, `expires_at`) VALUES
-(1, 19, '705084ef355b714f11b1990e063a10532311d366dc003f995be45231a807c198', '2025-09-17 17:57:06');
+(1, 19, '705084ef355b714f11b1990e063a10532311d366dc003f995be45231a807c198', '2025-09-17 17:57:06'),
+(2, 19, '35822721fffadf9155fccd0cb22aa3dcbf4a989aa78947161cc6ef82f21c6832', '2025-09-19 10:44:04'),
+(3, 19, '59c25758fede9a59332aea6548df31016279dab07720ffef0fffa00a37ff4540', '2025-09-19 10:56:45'),
+(6, 19, 'dea88dfd8001ece1c463b874e9fe6a8a3befe91393e3c51c7333daf392fc8c7d', '2025-09-19 11:48:06'),
+(7, 19, 'b0f34364f39de9f2881b379ac6a4f55d1fbf38c40cd87616aa1e46061de8d0d8', '2025-09-19 11:48:33'),
+(8, 19, '74316a3295a0e11614b53fcb7a7f330cf22bad75c0f2bf9d2e200009b002d97c', '2025-09-19 11:49:12');
 
 -- --------------------------------------------------------
 
@@ -1015,7 +1027,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `firstname`, `middlename`, `lastname`, `username`, `password`, `avatar`, `last_login`, `type`, `date_added`, `date_updated`) VALUES
-(1, 'Adminstrator', '', 'Admin', 'admin', '$2y$10$IPafJCMuzrtqRJFrR1VddOJ5iPHIqQSP0yKs9rA1Ua8uBbyIOQ1aK', 'uploads/avatars/1.png', '2025-09-17 16:23:01', 1, '2021-01-20 14:02:37', '2025-09-17 16:23:01'),
+(1, 'Adminstrator', '', 'Admin', 'admin', '$2y$10$IPafJCMuzrtqRJFrR1VddOJ5iPHIqQSP0yKs9rA1Ua8uBbyIOQ1aK', 'uploads/avatars/1.png', '2025-09-19 09:55:20', 1, '2021-01-20 14:02:37', '2025-09-19 09:55:20'),
 (8, 'Claire', '', 'Blake', 'cblake', 'cd74fae0a3adf459f73bbf187607ccea', 'uploads/avatars/8.png?v=1675047323', NULL, 2, '2023-01-30 10:55:23', '2023-01-30 10:55:23'),
 (9, 'Staff', '', 'Staff', 'staff1', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/avatars/9.png?v=1757391282', NULL, 2, '2025-05-19 16:21:57', '2025-09-17 11:56:43'),
 (10, 'Staffฟๆ', '', '2', 'staff2', '$2y$10$dkGh3arZQPGctYHUAmJ.VOSEd2BzAoUL6EKLIx3REijCBeQhEWWp2', 'uploads/avatars/10.png', '2025-09-17 13:18:30', 2, '2025-09-09 11:39:26', '2025-09-17 13:18:30'),
@@ -1215,7 +1227,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `category_list`
@@ -1257,7 +1269,7 @@ ALTER TABLE `order_list`
 -- AUTO_INCREMENT for table `password_resets`
 --
 ALTER TABLE `password_resets`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `product_image_path`
@@ -1393,6 +1405,12 @@ ALTER TABLE `order_list`
   ADD CONSTRAINT `fk_promotions_list` FOREIGN KEY (`promotion_id`) REFERENCES `promotions_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_shipping_methods` FOREIGN KEY (`shipping_methods_id`) REFERENCES `shipping_methods` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_shipping_prices` FOREIGN KEY (`shipping_prices_id`) REFERENCES `shipping_prices` (`id`);
+
+--
+-- Constraints for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD CONSTRAINT `fk_customer_id` FOREIGN KEY (`customer_id`) REFERENCES `customer_list` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `product_image_path`
