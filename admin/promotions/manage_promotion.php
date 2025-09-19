@@ -119,12 +119,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
                     <div class="form-group row">
                         <div class="col-md-6">
-                            <label>มูลค่าส่วนลด</label>
-                            <input type="number" name="discount_value" step="0.01" min="0" class="form-control" value="<?= isset($discount_value) ? $discount_value : '' ?>">
+                            <label>มูลค่าส่วนลด <span class="text-danger">*</span></label>
+                            <input type="number" name="discount_value" step="0.01" min="0" class="form-control" value="<?= isset($discount_value) ? $discount_value : '' ?>" required>
                         </div>
                         <div class="col-md-6">
-                            <label>ยอดสั่งซื้อขั้นต่ำ</label>
-                            <input type="number" name="minimum_order" step="0.01" min="0" class="form-control" value="<?= isset($minimum_order) ? $minimum_order : '' ?>">
+                            <label>ยอดสั่งซื้อขั้นต่ำ <span class="text-danger">*</span></label>
+                            <input type="number" name="minimum_order" step="0.01" min="0" class="form-control" value="<?= isset($minimum_order) ? $minimum_order : '' ?>" required>
                         </div>
                     </div>
 
