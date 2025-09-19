@@ -30,6 +30,15 @@ if ($_settings->userdata('id') != '') {
         border-radius: 13px;
         font-size: 16px;
     }
+
+    .icon-success {
+        color: #28a745;
+        /* สีเขียวสำหรับติ๊กถูก */
+        font-size: 60px;
+        /* ขนาดไอคอนใหญ่ */
+        margin-bottom: 20px;
+        /* เว้นระยะห่างจากข้อความ */
+    }
 </style>
 
 <div class="container-fluid password">
@@ -77,18 +86,15 @@ if ($_settings->userdata('id') != '') {
             <label for="email" class="control-label">อีเมล</label>
             <input type="email" class="form-control" name="email" required>
         </div>
-        <div class="form-group">
-            <label for="name" class="control-label">ชื่อ (ที่ใช้สมัคร)</label>
-            <input type="text" class="form-control" name="name" required>
-        </div>
         <div class="text-right">
             <small><a href="#" id="back_to_change_password">กลับไปหน้าเปลี่ยนรหัสผ่าน</a></small>
         </div>
     </form>
 
     <div id="reset_success_message" style="display: none;" class="text-center">
-        <h4 class="text-success">ส่งคำขอสำเร็จ</h4>
-        <p>ระบบได้ส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปยังอีเมลของคุณแล้ว กรุณาตรวจสอบ</p>
+        <i class="fa-solid fa-check-circle icon-success pt-4"></i>
+        <h4 class="text-success">คำขอรีเซ็ตรหัสผ่านของคุณ <br>ถูกส่งเรียบร้อยแล้ว</h4>
+        <p>กรุณารอการตอบกลับที่อีเมล</p>
     </div>
 </div>
 

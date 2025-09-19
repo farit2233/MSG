@@ -531,7 +531,7 @@
 
 					if ($insert_stmt->execute()) {
 						// 4. เตรียมและส่งอีเมลไปยังผู้ใช้ (ส่วนนี้เหมือนเดิม)
-						$reset_link = "https://msgtest.test/reset_password.php?token=" . $token; // **สำคัญ:** เปลี่ยน yourwebsite.com เป็นโดเมนของคุณ
+						$reset_link = "http://msgtest.test/reset_password.php?token=" . $token; // **สำคัญ:** เปลี่ยน yourwebsite.com เป็นโดเมนของคุณ
 
 						$email_subject = "คำขอรีเซ็ตรหัสผ่านของคุณ";
 						$email_body = "
@@ -715,6 +715,62 @@
 				echo json_encode(['status' => 'failed', 'msg' => 'ข้อมูลไม่ครบ']);
 			}
 		}
+
+		// เพิ่มฟังก์ชันนี้ในไฟล์ classes/Users.php ภายใน class Users
+		function reset_password_with_token()
+		{
+			extract($_POST);
+
+			// ตรวจสอบข้อมูลเบื้องต้น
+			if (!isset($token) || !isset($new_password) || !isset($confirm_password)) {
+				return json_encode(['status' => 'error', 'msg' => 'ข้อมูลไม่ครบถ้วน']);
+			}
+
+			if ($new_password !== $confirm_password) {
+				return json_encode(['status' => 'error', 'msg' => 'รหัสผ่านใหม่และการยืนยันไม่ตรงกัน']);
+			}
+
+			// ตรวจสอบความปลอดภัยของรหัสผ่าน
+			if (strlen($new_password) < 8 || !preg_match('/[a-z]/', $new_password) || !preg_match('/\d/', $new_password)) {
+				return json_encode(['status' => 'error', 'msg' => 'รหัสผ่านไม่ตรงตามเงื่อนไขความปลอดภัย']);
+			}
+
+			// 1. ค้นหา Token ในฐานข้อมูล
+			$token_qry = $this->conn->prepare("SELECT * FROM `password_resets` WHERE token = ?");
+			$token_qry->bind_param("s", $token);
+			$token_qry->execute();
+			$result = $token_qry->get_result();
+
+			if ($result->num_rows == 0) {
+				return json_encode(['status' => 'error', 'msg' => 'Token ไม่ถูกต้องหรือไม่พบในระบบ']);
+			}
+
+			$row = $result->fetch_assoc();
+			$expires_at = strtotime($row['expires_at']);
+
+			// 2. ตรวจสอบว่า Token หมดอายุหรือไม่
+			if ($expires_at <= time()) {
+				return json_encode(['status' => 'error', 'msg' => 'Token หมดอายุแล้ว กรุณาดำเนินการขอรีเซ็ตรหัสผ่านใหม่อีกครั้ง']);
+			}
+
+			// 3. ถ้า Token ถูกต้อง: ทำการ Hash รหัสผ่านใหม่และอัปเดต
+			$user_id = $row['customer_id'];
+			$hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+
+			$update_stmt = $this->conn->prepare("UPDATE `customer_list` SET `password` = ? WHERE `id` = ?");
+			$update_stmt->bind_param("si", $hashed_password, $user_id);
+
+			if ($update_stmt->execute()) {
+				// 4. ลบ Token ที่ใช้งานแล้วออกจากฐานข้อมูล
+				$delete_stmt = $this->conn->prepare("DELETE FROM `password_resets` WHERE `token` = ?");
+				$delete_stmt->bind_param("s", $token);
+				$delete_stmt->execute();
+
+				return json_encode(['status' => 'success', 'msg' => 'รหัสผ่านถูกอัปเดตเรียบร้อยแล้ว']);
+			} else {
+				return json_encode(['status' => 'error', 'msg' => 'เกิดข้อผิดพลาดในการอัปเดตรหัสผ่าน']);
+			}
+		}
 	}
 
 	$users = new users();
@@ -747,6 +803,9 @@
 			break;
 		case 'user_manage_password':
 			echo $users->user_manage_password();
+			break;
+		case 'reset_password_with_token':
+			echo $users->reset_password_with_token();
 			break;
 		default:
 			// echo $sysset->index();
