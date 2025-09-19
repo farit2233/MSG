@@ -135,7 +135,34 @@
         }
       })
     }
-
+    window.address_option = function($title = '', $url = '', $size = "") {
+      start_loader()
+      $.ajax({
+        url: $url,
+        error: err => {
+          console.log()
+          alert("An error occured")
+        },
+        success: function(resp) {
+          if (resp) {
+            $('#address_option .modal-title').html($title)
+            $('#address_option .modal-body').html(resp)
+            if ($size != '') {
+              $('#address_option .modal-dialog').addClass($size + '  modal-dialog-centered')
+            } else {
+              $('#address_option .modal-dialog').removeAttr("class").addClass("modal-dialog modal-md modal-dialog-centered")
+            }
+            $('#address_option').modal({
+              show: true,
+              backdrop: 'true',
+              keyboard: false,
+              focus: true
+            })
+            end_loader()
+          }
+        }
+      })
+    }
     window._conf = function($msg = '', $func = '', $params = []) {
       $('#confirm_modal #confirm').attr('onclick', $func + "(" + $params.join(',') + ")")
       $('#confirm_modal .modal-body').html($msg)

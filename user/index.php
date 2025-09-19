@@ -35,6 +35,25 @@ if ($_settings->userdata('id') != '') {
         text-decoration: underline !important;
         /* เพิ่มเส้นใต้เมื่อมีการ focus */
     }
+
+    #address_option {
+        border: none;
+        /* ลบกรอบ */
+        background: transparent;
+        /* กำหนดให้พื้นหลังเป็นโปร่งใส */
+        padding: 10px 15px;
+        /* เพิ่มระยะห่างข้างใน */
+        font-size: 16px;
+        /* ขนาดตัวอักษร */
+
+    }
+
+    #address_option:focus {
+        outline: none;
+        /* ลบกรอบที่แสดงเวลาโฟกัส */
+        text-decoration: underline !important;
+        /* เพิ่มเส้นใต้เมื่อมีการ focus */
+    }
 </style>
 <section class="py-3 profile-page">
     <div class="container">
@@ -135,6 +154,10 @@ if ($_settings->userdata('id') != '') {
                                             <label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
                                             <input type="text" class="form-control" name="postal_code" id="postal_code" value="<?= isset($postal_code) ? $postal_code : '' ?>">
                                         </div>
+                                        <div class="form-group">
+                                            <label for="contact" class="control-label">สมุดที่อยู่</label>
+                                            <a class="form-control" type="button" id="address_option">เปลี่ยนที่อยู่หลัก / เพิ่มที่อยู่ใหม่ <i class="fa-solid fa-circle-plus"></i></a>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -158,6 +181,9 @@ if ($_settings->userdata('id') != '') {
         end_loader();
         $('#password').click(function() {
             password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/password.php?pid=<?= isset($id) ? $id : '' ?>')
+        })
+        $('#address_option').click(function() {
+            address_option_modal('เปลี่ยนที่อยู่หลัก / เพิ่มที่อยู่ใหม่ <i class="fa-solid fa-circle-plus"></i>', 'user/address_option.php?pid=<?= isset($id) ? $id : '' ?>')
         })
         // --- Form Submission Logic ---
         $('#update-form').submit(function(e) {

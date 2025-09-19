@@ -150,6 +150,23 @@
     </div>
   </div>
 
+  <div class="modal fade" id="address_option_modal" role='dialog'>
+    <div class="modal-dialog modal-dialog-centered " role="document">
+      <div class="modal-content ">
+        <div class="modal-header">
+          <h5 class="modal-title">เปลี่ยนที่อยู่หลัก / เพิ่มที่อยู่ใหม่</h5>
+        </div>
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary" id="btn_change_address" form="change_password_form">ยืนยัน</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-user " role="document">
       <div class="modal-content">

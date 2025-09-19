@@ -50,6 +50,7 @@
   <script src="<?= base_url ?>plugins/jquery/jquery.min.js"></script>
 
   <!--Custom css-->
+  <link rel="stylesheet" href="assets/css/address_option.css">
   <link rel="stylesheet" href="assets/css/checkout.css">
   <link rel="stylesheet" href="assets/css/fetch_product.css">
   <link rel="stylesheet" href="assets/css/footer.css">

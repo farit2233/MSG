@@ -1,0 +1,20 @@
+    #address_option_modal .modal-dialog-address {
+        position: fixed !important;
+        /* ทำให้ dialog ล็อกตาม viewport */
+        top: 50%;
+        /* กึ่งกลางแนวตั้ง */
+        left: 50%;
+        /* กึ่งกลางแนวนอน */
+        transform: translate(-50%, -50%);
+        /* ปรับให้ตรงกลางพอดี */
+        max-width: 60px;
+        width: 100%;
+        margin: 0;
+        max-height: 10px;
+        height: 100%;
+        /* ไม่ให้ Bootstrap ใส่ margin */
+    }
+    #address_option_modal .modal-content {
+        border-radius: 30px;
+        overflow: hidden;
+    }
