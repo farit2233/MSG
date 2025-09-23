@@ -1,6 +1,5 @@
  /* --- Styles from Registration page theme --- */
     .profile-page {
-        padding-top: 0px !important;
         background-size: cover;
         background-repeat: no-repeat;
         overflow-x: hidden;
@@ -22,14 +21,14 @@
         font-size: 16px !important;
     }
 
-    .profile-section-title-with-line h4 {
+    .profile-section-title-with-line {
         position: relative;
         border-bottom: 2px solid #f57421 !important;
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
     }
 
-    .profile-section-title-with-line h4::after {
+    .profile-section-title-with-line ::after {
         content: none !important;
     }
 
