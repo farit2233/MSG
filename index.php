@@ -168,7 +168,8 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-          <button type="submit" class="btn btn-primary" id="confirm_address_selection" form="address_option">เลือกที่อยู่นี้</button>
+          <button type="submit" class="btn btn-primary" id="btn_confirm_address" form="address_selection_form">เลือกที่อยู่นี้</button>
+          <button type="submit" class="btn btn-primary" id="btn_new_address" form="new_address_form" style="display:none;">บันทึกที่อยู่ใหม่</button>
         </div>
       </div>
     </div>

@@ -101,7 +101,7 @@ if ($user_qry->num_rows > 0) {
         <a href="?p=user/profile" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'profile') ? 'active' : '' ?>">
             <i class="fa-solid fa-pen-to-square"></i> ข้อมูลส่วนตัว
         </a>
-        <a href="?p=address" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'address') ? 'active' : '' ?>">
+        <a href="?p=user/address" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'address') ? 'active' : '' ?>">
             <i class="fa-solid fa-map-location-dot"></i> ที่อยู่ของฉัน
         </a>
         <a href="?p=orders" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'orders') ? 'active' : '' ?>">

@@ -328,6 +328,63 @@
 			return json_encode($resp);
 		}
 
+		function new_address()
+		{
+			extract($_POST);
+			$customer_id = $this->settings->userdata('id');
+
+			if (empty($customer_id)) {
+				$resp['status'] = 'failed';
+				$resp['msg'] = 'กรุณาเข้าสู่ระบบก่อนเพิ่มที่อยู่';
+				return json_encode($resp);
+			}
+
+			// field ที่อนุญาตให้บันทึก
+			$fields = [
+				'address',
+				'sub_district',
+				'district',
+				'province',
+				'postal_code',
+				'is_primary'
+			];
+
+			$data = "";
+			foreach ($_POST as $k => $v) {
+				$v = $this->conn->real_escape_string($v);
+				if (in_array($k, $fields)) {
+					if (!empty($data)) $data .= ", ";
+					$data .= " `{$k}` = '{$v}' ";
+				}
+			}
+
+			// ถ้าตั้งที่อยู่นี้เป็น primary -> reset ของเก่าออกก่อน
+			if (!empty($is_primary) && $is_primary == 1) {
+				$this->conn->query("UPDATE `customer_addresses` SET is_primary = 0 WHERE customer_id = '{$customer_id}'");
+			}
+
+			// insert address ใหม่เสมอ
+			$sql = "INSERT INTO `customer_addresses` SET {$data}, `customer_id` = '{$customer_id}' ";
+
+			$save = $this->conn->query($sql);
+
+			if ($save) {
+				$addr_id = $this->conn->insert_id;
+				$resp['status'] = 'success';
+				$resp['addr_id'] = $addr_id;
+				$resp['msg'] = 'เพิ่มที่อยู่ใหม่เรียบร้อยแล้ว';
+			} else {
+				$resp['status'] = 'failed';
+				$resp['msg'] = $this->conn->error;
+				$resp['sql'] = $sql;
+			}
+
+			if ($resp['status'] == 'success' && isset($resp['msg']))
+				$this->settings->set_flashdata('success', $resp['msg']);
+			return json_encode($resp);
+		}
+
+
 		public function delete_customer()
 		{
 			extract($_POST);
@@ -798,6 +855,9 @@
 			break;
 		case 'registration':
 			echo $users->registration();
+			break;
+		case 'new_address':
+			echo $users->new_address();
 			break;
 		case 'delete_customer':
 			echo $users->delete_customer();

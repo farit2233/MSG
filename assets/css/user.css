@@ -48,8 +48,8 @@
     }
 
     img#cimg {
-        height: 10em;
-        width: 10em;
+        height: 8em;
+        width: 8em;
         object-fit: cover;
         border-radius: 100%;
         border: 3px solid #f57421;
@@ -154,7 +154,7 @@
     }
 
     
-  .profile-img {
+  .profile-img-label {
     border-radius: 13px;
     font-size: 16px !important;
     font-weight: normal !important;

@@ -20,7 +20,7 @@ if ($_settings->userdata('id') != '') {
     <div class="container">
         <div class="row">
             <div class="col-lg-3">
-                <?php include 'navigation.php'; ?>
+                <?php include './user/inc/navigation.php'; ?>
             </div>
 
             <div class="col-lg-9" id="main-content">

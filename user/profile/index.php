@@ -41,7 +41,7 @@ if ($_settings->userdata('id') != '') {
     <div class="container">
         <div class="row">
             <div class="col-lg-3">
-                <?php include 'navigation.php'; ?>
+                <?php include 'user/inc/navigation.php'; ?>
             </div>
 
             <div class="col-lg-9">
@@ -64,10 +64,11 @@ if ($_settings->userdata('id') != '') {
                                         </div>
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input" id="customFile" name="img" accept="image/png, image/jpeg">
-                                            <label class="custom-file-label profile-img" for="customFile">เปลี่ยนรูปโปรไฟล์</label>
+                                            <label class="custom-file-label profile-img-label" for="customFile">เปลี่ยนรูปโปรไฟล์</label>
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                         <div class="form-group">
@@ -154,9 +155,6 @@ if ($_settings->userdata('id') != '') {
             </div>
         </div>
     </div>
-    </div>
-    </div>
-    </div>
 </section>
 
 
@@ -164,10 +162,7 @@ if ($_settings->userdata('id') != '') {
     $(document).ready(function() {
         end_loader();
         $('#password').click(function() {
-            password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/password.php?pid=<?= isset($id) ? $id : '' ?>')
-        })
-        $('#address_option').click(function() {
-            address_option_modal('เปลี่ยนที่อยู่หลัก / เพิ่มที่อยู่ใหม่ <i class="fa-solid fa-circle-plus"></i>', 'user/address_option.php?pid=<?= isset($id) ? $id : '' ?>')
+            password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/profile/password.php?pid=<?= isset($id) ? $id : '' ?>')
         })
         // --- Form Submission Logic ---
         $('#update-form').submit(function(e) {
@@ -196,11 +191,11 @@ if ($_settings->userdata('id') != '') {
 
             // เช็คว่ามีการเลือกไฟล์ใหม่ไหม ถ้าไม่มีให้ส่งรูปเก่าที่มี
             if (!$('#customFile').val()) {
-                formData.append('cropped_image', $('#cropped_image').val()); // รูปเก่าที่ถูกบันทึกไว้
+                formData.append('cropped_image', $('#cropped_image').val());
             }
 
             $.ajax({
-                url: _base_url_ + "classes/Users.php?f=registration", // Make sure this endpoint is correct for updates
+                url: _base_url_ + "classes/Users.php?f=registration",
                 method: 'POST',
                 data: formData,
                 dataType: 'json',
