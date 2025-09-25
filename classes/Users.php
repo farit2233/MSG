@@ -342,6 +342,7 @@
 			// Fields allowed to be saved
 			$fields = [
 				'name',
+				'contact',
 				'address',
 				'sub_district',
 				'district',

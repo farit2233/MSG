@@ -57,17 +57,45 @@ if (!empty($selected_items)) {
 // ============================
 // PHP: ดึงข้อมูลลูกค้า และสร้างที่อยู่
 // ============================
+
+// ============================
+// PHP: ดึงข้อมูลลูกค้า และสร้างที่อยู่ (✨ UPDATED SECTION)
+// ============================
+
 $customer = $conn->query("SELECT * FROM customer_list WHERE id = '{$_settings->userdata('id')}'")->fetch_assoc();
+$address = $conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$_settings->userdata('id')}' AND is_primary = 1")->fetch_assoc();
+
+// --- เพิ่มการตรวจสอบความสมบูรณ์ของที่อยู่ ---
+$is_address_complete = false;
+if (
+    $address &&
+    !empty($address['name']) &&
+    !empty($address['contact']) &&
+    !empty($address['address']) &&
+    !empty($address['sub_district']) &&
+    !empty($address['district']) &&
+    !empty($address['province']) &&
+    !empty($address['postal_code'])
+) {
+    $is_address_complete = true;
+}
+// --- สิ้นสุดการตรวจสอบ ---
+
 $full_address = "";
-if ($customer) {
+if ($address) { // ตรวจสอบจาก $address โดยตรง
     $parts = [];
-    if (!empty($customer['address'])) $parts[] = $customer['address'];
-    if (!empty($customer['sub_district'])) $parts[] = "ต." . $customer['sub_district'];
-    if (!empty($customer['district'])) $parts[] = "อ." . $customer['district'];
-    if (!empty($customer['province'])) $parts[] = "จ." . $customer['province'];
-    if (!empty($customer['postal_code'])) $parts[] = $customer['postal_code'];
+    // ส่วนนี้เหมือนเดิม: สร้าง string ที่อยู่เต็ม
+    if (!empty($address['name'])) $parts[] = $address['name'];
+    if (!empty($address['contact'])) $parts[] = $address['contact'];
+    if (!empty($address['address'])) $parts[] = $address['address'];
+    if (!empty($address['sub_district'])) $parts[] = "ต." . $address['sub_district'];
+    if (!empty($address['district'])) $parts[] = "อ." . $address['district'];
+    if (!empty($address['province'])) $parts[] = "จ." . $address['province'];
+    if (!empty($address['postal_code'])) $parts[] = $address['postal_code'];
+
     $full_address = implode(", ", $parts);
 }
+
 
 // ============================
 // PHP: ดึงข้อมูลขนส่ง สำหรับแสดงใน modal และค่า default
@@ -306,10 +334,10 @@ if (!function_exists('format_price_custom')) {
                             </div>
 
                             <?php if (!empty($cart_items)): ?>
-                                <?php if (empty($full_address)): ?>
+                                <?php if (!$is_address_complete): ?>
                                     <div class="alert alert-warning text-center">
-                                        <strong>ยังไม่มีที่อยู่จัดส่ง!</strong><br>
-                                        กรุณาไปที่หน้า <a href="./?p=user" class="alert-link">บัญชีของฉัน</a> เพื่อกรอกข้อมูลที่อยู่ก่อนทำการสั่งซื้อ
+                                        <strong>ที่อยู่จัดส่งไม่สมบูรณ์!</strong><br>
+                                        กรุณาไปที่หน้า <a href="./?p=user" class="alert-link">บัญชีของฉัน</a> เพื่อกรอกข้อมูลที่อยู่ให้ครบถ้วนก่อนทำการสั่งซื้อ
                                     </div>
                                 <?php endif; ?>
 
@@ -325,20 +353,20 @@ if (!function_exists('format_price_custom')) {
                                         <tbody>
                                             <tr>
                                                 <th>ชื่อ</th>
-                                                <td><?= htmlentities($customer['firstname'] . ' ' . $customer['middlename'] . ' ' . $customer['lastname']) ?></td>
+                                                <td><?= !empty($address['name']) ? htmlentities($address['name']) . ' ' : 'ไม่พบชื่อ' ?></td>
                                             </tr>
                                             <tr>
                                                 <th>เบอร์โทร</th>
-                                                <td><?= htmlentities($customer['contact']) ?></td>
+                                                <td><?= !empty($address['contact']) ? htmlentities($address['contact']) . ' ' : 'ไม่พบเบอร์โทรศัพท์' ?></td>
                                             </tr>
                                             <tr>
                                                 <th>ที่อยู่</th>
                                                 <td>
-                                                    <?= htmlentities($customer['address']) ?><br>
-                                                    <?= !empty($customer['sub_district']) ? 'ต.' . htmlentities($customer['sub_district']) . ' ' : '' ?>
-                                                    <?= !empty($customer['district']) ? 'อ.' . htmlentities($customer['district']) . ' ' : '' ?>
-                                                    <?= !empty($customer['province']) ? 'จ.' . htmlentities($customer['province']) : '' ?><br>
-                                                    <?= htmlentities($customer['postal_code']) ?>
+                                                    <?= !empty($address['address']) ? htmlentities($address['address']) . ' ' : 'ไม่พบที่อยู่' ?><br>
+                                                    <?= !empty($address['sub_district']) ? 'ต.' . htmlentities($address['sub_district']) . ' ' : '' ?>
+                                                    <?= !empty($address['district']) ? 'อ.' . htmlentities($address['district']) . ' ' : '' ?>
+                                                    <?= !empty($address['province']) ? 'จ.' . htmlentities($address['province']) : '' ?><br>
+                                                    <?= !empty($address['postal_code']) ? htmlentities($address['postal_code']) . ' ' : '' ?>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -531,7 +559,7 @@ if (!function_exists('format_price_custom')) {
                                 <input type="hidden" name="coupon_code_id" id="applied_coupon_id" value="0">
 
                                 <div class="py-1 text-center">
-                                    <button class="btn addcart rounded-pill" <?= empty($full_address) ? 'disabled' : '' ?>>
+                                    <button class="btn addcart rounded-pill" <?= !$is_address_complete ? 'disabled' : '' ?>>
                                         ยืนยันคำสั่งซื้อ
                                     </button>
                                 </div>

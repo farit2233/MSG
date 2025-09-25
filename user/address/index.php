@@ -89,38 +89,45 @@ if ($_settings->userdata('id') != '') {
                                                                 ที่อยู่ <?= ($row['is_primary'] == 1) ? 'หลัก' : 'เพิ่มเติม' ?>
                                                             </h6>
                                                             <p class="mb-0 text-muted">
-                                                                <?= htmlspecialchars($row['name']) ?>,
-                                                                <?= htmlspecialchars($row['address']) ?>,
-                                                                <?= htmlspecialchars($row['sub_district']) ?>,
-                                                                <?= htmlspecialchars($row['district']) ?>,
-                                                                <?= htmlspecialchars($row['province']) ?>
-                                                                <?= htmlspecialchars($row['postal_code']) ?>
+                                                                <?= !empty($row['name']) ? htmlspecialchars($row['name']) . ',' : 'ไม่พบชื่อ' ?>
+                                                                <?= !empty($row['contact']) ? htmlspecialchars($row['contact']) : 'ไม่พบเบอร์โทรศัพท์' ?><br>
+                                                                <?= !empty($row['address']) ? 'ที่อยู่ ' . htmlspecialchars($row['address']) . ',' : ', ไม่พบที่อยู่,' ?><br>
+                                                                <?= !empty($row['sub_district']) ? 'ต.' . htmlspecialchars($row['sub_district']) . ',' : '' ?>
+                                                                <?= !empty($row['district']) ? 'อ.' . htmlspecialchars($row['district']) . ',' : '' ?>
+                                                                <?= !empty($row['province']) ? 'จ.' . htmlspecialchars($row['province']) . ',' : '' ?>
+                                                                <?= !empty($row['postal_code']) ? htmlspecialchars($row['postal_code']) : '' ?>
                                                             </p>
                                                         </div>
                                                         <div class="ms-3 d-flex flex-column align-items-end">
-                                                            <a href="#" class="edit-address mb-1 text-sm "
+                                                            <a href="#" class="edit-address mb-1 text-sm"
                                                                 data-id="<?= $row['id'] ?>"
                                                                 data-name="<?= htmlspecialchars($row['name']) ?>"
+                                                                data-contact="<?= htmlspecialchars($row['contact']) ?>"
                                                                 data-address="<?= htmlspecialchars($row['address']) ?>"
                                                                 data-sub_district="<?= htmlspecialchars($row['sub_district']) ?>"
                                                                 data-district="<?= htmlspecialchars($row['district']) ?>"
                                                                 data-province="<?= htmlspecialchars($row['province']) ?>"
                                                                 data-postal_code="<?= htmlspecialchars($row['postal_code']) ?>"
-                                                                style="text-decoration: none;"> แก้ไข
-                                                            </a>
-                                                            <a href="#" class="set-primary mb-1 text-sm " data-id="<?= $row['id'] ?>"
-                                                                <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
-                                                                style="text-decoration: none;">ตั้งเป็นที่อยู่หลัก
+                                                                style="text-decoration: none;">
+                                                                <i class="fa-solid fa-pencil-alt"></i> แก้ไข
                                                             </a>
 
-                                                            <a href="#" class="delete-address mb-1 text-sm " data-id="<?= $row['id'] ?>"
+                                                            <a href="#" class="set-primary mb-1 text-sm" data-id="<?= $row['id'] ?>"
                                                                 <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
-                                                                style="text-decoration: none;">ลบ
+                                                                style="text-decoration: none;">
+                                                                <i class="<?= ($row['is_primary'] == 1) ? 'fa-solid' : 'fa-regular' ?> fa-star"></i> ตั้งเป็นที่อยู่หลัก
+                                                            </a>
+
+                                                            <a href="#" class="delete-address mb-1 text-sm" data-id="<?= $row['id'] ?>"
+                                                                <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
+                                                                style="text-decoration: none;">
+                                                                <i class="fa-solid fa-trash"></i> ลบ
                                                             </a>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+
                                         <?php
                                         endwhile;
                                     else:
@@ -145,31 +152,35 @@ if ($_settings->userdata('id') != '') {
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                         <div class="form-group">
-                                            <label for="name" class="control-label">ชื่อ นามสกุล</label>
+                                            <label for="name" class="control-label">ชื่อ นามสกุล <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" name="name" id="name" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="address" class="control-label">บ้านเลขที่, ถนน</label>
+                                            <label for="address" class="control-label">บ้านเลขที่, ถนน <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" name="address" id="address" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="sub_district" class="control-label">ตำบล/แขวง</label>
-                                            <input type="text" class="form-control" name="sub_district" id="sub_district" required>
-                                        </div>
-
-                                    </div>
-                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                                        <div class="form-group">
-                                            <label for="district" class="control-label">อำเภอ/เขต</label>
+                                            <label for="district" class="control-label">อำเภอ/เขต <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" name="district" id="district" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="province" class="control-label">จังหวัด</label>
-                                            <input type="text" class="form-control" name="province" id="province" required>
+                                            <label for="postal_code" class="control-label">รหัสไปรษณีย์ <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="postal_code" id="postal_code" maxlength="10" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                        <div class="form-group">
+                                            <label for="name" class="control-label">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="contact" id="contact" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="sub_district" class="control-label">ตำบล/แขวง <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="sub_district" id="sub_district" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
-                                            <input type="text" class="form-control" name="postal_code" id="postal_code" maxlength="10" required>
+                                            <label for="province" class="control-label">จังหวัด <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="province" id="province" required>
                                         </div>
                                     </div>
                                 </div>
@@ -214,6 +225,7 @@ if ($_settings->userdata('id') != '') {
             // 2. ดึงข้อมูลจาก data attributes ของปุ่มมาใส่ในฟอร์ม
             $('#address_id').val(_this.data('id'));
             $('#name').val(_this.data('name'));
+            $('#contact').val(_this.data('contact'));
             $('#address').val(_this.data('address'));
             $('#sub_district').val(_this.data('sub_district'));
             $('#district').val(_this.data('district'));
