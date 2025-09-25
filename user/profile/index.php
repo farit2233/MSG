@@ -51,6 +51,7 @@ if ($_settings->userdata('id') != '') {
                         <div class="container-fluid">
                             <div class="profile-section-title-with-line ">
                                 <h4>แก้ไขข้อมูลส่วนตัว</h4>
+                                <p>แก้ไขชื่อ, อีเมล, และเบอร์โทรศัพท์</p>
                             </div>
                             <form id="update-form" method="post">
                                 <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
@@ -108,40 +109,6 @@ if ($_settings->userdata('id') != '') {
 
                                     </div>
                                 </div>
-
-                                <!--div class="profile-section-title-with-line mb-4">
-                                    <h4>ที่อยู่จัดส่ง</h4>
-                                </div>
-                                <div class="row">
-                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                                        <div class="form-group">
-                                            <label for="address" class="control-label">บ้านเลขที่ ถนน</label>
-                                            <input type="text" class="form-control" name="address" id="address" value="<?= isset($address) ? $address : '' ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="sub_district" class="control-label">ตำบล</label>
-                                            <input type="text" class="form-control" name="sub_district" id="sub_district" value="<?= isset($sub_district) ? $sub_district : '' ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="district" class="control-label">อำเภอ</label>
-                                            <input type="text" class="form-control" name="district" id="district" value="<?= isset($district) ? $district : '' ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                                        <div class="form-group">
-                                            <label for="province" class="control-label">จังหวัด</label>
-                                            <input type="text" class="form-control" name="province" id="province" value="<?= isset($province) ? $province : '' ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
-                                            <input type="text" class="form-control" name="postal_code" id="postal_code" value="<?= isset($postal_code) ? $postal_code : '' ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="contact" class="control-label">สมุดที่อยู่</label>
-                                            <a class="form-control" type="button" id="address_option">เปลี่ยนที่อยู่หลัก / เพิ่มที่อยู่ใหม่ <i class="fa-solid fa-circle-plus"></i></a>
-                                        </div>
-                                    </div>
-                                </div-->
 
                                 <div class="row justify-content-center">
                                     <div class="col-md-5 col-12 text-center">

@@ -66,10 +66,10 @@ $filter_options = [
                                     $where .= " AND delivery_status = 4";
                                     break;
                                 case 'cancelled':
-                                    $where .= " AND (payment_status = 3 OR delivery_status = 5 OR payment_status = 4 OR delivery_status = 6)";
+                                    $where .= " AND (payment_status = 3 OR delivery_status = 6 OR payment_status = 4 OR delivery_status = 10)";
                                     break;
                                 case 'returned':
-                                    $where .= " AND (payment_status = 5 OR delivery_status = 8)";
+                                    $where .= " AND (payment_status = 5 OR delivery_status = 8 OR payment_status = 6 OR delivery_status = 9)";
                                     break;
                                     // 'all' doesn't need condition
                             }
@@ -106,7 +106,7 @@ $filter_options = [
                                     <div class="order-card" data-id="<?= $row['id'] ?>">
                                         <div class="order-header">
                                             <div class="order-info">
-                                                <strong>เลขที่คำสั่งซื้อ: </strong> <?= $row['code'] ?><br>
+                                                <strong>เลขที่คำสั่งซื้อ</strong> <?= $row['code'] ?><br>
                                                 <small class="text-muted">วันที่สั่ง: <?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></small>
                                             </div>
                                             <div class="d-flex flex-column">

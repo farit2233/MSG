@@ -29,6 +29,28 @@ if ($_settings->userdata('id') != '') {
         outline: none;
         text-decoration: underline !important;
     }
+
+    .border-msg {
+        border-color: #f57421 !important;
+        border-width: 2px;
+        border-style: solid;
+        box-shadow: none !important;
+        border-radius: 13px;
+    }
+
+    .card-address a {
+        color: black;
+        text-decoration: none;
+    }
+
+    .card-address a:hover {
+        text-decoration: underline;
+        line-height: normal;
+    }
+
+    .card-address {
+        border-radius: 13px;
+    }
 </style>
 
 <section class="py-5 profile-page">
@@ -40,14 +62,15 @@ if ($_settings->userdata('id') != '') {
 
             <div class="col-lg-9">
                 <div class="py-4">
-                    <div class="card-body">
+                    <div class="card-body card-address">
                         <div class="container-fluid">
                             <div id="address-list">
                                 <div class="profile-section-title-with-line ">
                                     <h4>ที่อยู่ของฉัน</h4>
+                                    <p>จัดการ และเพิ่มที่อยู่สำหรับจัดส่ง</p>
                                 </div>
                                 <div class="d-flex">
-                                    <a href="#" class="ml-auto" id="address_option">
+                                    <a href="#" class="ml-auto " id="address_option">
                                         <i class="fa-solid fa-plus"></i> เพิ่มที่อยู่ใหม่
                                     </a>
                                 </div>
@@ -59,11 +82,11 @@ if ($_settings->userdata('id') != '') {
                                         while ($row = $addresses_qry->fetch_assoc()):
                                     ?>
                                             <div class="col-12 mb-3">
-                                                <div class="card p-3 border rounded <?= ($row['is_primary'] == 1) ? 'border-primary' : '' ?>">
+                                                <div class="card p-3 card-address <?= ($row['is_primary'] == 1) ? 'border-msg' : '' ?>">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div class="flex-grow-1">
                                                             <h6 class="mb-0">
-                                                                <strong>ที่อยู่ <?= ($row['is_primary'] == 1) ? 'หลัก' : 'เพิ่มเติม' ?></strong>
+                                                                ที่อยู่ <?= ($row['is_primary'] == 1) ? 'หลัก' : 'เพิ่มเติม' ?>
                                                             </h6>
                                                             <p class="mb-0 text-muted">
                                                                 <?= htmlspecialchars($row['name']) ?>,
@@ -75,7 +98,7 @@ if ($_settings->userdata('id') != '') {
                                                             </p>
                                                         </div>
                                                         <div class="ms-3 d-flex flex-column align-items-end">
-                                                            <a href="#" class="edit-address-btn mb-1 text-sm"
+                                                            <a href="#" class="edit-address mb-1 text-sm "
                                                                 data-id="<?= $row['id'] ?>"
                                                                 data-name="<?= htmlspecialchars($row['name']) ?>"
                                                                 data-address="<?= htmlspecialchars($row['address']) ?>"
@@ -85,12 +108,12 @@ if ($_settings->userdata('id') != '') {
                                                                 data-postal_code="<?= htmlspecialchars($row['postal_code']) ?>"
                                                                 style="text-decoration: none;"> แก้ไข
                                                             </a>
-                                                            <a href="#" class="set-primary-btn mb-1 text-sm" data-id="<?= $row['id'] ?>"
+                                                            <a href="#" class="set-primary mb-1 text-sm " data-id="<?= $row['id'] ?>"
                                                                 <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
                                                                 style="text-decoration: none;">ตั้งเป็นที่อยู่หลัก
                                                             </a>
 
-                                                            <a href="#" class="delete-address-btn mb-1 text-sm" data-id="<?= $row['id'] ?>"
+                                                            <a href="#" class="delete-address mb-1 text-sm " data-id="<?= $row['id'] ?>"
                                                                 <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
                                                                 style="text-decoration: none;">ลบ
                                                             </a>
@@ -146,7 +169,7 @@ if ($_settings->userdata('id') != '') {
                                         </div>
                                         <div class="form-group">
                                             <label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
-                                            <input type="text" class="form-control" name="postal_code" id="postal_code" required>
+                                            <input type="text" class="form-control" name="postal_code" id="postal_code" maxlength="10" required>
                                         </div>
                                     </div>
                                 </div>
@@ -181,7 +204,7 @@ if ($_settings->userdata('id') != '') {
         });
 
         // ================== START: การเปลี่ยนแปลงใน JavaScript ==================
-        $('.edit-address-btn').click(function(e) {
+        $('.edit-address').click(function(e) {
             e.preventDefault();
             var _this = $(this); // อ้างอิงถึงปุ่ม 'แก้ไข' ที่ถูกคลิก
 
@@ -237,5 +260,121 @@ if ($_settings->userdata('id') != '') {
             });
         });
 
+        $('.set-primary').click(function(e) {
+            e.preventDefault();
+            var _this = $(this);
+
+            // ถ้าเป็นที่อยู่หลักอยู่แล้ว จะไม่ให้คลิก
+            if (_this.hasClass('disabled')) return;
+
+            var address_id = _this.data('id');
+
+            // ใช้ SweetAlert เพื่อยืนยันก่อนตั้งเป็นที่อยู่หลัก
+            Swal.fire({
+                title: 'ยืนยันการตั้งเป็นที่อยู่หลัก?',
+                text: "คุณต้องการตั้งที่อยู่นี้เป็นที่อยู่หลักหรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ถ้าผู้ใช้ยืนยัน ให้ส่งคำขอไปที่เซิร์ฟเวอร์
+                    $.ajax({
+                        url: _base_url_ + "classes/Users.php?f=save_address",
+                        method: 'POST',
+                        data: {
+                            address_id: address_id,
+                            is_primary: 1
+                        },
+                        dataType: 'json',
+                        success: function(resp) {
+                            if (resp.status == 'success') {
+                                location.reload(); // รีโหลดหน้าเมื่อสำเร็จ
+                            } else {
+                                Swal.fire(
+                                    'เกิดข้อผิดพลาด!',
+                                    resp.msg || 'เกิดข้อผิดพลาดในการตั้งที่อยู่หลัก.',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(err) {
+                            console.log(err);
+                            Swal.fire(
+                                'เกิดข้อผิดพลาด!',
+                                'เกิดข้อผิดพลาดในการติดต่อกับเซิร์ฟเวอร์.',
+                                'error'
+                            );
+                        }
+                    });
+                } else {
+                    Swal.fire(
+                        'ยกเลิกการตั้งที่อยู่หลัก',
+                        'คุณได้ยกเลิกการตั้งที่อยู่หลักแล้ว.',
+                        'info'
+                    );
+                }
+            });
+        });
+        $('.delete-address').click(function(e) {
+            e.preventDefault();
+            var _this = $(this);
+
+            // ถ้าเป็นที่อยู่หลักอยู่แล้ว จะไม่ให้คลิก
+            if (_this.hasClass('disabled')) return;
+
+            var address_id = _this.data('id');
+
+            // ใช้ SweetAlert เพื่อยืนยันก่อนตั้งเป็นที่อยู่หลัก
+            Swal.fire({
+                title: 'คุณแน่ใจหรือไม่?',
+                text: "คุณต้องการลบที่อยู่นี้หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันการลบ',
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ถ้าผู้ใช้ยืนยัน ให้ส่งคำขอไปที่เซิร์ฟเวอร์
+                    $.ajax({
+                        url: _base_url_ + "classes/Users.php?f=delete_address",
+                        method: 'POST',
+                        data: {
+                            address_id: address_id,
+                            is_primary: 1
+                        },
+                        dataType: 'json',
+                        success: function(resp) {
+                            if (resp.status == 'success') {
+                                location.reload(); // รีโหลดหน้าเมื่อสำเร็จ
+                            } else {
+                                Swal.fire(
+                                    'เกิดข้อผิดพลาด!',
+                                    resp.msg || 'เกิดข้อผิดพลาดในการลบที่อยู่.',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(err) {
+                            console.log(err);
+                            Swal.fire(
+                                'เกิดข้อผิดพลาด!',
+                                'เกิดข้อผิดพลาดในการติดต่อกับเซิร์ฟเวอร์.',
+                                'error'
+                            );
+                        }
+                    });
+                } else {
+                    Swal.fire(
+                        'ยกเลิกการตั้งที่อยู่หลัก',
+                        'คุณได้ยกเลิกการตั้งที่อยู่หลักแล้ว.',
+                        'info'
+                    );
+                }
+            });
+        });
     });
 </script>

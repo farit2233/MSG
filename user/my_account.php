@@ -53,10 +53,10 @@
                         <a href="?p=user/orders" class="list-group-item-action account-card <?php echo (isset($_GET['p']) && $_GET['p'] == 'profile') ? 'active' : '' ?>">
                             <div class="card h-100">
                                 <div class="card-body">
-                                    <h5 class="card-title">การสั่งซื้อของฉัน <i class="fa-solid fa-box"></i></h5>
+                                    <h5 class="card-title">ประวัติการสั่งซื้อ <i class="fa fa-truck"></i></h5>
                                 </div>
                                 <div class="card-footer">
-                                    <p class="card-text text-muted">ดูประวัติการสั่งซื้อและสถานะสินค้า</p>
+                                    <p class="card-text text-muted">ดูประวัติการสั่งซื้อ และสถานะสินค้า</p>
                                 </div>
                             </div>
                         </a>

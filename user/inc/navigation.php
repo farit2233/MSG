@@ -46,6 +46,10 @@
         /* ทำให้เป็นวงกลม */
         transition: transform 0.3s ease;
         /* เพิ่ม transition เวลา hover */
+        object-fit: cover;
+        border-radius: 100%;
+        border: 3px solid #f57421;
+        padding: 4px;
     }
 
     /* ไอคอนดินสอ */
@@ -104,10 +108,10 @@ if ($user_qry->num_rows > 0) {
         <a href="?p=user/address" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'address') ? 'active' : '' ?>">
             <i class="fa-solid fa-map-location-dot"></i> ที่อยู่ของฉัน
         </a>
-        <a href="?p=orders" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'orders') ? 'active' : '' ?>">
-            <i class="fa-solid fa-box"></i> การสั่งซื้อของฉัน
+        <a href="?p=user/orders" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'orders') ? 'active' : '' ?>">
+            <i class="fa fa-truck"></i> ประวัติการสั่งซื้อ
         </a>
-        <a href="javascript:void(0)" onclick="logout_customer()" class="list-group-item list-group-item-action">
+        <a href="<?= base_url . '../../classes/Login.php?f=logout_customer' ?>" class="list-group-item list-group-item-action">
             <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ
         </a>
     </div>
