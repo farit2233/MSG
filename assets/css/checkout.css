@@ -61,6 +61,67 @@
         align-items: center;
         z-index: 1050;
     }
+    .address-modal-content {
+        width: 90%;
+        max-width: 540px;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .address-modal-header {
+        padding: 1rem 1.5rem;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        font-size: 18px;
+    }
+
+    .address-option {
+        border: 1px solid #eee;
+        padding: 1rem;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .address-option:hover {
+        background: #f9f9f9;
+    }
+
+    .address-option.selected {
+        border: 2px solid #f57421;
+        background-color: #fff5f0;
+    }
+
+    .address-option .checkmark {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: #f57421;
+        display: none;
+    }
+
+    .address-option.selected .checkmark {
+        display: inline;
+    }
+
+    .address-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+
+    .address-modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 1rem 1.5rem;
+    }
 
     .shipping-modal-content {
         width: 90%;

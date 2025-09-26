@@ -346,7 +346,10 @@ if (!function_exists('format_price_custom')) {
                                         <thead>
                                             <tr>
                                                 <th colspan="2">
-                                                    <h5 class="text-bold">ที่อยู่จัดส่ง</h5>
+                                                    <div class="d-flex justify-content-between">
+                                                        <h5 class="text-bold mb-0">ที่อยู่จัดส่ง</h5>
+                                                        <a href="javascript:void(0);" onclick="openAddressModal()">เปลี่ยน</a>
+                                                    </div>
                                                 </th>
                                             </tr>
                                         </thead>
@@ -572,6 +575,56 @@ if (!function_exists('format_price_custom')) {
         </div>
     </div>
 
+    <div id="AddressModal" class="modal-backdrop-custom" style="display:none;">
+        <div class="address-modal-content">
+            <div class="address-modal-header">เลือกที่อยู่จัดส่ง</div>
+            <div class="address-modal-body">
+                <?php
+                $addresses = $conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$_settings->userdata('id')}' ORDER BY is_primary DESC, id ASC");
+                while ($row = $addresses->fetch_assoc()): $checked = $row['is_primary'] == 1 ? 'checked' : ''; ?>
+                    <div class="address-option d-flex justify-content-between align-items-center" data-id="<?= $row['id'] ?>" onclick="selectAddress(this)">
+                        <div class="flex-grow-1 d-flex align-items-center">
+                            <input type="radio" name="address_id" value="<?= $row['id'] ?>" <?= $checked ?> class="address-radio me-3">
+                            <div>
+                                <h6 class="mb-0"> ที่อยู่
+                                    <?= ($row['is_primary'] == 1) ? 'หลัก' : 'เพิ่มเติม' ?>
+                                </h6>
+                                <p class="mb-0 text-muted small">
+                                    <?= !empty($row['name']) ? htmlspecialchars($row['name']) : 'ไม่พบชื่อ' ?><br>
+                                    <?= !empty($row['contact']) ? htmlspecialchars($row['contact']) : 'ไม่พบเบอร์โทรศัพท์' ?><br>
+                                    <?= !empty($row['address']) ? 'ที่อยู่ ' . htmlspecialchars($row['address']) . ',' : ', ไม่พบที่อยู่,' ?>
+                                    <?= !empty($row['sub_district']) ? 'ต.' . htmlspecialchars($row['sub_district']) . ',' : '' ?>
+                                    <?= !empty($row['district']) ? 'อ.' . htmlspecialchars($row['district']) . ',' : '' ?>
+                                    <?= !empty($row['province']) ? 'จ.' . htmlspecialchars($row['province']) . ',' : '' ?>
+                                    <?= !empty($row['postal_code']) ? htmlspecialchars($row['postal_code']) : '' ?>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="ms-3 d-flex flex-column align-items-end">
+                            <a href="#" class="edit-address mb-1 text-sm"
+                                data-id="<?= $row['id'] ?>"
+                                data-name="<?= htmlspecialchars($row['name']) ?>"
+                                data-contact="<?= htmlspecialchars($row['contact']) ?>"
+                                data-address="<?= htmlspecialchars($row['address']) ?>"
+                                data-sub_district="<?= htmlspecialchars($row['sub_district']) ?>"
+                                data-district="<?= htmlspecialchars($row['district']) ?>"
+                                data-province="<?= htmlspecialchars($row['province']) ?>"
+                                data-postal_code="<?= htmlspecialchars($row['postal_code']) ?>" style="text-decoration: none;">
+                                <i class="fa-solid fa-pencil-alt"></i> แก้ไข
+                            </a>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+            <div class="address-modal-footer">
+                <button class="btn-cancel" onclick="closeAddressModal()">ยกเลิก</button>
+                <button class="btn-confirm" onclick="confirmAddress()">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <form action=""></form>
+
     <div id="shippingModal" class="modal-backdrop-custom" style="display:none;">
         <div class="shipping-modal-content">
             <div class="shipping-modal-header">เลือก ตัวเลือกการจัดส่ง</div>
@@ -604,6 +657,7 @@ if (!function_exists('format_price_custom')) {
             </div>
         </div>
     </div>
+
 </section>
 
 <script>
@@ -642,6 +696,61 @@ if (!function_exists('format_price_custom')) {
             }
         });
     });
+
+    function editAddress(button) {
+        // ดึงข้อมูลจาก data-* ของปุ่ม "แก้ไข"
+        const addressData = button.dataset;
+
+        // เติมข้อมูลในฟอร์ม
+        document.getElementById('address-id').value = addressData.id;
+        document.getElementById('address-name').value = addressData.name;
+        document.getElementById('address-contact').value = addressData.contact;
+        document.getElementById('address-address').value = addressData.address;
+        document.getElementById('address-sub_district').value = addressData.sub_district;
+        document.getElementById('address-district').value = addressData.district;
+        document.getElementById('address-province').value = addressData.province;
+        document.getElementById('address-postal_code').value = addressData.postal_code;
+
+        // ถ้าเป็นที่อยู่หลัก ให้เลือก checkbox
+        document.getElementById('address-primary').checked = addressData.is_primary === "1";
+
+        // เปิด modal แก้ไขที่อยู่
+        openAddressModal();
+    }
+
+    function openAddressModal() {
+        document.getElementById('AddressModal').style.display = 'flex'; // เปิด modal
+    }
+
+    function closeAddressModal() {
+        document.getElementById('AddressModal').style.display = 'none'; // ปิด modal
+    }
+
+    function saveAddress() {
+        const formData = new FormData(document.getElementById('address-form'));
+
+        // ส่งข้อมูลไปบันทึกที่ server
+        fetch('your_php_endpoint_to_save_address.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('บันทึกที่อยู่เรียบร้อย');
+                    // ปิด modal และอัปเดตที่อยู่ที่เลือก
+                    closeAddressModal();
+                    location.reload(); // รีเฟรชหน้าเพื่อแสดงข้อมูลที่อยู่ใหม่
+                } else {
+                    alert('เกิดข้อผิดพลาด');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาด');
+            });
+    }
+
 
     // ============================
     // JS: จัดการ Modal
