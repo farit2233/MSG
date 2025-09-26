@@ -89,7 +89,7 @@ if ($_settings->userdata('id') != '') {
                                                                 ที่อยู่ <?= ($row['is_primary'] == 1) ? 'หลัก' : 'เพิ่มเติม' ?>
                                                             </h6>
                                                             <p class="mb-0 text-muted">
-                                                                <?= !empty($row['name']) ? htmlspecialchars($row['name']) . ',' : 'ไม่พบชื่อ' ?>
+                                                                <?= !empty($row['name']) ? htmlspecialchars($row['name']) : 'ไม่พบชื่อ' ?><br>
                                                                 <?= !empty($row['contact']) ? htmlspecialchars($row['contact']) : 'ไม่พบเบอร์โทรศัพท์' ?><br>
                                                                 <?= !empty($row['address']) ? 'ที่อยู่ ' . htmlspecialchars($row['address']) . ',' : ', ไม่พบที่อยู่,' ?><br>
                                                                 <?= !empty($row['sub_district']) ? 'ต.' . htmlspecialchars($row['sub_district']) . ',' : '' ?>
@@ -115,7 +115,7 @@ if ($_settings->userdata('id') != '') {
                                                             <a href="#" class="set-primary mb-1 text-sm" data-id="<?= $row['id'] ?>"
                                                                 <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
                                                                 style="text-decoration: none;">
-                                                                <i class="<?= ($row['is_primary'] == 1) ? 'fa-solid' : 'fa-regular' ?> fa-star"></i> ตั้งเป็นที่อยู่หลัก
+                                                                <i class="<?= ($row['is_primary'] == 1) ? 'fa-solid' : 'fa-regular' ?> fa-star"></i> ที่อยู่หลัก
                                                             </a>
 
                                                             <a href="#" class="delete-address mb-1 text-sm" data-id="<?= $row['id'] ?>"

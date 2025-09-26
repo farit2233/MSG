@@ -99,11 +99,16 @@ if (!function_exists('format_price_custom')) {
 
 $customer_name = '';
 if (!empty($customer_id)) {
-    $cus = $conn->query("SELECT CONCAT(firstname, ' ', middlename, ' ', lastname,' ',contact) AS fullname FROM customer_list WHERE id = '{$customer_id}'");
+    // ดึงชื่อจาก customer_addresses โดยใช้ customer_id
+    $cus = $conn->query("SELECT CONCAT(name, ' ', contact) AS fullname FROM customer_addresses WHERE customer_id = '{$customer_id}' AND is_primary = 1");
+
+    // ตรวจสอบว่ามีข้อมูลหรือไม่
     if ($cus->num_rows > 0) {
+        // ดึงชื่อและที่อยู่
         $customer_name = $cus->fetch_assoc()['fullname'];
     }
 }
+
 ?>
 <div class="container-fluid">
     <div class="row mb-3">

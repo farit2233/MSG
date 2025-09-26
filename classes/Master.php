@@ -740,10 +740,10 @@ class Master extends DBConnection
 					// 1. ดึงรายการ ID ของสินค้าที่ร่วมรายการกับคูปองนี้
 					$eligible_product_ids = [];
 					$prod_qry = $this->conn->query("
-            SELECT product_id 
-            FROM `coupon_code_products` 
-            WHERE coupon_code_id = {$coupon_code_id} AND status = 1 AND delete_flag = 0
-        ");
+						SELECT product_id 
+						FROM `coupon_code_products` 
+						WHERE coupon_code_id = {$coupon_code_id} AND status = 1 AND delete_flag = 0
+					");
 					while ($p_row = $prod_qry->fetch_assoc()) {
 						$eligible_product_ids[] = $p_row['product_id'];
 					}
@@ -807,8 +807,20 @@ class Master extends DBConnection
 			$applied_promo_id = ($promotion_id > 0) ? "'{$promotion_id}'" : "NULL";
 			$applied_coupon_id = ($coupon_code_id > 0) ? "'{$coupon_code_id}'" : "NULL";
 
+
 			$customer = $this->conn->query("SELECT * FROM customer_list WHERE id = '{$customer_id}'")->fetch_assoc();
-			$customer_name = trim("{$customer['firstname']} {$customer['middlename']} {$customer['lastname']}");
+			$customer_email = trim("{$customer['email']}");
+
+			// --- ดึงข้อมูลจาก customer_addresses โดยใช้ customer_id และ is_primary = 1 ---
+			$customer = $this->conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$customer_id}' AND is_primary = 1")->fetch_assoc();
+
+			if (!$customer) {
+				throw new Exception('ไม่พบที่อยู่หลักของลูกค้า');
+			}
+
+			$customer_name = trim("{$customer['name']}"); // ใช้ชื่อจาก customer_addresses
+			$delivery_address = trim("{$customer['address']} {$customer['sub_district']} {$customer['district']} {$customer['province']} {$customer['postal_code']}");
+
 
 			$shipping_methods_name = 'ไม่ระบุ';
 			if (!empty($selected_shipping_method_id)) {
@@ -907,7 +919,7 @@ class Master extends DBConnection
 				$mail->Subject = "📦 ยืนยันคำสั่งซื้อ #$code";
 
 				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
-				$mail->addAddress($customer['email'], $customer_name);
+				$mail->addAddress($customer_email, $customer_name);
 				$body = "
 						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
 							<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
