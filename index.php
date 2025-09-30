@@ -142,9 +142,9 @@
 
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-          <button type="submit" class="btn btn-primary" id="btn_confirm_form_1" form="confirm_form_1">ยืนยัน</button>
-          <button type="submit" class="btn btn-primary" id="btn_confirm_form_2" form="confirm_form_2" style="display:none;">ส่งคำขอ</button>
+          <button type="button" class="btn btn-cancel" data-dismiss="modal">ยกเลิก</button>
+          <button type="submit" class="btn btn-confirm" id="btn_confirm_form_1" form="confirm_form_1">ยืนยัน</button>
+          <button type="submit" class="btn btn-confirm" id="btn_confirm_form_2" form="confirm_form_2" style="display:none;">ยืนยัน</button>
         </div>
       </div>
     </div>

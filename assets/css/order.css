@@ -87,15 +87,15 @@
         filter: brightness(90%);
     }
 
-    .btn-cancel {
+    .btn-order-cancel {
         font-size: 14px;
-        background-color: #bb2d3b;
+        background-color: #dc3545;
         border-radius: 13px;
         color: white;
         transition: all 0.2s ease-in-out;
     }
 
-    .btn-cancel:hover {
+    .btn-order-cancel:hover {
         color: white;
         filter: brightness(90%);
     }

@@ -189,7 +189,7 @@
         border: 1px solid #ccc;
         padding: 8px 20px;
         border-radius: 6px;
-        color: #333;
+        color: black;
     }
 
     .btn-confirm {
@@ -198,6 +198,10 @@
         padding: 8px 20px;
         border-radius: 6px;
         color: white;
+    }
+    .btn-confirm:hover{
+        color: white !important;
+        text-decoration: none !important;
     }
     /* ชื่อคลาสใหม่สำหรับจัดการคูปอง */
 /* จัดการคอนเทนเนอร์หลัก */
