@@ -57,7 +57,7 @@
         </div>
       </div>
 
-      <div class="modal fade" id="password_modal" role='dialog'>
+      <div class="modal fade" id="modal_confirm" role='dialog'>
         <div class="modal-dialog modal-md modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="modal-header">

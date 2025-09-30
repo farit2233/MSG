@@ -129,7 +129,7 @@ if ($_settings->userdata('id') != '') {
     $(document).ready(function() {
         end_loader();
         $('#password').click(function() {
-            password_modal('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/profile/password.php?pid=<?= isset($id) ? $id : '' ?>')
+            modal_confirm('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/profile/password.php?pid=<?= isset($id) ? $id : '' ?>')
         })
         // --- Form Submission Logic ---
         $('#update-form').submit(function(e) {

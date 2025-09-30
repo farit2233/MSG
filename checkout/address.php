@@ -1,5 +1,5 @@
 <?php
-require_once('../../config.php');
+require_once('../config.php');
 // ตรวจสอบว่าเรามีการส่ง ID มาไหม (สำหรับฟังก์ชันเปลี่ยนรหัสผ่าน)
 if ($_settings->userdata('id') != '') {
     $qry = $conn->query("SELECT * FROM `customer_list` WHERE id = '{$_settings->userdata('id')}'");
@@ -40,64 +40,81 @@ if ($_settings->userdata('id') != '') {
         /* เว้นระยะห่างจากข้อความ */
     }
 </style>
-
 <div class="container-fluid password">
-    <form id="change_password_form">
-        <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
-        <div class="form-group">
-            <label for="current_password" class="control-label">รหัสผ่านเดิม</label>
-            <input type="password" class="form-control" name="current_password" required>
-            <div class="text-right">
-                <small><a href="#" id="forgot_password_link">ลืมรหัสผ่าน?</a></small>
+    <form id="confirm_form_1">
+        <?php
+        $addresses = $conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$_settings->userdata('id')}' ORDER BY is_primary DESC, id ASC");
+        while ($row = $addresses->fetch_assoc()):
+        ?>
+            <div class="address-option d-flex justify-content-between align-items-center" data-id="<?= $row['id'] ?>" onclick="selectAddress(this)">
+                <div class="flex-grow-1 d-flex align-items-center">
+                    <input type="radio" name="address_id" value="<?= $row['id'] ?>" class="address-radio me-3">
+                    <div>
+                        <h6 class="mb-0">
+                            ที่อยู่ <?= ($row['is_primary'] == 1) ? 'หลัก' : 'เพิ่มเติม' ?>
+                        </h6>
+                        <p class="mb-0 text-muted small">
+                            <?= !empty($row['name']) ? htmlspecialchars($row['name']) : 'ไม่พบชื่อ' ?><br>
+                            <?= !empty($row['contact']) ? htmlspecialchars($row['contact']) : 'ไม่พบเบอร์โทรศัพท์' ?><br>
+                            <?= !empty($row['address']) ? 'ที่อยู่ ' . htmlspecialchars($row['address']) . ',' : ', ไม่พบที่อยู่,' ?>
+                            <?= !empty($row['sub_district']) ? 'ต.' . htmlspecialchars($row['sub_district']) . ',' : '' ?>
+                            <?= !empty($row['district']) ? 'อ.' . htmlspecialchars($row['district']) . ',' : '' ?>
+                            <?= !empty($row['province']) ? 'จ.' . htmlspecialchars($row['province']) . ',' : '' ?>
+                            <?= !empty($row['postal_code']) ? htmlspecialchars($row['postal_code']) : '' ?>
+                        </p>
+                    </div>
+                </div>
+                <div class="ms-3 d-flex flex-column align-items-end">
+                    <a href="#" class="edit-address mb-1 text-sm"
+                        data-id="<?= $row['id'] ?>"
+                        data-name="<?= htmlspecialchars($row['name']) ?>"
+                        data-contact="<?= htmlspecialchars($row['contact']) ?>"
+                        data-address="<?= htmlspecialchars($row['address']) ?>"
+                        data-sub_district="<?= htmlspecialchars($row['sub_district']) ?>"
+                        data-district="<?= htmlspecialchars($row['district']) ?>"
+                        data-province="<?= htmlspecialchars($row['province']) ?>"
+                        data-postal_code="<?= htmlspecialchars($row['postal_code']) ?>"
+                        style="text-decoration: none;" id="editAddress">
+                        <i class="fa-solid fa-pencil-alt"></i> แก้ไข
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label for="new_password" class="control-label">รหัสผ่านใหม่</label>
-            <input type="password" class="form-control" name="new_password" required id="new_password"
-                pattern="(?=.*\d)(?=.*[a-z]).{8,}"
-                title="รหัสผ่านต้องมีอย่างน้อย 8 ตัว, มีตัวพิมพ์เล็ก, และตัวเลข">
-        </div>
-        <div class="form-group">
-            <label for="confirm_password" class="control-label">ยืนยันรหัสผ่านใหม่</label>
-            <input type="password" class="form-control" name="confirm_password" required id="confirm_password">
-        </div>
-        <div id="password-requirements" class="mb-2" style="display: none;">
-            <small>เงื่อนไขรหัสผ่าน:</small>
-            <ul class="list-unstyled text-danger text-sm">
-                <li id="length" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีความยาวอย่างน้อย 8 ตัวอักษร</li>
-                <li id="lowercase" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวอักษรพิมพ์เล็ก (a-z)</li>
-                <li id="number" class="invalid text-sm"><i class="fas fa-times-circle"></i> มีตัวเลข (0-9)</li>
-            </ul>
-        </div>
-        <style>
-            #password-requirements .valid {
-                color: #28a745;
-            }
+        <?php endwhile; ?>
 
-            #password-requirements .valid .fa-times-circle::before {
-                content: "\f058";
-                /* fa-check-circle */
-            }
-        </style>
     </form>
-
-    <form id="forgot_password_form" style="display: none;">
+    <form id="confirm_form_2" style="display: none;">
+        <input type="hidden" name="address_id" id="address_id">
+        <input type="hidden" name="customer_id" value="<?= isset($id) ? $id : '' ?>">
         <div class="form-group">
-            <label for="email" class="control-label">อีเมล</label>
-            <input type="email" class="form-control" name="email" required>
+            <label for="address" class="control-label">ชื่อ นามสกุล<span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" id="name" required>
+        </div>
+        <div class="form-group">
+            <label for="address" class="control-label">บ้านเลขที่ ถนน <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="address" id="address" required>
+        </div>
+        <div class="form-group">
+            <label for="sub_district" class="control-label">ตำบล <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="sub_district" id="sub_district" required>
+        </div>
+        <div class="form-group">
+            <label for="district" class="control-label">อำเภอ <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="district" id="district" required>
+        </div>
+        <div class="form-group">
+            <label for="province" class="control-label">จังหวัด <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="province" id="province" required>
+        </div>
+        <div class="form-group">
+            <label for="postal_code" class="control-label">รหัสไปรษณีย์ <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="postal_code" id="postal_code" required>
         </div>
         <div class="text-right">
-            <small><a href="#" id="back_to_change_password">กลับไปหน้าเปลี่ยนรหัสผ่าน</a></small>
+            <small><a href="#" id="back_to_change_address">กลับไปหน้าสมุดบัญชี</a></small>
         </div>
     </form>
 
-    <div id="reset_success_message" style="display: none;" class="text-center">
-        <i class="fa-solid fa-check-circle icon-success pt-4"></i>
-        <h4 class="text-success">คำขอรีเซ็ตรหัสผ่านของคุณ <br>ถูกส่งเรียบร้อยแล้ว</h4>
-        <p>กรุณารอการตอบกลับที่อีเมล</p>
-    </div>
 </div>
-
 <script>
     $(document).ready(function() {
         var passwordInput = $('#new_password');
@@ -145,103 +162,107 @@ if ($_settings->userdata('id') != '') {
 
 
         // --- ฟังก์ชันสำหรับสลับฟอร์ม ---
-        function showChangePasswordForm() {
-            $('#change_password_form').show();
-            $('#forgot_password_form').hide();
-            $('#reset_success_message').hide();
+        function showAddressOptionForm() {
+            $('#confirm_form_1').show();
+            $('#confirm_form_2').hide();
             // อัพเดทปุ่มใน Modal Footer
             $('.modal-footer #btn_change_password').show();
-            $('.modal-footer #btn_forgot_password').hide();
-            $('.modal-title').html('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>');
         }
 
-        function showForgotPasswordForm() {
-            $('#change_password_form').hide();
-            $('#forgot_password_form').show();
-            $('#reset_success_message').hide();
+        function showeditAddressForm() {
+            $('#confirm_form_1').hide();
+            $('#confirm_form_2').show();
             // อัพเดทปุ่มใน Modal Footer
-            $('.modal-footer #btn_change_password').hide();
-            $('.modal-footer #btn_forgot_password').show();
-            $('.modal-title').html('ลืมรหัสผ่าน <i class="fa fa-pencil"></i>');
+            $('.modal-footer #btn_change_password').show();
         }
 
         // --- Event Handlers ---
-
-        // เมื่อคลิกลิงก์ "ลืมรหัสผ่าน?"
-        $('#forgot_password_link').click(function(e) {
+        $('#editAddress').click(function(e) {
             e.preventDefault();
-            showForgotPasswordForm();
+            showeditAddressForm();
+
+            var _this = $(this); // อ้างอิงถึงปุ่ม 'แก้ไข' ที่ถูกคลิก
+
+            // 1. เปลี่ยนหัวข้อฟอร์ม
+            $('#form-title').text('แก้ไขที่อยู่');
+
+            // 2. ดึงข้อมูลจาก data attributes ของปุ่มมาใส่ในฟอร์ม
+            $('#address_id').val(_this.data('id'));
+            $('#name').val(_this.data('name'));
+            $('#contact').val(_this.data('contact'));
+            $('#address').val(_this.data('address'));
+            $('#sub_district').val(_this.data('sub_district'));
+            $('#district').val(_this.data('district'));
+            $('#province').val(_this.data('province'));
+            $('#postal_code').val(_this.data('postal_code'));
+
+            // 3. ซ่อนรายการที่อยู่และแสดงฟอร์ม
+            $('#address-list').hide();
+            $('#address-form').show();
         });
 
         // เมื่อคลิกลิงก์ "กลับไปหน้าเปลี่ยนรหัสผ่าน"
-        $('#back_to_change_password').click(function(e) {
+        $('#back_to_change_address').click(function(e) {
             e.preventDefault();
-            showChangePasswordForm();
+            showAddressOptionForm();
         });
 
 
-        // เมื่อ submit ฟอร์ม "เปลี่ยนรหัสผ่าน"
-        $('#change_password_form').submit(function(e) {
+        $('#confirm_form_1').click(function(e) {
             e.preventDefault();
+            var _this = $(this);
 
-            var newPassword = $('#new_password').val();
-            var confirmPassword = $('input[name="confirm_password"]').val();
+            // ถ้าเป็นที่อยู่หลักอยู่แล้ว จะไม่ให้คลิก
+            if (_this.hasClass('disabled')) return;
 
-            if (newPassword !== confirmPassword) {
-                Swal.fire('ข้อผิดพลาด', 'รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน', 'error');
-                return;
-            }
+            var address_id = _this.data('id');
 
-            start_loader(); // แสดง loader (ถ้ามี)
-            $.ajax({
-                url: _base_url_ + 'classes/Users.php?f=password&id=' + $('input[name="id"]').val(),
-                method: 'POST',
-                data: $(this).serialize(),
-                dataType: 'json',
-                success: function(resp) {
-                    if (resp.status === 'success') {
-                        Swal.fire('สำเร็จ', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว', 'success').then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire('เกิดข้อผิดพลาด', resp.msg, 'error');
-                    }
-                    end_loader(); // ซ่อน loader (ถ้ามี)
-                },
-                error: function(err) {
-                    console.log(err);
-                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
-                    end_loader();
-                }
-            });
-        });
-
-        // เมื่อ submit ฟอร์ม "ลืมรหัสผ่าน"
-        $('#forgot_password_form').submit(function(e) {
-            e.preventDefault();
-            start_loader();
-            $.ajax({
-                url: _base_url_ + "classes/Users.php?f=forgot_password",
-                method: 'POST',
-                data: $(this).serialize(),
-                dataType: 'json',
-                success: function(resp) {
-                    if (resp.status == 'success') {
-                        // ซ่อนฟอร์มและปุ่มทั้งหมด แล้วแสดงข้อความสำเร็จ
-                        $('#change_password_form').hide();
-                        $('#forgot_password_form').hide();
-                        $('#reset_success_message').show();
-                        $('.modal-footer #btn_change_password').hide();
-                        $('.modal-footer #btn_forgot_password').hide();
-                    } else {
-                        Swal.fire('เกิดข้อผิดพลาด', resp.msg, 'error');
-                    }
-                    end_loader();
-                },
-                error: function(err) {
-                    console.log(err);
-                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถส่งคำขอรีเซ็ตรหัสผ่านได้', 'error');
-                    end_loader();
+            // ใช้ SweetAlert เพื่อยืนยันก่อนตั้งเป็นที่อยู่หลัก
+            Swal.fire({
+                title: 'ยืนยันการตั้งเป็นที่อยู่หลัก?',
+                text: "คุณต้องการตั้งที่อยู่นี้เป็นที่อยู่หลักหรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ถ้าผู้ใช้ยืนยัน ให้ส่งคำขอไปที่เซิร์ฟเวอร์
+                    $.ajax({
+                        url: _base_url_ + "classes/Users.php?f=save_address",
+                        method: 'POST',
+                        data: {
+                            address_id: address_id,
+                            is_primary: 1
+                        },
+                        dataType: 'json',
+                        success: function(resp) {
+                            if (resp.status == 'success') {
+                                location.reload(); // รีโหลดหน้าเมื่อสำเร็จ
+                            } else {
+                                Swal.fire(
+                                    'เกิดข้อผิดพลาด!',
+                                    resp.msg || 'เกิดข้อผิดพลาดในการตั้งที่อยู่หลัก.',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(err) {
+                            console.log(err);
+                            Swal.fire(
+                                'เกิดข้อผิดพลาด!',
+                                'เกิดข้อผิดพลาดในการติดต่อกับเซิร์ฟเวอร์.',
+                                'error'
+                            );
+                        }
+                    });
+                } else {
+                    Swal.fire(
+                        'ยกเลิกการตั้งที่อยู่หลัก',
+                        'คุณได้ยกเลิกการตั้งที่อยู่หลักแล้ว.',
+                        'info'
+                    );
                 }
             });
         });

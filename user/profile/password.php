@@ -42,7 +42,7 @@ if ($_settings->userdata('id') != '') {
 </style>
 
 <div class="container-fluid password">
-    <form id="change_password_form">
+    <form id="confirm_form_1">
         <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
         <div class="form-group">
             <label for="current_password" class="control-label">รหัสผ่านเดิม</label>
@@ -81,7 +81,7 @@ if ($_settings->userdata('id') != '') {
         </style>
     </form>
 
-    <form id="forgot_password_form" style="display: none;">
+    <form id="confirm_form_2" style="display: none;">
         <div class="form-group">
             <label for="email" class="control-label">อีเมล</label>
             <input type="email" class="form-control" name="email" required>
@@ -146,22 +146,22 @@ if ($_settings->userdata('id') != '') {
 
         // --- ฟังก์ชันสำหรับสลับฟอร์ม ---
         function showChangePasswordForm() {
-            $('#change_password_form').show();
-            $('#forgot_password_form').hide();
+            $('#confirm_form_1').show();
+            $('#confirm_form_2').hide();
             $('#reset_success_message').hide();
             // อัพเดทปุ่มใน Modal Footer
-            $('.modal-footer #btn_change_password').show();
-            $('.modal-footer #btn_forgot_password').hide();
+            $('.modal-footer #btn_confirm_form_1').show();
+            $('.modal-footer #btn_confirm_form_2').hide();
             $('.modal-title').html('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>');
         }
 
         function showForgotPasswordForm() {
-            $('#change_password_form').hide();
-            $('#forgot_password_form').show();
+            $('#confirm_form_1').hide();
+            $('#confirm_form_2').show();
             $('#reset_success_message').hide();
             // อัพเดทปุ่มใน Modal Footer
-            $('.modal-footer #btn_change_password').hide();
-            $('.modal-footer #btn_forgot_password').show();
+            $('.modal-footer #btn_confirm_form_1').hide();
+            $('.modal-footer #btn_confirm_form_2').show();
             $('.modal-title').html('ลืมรหัสผ่าน <i class="fa fa-pencil"></i>');
         }
 
@@ -181,7 +181,7 @@ if ($_settings->userdata('id') != '') {
 
 
         // เมื่อ submit ฟอร์ม "เปลี่ยนรหัสผ่าน"
-        $('#change_password_form').submit(function(e) {
+        $('#confirm_form_1').submit(function(e) {
             e.preventDefault();
 
             var newPassword = $('#new_password').val();
@@ -217,7 +217,7 @@ if ($_settings->userdata('id') != '') {
         });
 
         // เมื่อ submit ฟอร์ม "ลืมรหัสผ่าน"
-        $('#forgot_password_form').submit(function(e) {
+        $('#confirm_form_2').submit(function(e) {
             e.preventDefault();
             start_loader();
             $.ajax({
@@ -228,11 +228,11 @@ if ($_settings->userdata('id') != '') {
                 success: function(resp) {
                     if (resp.status == 'success') {
                         // ซ่อนฟอร์มและปุ่มทั้งหมด แล้วแสดงข้อความสำเร็จ
-                        $('#change_password_form').hide();
-                        $('#forgot_password_form').hide();
+                        $('#confirm_form_1').hide();
+                        $('#confirm_form_2').hide();
                         $('#reset_success_message').show();
-                        $('.modal-footer #btn_change_password').hide();
-                        $('.modal-footer #btn_forgot_password').hide();
+                        $('.modal-footer #btn_confirm_form_1').hide();
+                        $('.modal-footer #btn_confirm_form_2').hide();
                     } else {
                         Swal.fire('เกิดข้อผิดพลาด', resp.msg, 'error');
                     }

@@ -107,7 +107,7 @@
           }
         })
       }
-      window.password_modal = function($title = '', $url = '', $size = "") {
+      window.modal_confirm = function($title = '', $url = '', $size = "") {
         start_loader()
         $.ajax({
           url: $url,
@@ -117,14 +117,14 @@
           },
           success: function(resp) {
             if (resp) {
-              $('#password_modal .modal-title').html($title)
-              $('#password_modal .modal-body').html(resp)
+              $('#modal_confirm .modal-title').html($title)
+              $('#modal_confirm .modal-body').html(resp)
               if ($size != '') {
-                $('#password_modal .modal-dialog').addClass($size + '  modal-dialog-centered')
+                $('#modal_confirm .modal-dialog').addClass($size + '  modal-dialog-centered')
               } else {
-                $('#password_modal .modal-dialog').removeAttr("class").addClass("modal-dialog modal-md modal-dialog-centered")
+                $('#modal_confirm .modal-dialog').removeAttr("class").addClass("modal-dialog modal-md modal-dialog-centered")
               }
-              $('#password_modal').modal({
+              $('#modal_confirm').modal({
                 show: true,
                 backdrop: 'true',
                 keyboard: false,

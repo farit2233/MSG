@@ -132,49 +132,23 @@
     </div>
   </div>
 
-  <div class="modal fade" id="password_modal" role='dialog'>
+  <div class="modal fade" id="modal_confirm" role='dialog'>
     <div class="modal-dialog modal-md modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">เปลี่ยนรหัสผ่าน</h5>
+          <h5 class="modal-title">Confirmation</h5>
         </div>
         <div class="modal-body">
 
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-          <button type="submit" class="btn btn-primary" id="btn_change_password" form="change_password_form">ยืนยัน</button>
-          <button type="submit" class="btn btn-primary" id="btn_forgot_password" form="forgot_password_form" style="display:none;">ส่งคำขอ</button>
+          <button type="submit" class="btn btn-primary" id="btn_confirm_form_1" form="confirm_form_1">ยืนยัน</button>
+          <button type="submit" class="btn btn-primary" id="btn_confirm_form_2" form="confirm_form_2" style="display:none;">ส่งคำขอ</button>
         </div>
       </div>
     </div>
   </div>
-
-  <div class="modal fade" id="address_option_modal" tabindex="-1" aria-labelledby="addressOptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addressOptionModalLabel">เปลี่ยนที่อยู่หลัก / เพิ่มที่อยู่ใหม่</h5>
-        </div>
-        <div class="modal-body">
-          <h6>ที่อยู่หลักของคุณ:</h6>
-          <div id="main-address">
-
-          </div>
-          <h6>ที่อยู่เพิ่มเติม:</h6>
-          <div id="additional-addresses">
-
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-          <button type="submit" class="btn btn-primary" id="btn_confirm_address" form="address_selection_form">เลือกที่อยู่นี้</button>
-          <button type="submit" class="btn btn-primary" id="btn_new_address" form="new_address_form" style="display:none;">บันทึกที่อยู่ใหม่</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 
   <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-user " role="document">
