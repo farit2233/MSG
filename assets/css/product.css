@@ -335,6 +335,94 @@
 		margin-top: 170px !important;
 	}
 
+	.product-gallery {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		/* ระยะห่างระหว่างรูป */
+	}
+
+	.gallery-thumbnail {
+		width: 80px;
+		height: 80px;
+		object-fit: cover;
+		cursor: pointer;
+		border: 2px solid #ddd;
+		border-radius: 4px;
+		transition: border-color 0.3s;
+	}
+
+	.image-modal {
+		width: 70%;
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.product-gallery-container {
+		position: relative;
+		overflow-x: hidden;
+		/* ไม่ให้ scroll visible */
+		padding: 10px 0;
+		display: flex;
+		align-items: center;
+		/* ทำให้ปุ่มอยู่ในแนวเดียวกัน */
+	}
+
+	.product-gallery {
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 10px;
+		overflow-x: auto;
+		scroll-behavior: smooth;
+		/* ทำให้การเลื่อนดูนุ่มนวล */
+		padding-bottom: 10px;
+		/* ปรับระยะห่างด้านล่าง */
+	}
+
+	/* สไตล์รูปภาพในแกลเลอรี */
+	.product-gallery img {
+		width: 100px;
+		/* ขนาดรูป */
+		height: auto;
+		cursor: pointer;
+	}
+
+	/* ปุ่มเลื่อน */
+	.gallery-prev-btn,
+	.gallery-next-btn {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		background-color: rgba(0, 0, 0, 0.5);
+		color: white;
+		border: none;
+		padding: 10px 12px;
+		font-size: 16px;
+		cursor: pointer;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+	}
+
+	/* ปุ่มเลื่อนซ้าย */
+	.gallery-prev-btn {
+		left: 10px;
+	}
+
+	/* ปุ่มเลื่อนขวา */
+	.gallery-next-btn {
+		right: 10px;
+	}
+
+	/* เพิ่ม effect เมื่อ hover ปุ่ม */
+	.gallery-prev-btn:hover,
+	.gallery-next-btn:hover {
+		background-color: rgba(0, 0, 0, 0.8);
+	}
+
 	@media    (max-width: 932px) {
 		.modal-dialog-image{
 				width: 35% !important;

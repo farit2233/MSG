@@ -74,6 +74,50 @@ if (!function_exists('format_price_custom')) {
 		return $formatted_price;
 	}
 }
+
+// ดึงข้อมูลสถิติรีวิว (ค่าเฉลี่ยดาว และ จำนวนรีวิว)
+$review_stats_qry = $conn->query("SELECT COUNT(id) as review_count, AVG(star) as avg_rating FROM product_reviews WHERE product_id = '{$id}' AND status = 1 AND delete_flag = 0");
+$review_stats = $review_stats_qry->fetch_assoc();
+$review_count = $review_stats['review_count'] ?? 0;
+$avg_rating = $review_stats['avg_rating'] ?? 0;
+
+// ดึงข้อมูลรีวิวแต่ละรายการ พร้อมชื่อลูกค้า
+$reviews = [];
+if ($review_count > 0) {
+	$reviews_qry = $conn->query("SELECT r.*, CONCAT(c.firstname, ' ', c.lastname) as customer_name, c.avatar
+                              FROM product_reviews r
+                              INNER JOIN customer_list c ON r.customer_id = c.id
+                              WHERE r.product_id = '{$id}' AND r.status = 1 AND r.delete_flag = 0
+                              ORDER BY r.date_create DESC");
+	while ($row = $reviews_qry->fetch_assoc()) {
+		$reviews[] = $row;
+	}
+}
+
+// [NEW] ฟังก์ชันสำหรับแสดงผลดาว
+if (!function_exists('display_stars')) {
+	function display_stars($rating)
+	{
+		$output = '';
+		$full_stars = floor($rating);
+		$half_star = ($rating - $full_stars) >= 0.5;
+		$empty_stars = 5 - $full_stars - ($half_star ? 1 : 0);
+
+		// Full Stars
+		for ($i = 0; $i < $full_stars; $i++) {
+			$output .= '<i class="fas fa-star text-warning"></i> ';
+		}
+		// Half Star
+		if ($half_star) {
+			$output .= '<i class="fas fa-star-half-alt text-warning"></i> ';
+		}
+		// Empty Stars
+		for ($i = 0; $i < $empty_stars; $i++) {
+			$output .= '<i class="far fa-star text-warning"></i> ';
+		}
+		return trim($output);
+	}
+}
 ?>
 <style>
 	#productImageModal .modal-dialog {
@@ -84,23 +128,6 @@ if (!function_exists('format_price_custom')) {
 		top: 28%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-	}
-
-	.product-gallery {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px;
-		/* ระยะห่างระหว่างรูป */
-	}
-
-	.gallery-thumbnail {
-		width: 80px;
-		height: 80px;
-		object-fit: cover;
-		cursor: pointer;
-		border: 2px solid #ddd;
-		border-radius: 4px;
-		transition: border-color 0.3s;
 	}
 
 	/* Modal Navigation */
@@ -135,75 +162,12 @@ if (!function_exists('format_price_custom')) {
 		background-color: rgba(0, 0, 0, 0.8);
 	}
 
-	.image-modal {
-		width: 70%;
-		display: block;
-		margin-left: auto;
-		margin-right: auto;
+	.review-list .list-group-item {
+		border-bottom: 1px solid #eee;
 	}
 
-	.product-gallery-container {
-		position: relative;
-		overflow-x: hidden;
-		/* ไม่ให้ scroll visible */
-		padding: 10px 0;
-		display: flex;
-		align-items: center;
-		/* ทำให้ปุ่มอยู่ในแนวเดียวกัน */
-	}
-
-	.product-gallery {
-		display: flex;
-		flex-wrap: nowrap;
-		gap: 10px;
-		overflow-x: auto;
-		scroll-behavior: smooth;
-		/* ทำให้การเลื่อนดูนุ่มนวล */
-		padding-bottom: 10px;
-		/* ปรับระยะห่างด้านล่าง */
-	}
-
-	/* สไตล์รูปภาพในแกลเลอรี */
-	.product-gallery img {
-		width: 100px;
-		/* ขนาดรูป */
-		height: auto;
-		cursor: pointer;
-	}
-
-	/* ปุ่มเลื่อน */
-	.gallery-prev-btn,
-	.gallery-next-btn {
-		position: absolute;
-		top: 50%;
-		transform: translateY(-50%);
-		background-color: rgba(0, 0, 0, 0.5);
-		color: white;
-		border: none;
-		padding: 10px 12px;
-		font-size: 16px;
-		cursor: pointer;
-		z-index: 2;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 50%;
-	}
-
-	/* ปุ่มเลื่อนซ้าย */
-	.gallery-prev-btn {
-		left: 10px;
-	}
-
-	/* ปุ่มเลื่อนขวา */
-	.gallery-next-btn {
-		right: 10px;
-	}
-
-	/* เพิ่ม effect เมื่อ hover ปุ่ม */
-	.gallery-prev-btn:hover,
-	.gallery-next-btn:hover {
-		background-color: rgba(0, 0, 0, 0.8);
+	.review-list .list-group-item:last-child {
+		border-bottom: none;
 	}
 </style>
 <section class="py-3">
@@ -504,89 +468,229 @@ if (!function_exists('format_price_custom')) {
 
 			</div>
 
+		</div>
+	</div>
+</section>
+<section>
+	<div class="container">
+		<div class="row justify-content-center mt-4">
+			<div class="col-lg-12 col-md-10 col-sm-12 col-xs-12">
+				<div class="card rounded-0">
+					<div class="card-body">
+						<h4 class="card-title">ความคิดเห็น (<?= $review_count ?>)</h4>
+						<hr>
+						<style>
+							/* CSS สำหรับ Star Rating */
+							.rate {
+								height: 46px;
+								padding: 0 10px;
+							}
 
-			<?php
-			//สินค้าที่เกี่ยวข้อง
-			// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
-			$related = $conn->query("SELECT *, 
+							.rate:not(:checked)>input {
+								position: absolute;
+								top: -9999px;
+							}
+
+							.rate:not(:checked)>label {
+								float: right;
+								width: 1em;
+								overflow: hidden;
+								white-space: nowrap;
+								cursor: pointer;
+								font-size: 30px;
+								color: #ccc;
+							}
+
+							.rate:not(:checked)>label:before {
+								content: '★ ';
+							}
+
+							.rate>input:checked~label {
+								color: #ffc700;
+							}
+
+							.rate:not(:checked)>label:hover,
+							.rate:not(:checked)>label:hover~label {
+								color: #deb217;
+							}
+
+							.rate>input:checked+label:hover,
+							.rate>input:checked+label:hover~label,
+							.rate>input:checked~label:hover,
+							.rate>input:checked~label:hover~label,
+							.rate>label:hover~input:checked~label {
+								color: #c59b08;
+							}
+						</style>
+
+						<?php
+						// ตรวจสอบว่าลูกค้า Login อยู่หรือไม่ (login_type == 2 คือลูกค้า)
+						if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2):
+						?>
+							<div class="card shadow-sm mb-4">
+								<div class="card-body">
+									<div class="d-flex align-items-center mb-3">
+										<img src="<?= validate_image($_settings->userdata('avatar')) ?>" class="rounded-circle" style="width:45px; height:45px; object-fit:cover;" alt="User Avatar">
+										<h5 class="card-title ms-3 mt-2">แสดงความคิดเห็นของคุณ</h5>
+									</div>
+
+									<form action="" id="review-form">
+										<input type="hidden" name="product_id" value="<?= $id ?>">
+
+										<div class="form-group mb-3">
+											<label class="form-label">ให้คะแนนสินค้า:</label>
+											<div class="rate">
+												<input type="radio" id="star5" name="rate" value="5" /><label for="star5" title="text">5 stars</label>
+												<input type="radio" id="star4" name="rate" value="4" /><label for="star4" title="text">4 stars</label>
+												<input type="radio" id="star3" name="rate" value="3" /><label for="star3" title="text">3 stars</label>
+												<input type="radio" id="star2" name="rate" value="2" /><label for="star2" title="text">2 stars</label>
+												<input type="radio" id="star1" name="rate" value="1" /><label for="star1" title="text">1 star</label>
+											</div>
+										</div>
+
+										<div class="form-group mb-3">
+											<label for="review_detail" class="form-label">ความคิดเห็น:</label>
+											<textarea name="detail" id="review_detail" rows="4" class="form-control" placeholder="สินค้าดีมากค่ะ ประทับใจ..." required></textarea>
+										</div>
+
+										<div class="form-group mb-4">
+											<label for="review_images" class="form-label">แนบรูปภาพสินค้า (ถ้ามี):</label>
+											<input type="file" name="images[]" id="review_images" class="form-control" multiple accept="image/png, image/jpeg, image/jpg">
+										</div>
+
+										<div class="text-end">
+											<button type="submit" class="btn btn-primary rounded-pill px-4">ส่งความคิดเห็น</button>
+										</div>
+									</form>
+								</div>
+							</div>
+						<?php else: ?>
+							<div class="alert alert-secondary text-center mb-4" role="alert">
+								กรุณา <a href="./login.php" class="alert-link">เข้าสู่ระบบ</a> เพื่อแสดงความคิดเห็นเกี่ยวกับสินค้านี้
+							</div>
+						<?php endif; ?>
+						<?php if ($review_count > 0) : ?>
+							<div class="d-flex align-items-center mb-4">
+								<span style="font-size: 1.8rem; font-weight: bold; color: #f0ad4e;"><?= number_format($avg_rating, 1) ?></span>
+								<span class="text-muted mx-2">/ 5</span>
+								<div style="font-size: 1.2rem;">
+									<?= display_stars($avg_rating) ?>
+								</div>
+							</div>
+							<div class="list-group list-group-flush review-list">
+								<?php foreach ($reviews as $review) : ?>
+									<div class="list-group-item px-0 py-3">
+										<div class="d-flex w-100">
+											<div class="me-3">
+												<img src="<?= validate_image($review['avatar'] ?? '') ?>"
+													class="img-fluid rounded-circle"
+													alt="<?= htmlspecialchars($review['customer_name']) ?>"
+													style="width: 40px; height: 40px; object-fit: cover;">
+											</div>
+											<div class="w-100">
+												<h6 class="mb-1 fw-bold"><?= htmlspecialchars($review['customer_name']) ?></h6>
+												<div class="mb-1">
+													<?= display_stars($review['star']) ?>
+												</div>
+												<small class="text-muted"><?= date("d M Y, H:i", strtotime($review['date_create'])) ?></small>
+												<p class="mb-1 mt-2"><?= nl2br(htmlspecialchars($review['detail'])) ?></p>
+											</div>
+										</div>
+									</div>
+								<?php endforeach; ?>
+							</div>
+						<?php else : ?>
+							<p class="text-center text-muted py-4">ยังไม่มีความคิดเห็นสำหรับสินค้านี้</p>
+						<?php endif; ?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<section class="py-3">
+	<div class="container">
+		<?php
+		//สินค้าที่เกี่ยวข้อง
+		// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
+		$related = $conn->query("SELECT *, 
 			(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
 			- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
 			FROM `product_list` 
 			WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
 			ORDER BY RAND() LIMIT 4");
 
-			// ============== โค้ดที่แก้ไข เริ่มต้นที่นี่ ==============
+		// ============== โค้ดที่แก้ไข เริ่มต้นที่นี่ ==============
 
-			// ตรวจสอบและสร้างฟังก์ชันสำหรับจัดรูปแบบราคา (หากยังไม่มี)
-			if (!function_exists('format_price_custom')) {
-				function format_price_custom($price)
-				{
-					$formatted_price = format_num($price, 2);
-					if (substr($formatted_price, -3) == '.00') {
-						return format_num($price, 0);
-					}
-					return $formatted_price;
+		// ตรวจสอบและสร้างฟังก์ชันสำหรับจัดรูปแบบราคา (หากยังไม่มี)
+		if (!function_exists('format_price_custom')) {
+			function format_price_custom($price)
+			{
+				$formatted_price = format_num($price, 2);
+				if (substr($formatted_price, -3) == '.00') {
+					return format_num($price, 0);
 				}
+				return $formatted_price;
 			}
+		}
 
-			if ($related->num_rows > 0): ?>
-				<div class="container">
-					<div class="row mt-n3 justify-content-center">
-						<div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
+		if ($related->num_rows > 0): ?>
+			<div class="container">
+				<div class="row mt-n3 justify-content-center">
+					<div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
 
-							<div class="card-body">
-								<h1 align="center">สินค้าที่เกี่ยวข้อง</h1>
-								<div class="row gy-3 gx-3">
-									<?php while ($rel = $related->fetch_assoc()): ?>
-										<div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
-											<a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
-												<div class="position-relative">
-													<div class="img-top position-relative product-img-holder">
-														<img src="<?= validate_image($rel['image_path']) ?>" alt="" class="product-img">
-													</div>
+						<div class="card-body">
+							<h1 align="center">สินค้าที่เกี่ยวข้อง</h1>
+							<div class="row gy-3 gx-3">
+								<?php while ($rel = $related->fetch_assoc()): ?>
+									<div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
+										<a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
+											<div class="position-relative">
+												<div class="img-top position-relative product-img-holder">
+													<img src="<?= validate_image($rel['image_path']) ?>" alt="" class="product-img">
 												</div>
-												<div class="card-body d-flex flex-column">
-													<div>
-														<div class="card-title w-100 mb-0"><?= $rel['name'] ?></div>
-														<div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
-															<div class="w-100">
-																<small class="text-muted" style="line-height: 1.25em; display: block;">
-																	<?= $rel['brand'] ?>
-																</small>
-															</div>
+											</div>
+											<div class="card-body d-flex flex-column">
+												<div>
+													<div class="card-title w-100 mb-0"><?= $rel['name'] ?></div>
+													<div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
+														<div class="w-100">
+															<small class="text-muted" style="line-height: 1.25em; display: block;">
+																<?= $rel['brand'] ?>
+															</small>
 														</div>
 													</div>
-
-													<div class="d-flex justify-content-end align-items-center mt-auto">
-														<?php
-														// เริ่มต้นด้วย price เป็น fallback
-														$display_price = isset($rel['price']) && $rel['price'] > 0 ? $rel['price'] : 0;
-
-														if (!is_null($rel['discounted_price']) && $rel['discounted_price'] > 0 && $rel['discounted_price'] < $rel['price']) {
-															$display_price = $rel['discounted_price'];
-															$discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100);
-															echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
-															echo '<span class="badge badge-sm prdouct-badge text-white">ลด ' . $discount_percentage . '%</span>';
-														} elseif (!is_null($rel['vat_price']) && $rel['vat_price'] > 0) {
-															$display_price = $rel['vat_price'];
-															echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
-														} else {
-															// fallback ใช้ price จริง
-															echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
-														}
-														?>
-													</div>
 												</div>
-											</a>
-										</div>
-									<?php endwhile; ?>
-								</div>
+
+												<div class="d-flex justify-content-end align-items-center mt-auto">
+													<?php
+													// เริ่มต้นด้วย price เป็น fallback
+													$display_price = isset($rel['price']) && $rel['price'] > 0 ? $rel['price'] : 0;
+
+													if (!is_null($rel['discounted_price']) && $rel['discounted_price'] > 0 && $rel['discounted_price'] < $rel['price']) {
+														$display_price = $rel['discounted_price'];
+														$discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100);
+														echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
+														echo '<span class="badge badge-sm prdouct-badge text-white">ลด ' . $discount_percentage . '%</span>';
+													} elseif (!is_null($rel['vat_price']) && $rel['vat_price'] > 0) {
+														$display_price = $rel['vat_price'];
+														echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+													} else {
+														// fallback ใช้ price จริง
+														echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+													}
+													?>
+												</div>
+											</div>
+										</a>
+									</div>
+								<?php endwhile; ?>
 							</div>
 						</div>
 					</div>
 				</div>
-			<?php endif; ?>
-		</div>
+			</div>
+		<?php endif; ?>
 	</div>
 </section>
 <script>
