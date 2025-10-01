@@ -80,7 +80,6 @@
 								<td class="">
 									<div style="line-height:1em">
 										<div><?= $row['name'] ?></div>
-										<div><small class="text-muted"><?= $row['dose'] ?></small></div>
 									</div>
 								</td>
 								<td class="text-center <?= $stock_class ?>"><?= format_num($row['available'], 0) ?></td>

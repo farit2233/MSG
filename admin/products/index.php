@@ -69,7 +69,6 @@
 								<td class="">
 									<div style="line-height:1em">
 										<div><?= $row['name'] ?></div>
-										<div><small class="text-muted"><?= $row['dose'] ?></small></div>
 									</div>
 								</td>
 
