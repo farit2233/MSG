@@ -117,7 +117,7 @@ $filter_options = [
                                                 <?php
                                                 if ($payment_status < 2 && $delivery_status < 3) :
                                                 ?>
-                                                    <button class="btn btn-cancel btn-danger cancel-order" data-id="<?= $row['id'] ?>">
+                                                    <button class="btn btn-order-cancel btn-danger cancel-order" data-id="<?= $row['id'] ?>">
                                                         <i class="fa fa-times"></i> ยกเลิกคำสั่งซื้อ
                                                     </button>
                                                 <?php endif; ?>
@@ -125,7 +125,7 @@ $filter_options = [
                                                 <?php
                                                 if ($payment_status == 2 || $delivery_status == 4) :
                                                 ?>
-                                                    <button class="btn btn-cancel btn-danger return-order" data-id="<?= $row['id'] ?>">
+                                                    <button class="btn btn-order-cancel btn-danger return-order" data-id="<?= $row['id'] ?>">
                                                         <i class="fa fa-times"></i> ขอคืนเงิน/คืนสินค้า
                                                     </button>
                                                 <?php endif; ?>
