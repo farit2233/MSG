@@ -350,27 +350,29 @@ if (!function_exists('format_price_custom')) {
         /* เว้นระยะห่างจากข้อความ */
     }
 </style>
-<?php if ($shipping_qry_all && $shipping_qry_all->num_rows > 0): ?>
-    <?php while ($row = $shipping_qry_all->fetch_assoc()):
-        $cost = floatval($row['cost']);
-    ?>
-        <div class="shipping-option"
-            data-id="<?= $row['id'] ?>"
-            data-name="<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>"
-            data-cost="<?= $cost ?>"
-            onclick="selectShipping(this)">
+<form id="modal_confirm_1">
+    <?php if ($shipping_qry_all && $shipping_qry_all->num_rows > 0): ?>
+        <?php while ($row = $shipping_qry_all->fetch_assoc()):
+            $cost = floatval($row['cost']);
+        ?>
+            <div class="shipping-option"
+                data-id="<?= $row['id'] ?>"
+                data-name="<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>"
+                data-cost="<?= $cost ?>"
+                onclick="selectShipping(this)">
 
-            <div>
-                <strong><?= $row['name'] ?></strong>
-                <span style="float:right;"><?= format_price_custom($cost, 2) ?> บาท</span>
-                <span class="checkmark">&#10003;</span>
+                <div>
+                    <strong><?= $row['name'] ?></strong>
+                    <span style="float:right;"><?= format_price_custom($cost, 2) ?> บาท</span>
+                    <span class="checkmark">&#10003;</span>
+                </div>
+                <div class="desc text-muted" style="font-size: 0.9em;"><?= htmlspecialchars($row['description']) ?></div>
             </div>
-            <div class="desc text-muted" style="font-size: 0.9em;"><?= htmlspecialchars($row['description']) ?></div>
-        </div>
-    <?php endwhile; ?>
-<?php else: ?>
-    <p>ไม่มีข้อมูลขนส่ง</p>
-<?php endif; ?>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <p>ไม่มีข้อมูลขนส่ง</p>
+    <?php endif; ?>
+</form>
 <script>
     let appliedCoupon = {
         id: 0,

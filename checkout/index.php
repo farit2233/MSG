@@ -429,7 +429,7 @@ if (!function_exists('format_price_custom')) {
                                                     <span id="shipping_methods_name_display" style="margin-left: 10px;"><?= $default_shipping_name ?></span>
                                                 </td>
                                                 <td class="text-right">
-                                                    <a href="javascript:void(0);" id="shipping_option_modal">เปลี่ยน</a>
+                                                    <a href="javascript:void(0);" onclick="openShippingModal()">เปลี่ยน</a>
                                                 </td>
                                                 <td class="text-right">
                                                     <label id="shipping-cost"><?= format_price_custom($default_shipping_cost, 2) ?> บาท</label>
@@ -572,6 +572,39 @@ if (!function_exists('format_price_custom')) {
 
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="shippingModal" class="modal-backdrop-custom" style="display:none;">
+        <div class="shipping-modal-content">
+            <div class="shipping-modal-header">เลือก ตัวเลือกการจัดส่ง</div>
+            <div class="shipping-modal-body">
+                <?php if ($shipping_qry_all && $shipping_qry_all->num_rows > 0): ?>
+                    <?php while ($row = $shipping_qry_all->fetch_assoc()):
+                        $cost = floatval($row['cost']);
+                    ?>
+                        <div class="shipping-option"
+                            data-id="<?= $row['id'] ?>"
+                            data-name="<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>"
+                            data-cost="<?= $cost ?>"
+                            onclick="selectShipping(this)">
+
+                            <div>
+                                <strong><?= $row['name'] ?></strong>
+                                <span style="float:right;"><?= format_price_custom($cost, 2) ?> บาท</span>
+                                <span class="checkmark">&#10003;</span>
+                            </div>
+                            <div class="desc text-muted" style="font-size: 0.9em;"><?= htmlspecialchars($row['description']) ?></div>
+                        </div>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p>ไม่มีข้อมูลขนส่ง</p>
+                <?php endif; ?>
+            </div>
+            <div class="shipping-modal-footer">
+                <button class="btn-cancel" onclick="closeShippingModal()">ยกเลิก</button>
+                <button class="btn-confirm" onclick="confirmShipping()">ยืนยัน</button>
             </div>
         </div>
     </div>
