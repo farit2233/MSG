@@ -287,6 +287,8 @@ if ($_settings->userdata('id') != '') {
                 text: "คุณต้องการตั้งที่อยู่นี้เป็นที่อยู่หลักหรือไม่?",
                 icon: 'warning',
                 showCancelButton: true,
+                confirmButtonColor: '#f57421',
+                cancelButtonColor: '#6c757d',
                 confirmButtonText: 'ยืนยัน',
                 cancelButtonText: 'ยกเลิก',
                 reverseButtons: true
@@ -321,12 +323,6 @@ if ($_settings->userdata('id') != '') {
                             );
                         }
                     });
-                } else {
-                    Swal.fire(
-                        'ยกเลิกการตั้งที่อยู่หลัก',
-                        'คุณได้ยกเลิกการตั้งที่อยู่หลักแล้ว.',
-                        'info'
-                    );
                 }
             });
         });
@@ -345,6 +341,8 @@ if ($_settings->userdata('id') != '') {
                 text: "คุณต้องการลบที่อยู่นี้หรือไม่?",
                 icon: 'warning',
                 showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
                 confirmButtonText: 'ยืนยันการลบ',
                 cancelButtonText: 'ยกเลิก',
                 reverseButtons: true
@@ -366,7 +364,9 @@ if ($_settings->userdata('id') != '') {
                                 Swal.fire(
                                     'เกิดข้อผิดพลาด!',
                                     resp.msg || 'เกิดข้อผิดพลาดในการลบที่อยู่.',
-                                    'error'
+                                    'error', {
+                                        confirmButtonText: 'ปิด'
+                                    }
                                 );
                             }
                         },
@@ -375,16 +375,12 @@ if ($_settings->userdata('id') != '') {
                             Swal.fire(
                                 'เกิดข้อผิดพลาด!',
                                 'เกิดข้อผิดพลาดในการติดต่อกับเซิร์ฟเวอร์.',
-                                'error'
+                                'error', {
+                                    confirmButtonText: 'ปิด'
+                                }
                             );
                         }
                     });
-                } else {
-                    Swal.fire(
-                        'ยกเลิกการตั้งที่อยู่หลัก',
-                        'คุณได้ยกเลิกการตั้งที่อยู่หลักแล้ว.',
-                        'info'
-                    );
                 }
             });
         });
