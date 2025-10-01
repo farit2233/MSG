@@ -67,43 +67,49 @@ if ($_settings->userdata('id') != '') {
     <form id="confirm_form_1">
         <?php
         $addresses = $conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$_settings->userdata('id')}' ORDER BY is_primary DESC, id ASC");
-        while ($row = $addresses->fetch_assoc()):
+        if ($addresses->num_rows > 0) {
+            while ($row = $addresses->fetch_assoc()):
         ?>
-            <div class="address-option d-flex justify-content-between align-items-center mb-2" onclick="selectAddress(this)">
-                <div class="flex-grow-1 d-flex align-items-center">
-                    <input type="radio" name="address_id" value="<?= $row['id'] ?>" class="address-radio me-3" <?= ($row['is_primary'] == 1) ? 'checked' : '' ?>>
-                    <div>
-                        <h6 class="mb-0">
-                            ที่อยู่ <?= ($row['is_primary'] == 1) ? 'หลัก <i class="fa-solid fa-star fa-sm"></i>' : 'เพิ่มเติม' ?>
-                        </h6>
-                        <p class="mb-0 text-muted small">
-                            <?= htmlspecialchars($row['name']) ?><br>
-                            <?= htmlspecialchars($row['contact']) ?><br>
-                            <?= htmlspecialchars($row['address']) ?>,
-                            ต.<?= htmlspecialchars($row['sub_district']) ?>,
-                            อ.<?= htmlspecialchars($row['district']) ?>,
-                            จ.<?= htmlspecialchars($row['province']) ?>,
-                            <?= htmlspecialchars($row['postal_code']) ?>
-                        </p>
+                <div class="address-option d-flex justify-content-between align-items-center mb-2" onclick="selectAddress(this)">
+                    <div class="flex-grow-1 d-flex align-items-center">
+                        <input type="radio" name="address_id" value="<?= $row['id'] ?>" class="address-radio me-3" <?= ($row['is_primary'] == 1) ? 'checked' : '' ?>>
+                        <div>
+                            <h6 class="mb-0">
+                                ที่อยู่ <?= ($row['is_primary'] == 1) ? 'หลัก <i class="fa-solid fa-star fa-sm"></i>' : 'เพิ่มเติม' ?>
+                            </h6>
+                            <p class="mb-0 text-muted small">
+                                <?= htmlspecialchars($row['name']) ?><br>
+                                <?= htmlspecialchars($row['contact']) ?><br>
+                                <?= htmlspecialchars($row['address']) ?>,
+                                ต.<?= htmlspecialchars($row['sub_district']) ?>,
+                                อ.<?= htmlspecialchars($row['district']) ?>,
+                                จ.<?= htmlspecialchars($row['province']) ?>,
+                                <?= htmlspecialchars($row['postal_code']) ?>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <a href="javascript:void(0)" class="edit-address"
+                            data-id="<?= $row['id'] ?>"
+                            data-name="<?= htmlspecialchars($row['name']) ?>"
+                            data-contact="<?= htmlspecialchars($row['contact']) ?>"
+                            data-address="<?= htmlspecialchars($row['address']) ?>"
+                            data-sub_district="<?= htmlspecialchars($row['sub_district']) ?>"
+                            data-district="<?= htmlspecialchars($row['district']) ?>"
+                            data-province="<?= htmlspecialchars($row['province']) ?>"
+                            data-postal_code="<?= htmlspecialchars($row['postal_code']) ?>"
+                            style="text-decoration: none;">
+                            <i class="fa-solid fa-pencil-alt"></i> แก้ไข
+                        </a>
                     </div>
                 </div>
-                <div class="ms-3">
-                    <a href="javascript:void(0)" class="edit-address"
-                        data-id="<?= $row['id'] ?>"
-                        data-name="<?= htmlspecialchars($row['name']) ?>"
-                        data-contact="<?= htmlspecialchars($row['contact']) ?>"
-                        data-address="<?= htmlspecialchars($row['address']) ?>"
-                        data-sub_district="<?= htmlspecialchars($row['sub_district']) ?>"
-                        data-district="<?= htmlspecialchars($row['district']) ?>"
-                        data-province="<?= htmlspecialchars($row['province']) ?>"
-                        data-postal_code="<?= htmlspecialchars($row['postal_code']) ?>"
-                        style="text-decoration: none;">
-                        <i class="fa-solid fa-pencil-alt"></i> แก้ไข
-                    </a>
-                </div>
-            </div>
 
-        <?php endwhile; ?>
+        <?php
+            endwhile;
+        } else {
+            echo '<div class="text-center text-muted">ยังไม่มีที่อยู่ที่บันทึกไว้</div>';
+        }
+        ?>
     </form>
 
     <form id="confirm_form_2" style="display: none;">

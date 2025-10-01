@@ -133,7 +133,7 @@ if ($_settings->userdata('id') != '') {
                                     else:
                                         ?>
                                         <div class="col-12 text-center text-muted">
-                                            <p>ยังไม่มีที่อยู่บันทึกไว้</p>
+                                            <p>ยังไม่มีที่อยู่ที่บันทึกไว้</p>
                                         </div>
                                     <?php endif; ?>
                                 </div>
