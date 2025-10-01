@@ -238,12 +238,7 @@
 				'contact',
 				'email',
 				'status',
-				'password',
-				'address',
-				'sub_district',
-				'district',
-				'province',
-				'postal_code'
+				'password'
 			];
 
 			$data = "";

@@ -4,8 +4,6 @@
 
 <head>
   <?php require_once('inc/header.php') ?>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <script>
@@ -55,7 +53,7 @@
                       <div class="form-group">
                         <label for="firstname" class="control-label">ชื่อ</label>
                         <input type="text" class="form-control" required name="firstname" id="firstname"
-                          title="กรุณาใส่ชื่อตามจริง เพื่อที่จะสามารถจัดส่งได้ง่าย">
+                          title="กรุณาใส่ชื่อผู้ใช้งาน">
                       </div>
                       <div class="form-group">
                         <label for="middlename" class="control-label">ชื่อกลาง (ถ้ามี)</label>
@@ -64,7 +62,7 @@
                       <div class="form-group">
                         <label for="lastname" class="control-label">นามสกุล</label>
                         <input type="text" class="form-control" required name="lastname" id="lastname"
-                          title="กรุณาใส่นามสกุลตามจริง เพื่อที่จะสามารถจัดส่งได้ง่าย">
+                          title="กรุณาใส่นามสกุลผู้ใช้งาน">
                       </div>
                       <div class="form-group">
                         <label for="gender" class="control-label">เพศ</label>
@@ -76,16 +74,16 @@
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group">
-                        <label for="email" class="control-label">Email</label>
-                        <input type="email" class="form-control" required name="email" id="email"
-                          title="กรุณาใส่อีเมล">
-                      </div>
-                      <div class="form-group">
                         <label for="contact" class="control-label">เบอร์โทร</label>
                         <input type="text" class="form-control" required name="contact" id="contact"
                           maxlength="15"
                           pattern="\d{10,}"
                           title="กรุณาใส่ตัวเลขอย่างน้อย 10 ตัว">
+                      </div>
+                      <div class="form-group">
+                        <label for="email" class="control-label">Email</label>
+                        <input type="email" class="form-control" required name="email" id="email"
+                          title="กรุณาใส่อีเมล">
                       </div>
                       <div class="form-group">
                         <label for="password" class="control-label">รหัสผ่าน</label>
@@ -122,50 +120,58 @@
                     </div>
                   </div>
 
-                  <div class="register-section-title-with-line mb-4">
+                  <!--div class="register-section-title-with-line mb-4">
                     <h4>ที่อยู่จัดส่ง</h4>
                   </div>
                   <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+
                       <div class="form-group">
                         <label for="address" class="control-label">บ้านเลขที่ ถนน</label>
                         <input type="text" class="form-control" name="address" id="address">
                       </div>
-                      <div class="form-group">
-                        <label for="sub_district" class="control-label">ตำบล</label>
-                        <input type="text" class="form-control" name="sub_district" id="sub_district">
-                      </div>
+
                       <div class="form-group">
                         <label for="district" class="control-label">อำเภอ</label>
                         <input type="text" class="form-control" name="district" id="district">
-                      </div>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                      <div class="form-group">
-                        <label for="province" class="control-label">จังหวัด</label>
-                        <input type="text" class="form-control" name="province" id="province">
                       </div>
                       <div class="form-group">
                         <label for="postal_code" class="control-label">รหัสไปรษณีย์</label>
                         <input type="text" class="form-control" name="postal_code" id="postal_code">
                       </div>
-                    </div>
-                  </div>
 
-                  <div class="row justify-content-center">
-                    <div class="col-md-5 col-12 text-center">
-                      <button type="submit" class="btn btn-regis btn-block rounded-pill">สร้างบัญชี</button>
+
                     </div>
-                  </div>
-                  <div class="col-12 text-center mt-3">
-                    <p>มีบัญชีอยู่แล้ว? <a href="./login.php">เข้าสู่ระบบที่นี่</a></p>
-                  </div>
-                </form>
+
+                  <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+
+                    <div class="form-group">
+                      <label for="sub_district" class="control-label">ตำบล/เขต</label>
+                      <input type="text" class="form-control" name="sub_district" id="sub_district">
+                    </div>
+                    <div class="form-group">
+                      <label for="province" class="control-label">จังหวัด</label>
+                      <input type="text" class="form-control" name="province" id="province">
+                    </div>
+
+                  </div-->
+
               </div>
+
+              <div class="row justify-content-center">
+                <div class="col-md-5 col-12 text-center">
+                  <button type="submit" class="btn btn-regis btn-block rounded-pill">สร้างบัญชี</button>
+                </div>
+              </div>
+              <div class="col-12 text-center mt-3">
+                <p>มีบัญชีอยู่แล้ว? <a href="./login.php">เข้าสู่ระบบที่นี่</a></p>
+              </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
+    </div>
     </div>
 
     <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
@@ -296,6 +302,7 @@
           return false;
         }
 
+
         start_loader();
         $.ajax({
           url: _base_url_ + "classes/Users.php?f=registration",
@@ -311,7 +318,7 @@
           },
           success: function(resp) {
             if (resp.status == 'success') {
-              location.href = ('./login.php');
+              location.href = ('./index.php');
               // --- START: แก้ไขส่วนนี้ ---
             } else if (!!resp.msg) {
               // หาก Server ตอบกลับมาว่ามี Error (ซึ่งในฟอร์มนี้คืออีเมลซ้ำ)
