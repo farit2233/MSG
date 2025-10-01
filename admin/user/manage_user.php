@@ -238,6 +238,9 @@ if (isset($_GET['id'])) {
 											<label for="lastname" class="control-label">นามสกุล</label>
 											<input type="text" class="form-control " required name="lastname" id="lastname" value="<?php echo isset($meta['lastname']) ? $meta['lastname'] : '' ?>">
 										</div>
+
+									</div>
+									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 password-requirements">
 										<div class="form-group">
 											<label for="type" class="control-label">Type</label>
 											<select name="type" id="type" class="form-control" required>
@@ -245,12 +248,11 @@ if (isset($_GET['id'])) {
 												<option value="2" <?php echo isset($meta['type']) && $meta['type'] == 2 ? 'selected' : '' ?>>Staff</option>
 											</select>
 										</div>
-									</div>
-									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 password-requirements">
 										<div class="form-group">
 											<label for="username" class="control-label">ชื่อผู้ใช้</label>
 											<input type="text" class="form-control" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required>
 										</div>
+
 										<?php if (isset($meta['id'])): ?>
 											<div class="form-group">
 												<label for="contact" class="control-label">รหัสผ่าน</label>
