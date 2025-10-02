@@ -819,6 +819,7 @@ class Master extends DBConnection
 			}
 
 			$customer_name = trim("{$customer['name']}"); // ใช้ชื่อจาก customer_addresses
+			$contact = trim("{$customer['contact']}");
 			$delivery_address = trim("{$customer['address']} {$customer['sub_district']} {$customer['district']} {$customer['province']} {$customer['postal_code']}");
 
 
@@ -923,7 +924,7 @@ class Master extends DBConnection
 				$body = "
 						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
 							<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
-							<p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
+							<p>เรียนคุณ <strong>{$customer_name}</strong></p>
 							<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
 							<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
 							<p><strong>ขนส่ง:</strong> {$shipping_methods_name}</p>
@@ -1039,6 +1040,7 @@ class Master extends DBConnection
 					<h2 style='color: #16542b; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
 					<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
 					<p><strong>ลูกค้า:</strong> $customer_name</p>
+					<p><stron>เบอร์โทร:</strong> $contact</p>
 					<p><strong>ที่อยู่จัดส่ง:</strong> {$delivery_address}</p>
 					<p><strong>ยอดรวม:</strong> " . number_format($grand_total, 2) . " บาท</p>
 					<p><strong>ขนส่ง:</strong> $shipping_methods_name</p>
@@ -1324,7 +1326,7 @@ class Master extends DBConnection
 				$admin_body = "
 					<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
 						<h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการยกเลิก</h2>
-						<p>ลูกค้า <strong>{$customer_name}</strong>,</p>
+						<p>ลูกค้า <strong>{$customer_name}</strong>,{$contact}</p>
 						<p>หมายเลขคำสั่งซื้อ <strong>#{$order_code}</strong> กำลังรอดำเนินการยกเลิก</p>
 						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
 						<p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
@@ -1373,6 +1375,7 @@ class Master extends DBConnection
 			ลูกค้าได้ทำการยกเลิกคำสั่งซื้อ
 			- หมายเลขคำสั่งซื้อ: {$order_code}
 			- ลูกค้า: {$customer_name}
+			- เบอร์โทร : {$contact}
 			- ที่อยู่จัดส่ง: {$order['delivery_address']}
 			- ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท";
 			// ส่งข้อความ Telegram
