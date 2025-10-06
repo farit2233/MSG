@@ -28,15 +28,15 @@ if (isset($_GET['id'])) {
 
 <div class="container-fluid password">
     <form id="change_password_form">
-        <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
+        <input type="text" name="id" value="<?= isset($id) ? $id : '' ?>">
         <div class="form-group">
-            <label for="new_password" class="control-label">รหัสผ่านใหม่</label>
+            <label for="new_password" class="control-label">รหัสผ่านใหม่ <span class="text-danger">*</span></label>
             <input type="password" class="form-control" name="new_password" required id="new_password"
                 pattern="(?=.*\d)(?=.*[a-z]).{8,}"
                 title="รหัสผ่านต้องมีอย่างน้อย 8 ตัว, มีตัวพิมพ์เล็ก, และตัวเลข">
         </div>
         <div class="form-group">
-            <label for="confirm_password" class="control-label">ยืนยันรหัสผ่านใหม่</label>
+            <label for="confirm_password" class="control-label">ยืนยันรหัสผ่านใหม่ <span class="text-danger">*</span></label>
             <input type="password" class="form-control" name="confirm_password" required id="confirm_password">
         </div>
         <div id="password-requirements" class="mb-2" style="display: none;">

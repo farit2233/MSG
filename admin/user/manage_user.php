@@ -227,7 +227,7 @@ if (isset($_GET['id'])) {
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
-											<label for="firstname" class="control-label">ชื่อ</label>
+											<label for="firstname" class="control-label">ชื่อ <span class="text-danger">*</span></label>
 											<input type="text" class="form-control" name="firstname" id="firstname" value="<?php echo isset($meta['firstname']) ? $meta['firstname'] : '' ?>" required>
 										</div>
 										<div class="form-group">
@@ -235,7 +235,7 @@ if (isset($_GET['id'])) {
 											<input type="text" class="form-control " name="middlename" id="middlename" value="<?php echo isset($meta['middlename']) ? $meta['middlename'] : '' ?>">
 										</div>
 										<div class="form-group">
-											<label for="lastname" class="control-label">นามสกุล</label>
+											<label for="lastname" class="control-label">นามสกุล <span class="text-danger">*</span></label>
 											<input type="text" class="form-control " required name="lastname" id="lastname" value="<?php echo isset($meta['lastname']) ? $meta['lastname'] : '' ?>">
 										</div>
 
@@ -249,24 +249,24 @@ if (isset($_GET['id'])) {
 											</select>
 										</div>
 										<div class="form-group">
-											<label for="username" class="control-label">ชื่อผู้ใช้</label>
+											<label for="username" class="control-label">ชื่อผู้ใช้ <span class="text-danger">*</span></label>
 											<input type="text" class="form-control" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required>
 										</div>
 
 										<?php if (isset($meta['id'])): ?>
 											<div class="form-group">
-												<label for="contact" class="control-label">รหัสผ่าน</label>
+												<label for="contact" class="control-label">รหัสผ่าน </label>
 												<a class="form-control" type="button" id="change_password" data-id="<?= isset($meta['id']) ? $meta['id'] : '' ?>">เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i></a>
 											</div>
 										<?php else: ?>
 											<div class="form-group">
-												<label for="password" class="control-label">รหัสผ่านใหม่</label>
+												<label for="password" class="control-label">รหัสผ่านใหม่ <span class="text-danger">*</span></label>
 												<input type="password" class="form-control " name="password" id="password"
 													pattern="(?=.*\d)(?=.*[a-z]).{8,}"
 													title="รหัสผ่านต้องมีอย่างน้อย 8 ตัว, มีตัวพิมพ์เล็ก, และตัวเลข">
 											</div>
 											<div class="form-group">
-												<label for="cpassword" class="control-label">ยืนยัน รหัสผ่านใหม่</label>
+												<label for="cpassword" class="control-label">ยืนยัน รหัสผ่านใหม่ <span class="text-danger">*</span></label>
 												<input type="password" class="form-control " id="cpassword">
 											</div>
 											<style>
@@ -290,8 +290,6 @@ if (isset($_GET['id'])) {
 												</ul>
 											</div>
 										<?php endif; ?>
-
-
 									</div>
 								</div>
 								<div class="row justify-content-center">

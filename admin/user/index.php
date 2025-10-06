@@ -222,7 +222,7 @@ foreach ($user->fetch_array() as $k => $v) {
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
-											<label for="firstname" class="control-label">ชื่อ</label>
+											<label for="firstname" class="control-label">ชื่อ <span class="text-danger">*</span></label>
 											<input type="text" class="form-control" name="firstname" id="firstname" value="<?php echo isset($meta['firstname']) ? $meta['firstname'] : '' ?>" required>
 										</div>
 										<div class="form-group">
@@ -230,13 +230,13 @@ foreach ($user->fetch_array() as $k => $v) {
 											<input type="text" class="form-control" name="middlename" id="middlename" value="<?php echo isset($meta['middlename']) ? $meta['middlename'] : '' ?>">
 										</div>
 										<div class="form-group">
-											<label for="lastname" class="control-label">นามสกุล</label>
+											<label for="lastname" class="control-label">นามสกุล <span class="text-danger">*</span></label>
 											<input type="text" class="form-control" name="lastname" id="lastname" value="<?php echo isset($meta['lastname']) ? $meta['lastname'] : '' ?>" required>
 										</div>
 									</div>
 									<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
 										<div class="form-group">
-											<label for="username" class="control-label">ชื่อบัญชี</label>
+											<label for="username" class="control-label">ชื่อบัญชี <span class="text-danger">*</span></label>
 											<input type="text" class="form-control" name="username" id="username" value="<?php echo isset($meta['username']) ? $meta['username'] : '' ?>" required autocomplete="off">
 										</div>
 										<div class="form-group">
