@@ -73,7 +73,7 @@ if ($_settings->userdata('id') != '') {
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                         <div class="form-group">
-                                            <label for="firstname" class="control-label">ชื่อ</label>
+                                            <label for="firstname" class="control-label">ชื่อ <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" required name="firstname" id="firstname" value="<?= isset($firstname) ? $firstname : '' ?>">
                                         </div>
                                         <div class="form-group">
@@ -81,7 +81,7 @@ if ($_settings->userdata('id') != '') {
                                             <input type="text" class="form-control" name="middlename" id="middlename" value="<?= isset($middlename) ? $middlename : '' ?>">
                                         </div>
                                         <div class="form-group">
-                                            <label for="lastname" class="control-label">นามสกุล</label>
+                                            <label for="lastname" class="control-label">นามสกุล <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" required name="lastname" id="lastname" value="<?= isset($lastname) ? $lastname : '' ?>">
                                         </div>
                                         <div class="form-group">
@@ -94,11 +94,11 @@ if ($_settings->userdata('id') != '') {
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                         <div class="form-group">
-                                            <label for="contact" class="control-label">เบอร์โทร</label>
+                                            <label for="contact" class="control-label">เบอร์โทร <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" required name="contact" id="contact" value="<?= isset($contact) ? $contact : '' ?>">
                                         </div>
                                         <div class="form-group">
-                                            <label for="email" class="control-label">Email</label>
+                                            <label for="email" class="control-label">Email <span class="text-danger">*</span></label>
                                             <input type="email" class="form-control" required name="email" id="email" value="<?= isset($email) ? $email : '' ?>">
                                         </div>
 
@@ -128,6 +128,12 @@ if ($_settings->userdata('id') != '') {
 <script>
     $(document).ready(function() {
         end_loader();
+
+        const contactInput = document.getElementById('contact');
+        contactInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // ลบทุกตัวที่ไม่ใช่เลข
+        });
+
         $('#password').click(function() {
             modal_confirm('เปลี่ยนรหัสผ่าน <i class="fa fa-pencil"></i>', 'user/profile/password.php?pid=<?= isset($id) ? $id : '' ?>')
         })

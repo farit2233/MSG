@@ -45,20 +45,20 @@ if ($_settings->userdata('id') != '') {
     <form id="confirm_form_1">
         <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
         <div class="form-group">
-            <label for="current_password" class="control-label">รหัสผ่านเดิม</label>
+            <label for="current_password" class="control-label">รหัสผ่านเดิม <span class="text-danger">*</span></label>
             <input type="password" class="form-control" name="current_password" required>
             <div class="text-right">
                 <small><a href="#" id="forgot_password_link">ลืมรหัสผ่าน?</a></small>
             </div>
         </div>
         <div class="form-group">
-            <label for="new_password" class="control-label">รหัสผ่านใหม่</label>
+            <label for="new_password" class="control-label">รหัสผ่านใหม่ <span class="text-danger">*</span></label>
             <input type="password" class="form-control" name="new_password" required id="new_password"
                 pattern="(?=.*\d)(?=.*[a-z]).{8,}"
                 title="รหัสผ่านต้องมีอย่างน้อย 8 ตัว, มีตัวพิมพ์เล็ก, และตัวเลข">
         </div>
         <div class="form-group">
-            <label for="confirm_password" class="control-label">ยืนยันรหัสผ่านใหม่</label>
+            <label for="confirm_password" class="control-label">ยืนยันรหัสผ่านใหม่ <span class="text-danger">*</span></label>
             <input type="password" class="form-control" name="confirm_password" required id="confirm_password">
         </div>
         <div id="password-requirements" class="mb-2" style="display: none;">
@@ -83,7 +83,7 @@ if ($_settings->userdata('id') != '') {
 
     <form id="confirm_form_2" style="display: none;">
         <div class="form-group">
-            <label for="email" class="control-label">อีเมล</label>
+            <label for="email" class="control-label">อีเมล <span class="text-danger">*</span></label>
             <input type="email" class="form-control" name="email" required>
         </div>
         <div class="text-right">
