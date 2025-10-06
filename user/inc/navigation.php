@@ -96,7 +96,7 @@ if ($user_qry->num_rows > 0) {
             <img src="<?php echo validate_image(isset($user_data['avatar']) ? $user_data['avatar'] : '') ?>" alt="User Avatar" class="profile-img">
             <i class="fa-solid fa-pen-to-square edit-icon"></i>
         </a>
-        <h5><?php echo isset($user_data['firstname']) ? $user_data['firstname'] . ' ' . $user_data['lastname'] : 'สวัสดี'; ?></h5>
+        <h5><?php echo isset($user_data['firstname']) ? $user_data['firstname'] . ' ' . $user_data['middlename'] . ' ' . $user_data['lastname'] : 'สวัสดี'; ?></h5>
     </div>
     <div class="list-group list-group-flush">
         <a href="?p=user/" class="list-group-item list-group-item-action <?php echo (!isset($_GET['p']) || $_GET['p'] == 'my_account') ? 'active' : '' ?>">
