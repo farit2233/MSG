@@ -35,13 +35,6 @@ if (!empty($coupon_code_id)) {
 }
 // ======================= END: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชันและคูปอง =======================
 
-$customer_name = '';
-if (!empty($customer_id)) {
-    $cus = $conn->query("SELECT CONCAT(firstname, ' ', middlename, ' ', lastname,' ',contact) AS fullname FROM customer_list WHERE id = '{$customer_id}'");
-    if ($cus->num_rows > 0) {
-        $customer_name = $cus->fetch_assoc()['fullname'];
-    }
-}
 
 $shipping_methods_name = 'ไม่ระบุขนส่ง';
 if (!empty($shipping_methods_id)) {
@@ -97,18 +90,6 @@ if (!function_exists('format_price_custom')) {
     }
 }
 
-$customer_name = '';
-if (!empty($customer_id)) {
-    // ดึงชื่อจาก customer_addresses โดยใช้ customer_id
-    $cus = $conn->query("SELECT CONCAT(name, ' ', contact) AS fullname FROM customer_addresses WHERE customer_id = '{$customer_id}' AND is_primary = 1");
-
-    // ตรวจสอบว่ามีข้อมูลหรือไม่
-    if ($cus->num_rows > 0) {
-        // ดึงชื่อและที่อยู่
-        $customer_name = $cus->fetch_assoc()['fullname'];
-    }
-}
-
 ?>
 <div class="container-fluid">
     <div class="row mb-3">
@@ -119,7 +100,7 @@ if (!empty($customer_id)) {
             </div>
             <div class="mb-3">
                 <label for="" class="control-label">ชื่อ และเบอร์โทรผู้รับสินค้า:</label>
-                <div class="pl-4"><?= !empty($customer_name) ? htmlentities($customer_name) : 'ไม่พบข้อมูลลูกค้า' ?></div>
+                <div class="pl-4"><?= !empty($name) ? htmlentities($name) : 'ไม่พบข้อมูลลูกค้า' ?>, <br><?= !empty($contact) ? htmlentities($contact) : 'ไม่พบเบอร์โทรศัพท์' ?></div>
             </div>
             <div class="mb-3">
                 <label for="" class="control-label">ที่อยู่จัดส่ง:</label>
