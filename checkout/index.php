@@ -615,10 +615,13 @@ if (!function_exists('format_price_custom')) {
         id: 0,
         amount: 0,
         type: null
-    }; // ✨ ตัวแปรใหม่สำหรับจำคูปองที่ใช้
+    };
     const cartTotal = parseFloat(<?= json_encode($cart_total) ?>) || 0;
     const appliedPromo = <?= json_encode($applied_promo) ?>;
-    const initialShippingCost = <?= $final_shipping_cost; ?>; // ✨ เก็บค่าส่งเริ่มต้น
+    const initialShippingCost = <?= $final_shipping_cost; ?>;
+
+    // --- ⬇️ 1. เพิ่มตัวแปรนี้เข้ามา ⬇️ ---
+    let currentShippingCost = initialShippingCost; // เริ่มต้นด้วยค่า default
 
     // ============================
     // JS: จัดการฟอร์มสั่งซื้อ
@@ -663,10 +666,10 @@ if (!function_exists('format_price_custom')) {
 
         document.getElementById('shipping_methods_id').value = selectedShipping.id;
         document.getElementById('shipping_methods_name_display').innerText = selectedShipping.name;
-
-        // --- [ บรรทัดที่ต้องเพิ่ม ] ---
-        // อัปเดตข้อความแสดงราคาค่าส่งให้ตรงกับที่เลือก
         document.getElementById('shipping-cost').innerText = formatPrice(selectedShipping.cost) + ' บาท';
+
+        // --- ⬇️ 2. อัปเดตค่าขนส่งล่าสุด ⬇️ ---
+        currentShippingCost = selectedShipping.cost; // เก็บค่าที่เลือกใหม่
 
         updateGrandTotal(selectedShipping.cost);
         closeShippingModal();
@@ -676,17 +679,12 @@ if (!function_exists('format_price_custom')) {
 
     function formatPrice(value) {
         if (isNaN(value)) return value;
-
-        // แปลงเป็นจำนวน float
         let num = parseFloat(value);
-
-        // ถ้าจำนวนเต็ม → ไม่แสดงทศนิยม
         if (num % 1 === 0) {
             return num.toLocaleString('th-TH', {
                 maximumFractionDigits: 0
             });
         } else {
-            // ถ้ามีทศนิยม → แสดง 2 หลัก
             return num.toLocaleString('th-TH', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
@@ -701,7 +699,6 @@ if (!function_exists('format_price_custom')) {
         let promoDiscount = 0;
         let finalShippingCost = parseFloat(shippingCost) || 0;
 
-        // --- ส่วนที่ 1: คำนวณส่วนลดโปรโมชัน (โค้ดเดิมของคุณ) ---
         if (appliedPromo && cartTotal >= parseFloat(appliedPromo.minimum_order)) {
             switch (appliedPromo.type) {
                 case 'fixed':
@@ -711,52 +708,36 @@ if (!function_exists('format_price_custom')) {
                     promoDiscount = cartTotal * (parseFloat(appliedPromo.discount_value) / 100);
                     break;
                 case 'free_shipping':
-                    finalShippingCost = 0; // โปรโมชันส่งฟรี ทำให้ค่าส่งเป็น 0
+                    finalShippingCost = 0;
                     break;
             }
         }
 
-        // --- ส่วนที่ 2: ✨ ตรวจสอบส่วนลดจาก "คูปอง" ---
         let couponDiscount = 0;
-
         if (appliedCoupon.type === 'free_shipping') {
-            finalShippingCost = 0; // คูปองส่งฟรี ก็ทำให้ค่าส่งเป็น 0
-            // ไม่ต้องกำหนด couponDiscount เพราะเราจัดการผ่าน finalShippingCost แล้ว
+            finalShippingCost = 0;
         } else {
-            couponDiscount = appliedCoupon.amount; // ถ้าเป็นคูปองลดราคาปกติ
+            couponDiscount = appliedCoupon.amount;
         }
 
-
-        // --- ส่วนที่ 3: คำนวณยอดรวมสุดท้าย ---
-        // ยอดรวม = (ราคาสินค้า - ส่วนลดโปรโมชัน - ส่วนลดคูปอง) + ค่าส่งสุดท้าย
         const grandTotal = (cartTotal - promoDiscount - couponDiscount) + finalShippingCost;
 
-
-        // อัปเดตยอดรวมสุทธิ (ใช้ toLocaleString เหมือนเดิมได้)
-        // ฟังก์ชันอัปเดตยอดรวม
         function updateOrderTotal(grandTotal) {
             let formattedTotal;
-
             if (grandTotal % 1 === 0) {
-                // จำนวนเต็ม → ไม่แสดงทศนิยม
                 formattedTotal = grandTotal.toLocaleString('th-TH', {
                     maximumFractionDigits: 0
                 });
             } else {
-                // มีทศนิยม → แสดง 2 หลัก
                 formattedTotal = grandTotal.toLocaleString('th-TH', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
             }
-
             document.getElementById('order-total-text').innerText = formattedTotal;
             document.getElementById('order-vat-total').innerText = formattedTotal;
         }
-
-        // ตัวอย่างการเรียกใช้งาน
         updateOrderTotal(grandTotal);
-
     }
 
     // ============================
@@ -766,7 +747,6 @@ if (!function_exists('format_price_custom')) {
         if (!element) return;
         document.querySelectorAll('.shipping-option').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
-
         selectedShipping = {
             id: element.dataset.id,
             name: element.dataset.name,
@@ -775,10 +755,10 @@ if (!function_exists('format_price_custom')) {
     }
 
     $(document).ready(function() {
+        // --- ส่วนนี้คือโค้ดเดิมของคุณ ไม่มีการแก้ไข ---
         const initialCost = parseFloat(<?= json_encode($default_shipping_cost) ?>) || 0;
         updateGrandTotal(initialCost);
         let timeout;
-
         end_loader();
         $('#address_option_modal').click(function() {
             modal_confirm('สมุดที่อยู่ <i class="fa fa-pencil"></i>', 'checkout/address.php?pid=<?= isset($id) ? $id : '' ?>')
@@ -787,30 +767,28 @@ if (!function_exists('format_price_custom')) {
             modal_confirm('เลือกขนส่ง <i class="fa fa-truck"></i>', 'checkout/shipping.php?pid=<?= isset($id) ? $id : '' ?>')
         })
 
+        // --- ส่วนจัดการปุ่มใช้คูปอง (มีการแก้ไข 1 บรรทัด) ---
         $('#apply_coupon_button').on('click', function() {
             var coupon_code = $('#coupon_code_input').val().trim();
             var error_el = $('#coupon_error_message');
             var discount_val_el = $('#discount_value');
             var discount_type_el = $('#discount_type');
-            var quantity_warning_message_el = $('#quantity_warning_message'); // เพิ่มตัวแปรสำหรับแสดงข้อความเตือน
+            var quantity_warning_message_el = $('#quantity_warning_message');
 
             if (coupon_code === '') {
                 error_el.text('กรุณากรอกรหัสคูปอง');
                 return;
             }
-
-            // เริ่ม loader (ถ้ามี)
             start_loader();
             error_el.text('');
 
-            // ส่งข้อมูลไปตรวจสอบที่หลังบ้าน
             $.ajax({
                 url: _base_url_ + 'classes/Master.php?f=apply_coupon',
                 method: 'POST',
                 data: {
                     coupon_code: coupon_code,
-                    cart_items: cartItems, // ตัวแปรนี้ต้องมีข้อมูลสินค้าในตะกร้า
-                    cart_total: cartTotal // ตัวแปรนี้คือยอดรวมราคาสินค้า
+                    cart_items: cartItems,
+                    cart_total: cartTotal
                 },
                 dataType: 'json',
                 error: function(err) {
@@ -820,56 +798,40 @@ if (!function_exists('format_price_custom')) {
                 },
                 success: function(resp) {
                     if (resp.success) {
-                        // === ✅ จุดสำคัญที่สุด ===
-                        // นำ ID ของคูปองมาใส่ใน hidden input
                         $('#applied_coupon_id').val(resp.coupon_code_id);
-                        // ======================
-
-                        // อัปเดตตัวแปร appliedCoupon เพื่อใช้ในการคำนวณราคาสุทธิ
                         appliedCoupon.id = resp.coupon_code_id;
                         appliedCoupon.amount = resp.discount_amount;
                         appliedCoupon.type = resp.type;
-
-                        // แสดงผลลัพธ์ให้ผู้ใช้เห็น
                         discount_type_el.text(resp.message);
 
-                        // แสดงข้อความเตือนจำนวนคูปองที่เหลือ
                         if (resp.quantity_warning_message) {
-                            quantity_warning_message_el.text(resp.quantity_warning_message).show(); // แสดงข้อความ
+                            quantity_warning_message_el.text(resp.quantity_warning_message).show();
                         } else {
-                            quantity_warning_message_el.hide(); // ซ่อนข้อความถ้าไม่มี
+                            quantity_warning_message_el.hide();
                         }
 
-                        // 👇 เพิ่มส่วนนี้เข้ามา 👇
                         if (resp.type === 'free_shipping') {
                             discount_val_el.html('<strong class="text-danger">ส่งฟรี</strong>');
                         } else {
                             discount_val_el.html('<strong class="text-danger">- ' + formatPrice(resp.discount_amount) + ' บาท</strong>');
                         }
-                        // 👆 เพิ่มส่วนนี้เข้ามา 👆
-
                         error_el.text('');
                         alert_toast("ใช้คูปองสำเร็จ!", "success");
                     } else {
-                        // --- กรณีใช้คูปองไม่สำเร็จ ---
-                        // ล้างค่า ID ใน hidden input
                         $('#applied_coupon_id').val(0);
-
-                        // ล้างค่าในตัวแปร
                         appliedCoupon.id = 0;
                         appliedCoupon.amount = 0;
                         appliedCoupon.type = null;
-
-                        // แสดงข้อผิดพลาด
                         error_el.text(resp.error);
                         discount_type_el.text('');
                         discount_val_el.text('');
-                        quantity_warning_message_el.hide(); // ซ่อนข้อความเตือนถ้าใช้คูปองไม่สำเร็จ
+                        quantity_warning_message_el.hide();
                         alert_toast(resp.error, "error");
                     }
 
-                    // เรียกฟังก์ชันคำนวณยอดรวมใหม่อีกครั้ง
-                    updateGrandTotal(initialShippingCost); // ใช้ค่าส่งเริ่มต้น
+                    // --- ⬇️ 3. แก้ไขบรรทัดนี้ ⬇️ ---
+                    updateGrandTotal(currentShippingCost); // << ใช้ค่าส่งล่าสุดที่เก็บไว้
+
                     end_loader();
                 }
             });
