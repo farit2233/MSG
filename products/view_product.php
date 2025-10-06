@@ -76,6 +76,49 @@ if (!function_exists('format_price_custom')) {
 }
 
 ?>
+<style>
+	#productImageModal .modal-dialog {
+		max-width: 800px !important;
+		z-index: 1050 !important;
+		margin: auto;
+		position: fixed;
+		top: 28%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+	/* Modal Navigation */
+	#productImageModal .modal-prev,
+	#productImageModal .modal-next {
+		cursor: pointer;
+		position: absolute;
+		top: 50%;
+		width: auto;
+		padding: 16px;
+		margin-top: -30px;
+		color: white;
+		font-weight: bold;
+		font-size: 24px;
+		transition: 0.3s ease;
+		border-radius: 0 3px 3px 0;
+		user-select: none;
+		background-color: rgba(0, 0, 0, 0.5);
+	}
+
+	#productImageModal .modal-next {
+		right: 0;
+		border-radius: 3px 0 0 3px;
+	}
+
+	#productImageModal .modal-prev {
+		left: 0;
+	}
+
+	#productImageModal .modal-prev:hover,
+	#productImageModal .modal-next:hover {
+		background-color: rgba(0, 0, 0, 0.8);
+	}
+</style>
 <section class="py-3">
 	<div class="container">
 		<div class="content py-5 px-3 text-dark X">
