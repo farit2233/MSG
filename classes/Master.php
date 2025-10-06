@@ -809,18 +809,19 @@ class Master extends DBConnection
 
 
 			$customer = $this->conn->query("SELECT * FROM customer_list WHERE id = '{$customer_id}'")->fetch_assoc();
+			$customer_name = trim("{$customer['firstname']} {$customer['middlename']} {$customer['lastname']}");
 			$customer_email = trim("{$customer['email']}");
 
 			// --- ดึงข้อมูลจาก customer_addresses โดยใช้ customer_id และ is_primary = 1 ---
-			$customer = $this->conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$customer_id}' AND is_primary = 1")->fetch_assoc();
+			$customer_addresses = $this->conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$customer_id}' AND is_primary = 1")->fetch_assoc();
 
 			if (!$customer) {
 				throw new Exception('ไม่พบที่อยู่หลักของลูกค้า');
 			}
 
-			$customer_name = trim("{$customer['name']}"); // ใช้ชื่อจาก customer_addresses
-			$contact = trim("{$customer['contact']}");
-			$delivery_address = trim("{$customer['address']} {$customer['sub_district']} {$customer['district']} {$customer['province']} {$customer['postal_code']}");
+			$name = trim("{$customer_addresses['name']}");
+			$contact = trim("{$customer_addresses['contact']}");
+			$delivery_address = trim("{$customer_addresses['address']} {$customer_addresses['sub_district']} {$customer_addresses['district']} {$customer_addresses['province']} {$customer_addresses['postal_code']}");
 
 
 			$shipping_methods_name = 'ไม่ระบุ';
@@ -834,12 +835,13 @@ class Master extends DBConnection
 
 			// --- ✨ บันทึกข้อมูลลง order_list (แก้ไข Query) ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-            (`code`, `customer_id`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`,shipping_prices_id, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`) 
+            (`code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`,shipping_prices_id, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`) 
             VALUES 
-            ('{$code}', '{$customer_id}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id},{$shipping_prices_id}, {$applied_promo_id}, {$applied_coupon_id}, 0, 0, 0)");
+            ('{$code}', '{$customer_id}', '{$name}', '{$contact}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id},{$shipping_prices_id}, {$applied_promo_id}, {$applied_coupon_id}, 0, 0, 0)");
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
 			$oid = $this->conn->insert_id;
+
 
 
 			if ($promotion_id > 0) {
@@ -1003,7 +1005,7 @@ class Master extends DBConnection
 									</tr>
 								</tbody>
 							</table>
-							<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$delivery_address}</div></p>
+							<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$name}, {$contact}, {$delivery_address}</div></p>
 							<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
 						</div>";
 				$mail->Body = $body;
@@ -1039,9 +1041,9 @@ class Master extends DBConnection
 				<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
 					<h2 style='color: #16542b; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
 					<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
-					<p><strong>ลูกค้า:</strong> $customer_name</p>
+					<p><strong>ชื่อผู้ใช้:</strong> $customer_name</p>
 					<p><stron>เบอร์โทร:</strong> $contact</p>
-					<p><strong>ที่อยู่จัดส่ง:</strong> {$delivery_address}</p>
+					<p><strong>ที่อยู่จัดส่ง:</strong>{$name}, {$contact}, {$delivery_address}</p>
 					<p><strong>ยอดรวม:</strong> " . number_format($grand_total, 2) . " บาท</p>
 					<p><strong>ขนส่ง:</strong> $shipping_methods_name</p>
 					<h3>รายการสินค้า</h3>
@@ -1165,8 +1167,9 @@ class Master extends DBConnection
 			$telegram_message = "
 			📦 คำสั่งซื้อใหม่จากลูกค้า
 			- รหัสคำสั่งซื้อ: $code
-			- ลูกค้า: $customer_name
-			- ที่อยู่จัดส่ง: $delivery_address
+			- ชื่อผู้ใช้: $customer_name
+			- ที่อยู่จัดส่ง: $name, $contact,
+			  $delivery_address
 			- ยอดรวม: " . number_format($grand_total, 2) . " บาท
 			- ขนส่ง: $shipping_methods_name
 			
