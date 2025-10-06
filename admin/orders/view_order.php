@@ -35,14 +35,6 @@ if (!empty($coupon_code_id)) {
     }
 }
 
-$customer_name = '';
-if (!empty($customer_id)) {
-    $cus = $conn->query("SELECT CONCAT(firstname, ' ', middlename, ' ', lastname,' ',contact) AS fullname FROM customer_list WHERE id = '{$customer_id}'");
-    if ($cus->num_rows > 0) {
-        $customer_name = $cus->fetch_assoc()['fullname'];
-    }
-}
-
 // ข้อมูลขนส่ง
 $shipping_methods_name = 'ไม่ระบุขนส่ง';
 if (!empty($shipping_methods_id)) {
@@ -131,12 +123,13 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                         <div class="pl-4"><?= isset($code) ? $code : '' ?></div>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="" class="control-label head-detail">ที่อยู่จัดส่ง :</label>
-                                        <div class="pl-4"><?= isset($delivery_address) ? str_replace(["\r\n", "\r", "\n"], "<br>", $delivery_address) : '' ?></div>
+                                        <label for="" class="control-label head-detail">ชื่อผู้รับ และเบอร์โทร :</label>
+                                        <div class="pl-4"><?= !empty($name) ? htmlentities($name) : 'ไม่พบข้อมูลลูกค้า' ?>, <br>
+                                            <?= !empty($contact) ? htmlentities($contact) : 'ไม่พบเบอร์โทร' ?></div>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="" class="control-label head-detail">ชื่อผู้รับ :</label>
-                                        <div class="pl-4"><?= !empty($customer_name) ? htmlentities($customer_name) : 'ไม่พบข้อมูลลูกค้า' ?></div>
+                                        <label for="" class="control-label head-detail">ที่อยู่จัดส่ง :</label>
+                                        <div class="pl-4"><?= isset($delivery_address) ? str_replace(["\r\n", "\r", "\n"], "<br>", $delivery_address) : '' ?></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
