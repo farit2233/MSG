@@ -141,6 +141,7 @@ if ($_settings->userdata('id') != '') {
                             <form id="address-form" method="post" style="display: none;">
                                 <div class="profile-section-title-with-line ">
                                     <h4 id="form-title">เพิ่มที่อยู่ใหม่</h4>
+                                    <p>เพิ่มที่อยู่สำหรับจัดส่ง</p>
                                 </div>
                                 <input type="hidden" name="address_id" id="address_id">
                                 <input type="hidden" name="customer_id" value="<?= isset($id) ? $id : '' ?>">
@@ -200,6 +201,10 @@ if ($_settings->userdata('id') != '') {
 
 <script>
     $(document).ready(function() {
+        const contactInput = document.getElementById('contact');
+        contactInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // ลบทุกตัวที่ไม่ใช่เลข
+        });
 
         function resetAddressForm() {
             $('#address-form')[0].reset();
