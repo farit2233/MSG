@@ -206,7 +206,8 @@ $delivery_status_map = [
         <table class="w-full text-sm text-left text-gray-500">
           <tbody>
             <?php while ($row = $recent_orders_query->fetch_assoc()): ?>
-              <tr class="bg-white border-b hover:bg-gray-50">
+
+              <tr class="bg-white border-b hover:bg-gray-50" style="cursor: pointer;" onclick="window.location.href='?page=orders/view_order&id=<?php echo $row['id']; ?>'">
                 <td class="px-6 py-3">
                   <p class="font-medium text-gray-900"><?php echo $row['code'] ?></p>
                   <p class="text-xs text-gray-500">
@@ -220,11 +221,13 @@ $delivery_status_map = [
                   </span>
                 </td>
               </tr>
+
             <?php endwhile; ?>
           </tbody>
         </table>
       </div>
     </div>
+
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
