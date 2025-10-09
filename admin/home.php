@@ -1,5 +1,4 @@
 <?php
-// --- PHP Data Fetching ---
 
 // แก้ไขข้อผิดพลาด: ดึงยอดขายวันนี้จากคอลัมน์ 'total_amount'
 $today_sales_query = $conn->query("SELECT SUM(total_amount) as total FROM order_list WHERE DATE(date_created) = CURDATE()");
@@ -24,6 +23,29 @@ $low_stock_query = $conn->query("
 ");
 $low_stock_count = $low_stock_query->fetch_assoc()['low_stock_count'] ?? 0;
 
+function formatDateThai($date)
+{
+  // ถ้าวันที่ว่างหรือไม่ถูกต้อง
+  if (empty($date)) {
+    return 'ข้อมูลวันที่ไม่ถูกต้อง';
+  }
+
+  // แปลงวันที่เป็น timestamp
+  $timestamp = strtotime($date);
+  if ($timestamp === false) {
+    return 'ข้อมูลวันที่ไม่ถูกต้อง';
+  }
+
+  // ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+  $day = date("j", $timestamp);
+  $month = date("n", $timestamp);
+  $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+  $hour = date("H", $timestamp); // ชั่วโมง (00-23)
+  $minute = date("i", $timestamp); // นาที (00-59)
+
+  // ส่งคืนวันที่ในรูปแบบไทย
+  return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
 
 // ข้อมูลสำหรับกราฟแนวโน้มยอดขาย 6 เดือนล่าสุด
 $sales_chart_labels = [];
@@ -56,7 +78,6 @@ for ($i = 5; $i >= 0; $i--) {
 $sales_chart_labels_json = json_encode($sales_chart_labels);
 $sales_chart_data_json = json_encode($sales_chart_data);
 
-
 // คำสั่งซื้อล่าสุด 5 รายการ
 $recent_orders_query = $conn->query("SELECT * FROM `order_list` ORDER BY `date_created` DESC LIMIT 5");
 
@@ -86,26 +107,8 @@ $delivery_status_map = [
 ];
 
 ?>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-  /* ใช้ฟอนต์ที่สวยงามและเข้ากับระบบ */
-  body,
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  p,
-  span,
-  a,
-  th,
-  td {
-    font-family: 'Sarabun', sans-serif;
-  }
-
   .stat-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
@@ -115,60 +118,87 @@ $delivery_status_map = [
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   }
 </style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="w-full px-4 md:px-6 py-6">
-  <h1 class="text-2xl font-bold text-gray-800 mb-2">
+  <h1 class="text-2xl font-bold mb-2">
     ยินดีต้อนรับ, <?php echo $_settings->userdata('firstname') . " " . $_settings->userdata('lastname') ?>!
   </h1>
   <p class="text-gray-600 mb-6">ภาพรวมข้อมูลทั้งหมดในระบบของคุณ</p>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="stat-card bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium text-gray-500">ยอดขายวันนี้</p>
-        <p class="text-3xl font-bold text-gray-800">฿<?php echo format_num($today_sales, 2); ?></p>
+  <?php
+  $stat_card_grid_class = ($_settings->userdata('type') == 1) ? 'lg:grid-cols-4' : 'lg:grid-cols-3';
+  ?>
+  <div class="grid grid-cols-1 sm:grid-cols-2 <?php echo $stat_card_grid_class; ?> gap-6 mb-8">
+
+    <?php if ($_settings->userdata('type') == 1): ?>
+      <a href="?page=reports">
+        <div class="stat-card bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-500">ยอดขายวันนี้</p>
+            <p class="text-3xl font-bold text-gray-800">฿<?php echo format_num($today_sales, 2); ?></p>
+          </div>
+          <div class="p-3">
+            <i class="fas fa-dollar-sign text-xl text-primary"></i>
+          </div>
+        </div>
+      </a>
+    <?php endif; ?>
+
+    <a href="?page=orders">
+      <div class="stat-card bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">คำสั่งซื้อทั้งหมด</p>
+          <p class="text-3xl font-bold text-gray-800"><?php echo format_num($total_orders); ?></p>
+        </div>
+        <div class="p-3">
+          <i class="fas fa-shopping-cart text-xl text-primary"></i>
+        </div>
       </div>
-      <div class="bg-indigo-100 rounded-full p-3">
-        <i class="fas fa-dollar-sign h-6 w-6 text-indigo-500"></i>
+    </a>
+
+    <a href="?page=products">
+      <div class="stat-card bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">สินค้าทั้งหมด</p>
+          <p class="text-3xl font-bold text-gray-800"><?php echo format_num($total_products); ?></p>
+        </div>
+        <div class="p-3">
+          <i class="fas fa-boxes text-xl text-primary"></i>
+        </div>
       </div>
-    </div>
-    <div class="stat-card bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium text-gray-500">คำสั่งซื้อทั้งหมด</p>
-        <p class="text-3xl font-bold text-gray-800"><?php echo format_num($total_orders); ?></p>
+    </a>
+
+    <a href="?page=inventory">
+      <div class="stat-card <?php echo $low_stock_count > 0 ? 'bg-red-50 border-danger' : 'bg-white'; ?> rounded-lg shadow-md p-6 flex items-center justify-between border-2">
+        <div>
+          <p class="text-lg font-bold <?php echo $low_stock_count > 0 ? 'text-danger' : 'text-gray-800'; ?>">
+            สต็อกใกล้หมด
+          </p>
+          <p class="text-3xl font-bold <?php echo $low_stock_count > 0 ? 'text-danger' : 'text-gray-800'; ?>">
+            <?php echo format_num($low_stock_count); ?>
+          </p>
+        </div>
+        <div class="p-3">
+          <i class="fas <?php echo $low_stock_count > 0 ? 'fa-exclamation-triangle text-danger' : 'fa-warehouse text-primary'; ?> text-xl"></i>
+        </div>
       </div>
-      <div class="bg-green-100 rounded-full p-3">
-        <i class="fas fa-shopping-cart h-6 w-6 text-green-500"></i>
-      </div>
-    </div>
-    <div class="stat-card bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium text-gray-500">สินค้าทั้งหมด</p>
-        <p class="text-3xl font-bold text-gray-800"><?php echo format_num($total_products); ?></p>
-      </div>
-      <div class="bg-blue-100 rounded-full p-3">
-        <i class="fas fa-boxes h-6 w-6 text-blue-500"></i>
-      </div>
-    </div>
-    <div class="stat-card <?php echo $low_stock_count > 0 ? 'bg-red-50 border-red-500' : 'bg-white'; ?> rounded-lg shadow-md p-6 flex items-center justify-between border-2">
-      <div>
-        <p class="text-sm font-medium <?php echo $low_stock_count > 0 ? 'text-red-700' : 'text-gray-500'; ?>">สต็อกใกล้หมด/หมด</p>
-        <p class="text-3xl font-bold <?php echo $low_stock_count > 0 ? 'text-red-600' : 'text-gray-800'; ?>"><?php echo format_num($low_stock_count); ?></p>
-      </div>
-      <div class="<?php echo $low_stock_count > 0 ? 'bg-red-100' : 'bg-yellow-100'; ?> rounded-full p-3">
-        <i class="fas fa-exclamation-triangle h-6 w-6 <?php echo $low_stock_count > 0 ? 'text-red-500' : 'text-yellow-500'; ?>"></i>
-      </div>
-    </div>
+    </a>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-    <div class="lg:col-span-3 bg-white rounded-lg shadow-md p-6">
-      <h3 class="text-lg font-semibold text-gray-700 mb-4">แนวโน้มยอดขาย (6 เดือนล่าสุด)</h3>
-      <div class="relative h-72">
-        <canvas id="salesChart"></canvas>
+
+    <?php if ($_settings->userdata('type') == 1): ?>
+      <div class="lg:col-span-3 bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">แนวโน้มยอดขาย (6 เดือนล่าสุด)</h3>
+        <div class="relative h-72">
+          <canvas id="salesChart"></canvas>
+        </div>
       </div>
-    </div>
-    <div class="lg:col-span-2 bg-white rounded-lg shadow-md">
+    <?php endif; ?>
+
+    <div class="<?php echo ($_settings->userdata('type') == 1) ? 'lg:col-span-2' : 'lg:col-span-5'; ?> bg-white rounded-lg shadow-md">
       <div class="p-6 border-b">
         <h3 class="text-lg font-semibold text-gray-700">คำสั่งซื้อล่าสุด</h3>
       </div>
@@ -179,7 +209,9 @@ $delivery_status_map = [
               <tr class="bg-white border-b hover:bg-gray-50">
                 <td class="px-6 py-3">
                   <p class="font-medium text-gray-900"><?php echo $row['code'] ?></p>
-                  <p class="text-xs text-gray-500"><?php echo date("d M Y, H:i", strtotime($row['date_created'])) ?></p>
+                  <p class="text-xs text-gray-500">
+                    <?php echo formatDateThai($row['date_created']); ?>
+                  </p>
                 </td>
                 <td class="px-6 py-3 text-right">
                   <p class="font-medium text-gray-900">฿<?php echo format_num($row['total_amount'], 2) ?></p>
@@ -194,6 +226,7 @@ $delivery_status_map = [
       </div>
     </div>
   </div>
+
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <div class="bg-white rounded-lg shadow-md p-6">
       <h3 class="text-lg font-semibold text-gray-700 mb-4">สถานะการชำระเงิน</h3>
@@ -229,10 +262,11 @@ $delivery_status_map = [
       </div>
     </div>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Sales Chart
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // ตรวจสอบว่ามี element `salesChart` หรือไม่ (ป้องกัน error ในฝั่ง staff)
+    if (document.getElementById('salesChart')) {
       const salesCtx = document.getElementById('salesChart').getContext('2d');
       const salesChart = new Chart(salesCtx, {
         type: 'line',
@@ -290,5 +324,6 @@ $delivery_status_map = [
           }
         }
       });
-    });
-  </script>
+    }
+  });
+</script>
