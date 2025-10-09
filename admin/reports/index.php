@@ -36,7 +36,7 @@ $date = isset($_GET['date']) ? $_GET['date'] : date("Y-m-d");
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
                         <div class="form-group">
-                            <button class="btn btn-sm btn-flat btn-dark bg-gradient-dark"><i class="fa fa-filter"></i> ยืนยัน</button>
+                            <button class="btn btn-sm btn-flat btn-dark bg-gradient-dark"><i class="fa fa-filter"></i> ค้นหา</button>
                         </div>
                     </div>
                 </div>
