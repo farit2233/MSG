@@ -102,7 +102,7 @@
 
             <!-- การ์ดที่ 6 -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <a href="?p=products&tid=6" class="text-decoration-none">
+                <a href="?p=products" class="text-decoration-none">
                     <div class="card shadow-sm border-0 text-center h-100 hover-card">
                         <div class="card-body d-flex flex-column align-items-center justify-content-center">
                             <i class="fa-solid fa-ellipsis fa-2x mb-2 text-secondary"></i>
