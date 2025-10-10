@@ -218,12 +218,14 @@ $delivery_status_map = [
                     <?php echo formatDateThai($row['date_created']); ?>
                   </p>
                 </td>
+
                 <td class="px-6 py-3 text-right">
                   <p class="font-medium text-gray-900">฿<?php echo format_num($row['total_amount'], 2) ?></p>
-                  <span class="px-2 py-1 text-xs font-semibold rounded-full <?php echo $payment_status_map[$row['payment_status']]['bg'] ?? 'bg-gray-100 text-gray-800'; ?>">
-                    <?php echo $payment_status_map[$row['payment_status']]['label'] ?? 'ไม่ระบุ'; ?>
+                  <span class="px-2 py-1 text-xs font-semibold">
+                    <?php echo $payment_status_map[$row['payment_status']]['label'] ?? 'ไม่ระบุ'; ?>, <?php echo $delivery_status_map[$row['delivery_status']]['label'] ?? 'ไม่ระบุ'; ?>
                   </span>
                 </td>
+
               </tr>
 
             <?php endwhile; ?>
