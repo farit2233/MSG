@@ -173,18 +173,22 @@ $delivery_status_map = [
     <a href="?page=inventory">
       <div class="stat-card <?php echo $low_stock_count > 0 ? 'bg-red-50 border-danger' : 'bg-white'; ?> rounded-lg shadow-md p-6 flex items-center justify-between border-2">
         <div>
-          <p class="text-lg font-bold <?php echo $low_stock_count > 0 ? 'text-danger' : 'text-gray-800'; ?>">
-            สต็อกใกล้หมด
+          <!-- เช็คเงื่อนไขสต๊อกใกล้หมดหรือปกติ -->
+          <p class="font-bold <?php echo $low_stock_count > 0 ? 'text-sm text-danger' : 'text-lg text-gray-800'; ?>">
+            <?php echo $low_stock_count > 0 ? 'สต๊อกสินค้าใกล้หมด' : 'สต๊อกทั้งหมด'; ?>
           </p>
-          <p class="text-3xl font-bold <?php echo $low_stock_count > 0 ? 'text-danger' : 'text-gray-800'; ?>">
-            <?php echo format_num($low_stock_count); ?>
-          </p>
+          <?php if ($low_stock_count > 0): ?>
+            <p class="text-3xl font-bold <?php echo $low_stock_count > 0 ? 'text-danger' : 'text-gray-800'; ?>">
+              <?php echo format_num($low_stock_count); ?>
+            </p>
+          <?php endif; ?>
         </div>
         <div class="p-3">
           <i class="fas <?php echo $low_stock_count > 0 ? 'fa-exclamation-triangle text-danger' : 'fa-warehouse text-primary'; ?> text-xl"></i>
         </div>
       </div>
     </a>
+
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
@@ -209,7 +213,7 @@ $delivery_status_map = [
 
               <tr class="bg-white border-b hover:bg-gray-50" style="cursor: pointer;" onclick="window.location.href='?page=orders/view_order&id=<?php echo $row['id']; ?>'">
                 <td class="px-6 py-3">
-                  <p class="font-medium text-gray-900"><?php echo $row['code'] ?></p>
+                  <a class="font-medium text-gray-900"><?php echo $row['code'] ?></a>
                   <p class="text-xs text-gray-500">
                     <?php echo formatDateThai($row['date_created']); ?>
                   </p>
