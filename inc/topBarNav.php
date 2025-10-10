@@ -301,7 +301,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
               <div class="dropdown-menu user-dropdown-menu dropdown-menu-right">
                 <a class="dropdown-item" href="<?= base_url . '?p=user' ?>"><i class="fa-solid fa-user-circle"></i> บัญชีของฉัน</a>
                 <a class="dropdown-item" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-basket-shopping"></i> ตะกร้าของฉัน</a>
-                <a class="dropdown-item" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
+                <a class="dropdown-item" href="<?= base_url . '?p=user/orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>"><i class="fa fa-sign-out-alt"></i> ออกจากระบบ</a>
               </div>
