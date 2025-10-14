@@ -67,24 +67,19 @@ while ($type_row = $type_qry->fetch_assoc()) {
 }
 
 ?>
-<nav class="navbar navbar-expand-lg navbar-dark navbar-msg">
+<nav class="navbar navbar-expand-lg navbar-msg">
   <div class="container container-wide px-0 px-lg-0">
 
     <a class="navbar-brand" href="./">
       <img src="<?php echo validate_image($_settings->info('logo')) ?>" width="80" height="80" class="d-inline-block align-top" alt="" loading="lazy">
-      <!--?php echo $_settings->info('short_name') ?-->
     </a>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-        <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=products">สินค้าทั้งหมด</a></li-->
 
-        <!-- HTML Navbar ที่แสดงโปรโมชัน -->
-        <li class="nav-item dropdown position-static">
-          <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            ใหม่และโดดเด่น
-          </a>
-          <div class="dropdown-menu megamenu w-100" aria-labelledby="navbarDropdown">
+        <li class="nav-item nav-item-hoverable">
+          <a class="nav-link text-white fos" href="#">ใหม่และโดดเด่น</a>
+          <div class="mega-menu-content">
             <div class="mega-box">
               <div class="content">
                 <div class="row">
@@ -98,7 +93,6 @@ while ($type_row = $type_qry->fetch_assoc()) {
                           <hr class="mt-1 mb-2">
                           <?php foreach ($type_data['categories'] as $cat_row): ?>
                             <li>
-                              <!-- ลิงก์ไปยังหน้ารายการสินค้าตาม promotion_id -->
                               <a href="<?= base_url . "?p=products&pid=" . $cat_row['id'] ?>" class="text-decoration-none">
                                 <?= htmlspecialchars($cat_row['name']) ?>
                               </a>
@@ -114,11 +108,9 @@ while ($type_row = $type_qry->fetch_assoc()) {
           </div>
         </li>
 
-        <li class="nav-item dropdown position-static">
-          <a class="nav-link dropdown-toggle text-white fos" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            ประเภทสินค้า
-          </a>
-          <div class="dropdown-menu megamenu w-100" aria-labelledby="navbarDropdown">
+        <li class="nav-item nav-item-hoverable">
+          <a class="nav-link text-white fos" href="#">ประเภทสินค้า</a>
+          <div class="mega-menu-content">
             <div class="mega-box">
               <div class="content">
                 <div class="row">
@@ -133,7 +125,6 @@ while ($type_row = $type_qry->fetch_assoc()) {
                           <?php foreach ($type_data['categories'] as $cat_row): ?>
                             <li>
                               <a href="<?= base_url . "?p=products&cid=" . $cat_row['id'] ?>" class="text-decoration-none">
-
                                 <?= htmlspecialchars($cat_row['name']) ?>
                               </a>
                             </li>
@@ -147,9 +138,8 @@ while ($type_row = $type_qry->fetch_assoc()) {
             </div>
           </div>
         </li>
+
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=promotions">โปรโมชัน</a></li>
-        <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=help">ช่วยเหลือ</a></li-->
-        <!--li class="nav-item"><a class="nav-link text-white fos" href="./?p=about">เกี่ยวกับเรา</a></li-->
         <li class="nav-item"><a class="nav-link text-white fos" href="./?p=contact">ติดต่อเรา</a></li>
       </ul>
     </div>
@@ -179,79 +169,42 @@ while ($type_row = $type_qry->fetch_assoc()) {
           </a>
         </li>
         <li class="nav-item position-relative me-2">
-          <!--alert-->
           <?php
           $is_logged_in = $_settings->userdata('id') && $_settings->userdata('login_type') == 2;
           $customer_id = $_settings->userdata('id');
-
-          // เตรียม query แจ้งเตือน (หากล็อกอินแล้ว)
           if ($is_logged_in) {
             $notif_qry = $conn->query("
-              SELECT 
-                o.code, o.id, o.date_updated, o.payment_status, o.delivery_status,
-                
-                -- สินค้าชิ้นที่ 1
-                (SELECT p.name 
-                FROM order_items oi1 
-                INNER JOIN product_list p ON p.id = oi1.product_id 
-                WHERE oi1.order_id = o.id 
-                ORDER BY oi1.product_id ASC 
-                LIMIT 1 OFFSET 0) AS product_name,
-
-                -- สินค้าชิ้นที่ 2 (ถ้ามี)
-                (SELECT p.name 
-                FROM order_items oi2 
-                INNER JOIN product_list p ON p.id = oi2.product_id 
-                WHERE oi2.order_id = o.id 
-                ORDER BY oi2.product_id ASC 
-                LIMIT 1 OFFSET 1) AS more_product_name,
-
-                -- รูปภาพจากสินค้าชิ้นแรก
-                (SELECT p.image_path 
-                FROM order_items oi3 
-                INNER JOIN product_list p ON p.id = oi3.product_id 
-                WHERE oi3.order_id = o.id 
-                ORDER BY oi3.product_id ASC 
-                LIMIT 1 OFFSET 0) AS image_path
-
-              FROM order_list o
-              WHERE o.customer_id = '{$customer_id}'
-              ORDER BY o.date_updated DESC
-              LIMIT 5
-            ");
+                            SELECT 
+                                o.code, o.id, o.date_updated, o.payment_status, o.delivery_status,
+                                (SELECT p.name FROM order_items oi1 INNER JOIN product_list p ON p.id = oi1.product_id WHERE oi1.order_id = o.id ORDER BY oi1.product_id ASC LIMIT 1 OFFSET 0) AS product_name,
+                                (SELECT p.name FROM order_items oi2 INNER JOIN product_list p ON p.id = oi2.product_id WHERE oi2.order_id = o.id ORDER BY oi2.product_id ASC LIMIT 1 OFFSET 1) AS more_product_name,
+                                (SELECT p.image_path FROM order_items oi3 INNER JOIN product_list p ON p.id = oi3.product_id WHERE oi3.order_id = o.id ORDER BY oi3.product_id ASC LIMIT 1 OFFSET 0) AS image_path
+                            FROM order_list o WHERE o.customer_id = '{$customer_id}' ORDER BY o.date_updated DESC LIMIT 5
+                        ");
           }
           ?>
           <div class="position-relative">
             <div class="dropdown">
               <?php
-              // เช็กว่ามีแจ้งเตือนที่ยังไม่อ่าน
               $has_new_notif = false;
               if ($is_logged_in) {
                 $check_unseen = $conn->query("SELECT 1 FROM order_list WHERE customer_id = '{$customer_id}' AND is_seen = 0 LIMIT 1");
                 $has_new_notif = $check_unseen->num_rows > 0;
               }
               ?>
-              <a href="/?p=orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน" data-toggle="dropdown" id="notifDropdown">
+              <a href="/?p=orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน" data-bs-toggle="dropdown" id="notifDropdown">
                 <i class="fa fa-bell icon-size position-relative">
                   <?php if ($has_new_notif): ?>
-                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                    </span>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
                   <?php endif; ?>
                 </i>
               </a>
               <div class="dropdown-menu-notify">
                 <div class="dropdown-menu dropdown-menu-right ">
                   <?php if (!$is_logged_in): ?>
-                    <div class="dropdown-item text-muted text-center small">
-                      กรุณาเข้าสู่ระบบเพื่อดูแจ้งเตือน
-                    </div>
-
+                    <div class="dropdown-item text-muted text-center small">กรุณาเข้าสู่ระบบเพื่อดูแจ้งเตือน</div>
                   <?php elseif ($notif_qry->num_rows == 0): ?>
-                    <div class="dropdown-item text-muted text-center small">
-                      คุณยังไม่ได้สั่งสินค้า<br>
-                      <a href="./?p=products" class="text-decoration-underline">ไปสั่งซื้อเลย!</a>
-                    </div>
-
+                    <div class="dropdown-item text-muted text-center small">คุณยังไม่ได้สั่งสินค้า<br><a href="./?p=products" class="text-decoration-underline">ไปสั่งซื้อเลย!</a></div>
                   <?php else: ?>
                     <?php
                     function get_payment_text($status)
@@ -263,22 +216,13 @@ while ($type_row = $type_qry->fetch_assoc()) {
                       return ['ตรวจสอบคำสั่งซื้อ', 'กำลังเตรียมของ', 'แพ็กของแล้ว', 'กำลังจัดส่ง', 'จัดส่งสำเร็จ', 'จัดส่งไม่สำเร็จ', 'กำลังยกเลิกคำสั่งซื้อ', 'คืนของระหว่างทาง', 'กำลังคืนสินค้า', 'คืนของสำเร็จ', 'ยกเลิกแล้ว'][$status] ?? 'N/A';
                     }
                     while ($notif = $notif_qry->fetch_assoc()): ?>
-
-                      <a class="dropdown-item d-flex align-items-start gap-2" href=" ./?p=orders">
+                      <a class="dropdown-item d-flex align-items-start gap-2" href="./?p=orders">
                         <div class="d-flex align-items-center gap-2">
                           <img src="<?= validate_image($notif['image_path']) ?>" class="notif-thumb" alt="product">
-                          <div class="">
+                          <div>
                             <h6 class="mb-0">เลขที่คำสั่งซื้อ: <?= $notif['code'] ?></h6>
-                            <small class="text-truncate">
-                              <?= htmlentities($notif['product_name']) ?>
-                              <?php if (!empty($notif['more_product_name'])): ?>
-                                , <?= htmlentities($notif['more_product_name']) ?>
-                              <?php endif; ?>
-                            </small><br>
-                            <small class="text-muted">
-                              สถานะการชำระเงิน: <b><?= get_payment_text($notif['payment_status']) ?></b> |
-                              สถานะการจัดส่ง: <b><?= get_delivery_text($notif['delivery_status']) ?></b>
-                            </small>
+                            <small class="text-truncate"><?= htmlentities($notif['product_name']) ?><?php if (!empty($notif['more_product_name'])): ?>, <?= htmlentities($notif['more_product_name']) ?><?php endif; ?></small><br>
+                            <small class="text-muted">สถานะการชำระเงิน: <b><?= get_payment_text($notif['payment_status']) ?></b> | สถานะการจัดส่ง: <b><?= get_delivery_text($notif['delivery_status']) ?></b></small>
                           </div>
                         </div>
                       </a>
@@ -289,12 +233,11 @@ while ($type_row = $type_qry->fetch_assoc()) {
               </div>
             </div>
           </div>
-          <!-- end alert-->
         </li>
         <li class="nav-item dropdown">
           <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
             <div class="dropdown">
-              <button type="button" class="dropdown-toggle user-dd-toggle" data-toggle="dropdown">
+              <button type="button" class="dropdown-toggle user-dd-toggle" data-bs-toggle="dropdown">
                 <img src="<?= validate_image($_settings->userdata('avatar')) ?>" class="user-img-nav" alt="User">
                 <span class="user-name d-none d-lg-inline"><?= ucwords($_settings->userdata('firstname')) ?></span>
               </button>
@@ -308,7 +251,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
             </div>
           <?php else: ?>
             <div class="dropdown">
-              <button type="button" class="btn btn-rounded dropdown-toggle dropdown-icon text-white" data-toggle="dropdown">
+              <button type="button" class="btn btn-rounded dropdown-toggle dropdown-icon text-white" data-bs-toggle="dropdown">
                 <i class="fas fa-user-circle icon-acc-size text-white" title="แอคเคานท์"></i>
               </button>
               <div class="dropdown-menu user-dropdown-menu dropdown-menu-right" role="menu">
@@ -324,12 +267,6 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     <div class="d-flex d-lg-none align-items-center justify-content-end flex-nowrap">
       <ul class="navbar-nav flex-row align-items-center mb-0" style="gap: 0.8rem;">
-        <!-- icons -->
-        <li class="nav-item d-flex d-none align-items-center">
-          <a class="nav-link text-white p-0" href="#" data-toggle="modal" data-target="#mobileSearchModal" title="ค้นหาสินค้า">
-            <i class="fas fa-search icon-size"></i>
-          </a>
-        </li>
         <li class="nav-item position-relative">
           <a class="nav-link text-white p-0" href="./?p=cart_list" title="ตะกร้าสินค้า">
             <i class="fa fa-basket-shopping icon-size"></i>
@@ -360,13 +297,11 @@ while ($type_row = $type_qry->fetch_assoc()) {
             </a>
           <?php endif; ?>
         </li>
-
       </ul>
       <button class="navbar-toggler ms-2" type="button" id="openSidebarBtn">
         <span class="navbar-toggler-icon"></span>
       </button>
     </div>
-
   </div>
 </nav>
 
