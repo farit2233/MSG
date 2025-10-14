@@ -266,6 +266,203 @@
     min-width: 180px;
 }
 
+.account-menu_caret {
+  font-size: 0.7em; /* ขนาดของสามเหลี่ยม */
+  margin-left: 0.3em; /* ระยะห่างจากไอคอน user */
+  vertical-align: middle; /* จัดตำแหน่งให้ตรงกลางแนวตั้ง */
+  transition: transform 0.2s ease; /* ทำให้หมุนอย่างนุ่มนวล */
+}
+
+/* เมื่อเมนูเปิดอยู่ ให้สามเหลี่ยมหมุนขึ้น */
+.account-menu.is-active > .account-menu_toggle > .account-menu_caret {
+  transform: rotate(180deg);
+}
+
+/* ============================================= */
+/* ==   CSS สำหรับ Account Dropdown (แบบคลิก)  == */
+/* ============================================= */
+
+/* --- Block: กล่องครอบเมนูทั้งหมด --- */
+.account-menu {
+  position: relative;
+  display: inline-block;
+}
+
+/* --- Element: ปุ่มกดเปิด/ปิดเมนู --- */
+.account-menu_toggle {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: white;
+}
+
+/* --- Element: กล่องเมนูที่เลื่อนลงมา --- */
+.account-menu_content {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  
+  /* ซ่อนเมนูเป็นค่าเริ่มต้น */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  pointer-events: none;
+  
+  /* ทำให้การแสดงผลนุ่มนวล */
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  
+  /* สไตล์ของกล่องเมนู (เหมือนเดิม) */
+  min-width: 180px;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* * --- [ หัวใจหลัก ] ---
+ * แสดงเมนูเมื่อกล่องครอบ .account-menu มีคลาส .is-active
+*/
+.account-menu.is-active > .account-menu_content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* --- สไตล์รายการและเส้นคั่น (เหมือนเดิม) --- */
+.account-menu_item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+.account-menu_item:hover {
+  background-color: #f1f1f1;
+  color: #333;
+}
+.account-menu_item i {
+  margin-right: 0.8rem;
+  width: 1.25em;
+  text-align: center;
+  opacity: 0.7;
+}
+.account-menu_divider {
+  height: 1px;
+  margin: 0.5rem 0;
+  background-color: #e9ecef;
+}
+
+/* ============================================= */
+/* ==      CSS สำหรับ Profile Dropdown         == */
+/* ============================================= */
+
+/* --- [ 1 ] Block: กล่องครอบเมนูทั้งหมด --- */
+.profile-menu {
+  position: relative;
+  display: inline-block;
+}
+
+/* --- [ 2 ] Element: ปุ่มกดเปิด/ปิดเมนู --- */
+.profile-menu_toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* ระยะห่างระหว่าง รูป, ชื่อ, caret */
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: white;
+}
+
+/* --- [ 3 ] Elements ภายในปุ่ม --- */
+.profile-menu_avatar {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.profile-menu_username {
+  font-size: 16px;
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-menu_caret {
+  font-size: 0.8em;
+  transition: transform 0.2s ease;
+}
+
+/* --- [ 4 ] Element: กล่องเมนูที่เลื่อนลงมา --- */
+.profile-menu__content {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  
+  min-width: 220px; /* ปรับความกว้างตามต้องการ */
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* --- [ 5 ] Active State: แสดงเมนูเมื่อมีคลาส .is-active --- */
+.profile-menu.is-active > .profile-menu__content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.profile-menu.is-active .profile-menu_caret {
+  transform: rotate(180deg); /* หมุน caret เมื่อเมนูเปิด */
+}
+
+/* --- [ 6 ] Elements ภายในเมนู --- */
+.profile-menu_item {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  color: #333;
+  text-decoration: none;
+  font-size: 1rem;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+.profile-menu_item:hover {
+  background-color: #f1f1f1;
+  color: #333;
+}
+.profile-menu_item i {
+  margin-right: 0.8rem;
+  width: 1.25em;
+  text-align: center;
+  opacity: 0.7;
+}
+.profile-menu_divider {
+  height: 1px;
+  margin: 0.5rem 0;
+  background-color: #e9ecef;
+}
+
 .navbar {
     padding-top: 5px;
     padding-bottom: 5px;
@@ -280,6 +477,18 @@
     width: 100%;
     z-index: 999;
     transition: top 0.3s ease-in-out;
+}
+
+.d-lg-none .icon-size {
+  margin-top: 0 !important;
+}
+
+/* * 2. สั่งให้ li ที่ครอบไอคอน จัดทุกอย่างให้อยู่กึ่งกลางแนวตั้ง
+ * เพื่อให้มั่นใจว่าทุกอย่างจะอยู่ตรงกลางแน่นอน
+*/
+.d-lg-none .navbar-nav .nav-item {
+  display: flex;
+  align-items: center;
 }
 
 .navbar .container-wide {
@@ -719,8 +928,78 @@ body.body-no-scroll {
 .back-to-main {
     margin: 1rem 0;
 }
+/* ============================================= */
+/* ==       CSS สำหรับ Hamburger Icon         == */
+/* ============================================= */
 
-@media (max-width: 1200px) {
+.hamburger-button {
+  padding: 10px;
+  display: inline-block;
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+  margin: 0;
+  transition: opacity 0.15s linear;
+}
+.hamburger-button:hover {
+  opacity: 0.7;
+}
+
+.hamburger-box {
+  width: 24px;  /* <--- 1. ปรับจาก 30px */
+  height: 20px; /* <--- 2. ปรับจาก 24px */
+  display: inline-block;
+  position: relative;
+}
+
+.hamburger-inner {
+  display: block;
+  top: 50%;
+}
+
+/* สร้างเส้น 3 เส้น */
+.hamburger-inner,
+.hamburger-inner::before,
+.hamburger-inner::after {
+  width: 24px;   /* <--- 3. ปรับจาก 30px */
+  height: 2px;   /* <--- 4. ปรับจาก 3px (ทำให้เส้นบางลง) */
+  background-color: #fff;
+  border-radius: 4px;
+  position: absolute;
+  transition: transform 0.2s ease-in-out;
+}
+
+.hamburger-inner::before,
+.hamburger-inner::after {
+  content: "";
+  display: block;
+}
+
+/* ตำแหน่งเส้นบน (ปรับระยะห่าง) */
+.hamburger-inner::before {
+  top: -8px; /* <--- 5. ปรับจาก -10px */
+}
+
+/* ตำแหน่งเส้นล่าง (ปรับระยะห่าง) */
+.hamburger-inner::after {
+  bottom: -8px; /* <--- 6. ปรับจาก -10px */
+}
+
+/* --- [ Animation ตอนเปิด Sidebar ] --- */
+/* (ส่วนนี้ไม่ต้องแก้ไข) */
+
+body.body-no-scroll .hamburger-inner {
+  transform: rotate(45deg);
+}
+body.body-no-scroll .hamburger-inner::before {
+  top: 0;
+  transform: rotate(90deg);
+}
+body.body-no-scroll .hamburger-inner::after {
+  opacity: 0;
+}
+
+@media (max-width: 1366px) {
     .navbar-nav .nav-link {
         font-size: 14px;
         padding: 0.5rem 0.75rem;
@@ -759,7 +1038,6 @@ body.body-no-scroll {
 
     .icon-size {
         font-size: 28px !important;
-        margin-top: 0.5rem !important;
         margin-left: 4px;
         margin-right: 0px;
     }

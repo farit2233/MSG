@@ -168,43 +168,84 @@ while ($type_row = $type_qry->fetch_assoc()) {
             <?php endif; ?>
           </a>
         </li>
+
         <li class="nav-item position-relative me-2">
+          <!--alert-->
           <?php
           $is_logged_in = $_settings->userdata('id') && $_settings->userdata('login_type') == 2;
           $customer_id = $_settings->userdata('id');
+
+          // เตรียม query แจ้งเตือน (หากล็อกอินแล้ว)
           if ($is_logged_in) {
             $notif_qry = $conn->query("
-                            SELECT 
-                                o.code, o.id, o.date_updated, o.payment_status, o.delivery_status,
-                                (SELECT p.name FROM order_items oi1 INNER JOIN product_list p ON p.id = oi1.product_id WHERE oi1.order_id = o.id ORDER BY oi1.product_id ASC LIMIT 1 OFFSET 0) AS product_name,
-                                (SELECT p.name FROM order_items oi2 INNER JOIN product_list p ON p.id = oi2.product_id WHERE oi2.order_id = o.id ORDER BY oi2.product_id ASC LIMIT 1 OFFSET 1) AS more_product_name,
-                                (SELECT p.image_path FROM order_items oi3 INNER JOIN product_list p ON p.id = oi3.product_id WHERE oi3.order_id = o.id ORDER BY oi3.product_id ASC LIMIT 1 OFFSET 0) AS image_path
-                            FROM order_list o WHERE o.customer_id = '{$customer_id}' ORDER BY o.date_updated DESC LIMIT 5
-                        ");
+              SELECT 
+                o.code, o.id, o.date_updated, o.payment_status, o.delivery_status,
+                
+                -- สินค้าชิ้นที่ 1
+                (SELECT p.name 
+                FROM order_items oi1 
+                INNER JOIN product_list p ON p.id = oi1.product_id 
+                WHERE oi1.order_id = o.id 
+                ORDER BY oi1.product_id ASC 
+                LIMIT 1 OFFSET 0) AS product_name,
+
+                -- สินค้าชิ้นที่ 2 (ถ้ามี)
+                (SELECT p.name 
+                FROM order_items oi2 
+                INNER JOIN product_list p ON p.id = oi2.product_id 
+                WHERE oi2.order_id = o.id 
+                ORDER BY oi2.product_id ASC 
+                LIMIT 1 OFFSET 1) AS more_product_name,
+
+                -- รูปภาพจากสินค้าชิ้นแรก
+                (SELECT p.image_path 
+                FROM order_items oi3 
+                INNER JOIN product_list p ON p.id = oi3.product_id 
+                WHERE oi3.order_id = o.id 
+                ORDER BY oi3.product_id ASC 
+                LIMIT 1 OFFSET 0) AS image_path
+
+              FROM order_list o
+              WHERE o.customer_id = '{$customer_id}'
+              ORDER BY o.date_updated DESC
+              LIMIT 5
+            ");
           }
           ?>
           <div class="position-relative">
             <div class="dropdown">
               <?php
+              // เช็กว่ามีแจ้งเตือนที่ยังไม่อ่าน
               $has_new_notif = false;
               if ($is_logged_in) {
                 $check_unseen = $conn->query("SELECT 1 FROM order_list WHERE customer_id = '{$customer_id}' AND is_seen = 0 LIMIT 1");
                 $has_new_notif = $check_unseen->num_rows > 0;
               }
               ?>
-              <a href="/?p=orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน" data-bs-toggle="dropdown" id="notifDropdown">
+
+              <a href="?p=user/orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน" data-toggle="dropdown" id="notifDropdown">
                 <i class="fa fa-bell icon-size position-relative">
                   <?php if ($has_new_notif): ?>
-                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                    </span>
                   <?php endif; ?>
                 </i>
               </a>
+
               <div class="dropdown-menu-notify">
                 <div class="dropdown-menu dropdown-menu-right ">
                   <?php if (!$is_logged_in): ?>
-                    <div class="dropdown-item text-muted text-center small">กรุณาเข้าสู่ระบบเพื่อดูแจ้งเตือน</div>
+                    <div class="dropdown-item text-muted text-center small">
+                      <p>กรุณาเข้าสู่ระบบเพื่อดูแจ้งเตือน</p>
+                      <a href="../login.php">เข้าสู่ระบบ</a>
+                    </div>
+
                   <?php elseif ($notif_qry->num_rows == 0): ?>
-                    <div class="dropdown-item text-muted text-center small">คุณยังไม่ได้สั่งสินค้า<br><a href="./?p=products" class="text-decoration-underline">ไปสั่งซื้อเลย!</a></div>
+                    <div class="dropdown-item text-muted text-center small">
+                      คุณยังไม่ได้สั่งสินค้า<br>
+                      <a href="./?p=products" class="text-decoration-underline">ไปสั่งซื้อเลย!</a>
+                    </div>
+
                   <?php else: ?>
                     <?php
                     function get_payment_text($status)
@@ -216,16 +257,26 @@ while ($type_row = $type_qry->fetch_assoc()) {
                       return ['ตรวจสอบคำสั่งซื้อ', 'กำลังเตรียมของ', 'แพ็กของแล้ว', 'กำลังจัดส่ง', 'จัดส่งสำเร็จ', 'จัดส่งไม่สำเร็จ', 'กำลังยกเลิกคำสั่งซื้อ', 'คืนของระหว่างทาง', 'กำลังคืนสินค้า', 'คืนของสำเร็จ', 'ยกเลิกแล้ว'][$status] ?? 'N/A';
                     }
                     while ($notif = $notif_qry->fetch_assoc()): ?>
-                      <a class="dropdown-item d-flex align-items-start gap-2" href="./?p=orders">
+
+                      <a class="dropdown-item d-flex align-items-start gap-2" href=" ./?p=user/orders">
                         <div class="d-flex align-items-center gap-2">
                           <img src="<?= validate_image($notif['image_path']) ?>" class="notif-thumb" alt="product">
-                          <div>
+                          <div class="">
                             <h6 class="mb-0">เลขที่คำสั่งซื้อ: <?= $notif['code'] ?></h6>
-                            <small class="text-truncate"><?= htmlentities($notif['product_name']) ?><?php if (!empty($notif['more_product_name'])): ?>, <?= htmlentities($notif['more_product_name']) ?><?php endif; ?></small><br>
-                            <small class="text-muted">สถานะการชำระเงิน: <b><?= get_payment_text($notif['payment_status']) ?></b> | สถานะการจัดส่ง: <b><?= get_delivery_text($notif['delivery_status']) ?></b></small>
+                            <small class="text-truncate">
+                              <?= htmlentities($notif['product_name']) ?>
+                              <?php if (!empty($notif['more_product_name'])): ?>
+                                , <?= htmlentities($notif['more_product_name']) ?>
+                              <?php endif; ?>
+                            </small><br>
+                            <small class="text-muted">
+                              สถานะการชำระเงิน: <b><?= get_payment_text($notif['payment_status']) ?></b> |
+                              สถานะการจัดส่ง: <b><?= get_delivery_text($notif['delivery_status']) ?></b>
+                            </small>
                           </div>
                         </div>
                       </a>
+
                       <div class="dropdown-divider"></div>
                     <?php endwhile; ?>
                   <?php endif; ?>
@@ -233,31 +284,55 @@ while ($type_row = $type_qry->fetch_assoc()) {
               </div>
             </div>
           </div>
+          <!-- end alert-->
         </li>
         <li class="nav-item dropdown">
           <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
-            <div class="dropdown">
-              <button type="button" class="dropdown-toggle user-dd-toggle" data-bs-toggle="dropdown">
-                <img src="<?= validate_image($_settings->userdata('avatar')) ?>" class="user-img-nav" alt="User">
-                <span class="user-name d-none d-lg-inline"><?= ucwords($_settings->userdata('firstname')) ?></span>
+            <div class="profile-menu">
+
+              <button type="button" id="profileMenuToggle" class="profile-menu_toggle">
+                <img src="<?= validate_image($_settings->userdata('avatar')) ?>" class="profile-menu_avatar" alt="User">
+                <span class="profile-menu_username d-none d-lg-inline"><?= ucwords($_settings->userdata('firstname')) ?></span>
+                <span class="profile-menu_caret fas fa-caret-down"></span>
               </button>
-              <div class="dropdown-menu user-dropdown-menu dropdown-menu-right">
-                <a class="dropdown-item" href="<?= base_url . '?p=user' ?>"><i class="fa-solid fa-user-circle"></i> บัญชีของฉัน</a>
-                <a class="dropdown-item" href="<?= base_url . '?p=cart_list' ?>"><i class="fa fa-basket-shopping"></i> ตะกร้าของฉัน</a>
-                <a class="dropdown-item" href="<?= base_url . '?p=user/orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>"><i class="fa fa-sign-out-alt"></i> ออกจากระบบ</a>
+
+              <div id="profileMenuContent" class="profile-menu__content">
+                <a class="profile-menu_item" href="<?= base_url . '?p=user' ?>">
+                  <i class="fa-solid fa-user-circle"></i>
+                  <span>บัญชีของฉัน</span>
+                </a>
+                <a class="profile-menu_item" href="<?= base_url . '?p=cart_list' ?>">
+                  <i class="fa fa-basket-shopping"></i>
+                  <span>ตะกร้าของฉัน</span>
+                </a>
+                <a class="profile-menu_item" href="<?= base_url . '?p=user/orders' ?>">
+                  <i class="fa fa-truck"></i>
+                  <span>ประวัติการสั่งซื้อ</span>
+                </a>
+                <div class="profile-menu_divider"></div>
+                <a class="profile-menu_item" href="<?= base_url . '/classes/Login.php?f=logout_customer' ?>">
+                  <i class="fa fa-sign-out-alt"></i>
+                  <span>ออกจากระบบ</span>
+                </a>
               </div>
             </div>
           <?php else: ?>
-            <div class="dropdown">
-              <button type="button" class="btn btn-rounded dropdown-toggle dropdown-icon text-white" data-bs-toggle="dropdown">
-                <i class="fas fa-user-circle icon-acc-size text-white" title="แอคเคานท์"></i>
+            <div class="account-menu">
+              <button type="button" id="accountMenuToggle" class="account-menu_toggle">
+                <i class="fas fa-user-circle icon-acc-size" title="แอคเคานท์"></i>
+                <span class="account-menu_caret fas fa-caret-down"></span>
               </button>
-              <div class="dropdown-menu user-dropdown-menu dropdown-menu-right" role="menu">
-                <a class="dropdown-item" href="./login.php"><i class="fa fa-sign-in-alt"></i> เข้าสู่ระบบ</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="./register.php"><i class="fa fa-user-plus"></i> สมัครสมาชิก</a>
+
+              <div id="accountMenuContent" class="account-menu_content" role="menu">
+                <a class="account-menu_item" href="./login.php">
+                  <i class="fa fa-sign-in-alt"></i>
+                  <span>เข้าสู่ระบบ</span>
+                </a>
+                <div class="account-menu_divider"></div>
+                <a class="account-menu_item" href="./register.php">
+                  <i class="fa fa-user-plus"></i>
+                  <span>สมัครสมาชิก</span>
+                </a>
               </div>
             </div>
           <?php endif; ?>
@@ -267,6 +342,12 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     <div class="d-flex d-lg-none align-items-center justify-content-end flex-nowrap">
       <ul class="navbar-nav flex-row align-items-center mb-0" style="gap: 0.8rem;">
+        <!-- icons -->
+        <li class="nav-item d-flex d-none align-items-center">
+          <a class="nav-link text-white p-0" href="#" data-toggle="modal" data-target="#mobileSearchModal" title="ค้นหาสินค้า">
+            <i class="fas fa-search icon-size"></i>
+          </a>
+        </li>
         <li class="nav-item position-relative">
           <a class="nav-link text-white p-0" href="./?p=cart_list" title="ตะกร้าสินค้า">
             <i class="fa fa-basket-shopping icon-size"></i>
@@ -277,15 +358,27 @@ while ($type_row = $type_qry->fetch_assoc()) {
             <?php endif; ?>
           </a>
         </li>
+
         <li class="nav-item position-relative">
-          <a href="/?p=orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน">
-            <i class="fa fa-bell icon-size position-relative">
-              <?php if ($has_new_notif): ?>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-              <?php endif; ?>
-            </i>
-          </a>
+          <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
+            <a href="./?p=user/orders" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน">
+              <i class="fa fa-bell icon-size position-relative">
+                <?php if ($has_new_notif): ?>
+                  <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+                <?php endif; ?>
+              </i>
+            </a>
+          <?php else: ?>
+            <a href="./login.php" class="text-white p-0 icon-alert notif-bell" title="แจ้งเตือน">
+              <i class="fa fa-bell icon-size position-relative">
+                <?php if ($has_new_notif): ?>
+                  <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+                <?php endif; ?>
+              </i>
+            </a>
+          <?php endif; ?>
         </li>
+
         <li class="nav-item d-flex align-items-center">
           <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
             <a href="<?= base_url . '?p=user' ?>" title="บัญชีของฉัน" class="d-flex align-items-center">
@@ -298,8 +391,10 @@ while ($type_row = $type_qry->fetch_assoc()) {
           <?php endif; ?>
         </li>
       </ul>
-      <button class="navbar-toggler ms-2" type="button" id="openSidebarBtn">
-        <span class="navbar-toggler-icon"></span>
+      <button class="hamburger-button" type="button" id="openSidebarBtn" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
       </button>
     </div>
   </div>
@@ -357,7 +452,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
         <nav class="nav flex-column pt-3">
           <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
             <a class="nav-link" href="<?= base_url . '?p=cart_list' ?>"> <i class="fa fa-basket-shopping"></i> ตะกร้าของฉัน</a>
-            <a class="nav-link" href="<?= base_url . '?p=orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
+            <a class="nav-link" href="<?= base_url . '?p=user/orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
             <div class="dropdown-divider"></div>
           <?php endif; ?>
           <h6 class="px-3 mt-2 mb-1 text-muted">ประเภทสินค้า</h6>
@@ -420,9 +515,9 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     // ถ้าเป็นมือถือ → redirect ไป orders ทันที
     document.querySelector(".notif-bell").addEventListener("click", function(e) {
-      if (window.innerWidth <= 1180) {
+      if (window.innerWidth <= 1023) {
         e.preventDefault(); // กัน dropdown เด้ง
-        window.location.href = "./?p=orders";
+        window.location.href = "../login.php";
       }
     });
   });
@@ -467,6 +562,32 @@ while ($type_row = $type_qry->fetch_assoc()) {
       });
     });
 
+    const accountMenu = document.querySelector('.account-menu');
+    const toggleButton = document.getElementById('accountMenuToggle');
+    const menuContent = document.getElementById('accountMenuContent');
+
+    // ตรวจสอบว่ามีปุ่มนี้ในหน้าเว็บจริง
+    if (toggleButton) {
+
+      // เมื่อ "คลิก" ที่ปุ่ม
+      toggleButton.addEventListener('click', function(event) {
+        // หยุดไม่ให้ event การคลิกกระจายไปที่อื่น
+        event.stopPropagation();
+
+        // สลับการใช้งานคลาส 'is-active' ที่กล่องครอบ
+        accountMenu.classList.toggle('is-active');
+      });
+
+      // เมื่อ "คลิก" ที่ส่วนใดๆ ของหน้าเว็บ
+      document.addEventListener('click', function(event) {
+        // ถ้าพื้นที่ที่คลิกไม่ได้อยู่ในเมนู และเมนูกำลังเปิดอยู่
+        if (!accountMenu.contains(event.target) && accountMenu.classList.contains('is-active')) {
+          // ให้เอาคลาส 'is-active' ออก (เพื่อปิดเมนู)
+          accountMenu.classList.remove('is-active');
+        }
+      });
+    }
+
     // --- Sidebar Controls ---
     const openSidebarBtn = document.getElementById('openSidebarBtn');
     const closeSidebarBtn = document.getElementById('closeSidebarBtn');
@@ -481,6 +602,27 @@ while ($type_row = $type_qry->fetch_assoc()) {
         // เพิ่มคลาสทั้งที่ html และ body
         document.body.classList.add('body-no-scroll');
         document.body.style.top = `-${scrollPosition}px`;
+      });
+    }
+
+    const profileMenu = document.querySelector('.profile-menu');
+    const profileMenuToggle = document.getElementById('profileMenuToggle');
+
+    // ตรวจสอบว่ามีเมนูนี้ในหน้าเว็บจริง (เผื่อเป็นหน้า guest)
+    if (profileMenu && profileMenuToggle) {
+
+      // เมื่อ "คลิก" ที่ปุ่ม
+      profileMenuToggle.addEventListener('click', function(event) {
+        event.stopPropagation(); // หยุดไม่ให้ event กระจายไปที่ document
+        profileMenu.classList.toggle('is-active');
+      });
+
+      // เมื่อ "คลิก" ที่ส่วนใดๆ ของหน้าเว็บ
+      document.addEventListener('click', function(event) {
+        // ถ้าเมนูกำลังเปิดอยู่ และไม่ได้คลิกภายในตัวเมนู
+        if (profileMenu.classList.contains('is-active') && !profileMenu.contains(event.target)) {
+          profileMenu.classList.remove('is-active'); // ให้ปิดเมนู
+        }
       });
     }
 
