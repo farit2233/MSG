@@ -654,7 +654,7 @@
 
 					if ($insert_stmt->execute()) {
 						// 4. เตรียมและส่งอีเมลไปยังผู้ใช้ (ส่วนนี้เหมือนเดิม)
-						$reset_link = "http://msgtest.test/reset_password.php?token=" . $token; // **สำคัญ:** เปลี่ยน yourwebsite.com เป็นโดเมนของคุณ
+						$reset_link = base_url .  "reset_password.php?token=" . $token; // **สำคัญ:** เปลี่ยน yourwebsite.com เป็นโดเมนของคุณ
 
 						$email_subject = "คำขอรีเซ็ตรหัสผ่านของคุณ";
 						$email_body = "
