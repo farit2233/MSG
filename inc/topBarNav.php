@@ -596,14 +596,32 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     if (openSidebarBtn) {
       openSidebarBtn.addEventListener('click', () => {
+        // 1. บันทึกตำแหน่ง scroll ปัจจุบัน
         scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
         mobileSidebar.classList.add('show');
         sidebarOverlay.classList.add('show');
-        // เพิ่มคลาสทั้งที่ html และ body
+
+        // 2. ล็อก Body และใช้ `top` ติดลบเพื่อคงตำแหน่งเดิมไว้
         document.body.classList.add('body-no-scroll');
         document.body.style.top = `-${scrollPosition}px`;
       });
     }
+
+    const closeSidebar = () => {
+      mobileSidebar.classList.remove('show');
+      sidebarOverlay.classList.remove('show');
+
+      // 3. ปลดล็อก Body และล้างค่า `top`
+      document.body.classList.remove('body-no-scroll');
+      document.body.style.top = '';
+
+      // 4. สั่งให้เลื่อนกลับไปยังตำแหน่งเดิมที่บันทึกไว้
+      window.scrollTo(0, scrollPosition);
+    };
+
+    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
     const profileMenu = document.querySelector('.profile-menu');
     const profileMenuToggle = document.getElementById('profileMenuToggle');
@@ -625,18 +643,6 @@ while ($type_row = $type_qry->fetch_assoc()) {
         }
       });
     }
-
-    const closeSidebar = () => {
-      mobileSidebar.classList.remove('show');
-      sidebarOverlay.classList.remove('show');
-      // ลบคลาสทั้งจาก html และ body
-      document.body.classList.remove('body-no-scroll');
-      document.body.style.top = '';
-      window.scrollTo(0, scrollPosition);
-    };
-
-    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
     // --- Search Form Submission ---
     function handleSearch(event) {

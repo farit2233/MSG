@@ -768,7 +768,11 @@ body.body-no-scroll {
     position: fixed;
     top: 0;
     right: 0;
-    height: 100%;
+    
+    /* --- หัวใจของการแก้ไข --- */
+    height: 100vh; /* Fallback สำหรับเบราว์เซอร์เก่า */
+    height: 100dvh;/* ★★★ ทำให้ความสูงปรับตามหน้าจอที่เห็นจริง! */
+    
     width: 311.5px;
     background: #fff;
     z-index: 1050;
@@ -809,6 +813,7 @@ body.body-no-scroll {
 .sidebar-body {
     flex-grow: 1;
     overflow-y: auto;
+    min-height: 0; /* <-- สำคัญมาก คงไว้นะครับ */
 }
 
 .sidebar-body .sidebar-search-form {
