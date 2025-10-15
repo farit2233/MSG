@@ -59,7 +59,10 @@
   transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0s;
 }
 
-
+.nav-item-hoverable:hover > .fos {
+    color: #ffffff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 255, 255, 0.3);
+}
 /* --- สไตล์ภายใน Mega Menu (เหมือนเดิมทุกประการ) --- */
 
 .mega-box {
@@ -82,20 +85,36 @@
   padding-left: 0;
 }
 
-.mega-menu-content ul li a {
+/* [ โค้ดแก้ไข ] 
+   เพิ่มความคมชัดของตัวอักษร 
+*/
+
+/* ================================================= */
+/* ==   [โค้ดแก้ไข] สไตล์ลิงก์ใน Mega Menu        == */
+/* ================================================= */
+
+/* --- 1. สไตล์ลิงก์ปกติ (สถานะเริ่มต้น) --- */
+.nav-item-hoverable .mega-menu-content ul li a {
   display: block;
   padding: 0.3rem 0.5rem;
-  color: #343a40 !important;
+  color: #343a40 !important;   /* สีตัวหนังสือเข้ม ชัดเจน */
+  background-color: transparent; /* พื้นหลังโปร่งใส ไม่ให้มีสีอื่นติดมา */
   text-decoration: none;
   border-radius: 4px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 400;             /* น้ำหนักตัวอักษรปกติ */
+  opacity: 1;                   /* ***สำคัญ: ทำให้ตัวหนังสือคมชัด ไม่โปร่งใส*** */
+  
+  /* เอฟเฟกต์การเปลี่ยนแปลงที่นุ่มนวล */
+  transition: background-color 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
 }
 
-.mega-menu-content ul li a:hover {
-  color: #f57421 !important;
-  background-color: #f1f1f1;
-}
 
+/* --- 2. สไตล์เมื่อเมาส์ชี้ (Hover State) --- */
+.nav-item-hoverable .mega-menu-content ul li a:hover {
+  color: #f57421 !important;   
+  background-color: #f5f5f5;  
+  opacity: 1;                   
+}
 /* ================================================================== */
 /* ส่วนที่ 2: CSS เดิมทั้งหมด (คงไว้ 100%) */
 /* ================================================================== */
