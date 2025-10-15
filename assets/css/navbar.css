@@ -24,7 +24,7 @@
   pointer-events: none; /* ป้องกันการคลิกตอนที่ซ่อนอยู่ */
   
   /* ทำให้การเคลื่อนไหวราบรื่น (แบบปกติ ไม่มี delay) */
-  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s;
+  transition: opacity 0.1s ease, transform 0.1s ease, visibility 0s 0.1s;
   
   /* สไตล์อื่นๆ เหมือนเดิมทั้งหมด */
   padding: 1.5rem 1rem;
@@ -65,9 +65,38 @@
 }
 /* --- สไตล์ภายใน Mega Menu (เหมือนเดิมทุกประการ) --- */
 
+/* ========================================================= */
+/* ==   [โค้ดแก้ไข] ทำให้ Mega Menu มี Scrollbar (สมบูรณ์) == */
+/* ========================================================= */
+
+/* --- 1. กล่องเนื้อหาหลัก --- */
 .mega-box {
-  max-width: 1140px;
-  margin: 0 auto;
+    max-height: 55vh;       /* กำหนดความสูงสูงสุดเหมือนเดิม */
+    overflow-y: auto;       /* ★ เปิดใช้งาน scrollbar "แนวตั้ง" (ขึ้น-ลง) */
+    overflow-x: hidden;     /* ★★★ ซ่อน scrollbar "แนวนอน" (ซ้าย-ขวา) ไปเลย */
+    padding-right: 10px;    /* (แนะนำ) เพิ่มช่องว่างด้านขวาเล็กน้อย ไม่ให้เนื้อหาชิด scrollbar เกินไป */
+}
+
+/* --- 2. สั่งให้แถวของคอลัมน์ (row) ยอมขึ้นบรรทัดใหม่ --- */
+.mega-box .row {
+    display: flex;          /* ★★★ ทำให้ row เป็น flex container */
+    flex-wrap: wrap;        /* ★★★ อนุญาตให้คอลัมน์ขึ้นบรรทัดใหม่เมื่อพื้นที่ไม่พอ */
+}
+
+/* --- 3. (เหมือนเดิม) ปรับสไตล์ Scrollbar ให้สวยงาม --- */
+.mega-box::-webkit-scrollbar {
+  width: 6px;
+}
+.mega-box::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.mega-box::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+.mega-box::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .mega-menu-content .list-header {
@@ -85,13 +114,7 @@
   padding-left: 0;
 }
 
-/* [ โค้ดแก้ไข ] 
-   เพิ่มความคมชัดของตัวอักษร 
-*/
 
-/* ================================================= */
-/* ==   [โค้ดแก้ไข] สไตล์ลิงก์ใน Mega Menu        == */
-/* ================================================= */
 
 /* --- 1. สไตล์ลิงก์ปกติ (สถานะเริ่มต้น) --- */
 .nav-item-hoverable .mega-menu-content ul li a {
