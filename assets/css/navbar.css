@@ -812,8 +812,9 @@ body.body-no-scroll {
 
 .sidebar-body {
     flex-grow: 1;
-    overflow-y: auto;
-    min-height: 0; /* <-- สำคัญมาก คงไว้นะครับ */
+    min-height: 0;
+    overflow-y: auto;    /* ★★★ ทำให้กล่องนี้มี Scrollbar เพียงอันเดียว ★★★ */
+    overflow-x: hidden;
 }
 
 .sidebar-body .sidebar-search-form {
@@ -936,42 +937,53 @@ body.body-no-scroll {
 }
 
 .sidebar-panels-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+    position: relative; /* ★★★ กำหนดเป็น relative เพื่อให้ panel ยึดเกาะ ★★★ */
+    /* ไม่ต้องกำหนด height, width หรือ overflow ที่นี่ */
 }
 
 .sidebar-panel {
+    background: #fff;
+    /* ★★★ ทำให้ Panel ทั้งสองมองไม่เห็นและไม่กินพื้นที่ในตอนแรก ★★★ */
+    visibility: hidden;
+    opacity: 0;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
-    background: #fff;
-    transition: transform 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
 }
-
 .sidebar-main-panel {
-    transform: translateX(0);
-    z-index: 2;
+    position: static; /* ★★★ ทำให้ panel หลักอยู่ใน flow เอกสารปกติ ★★★ */
+    visibility: visible;
+    opacity: 1;
 }
 
+/* Panel ย่อย: ซ่อนไว้และเตรียมสไลด์จากทางขวา */
 .sidebar-submenu-panel {
     transform: translateX(100%);
     z-index: 1;
 }
 
+/* เมื่อโชว์ Submenu: */
 .sidebar-panels-wrapper.show-submenu .sidebar-main-panel {
+    /* ซ่อน Panel หลัก โดยสไลด์ไปทางซ้าย */
+    visibility: hidden;
+    opacity: 0;
     transform: translateX(-100%);
-    z-index: 1;
 }
 
 .sidebar-panels-wrapper.show-submenu .sidebar-submenu-panel {
+    /* แสดง Panel ย่อย โดยสไลด์เข้ามาแทนที่ */
+    visibility: visible;
+    opacity: 1;
     transform: translateX(0);
-    z-index: 2;
 }
 
+/* เพิ่ม padding ด้านล่างให้เนื้อหาไม่ชิดขอบเกินไป เมื่อเลื่อนสุด */
+.sidebar-main-panel .nav,
+.sidebar-submenu-panel .nav {
+    padding-bottom: 2rem;
+}
 .back-to-main {
     margin: 1rem 0;
 }
