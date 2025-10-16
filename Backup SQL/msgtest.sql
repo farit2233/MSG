@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 06, 2025 at 09:52 AM
+-- Generation Time: Oct 16, 2025 at 06:31 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -39,8 +39,7 @@ CREATE TABLE `cart_list` (
 --
 
 INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
-(11, 48, 39, 1),
-(21, 19, 61, 1);
+(11, 48, 39, 1);
 
 -- --------------------------------------------------------
 
@@ -97,7 +96,14 @@ INSERT INTO `category_list` (`id`, `product_type_id`, `name`, `description`, `ot
 (30, 3, 'aaa', 'aaa', 1, 1, 1, '2025-09-05 16:06:48', '2025-09-05 16:08:36'),
 (31, 1, 'sadas', 'dassasd', 1, 1, 1, '2025-09-05 16:09:05', '2025-09-05 16:09:15'),
 (32, 1, 'afafasda', 'adasdasdasd', 1, 1, 1, '2025-09-05 16:12:30', '2025-09-05 16:12:46'),
-(33, 2, '1', '1', 0, 1, 1, '2025-09-11 11:28:37', '2025-09-11 11:28:42');
+(33, 2, '1', '1', 0, 1, 1, '2025-09-11 11:28:37', '2025-09-11 11:28:42'),
+(34, 20, 'ทดสอบ', '', 0, 1, 0, '2025-10-15 09:39:34', '2025-10-15 09:39:36'),
+(35, 21, 'ทดสอบ1', '', 0, 1, 0, '2025-10-15 09:39:43', '2025-10-15 09:39:43'),
+(36, 22, 'ทดสอบ2', '', 0, 1, 0, '2025-10-15 09:39:51', '2025-10-15 09:39:51'),
+(37, 23, 'ทดสอบ3', '', 0, 1, 0, '2025-10-15 09:40:01', '2025-10-15 09:40:01'),
+(38, 21, 'ทดสอบทดสอบ', '', 0, 0, 0, '2025-10-15 09:45:21', '2025-10-15 09:45:21'),
+(39, 21, 'ทดสอบทดสอบทดสอบ', '', 0, 1, 0, '2025-10-15 09:45:28', '2025-10-15 09:45:28'),
+(40, 21, 'ทดสอบทดสอบทดสอบทดสอบ', '', 0, 1, 0, '2025-10-15 09:45:36', '2025-10-15 09:45:36');
 
 -- --------------------------------------------------------
 
@@ -219,7 +225,8 @@ INSERT INTO `coupon_code_usage_logs` (`id`, `coupon_code_id`, `customer_id`, `or
 (41, 5, 19, 110, 50.00, 2, '2025-09-11 07:15:53'),
 (42, 5, 19, 2, 65.00, 1, '2025-09-12 04:55:18'),
 (43, 5, 19, 3, 65.00, 1, '2025-09-12 07:21:50'),
-(44, 16, 19, 15, 96.80, 1, '2025-10-06 07:59:05');
+(44, 16, 19, 15, 96.80, 1, '2025-10-06 07:59:05'),
+(45, 16, 19, 17, 1094.40, 1, '2025-10-10 08:04:02');
 
 -- --------------------------------------------------------
 
@@ -248,7 +255,8 @@ INSERT INTO `customer_addresses` (`id`, `customer_id`, `name`, `contact`, `addre
 (3, 19, 'นางสาวมลฑล ณ วิศัย', '082-888-9688', '21 ม.5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 0),
 (12, 19, 'นายฉันท์ชยา ภิญโญssss', '082-223-9898', '21/8', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 1),
 (15, 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง', 'อย่างซิ่ง', 'แซงหมด', 'ไม่มีเลี้ยว', '88888', 0),
-(17, 48, 'ฉันท์ชยา ภิญโญ', '0828398430', '21 ม.5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 1);
+(17, 48, 'ฉันท์ชยา ภิญโญ', '0828398430', '21 ม.5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 1),
+(18, 75, 'นายฉันท์ชยา ภิญโญ', '0828398430', '21 ม.5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 1);
 
 -- --------------------------------------------------------
 
@@ -290,7 +298,7 @@ INSERT INTO `customer_list` (`id`, `firstname`, `middlename`, `lastname`, `gende
 (16, 'เอกไม', '', 'ไมค์ทองคำ', 'Male', '023-858-9988', 'user4@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', NULL, NULL, '2025-06-17 13:17:23', '2025-06-17 13:17:23'),
 (17, 'นางสาวสามารถ', '', 'ทำได้ดี', 'Male', '068-888-9999', 'user5@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/17.png?v=1750141789', NULL, '2025-06-17 13:29:27', '2025-06-17 13:29:49'),
 (18, 'นายฉันท์ชยา', '', 'ภิญโญ', 'Male', '0828398430', 'faritre5566@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/18.png?v=1751264120', NULL, '2025-06-26 15:42:39', '2025-06-30 13:15:20'),
-(19, 'นางอัญมณี', 'ณ', 'คงสี', 'Female', '088-115-5458', 'faritre1@gmail.com', '$2y$10$R3opIXZef/UbI19/0VFVLOTkCn8wwPqteLnFNdEIGQFEYdQwEzG3K', 'uploads/customers/19.png?v=1758781935', '2025-10-06 16:51:04', '2025-06-26 15:48:41', '2025-10-06 16:51:04'),
+(19, 'นางอัญมณี', 'ณ', 'คงสี', 'Female', '088-115-5458', 'faritre1@gmail.com', '$2y$10$R3opIXZef/UbI19/0VFVLOTkCn8wwPqteLnFNdEIGQFEYdQwEzG3K', 'uploads/customers/19.png?v=1758781935', '2025-10-16 11:28:18', '2025-06-26 15:48:41', '2025-10-16 11:28:18'),
 (20, 'แมวหลาม', '', 'ซาบะ', 'Male', '011-555-6687', 'faritre4@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/20.png?v=1752809365', NULL, '2025-07-18 10:29:25', '2025-07-18 10:29:25'),
 (25, 'แชมเบอร์', '', 'สามช่า', 'Male', '011-999-7777', '1@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/25.png?v=1757393791', NULL, '2025-09-09 11:56:31', '2025-09-09 11:56:31'),
 (29, 'ปาล์ม', 'อมัจจ์', 'เดชสงคราม', 'Male', '0980624633', 'amat123450zx@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/29.png?v=1757673364', NULL, '2025-09-12 17:36:04', '2025-09-12 17:40:36'),
@@ -298,9 +306,10 @@ INSERT INTO `customer_list` (`id`, `firstname`, `middlename`, `lastname`, `gende
 (44, 'นางอัญมณีasdasd', '', 'คงสีaaa', 'Male', '0881155458', '333@gmail.com', '$2y$10$B.PUf0DE4PNa24ZHh46.QewXS9gkS9mmB3BmwARJYFR1RV4dsHme.', NULL, NULL, '2025-09-16 15:29:33', '2025-09-16 15:29:33'),
 (45, '1', '1', '1', 'Male', '01231456789', 'test1@gmail.com', '$2y$10$Wck6K95uN7w5SXA4qxnAz.QRI8rZQc7PjO28aODBB3lR9NpTbJKWW', 'uploads/customers/45.png?v=1758014169', NULL, '2025-09-16 16:16:09', '2025-09-16 16:16:09'),
 (46, '1', '1', '1', 'Male', '111111111111111', 'test2@gmail.com', '$2y$10$.o/t6M68vXIp30YGuzfafufu07sgSYVEJku/0ADtTVWHn.AqxJLgS', 'uploads/customers/46.png?v=1758014264', '2025-09-16 16:23:48', '2025-09-16 16:17:44', '2025-09-16 16:23:48'),
-(48, 'ฉันท์ชยา', '', 'ภิญโญ', 'Male', '0828398430', 'chanchayapinyo@gmail.com', '$2y$10$k8YvnBcdP/FdaUZ4KYuoYe9PMkWu.cG0hHJXIETOeXrUW4HOE8MMq', 'uploads/customers/48.png?v=1759286668', '2025-10-01 10:49:50', '2025-10-01 09:44:28', '2025-10-01 10:49:50'),
+(48, 'ฉันท์ชยา', '', 'ภิญโญ', 'Male', '0828398430', 'test111111@gmail.com', '$2y$10$k8YvnBcdP/FdaUZ4KYuoYe9PMkWu.cG0hHJXIETOeXrUW4HOE8MMq', 'uploads/customers/48.png?v=1759286668', '2025-10-01 10:49:50', '2025-10-01 09:44:28', '2025-10-15 15:10:25'),
 (73, 'มีนา', 'นะ', '88', 'Female', '0858987878', 'test12345@gmail.com', '$2y$10$nh1UWZTw5puqJL7rpxVPu.lqGTzFJ9dkzWCDjbeLt0q8LY3Msu0Gi', 'uploads/customers/73.png?v=1759718686', '2025-10-06 09:46:27', '2025-10-06 09:44:46', '2025-10-06 09:46:27'),
-(74, 'Blue', 'Sky', 'Hair', 'Female', '0856547541', 'test123456@gmail.com', '$2y$10$gmxuIh9F5LFvdPGMxsMn0Okh8H2Ix5Jh0LqIRoAT6IDy/e7zBFj2e', 'uploads/customers/74.png?v=1759725070', '2025-10-06 11:54:23', '2025-10-06 11:31:10', '2025-10-06 11:54:23');
+(74, 'Blue', 'Sky', 'Hair', 'Female', '0856547541', 'test123456@gmail.com', '$2y$10$gmxuIh9F5LFvdPGMxsMn0Okh8H2Ix5Jh0LqIRoAT6IDy/e7zBFj2e', 'uploads/customers/74.png?v=1759725070', '2025-10-06 11:54:23', '2025-10-06 11:31:10', '2025-10-06 11:54:23'),
+(75, 'ฉันท์ชยา', '', 'ภิญโญ', 'Male', '0828398430', 'chanchayapinyo@gmail.com', '$2y$10$U2jQSatqyKuViKG1pbbrLOEl38jpszOawjtOFfpwFkD5zwox5MRSm', 'uploads/customers/75.png?v=1760515704', '2025-10-16 11:52:51', '2025-10-15 15:07:40', '2025-10-16 11:52:51');
 
 -- --------------------------------------------------------
 
@@ -336,7 +345,12 @@ INSERT INTO `order_items` (`order_id`, `product_id`, `promotion_id`, `coupon_cod
 (12, 14, NULL, NULL, 1, 11298.00),
 (13, 25, NULL, NULL, 1, 594.00),
 (14, 40, NULL, NULL, 20, 59.00),
-(15, 33, 10, 16, 2, 242.00);
+(15, 33, 10, 16, 2, 242.00),
+(16, 61, NULL, NULL, 4, 144.00),
+(17, 61, 20, 16, 38, 144.00),
+(18, 14, NULL, NULL, 2, 11298.00),
+(18, 33, NULL, NULL, 3, 242.00),
+(18, 36, NULL, NULL, 1, 26960.00);
 
 -- --------------------------------------------------------
 
@@ -383,9 +397,12 @@ INSERT INTO `order_list` (`id`, `code`, `customer_id`, `name`, `contact`, `deliv
 (10, '2025100600003', 19, 'นายฉันท์ชยา ภิญโญssss', NULL, '21/8 นาท่ามเหนือ เมือง ตรัง 92190', 319.00, 0.00, 0.00, 3, 1, NULL, NULL, 0, 0, 0, 1, '2025-10-06 09:06:31', '2025-10-06 09:30:57'),
 (11, '2025100600004', 19, 'นายฉันท์ชยา ภิญโญssss', '082-223-9898', '21/8 นาท่ามเหนือ เมือง ตรัง 92190', 282.00, 0.00, 0.00, 3, 1, NULL, NULL, 0, 0, 0, 1, '2025-10-06 09:18:29', '2025-10-06 09:30:57'),
 (12, '2025100600005', 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง อย่างซิ่ง แซงหมด ไม่มีเลี้ยว 88888', 11348.00, 0.00, 0.00, 3, 2, NULL, NULL, 0, 0, 0, 1, '2025-10-06 09:29:52', '2025-10-06 09:30:57'),
-(13, '2025100600006', 19, 'นายฉันท์ชยา ภิญโญssss', '082-223-9898', '21/8 นาท่ามเหนือ เมือง ตรัง 92190', 634.00, 0.00, 0.00, 3, 1, NULL, NULL, 0, 0, 0, 1, '2025-10-06 09:33:07', '2025-10-06 09:33:24'),
-(14, '2025100600007', 19, 'นางสาวมลฑล ณ วิศัย', '082-888-9688', '21 ม.5 ถ.เพชรเกษม นาท่ามเหนือ เมือง ตรัง 92190', 1350.00, 0.00, 0.00, 3, 12, NULL, NULL, 4, 6, 0, 1, '2025-10-06 09:57:20', '2025-10-06 16:51:12'),
-(15, '2025100600008', 19, 'นายฉันท์ชยา ภิญโญssss', '082-223-9898', '21/8 นาท่ามเหนือ เมือง ตรัง 92190', 342.00, 145.20, 96.80, 40, 126, 10, 16, 0, 0, 0, 1, '2025-10-06 14:59:05', '2025-10-06 14:59:16');
+(13, '2025100600006', 19, 'นายฉันท์ชยา ภิญโญssss', '082-223-9898', '21/8 นาท่ามเหนือ เมือง ตรัง 92190', 634.00, 0.00, 0.00, 3, 1, NULL, NULL, 2, 3, 0, 1, '2025-10-06 09:33:07', '2025-10-10 09:34:58'),
+(14, '2025100600007', 19, 'นางสาวมลฑล ณ วิศัย', '082-888-9688', '21 ม.5 ถ.เพชรเกษม นาท่ามเหนือ เมือง ตรัง 92190', 1350.00, 0.00, 0.00, 3, 12, NULL, NULL, 6, 10, 0, 1, '2025-10-06 09:57:20', '2025-10-10 09:34:58'),
+(15, '2025100600008', 19, 'นายฉันท์ชยา ภิญโญssss', '082-223-9898', '21/8 นาท่ามเหนือ เมือง ตรัง 92190', 342.00, 145.20, 96.80, 40, 126, 10, 16, 2, 4, 0, 1, '2025-10-06 14:59:05', '2025-10-09 16:31:04'),
+(16, '2025100900001', 19, 'นายฉันท์ชยา ภิญโญssss', '082-223-9898', '21/8 นาท่ามเหนือ เมือง ตรัง 92190', 626.00, 0.00, 0.00, 3, 2, NULL, NULL, 2, 4, 0, 1, '2025-10-09 16:26:46', '2025-10-10 09:34:58'),
+(17, '2025101000001', 19, 'นายฉันท์ชยา ภิญโญssss', '082-223-9898', '21/8 นาท่ามเหนือ เมือง ตรัง 92190', 4377.60, 0.00, 1094.40, 7, 82, 20, 16, 0, 0, 0, 1, '2025-10-10 15:04:02', '2025-10-14 14:51:48'),
+(18, '2025101500001', 75, 'นายฉันท์ชยา ภิญโญ', '0828398430', '21 ม.5 ถ.เพชรเกษม นาท่ามเหนือ เมือง ตรัง 92190', 50372.00, 0.00, 0.00, 7, 68, NULL, NULL, 2, 3, 0, 0, '2025-10-15 15:16:39', '2025-10-15 15:26:07');
 
 -- --------------------------------------------------------
 
@@ -411,7 +428,11 @@ INSERT INTO `password_resets` (`id`, `customer_id`, `token`, `expires_at`) VALUE
 (6, 19, 'dea88dfd8001ece1c463b874e9fe6a8a3befe91393e3c51c7333daf392fc8c7d', '2025-09-19 11:48:06'),
 (7, 19, 'b0f34364f39de9f2881b379ac6a4f55d1fbf38c40cd87616aa1e46061de8d0d8', '2025-09-19 11:48:33'),
 (8, 19, '74316a3295a0e11614b53fcb7a7f330cf22bad75c0f2bf9d2e200009b002d97c', '2025-09-19 11:49:12'),
-(12, 19, 'a2a9d3d162ebf6da086e36413c2d962ec0fdad46dd0abe7aee9d24b0fa7d4279', '2025-09-30 12:54:06');
+(12, 19, 'a2a9d3d162ebf6da086e36413c2d962ec0fdad46dd0abe7aee9d24b0fa7d4279', '2025-09-30 12:54:06'),
+(14, 75, '2be7a95ad3cc617d01f7a9490d385e8e3db8cb0be2ef8babc5b2f21b51c4c768', '2025-10-15 16:30:50'),
+(15, 75, '2ecad0698253ef043e47f078d87ace43958703177451aed589d986282f3fe995', '2025-10-15 16:34:15'),
+(16, 75, '739bf93e6d9d2344183b3e78c9eee6ddb2029ce0dcffa89a6f20013106e30eff', '2025-10-15 16:34:19'),
+(17, 19, '81a66d916fd1ddb4a24ed8340115c3f75d99eda485d38bcb7da61e00a2c308fb', '2025-10-15 16:34:45');
 
 -- --------------------------------------------------------
 
@@ -680,7 +701,11 @@ INSERT INTO `product_type` (`id`, `name`, `description`, `other`, `status`, `del
 (16, 'sadasd;laskdlaksdasdsdd', 'sdas;dlkasdlaks&#039;;laksdsadasdasdsdasd', 1, 1, 1, '2025-09-05 15:48:27', '2025-09-05 15:51:09'),
 (17, 'adad', 'adadadad', 1, 1, 1, '2025-09-05 16:12:08', '2025-09-05 16:12:13'),
 (18, '1', '1', 0, 1, 1, '2025-09-11 11:28:25', '2025-09-11 11:28:30'),
-(19, 'ทดสอบ', '', 0, 1, 1, '2025-09-12 11:39:51', '2025-09-12 11:39:59');
+(19, 'ทดสอบ', '', 0, 1, 1, '2025-09-12 11:39:51', '2025-09-12 11:39:59'),
+(20, 'ทดสอบ', 'ทดสอบ', 0, 1, 0, '2025-10-15 09:38:44', '2025-10-15 09:38:44'),
+(21, 'ทดสอบ1', 'ทดสอบ', 0, 1, 0, '2025-10-15 09:38:52', '2025-10-15 09:38:52'),
+(22, 'ทดสอบ2', 'ทดสอบ', 0, 1, 0, '2025-10-15 09:38:59', '2025-10-15 09:38:59'),
+(23, 'ทดสอบ3', 'ทดสอบ', 0, 1, 0, '2025-10-15 09:39:07', '2025-10-15 09:39:07');
 
 -- --------------------------------------------------------
 
@@ -710,7 +735,7 @@ CREATE TABLE `promotions_list` (
 --
 
 INSERT INTO `promotions_list` (`id`, `promotion_category_id`, `name`, `description`, `image_path`, `type`, `discount_value`, `minimum_order`, `start_date`, `end_date`, `status`, `delete_flag`, `date_created`, `date_updated`) VALUES
-(10, 10, 'โปรโมชั่น 8.8 !', 'พบกับส่วนลดพิเศษทั้งร้านค้าต้อนรับ 8.8 ! ลดหนัก ลดกันไปเลย 30 % !', 'uploads/promotions/promo_689db31d6e8fb_1755165469.png?v=1755165469', 'percent', 30, 300, '2025-08-06 09:18:00', '2025-10-08 09:18:00', 1, 0, '2025-08-06 09:18:27', '2025-09-03 09:00:14'),
+(10, 10, 'โปรโมชั่น 8.8 !', 'พบกับส่วนลดพิเศษทั้งร้านค้าต้อนรับ 8.8 ! ลดหนัก ลดกันไปเลย 30 % !', 'uploads/promotions/promo_689db31d6e8fb_1755165469.png?v=1755165469', 'percent', 30, 300, '2025-08-06 09:18:00', '2025-10-31 09:18:00', 1, 0, '2025-08-06 09:18:27', '2025-10-10 14:03:14'),
 (11, 10, 'ลดล้างสต๊อก', 'ลดล้างสต๊อก\r\nลดล้างสต๊อกลดล้างสต๊อกลดล้างสต๊อก', 'uploads/promotions/promo_689daed0bca7e_1755164368.png?v=1755164368', 'percent', 90, 0, '2025-08-06 16:01:00', '2025-08-07 16:01:00', 0, 0, '2025-08-06 16:01:33', '2025-08-27 11:31:27'),
 (12, 10, 'ส่งฟรีไม่มีขั้นต่ำ', 'ส่งฟรีไม่มีขั้นต่ำ', 'uploads/promotions/promo_689db326cfea5_1755165478.png?v=1755165478', 'free_shipping', 0, 0, '2025-08-07 13:56:00', '2025-08-21 13:56:00', 0, 0, '2025-08-07 13:56:10', '2025-08-27 11:31:27'),
 (13, 10, 'ลดราคา 100 บาท', 'สั่งซื้อครบ 20 บาท ลดเลย 100 บาท !', 'uploads/promotions/promo_689db32dcf831_1755165485.png?v=1755165485', 'fixed', 100, 20, '2025-08-08 09:31:00', '2025-08-22 09:31:00', 0, 0, '2025-08-08 09:31:56', '2025-08-27 11:31:27'),
@@ -719,7 +744,8 @@ INSERT INTO `promotions_list` (`id`, `promotion_category_id`, `name`, `descripti
 (16, 10, 'ลดเลยทันที 40% !!!', 'ลดหนัก ๆ จัดกันจุก ๆ ลดทันที 40% !!!', 'uploads/promotions/promo_68a3ebac39e7f_1755573164.png?v=1755573164', 'percent', 40, 0, '2025-08-19 10:12:00', '2025-10-01 10:12:00', 0, 0, '2025-08-19 10:12:44', '2025-10-01 10:12:14'),
 (17, 11, 'NEWYEAR', 'NEWYEAR', 'uploads/promotions/promo_68b03dfa5a685_1756380666.jpg?v=1756380666', 'free_shipping', 0, 0, '2025-08-28 18:31:00', '2025-08-29 18:31:00', 0, 0, '2025-08-28 18:31:06', '2025-08-29 18:31:14'),
 (18, 12, 'วันเด็กแสนซน', 'วันเด็กแสนซน ส่งฟรีทุกสินค้า', 'uploads/promotions/promo_68b0432ee5c92_1756381998.png?v=1756381999', 'free_shipping', 0, 0, '2025-08-28 18:53:00', '2025-08-29 18:53:00', 0, 0, '2025-08-28 18:53:19', '2025-08-29 18:53:14'),
-(20, 21, 'สินค้าใหม่', 'สินค้าใหม่', 'uploads/promotions/promo_68cd0b9590957_1758268309.png?v=1758268310', 'percent', 0, 0, '2025-09-19 14:51:00', '2025-09-30 14:51:00', 0, 0, '2025-09-19 14:51:50', '2025-09-30 14:51:14');
+(20, 21, 'สินค้าใหม่', 'สินค้าใหม่', 'uploads/promotions/promo_68cd0b9590957_1758268309.png?v=1758268310', 'free_shipping', 0, 0, '2025-10-10 14:51:00', '2025-10-31 14:51:00', 1, 0, '2025-09-19 14:51:50', '2025-10-10 15:03:19'),
+(21, 21, 'ทดสอบ', '', 'uploads/promotions/promo_68e8baef9648b_1760082671.png?v=1760082672', 'fixed', 500, 500, '2025-10-10 14:50:00', '2025-10-31 14:50:00', 1, 0, '2025-10-10 14:51:12', '2025-10-10 14:51:12');
 
 -- --------------------------------------------------------
 
@@ -761,7 +787,8 @@ INSERT INTO `promotion_category` (`id`, `name`, `description`, `status`, `delete
 (18, 'ฟหก', 'ฟหก', 0, 1, '2025-09-11 04:44:23', '2025-09-11 06:49:09'),
 (19, 'ห', 'ห', 0, 1, '2025-09-11 04:44:32', '2025-09-11 06:49:11'),
 (20, 'ๅ', 'ๅ', 0, 1, '2025-09-11 05:57:46', '2025-09-11 06:49:14'),
-(21, 'สินค้าใหม่', '', 1, 0, '2025-09-19 04:44:33', '2025-09-19 04:44:33');
+(21, 'สินค้าใหม่', '', 1, 0, '2025-09-19 04:44:33', '2025-10-10 07:50:16'),
+(22, 'ทดสอบ', '', 1, 0, '2025-10-10 07:50:32', '2025-10-10 07:50:32');
 
 -- --------------------------------------------------------
 
@@ -862,7 +889,8 @@ INSERT INTO `promotion_usage_logs` (`id`, `promotion_id`, `customer_id`, `order_
 (58, 16, 19, 1, 217.20, 1, '2025-09-15 09:00:36'),
 (59, 20, 19, 3, 0.00, 1, '2025-09-26 02:24:29'),
 (60, 16, 19, 5, 10784.00, 1, '2025-09-26 02:29:59'),
-(61, 10, 19, 15, 145.20, 1, '2025-10-06 07:59:05');
+(61, 10, 19, 15, 145.20, 1, '2025-10-06 07:59:05'),
+(62, 20, 19, 17, 240.00, 1, '2025-10-10 08:04:02');
 
 -- --------------------------------------------------------
 
@@ -1009,7 +1037,6 @@ INSERT INTO `stock_list` (`id`, `product_id`, `code`, `quantity`, `date_created`
 (4, 14, 'GALAX1001', 1000.00, '2025-09-15 15:00:39', '2025-09-15 15:00:39'),
 (5, 25, 'XKT-02-BT0001', 1000.00, '2025-09-15 15:01:01', '2025-09-15 15:01:01'),
 (6, 23, 'SSMG101', 1000.00, '2025-09-15 15:01:11', '2025-09-15 15:01:11'),
-(7, 61, 'AmericanoCup', 1000.00, '2025-09-15 15:01:18', '2025-09-15 15:01:18'),
 (8, 39, 'CIVAGO1001', 1000.00, '2025-09-15 15:01:25', '2025-09-15 15:01:25'),
 (9, 22, 'FIIO101', 1000.00, '2025-09-15 15:01:35', '2025-09-15 15:01:35'),
 (10, 21, 'IHCPUH101', 1000.00, '2025-09-15 15:01:42', '2025-09-15 15:01:42'),
@@ -1023,7 +1050,8 @@ INSERT INTO `stock_list` (`id`, `product_id`, `code`, `quantity`, `date_created`
 (18, 33, 'SF-9-140001', 1000.00, '2025-09-15 15:03:02', '2025-09-15 15:03:02'),
 (19, 37, 'TR010001', 1000.00, '2025-09-15 15:03:11', '2025-09-15 15:03:11'),
 (20, 34, 'NTE-001', 1000.00, '2025-09-15 15:03:28', '2025-09-15 15:03:28'),
-(21, 40, 'SW001', 1000.00, '2025-09-15 15:03:35', '2025-09-15 15:03:35');
+(24, 61, 'ACC00001', 120.00, '2025-10-10 09:10:53', '2025-10-10 09:10:53'),
+(25, 40, 'SW0001', 120.00, '2025-10-10 09:14:57', '2025-10-10 09:14:57');
 
 -- --------------------------------------------------------
 
@@ -1051,14 +1079,16 @@ INSERT INTO `stock_out` (`id`, `order_id`, `stock_id`, `quantity`, `date_created
 (5, 5, 17, 1, '2025-09-26 09:29:59'),
 (6, 6, 9, 1, '2025-09-26 09:33:00'),
 (7, 7, 4, 1, '2025-10-01 09:00:46'),
-(8, 8, 7, 1, '2025-10-06 08:57:44'),
 (9, 9, 6, 1, '2025-10-06 09:02:51'),
 (10, 10, 6, 1, '2025-10-06 09:06:31'),
 (11, 11, 18, 1, '2025-10-06 09:18:29'),
 (12, 12, 4, 1, '2025-10-06 09:29:52'),
 (13, 13, 5, 1, '2025-10-06 09:33:07'),
-(14, 14, 21, 20, '2025-10-06 09:57:20'),
-(15, 15, 18, 2, '2025-10-06 14:59:05');
+(15, 15, 18, 2, '2025-10-06 14:59:05'),
+(17, 17, 24, 38, '2025-10-10 15:04:02'),
+(18, 18, 4, 2, '2025-10-15 15:16:39'),
+(19, 18, 18, 3, '2025-10-15 15:16:39'),
+(20, 18, 17, 1, '2025-10-15 15:16:39');
 
 -- --------------------------------------------------------
 
@@ -1117,11 +1147,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `firstname`, `middlename`, `lastname`, `username`, `password`, `avatar`, `last_login`, `type`, `date_added`, `date_updated`) VALUES
-(1, 'Admin', '4', 'Administrator', 'admin', '$2y$10$3AGnyajq0J3ui0/DIlsMd.7mk3napfyKKnxug8UL38Abz3lWociq2', 'uploads/avatars/1.png', '2025-10-06 13:40:33', 1, '2021-01-20 14:02:37', '2025-10-06 13:40:33'),
+(1, 'Admin', '4', 'Administrator', 'admin', '$2y$10$3AGnyajq0J3ui0/DIlsMd.7mk3napfyKKnxug8UL38Abz3lWociq2', 'uploads/avatars/1.png', '2025-10-15 15:28:31', 1, '2021-01-20 14:02:37', '2025-10-15 15:28:31'),
 (8, 'Claire', '', 'Blake', 'cblake', 'cd74fae0a3adf459f73bbf187607ccea', 'uploads/avatars/8.png?v=1675047323', NULL, 2, '2023-01-30 10:55:23', '2023-01-30 10:55:23'),
 (9, 'Staff', '', 'Staff', 'staff1', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/avatars/9.png?v=1757391282', NULL, 2, '2025-05-19 16:21:57', '2025-09-17 11:56:43'),
 (10, 'Staffฟๆ', '', '2', 'staff2', '$2y$10$dkGh3arZQPGctYHUAmJ.VOSEd2BzAoUL6EKLIx3REijCBeQhEWWp2', 'uploads/avatars/10.png', '2025-09-17 13:18:30', 2, '2025-09-09 11:39:26', '2025-09-17 13:18:30'),
-(11, 'Staff', '', '2', 'staff', '$2y$10$Y4tlza9d75K32YGMCJ8ktuTamdn3jm1uIw8EsgYQoVB4GjFXmGMCi', 'uploads/avatars/11.png', '2025-09-17 16:09:27', 2, '2025-09-17 11:59:39', '2025-09-17 16:25:24'),
+(11, 'Staff', '', 'Yellow', 'staff', '$2y$10$VaxawPZ9HmrvLuuBr/yzwOnSZ8opRXyM10zoICEe26p94Q9TdSfPS', 'uploads/avatars/11.png', '2025-10-10 09:16:13', 2, '2025-09-17 11:59:39', '2025-10-10 09:16:13'),
 (12, 'Admin', '', 'Teng', 'adminTeng', '$2y$10$yfpbHcpfPOHicaA8qC8lS.60mJnfabN0oiuAwDFVPBAQLvvfLP/zq', 'uploads/avatars/12.png', '2025-09-19 11:26:32', 1, '2025-09-19 11:25:27', '2025-09-19 11:27:09'),
 (13, 'Admin', 'a', 'Moeyes', 'adminmoeye', '$2y$10$rqhcKidEIy3A0WKRHF98eeUBFgyXXWarinMcZ2osmsyMxsEaK7wPu', 'uploads/avatars/13.png', NULL, 1, '2025-09-19 11:28:36', '2025-10-06 10:53:50'),
 (14, 'Staff', '', 'Main', 'staff0', '$2y$10$FFPCoIsQ8uBARGoT4A5b7.ghoj0BTpQaTE9cu14hkS55cCoAl4jka', 'uploads/avatars/14.png', '2025-10-01 11:09:13', 2, '2025-10-01 11:08:50', '2025-10-01 11:09:13'),
@@ -1330,13 +1360,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `category_list`
 --
 ALTER TABLE `category_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `coupon_code_list`
@@ -1354,31 +1384,31 @@ ALTER TABLE `coupon_code_products`
 -- AUTO_INCREMENT for table `coupon_code_usage_logs`
 --
 ALTER TABLE `coupon_code_usage_logs`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `customer_addresses`
 --
 ALTER TABLE `customer_addresses`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `customer_list`
 --
 ALTER TABLE `customer_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `password_resets`
 --
 ALTER TABLE `password_resets`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `product_image_path`
@@ -1396,19 +1426,19 @@ ALTER TABLE `product_list`
 -- AUTO_INCREMENT for table `product_type`
 --
 ALTER TABLE `product_type`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `promotions_list`
 --
 ALTER TABLE `promotions_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `promotion_category`
 --
 ALTER TABLE `promotion_category`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `promotion_products`
@@ -1420,7 +1450,7 @@ ALTER TABLE `promotion_products`
 -- AUTO_INCREMENT for table `promotion_usage_logs`
 --
 ALTER TABLE `promotion_usage_logs`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT for table `shipping_methods`
@@ -1444,13 +1474,13 @@ ALTER TABLE `shipping_providers`
 -- AUTO_INCREMENT for table `stock_list`
 --
 ALTER TABLE `stock_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `stock_out`
 --
 ALTER TABLE `stock_out`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `system_info`
