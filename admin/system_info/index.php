@@ -89,7 +89,7 @@
 						<textarea name="content[about]" cols="30" rows="6" class="form-control summernote"><?php echo  is_file(base_app . 'about.html') ? file_get_contents(base_app . 'about.html') : "" ?></textarea>
 					</div>
 					<div class="form-group">
-						<label for="" class="control-label head-label">โลโก้เว็บ</label>
+						<label for="" class="control-label head-label">โลโก้เว็บ <small>200x200px</small></label>
 						<div class="custom-file">
 							<input type="file" class="custom-file-input rounded-circle" id="customFile1" name="img" onchange="displayImg(this,$(this))">
 							<label class="custom-file-label text-size-input" for="customFile1">เลือกไฟล์ </label>
@@ -109,7 +109,7 @@
 						<img src="<?php echo validate_image($_settings->info('cover')) ?>" alt="" id="cimg2" class="img-fluid img-thumbnail">
 					</div>
 					<div class="form-group">
-						<label for="" class="control-label head-label">ภาพสไลด์หน้าเว็บ</label>
+						<label for="" class="control-label head-label">ภาพสไลด์หน้าเว็บ <small>1920x600px</small></label>
 						<div class="custom-file">
 							<input type="file" class="custom-file-input rounded-circle" id="customFile3" name="banners[]" multiple accept=".png,.jpg,.jpeg" onchange="displayImg3(this,$(this))">
 							<label class="custom-file-label text-size-input" for="customFile3">เลือกไฟล์ </label>
