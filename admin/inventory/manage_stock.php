@@ -58,7 +58,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 },
                 success: function(resp) {
                     if (typeof resp == 'object' && resp.status == 'success') {
-                        location.reload()
+                        location.replace('./?page=inventory')
                     } else if (resp.status == 'failed' && !!resp.msg) {
                         el.text(resp.msg)
                         _this.prepend(el)

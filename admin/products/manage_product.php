@@ -802,7 +802,7 @@ if (isset($id)) {
 				},
 				success: function(resp) {
 					if (typeof resp == 'object' && resp.status == 'success') {
-						location.href = "./?page=products/manage_product&id=" + resp.pid;
+						location.href = "./?page=products";
 					} else if (resp.status == 'failed' && !!resp.msg) {
 						var el = $('<div>');
 						el.addClass("alert alert-danger err-msg").text(resp.msg);
