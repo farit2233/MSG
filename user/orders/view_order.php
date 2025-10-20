@@ -194,6 +194,8 @@ if (!function_exists('format_price_custom')) {
             <div class="mb-3">
                 <label class="control-label head-detail">บริษัทขนส่ง :</label>
                 <div class="pl-4 ">
+                    <?= htmlentities($tracking_id ?: 'ไม่พบเลขขนส่ง') ?>
+                    <br>
                     <?= htmlentities($shipping_methods_name) ?>
                     <br>
                     น้ำหนักรวม: <?= number_format($total_weight, 0) ?> กรัม
