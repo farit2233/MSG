@@ -93,6 +93,24 @@
         </div>
       </div>
 
+      <div class="modal fade" id="uni_modal_tracking" role='dialog'>
+        <div class="modal-dialog modal-md modal-dialog-centered rounded-0" role="document">
+          <div class="modal-content rounded-0">
+            <div class="modal-header">
+              <h5 class="modal-title"></h5>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+              <!-- ปุ่มยกเลิก -->
+              <button type="button" class="btn btn-light border rounded shadow-sm" data-dismiss="modal">ยกเลิก</button>
+              <!-- ปุ่มเพิ่มสินค้าที่เลือก -->
+              <button type="button" class="btn btn-primary rounded shadow-sm" id="submit" onclick="$('#uni_modal form').submit()">บันทึก</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- /.content -->
       <div class="modal fade" id="uni_modal_promotion" role='dialog'>
         <div class="modal-dialog modal-md modal-dialog-centered rounded-0" role="document">

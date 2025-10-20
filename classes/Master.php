@@ -1574,6 +1574,55 @@ class Master extends DBConnection
 	}
 
 
+	function update_tracking_id()
+	{
+		// 1. รับค่าจาก POST โดยตรง (ปลอดภัยกว่า extract)
+		//    และตรวจสอบว่ามีค่าส่งมาหรือไม่
+		$tracking_id = $_POST['tracking_id'] ?? null;
+		$id = $_POST['id'] ?? null;
+
+		// 2. ตรวจสอบว่ามี ID ของออเดอร์ส่งมาหรือไม่
+		if (empty($id)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'ไม่พบ ID ของออเดอร์';
+			return json_encode($resp);
+		}
+
+		// 3. เตรียมคำสั่ง SQL (แก้ไข Syntax ที่ผิด และใช้ ? แทนค่า)
+		//    (ลบ , หน้า WHERE ออกแล้ว)
+		$sql = "UPDATE `order_list` 
+            SET `tracking_id` = ? 
+            WHERE `id` = ?";
+
+		// 4. ใช้ Prepared Statement เพื่อป้องกัน SQL Injection
+		$stmt = $this->conn->prepare($sql);
+
+		// 5. ผูกตัวแปรเข้ากับ ?
+		// "s" = string (สำหรับ tracking_id)
+		// "i" = integer (สำหรับ id) 
+		// (ถ้า id ของคุณเป็นตัวอักษร ให้ใช้ "s" แทน "i" -> "ss")
+		$stmt->bind_param("si", $tracking_id, $id);
+
+		// 6. สั่งทำงาน
+		$update = $stmt->execute();
+
+		// 7. ส่วนการแจ้งเตือน (คงไว้เหมือนเดิม)
+		if ($update) {
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success', "อัปเดตเลขขนส่งเรียบร้อยแล้ว");
+		} else {
+			$resp['status'] = 'failed';
+			// ใช้ $stmt->error แทน $this->conn->error จะให้ข้อมูลที่ดีกว่า
+			$resp['msg'] = $stmt->error;
+		}
+
+		// 8. ปิด statement
+		$stmt->close();
+
+		return json_encode($resp);
+	}
+
+
 	function update_order_status()
 	{
 		extract($_POST);
@@ -2690,6 +2739,9 @@ switch ($action) {
 		break;
 	case 'delete_order':
 		echo $Master->delete_order();
+		break;
+	case 'update_tracking_id':
+		echo $Master->update_tracking_id();
 		break;
 	case 'update_order_status':
 		echo $Master->update_order_status();

@@ -105,11 +105,12 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                         <button class="btn btn-navy btn-sm bg-gradient-navy rounded-0 mb-1" type="button" id="print">
                             <i class="fa fa-print"></i> พิมพ์
                         </button>
-                        <?php if (isset($status) && $status < 4): ?>
-                            <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="update_status">
-                                อัปเดตสถานะ
-                            </button>
-                        <?php endif; ?>
+                        <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="update_status">
+                            อัปเดตสถานะ
+                        </button>
+                        <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="update_tracking">
+                            อัปเดตเลขขนส่ง
+                        </button>
                     </div>
                 </div>
 
@@ -223,6 +224,8 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                     <div class="mb-3">
                                         <label class="control-label head-detail">บริษัทขนส่ง :</label>
                                         <div class="pl-4 ">
+                                            <?= htmlentities($tracking_id ?: 'ไม่พบเลขขนส่ง') ?>
+                                            <br>
                                             <?= htmlentities($shipping_methods_name) ?>
                                             <br>
                                             น้ำหนักรวม: <?= number_format($total_weight, 0) ?> กรัม
@@ -374,6 +377,9 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
         })
         $('#update_status').click(function() {
             uni_modal_order("อัปเดตสถานะ <small>*บันทึกเพื่ออัปเดตสถานะคำสั่งซื้อ และส่งอีเมล์</small>", "orders/update_status.php?id=<?= isset($id) ? $id : '' ?>")
+        })
+        $('#update_tracking').click(function() {
+            uni_modal_tracking("อัปเดตเลขขนส่ง <small>*บันทึกเพื่ออัปเดตสถานะเลขขนส่ง</small>", "orders/update_tracking.php?id=<?= isset($id) ? $id : '' ?>")
         })
     })
 
