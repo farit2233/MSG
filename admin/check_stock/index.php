@@ -113,7 +113,7 @@ $sql = "
     SELECT 
         pl.id,
         pl.name,
-        (SELECT sl.code FROM `stock_list` sl WHERE sl.product_id = pl.id LIMIT 1) as sku,
+        (SELECT sl.sku FROM `stock_list` sl WHERE sl.product_id = pl.id LIMIT 1) as sku,
         (
             COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = pl.id), 0)
             -

@@ -23,8 +23,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         <input type="hidden" name="id" value='<?= isset($id) ? $id : '' ?>'>
         <input type="hidden" name="product_id" value='<?= isset($product_id) ? $product_id : (isset($_GET['pid']) ? $_GET['pid'] : '') ?>'>
         <div class="form-group">
-            <label for="code" class="control-label">รหัสสต๊อกสินค้า</label>
-            <input type="text" class="form-control form-control-sm rounded-0 text-size-input" name="code" id="code" required="required" value="<?= isset($code) ? $code : '' ?>">
+            <label for="sku" class="control-label">SKU</label>
+            <input type="text" class="form-control form-control-sm rounded-0 text-size-input" name="sku" id="sku" required="required" value="<?= isset($sku) ? $sku : '' ?>">
         </div>
         <div class="form-group">
             <label for="quantity" class="control-label">จำนวน</label>

@@ -267,15 +267,8 @@ if (isset($id)) {
 						<label>รายละเอียดสินค้า</label>
 						<textarea name="description" rows="3" class="form-control"><?= isset($description) ? $description : '' ?></textarea>
 					</div>
-					<div class="row">
+					<!--div class="row">
 						<div class="col-md-6">
-							<div class="form-group">
-								<label>รหัสสินค้า (SKU) <span class="text-danger">*</span></label>
-								<input type="text" name="sku" class="form-control" value="<?= isset($sku) ? $sku : '' ?>" required>
-							</div>
-						</div>
-
-						<!--div class="col-md-6">
 							<div class="form-group">
 								<label>ราคา <span class="text-danger">*</span></label>
 								<div class="input-group">
@@ -285,8 +278,8 @@ if (isset($id)) {
 									<input type="number" step="0.01" name="price" class="form-control" value="<?= isset($price) ? $price : '' ?>" required>
 								</div>
 							</div>
-						</div-->
-					</div>
+						</div>
+					</div-->
 
 				</div>
 			</div>

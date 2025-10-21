@@ -425,6 +425,7 @@ class Master extends DBConnection
 	}
 
 
+
 	function save_stock()
 	{
 		extract($_POST);
@@ -436,15 +437,7 @@ class Master extends DBConnection
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
-		$check = $this->conn->query("SELECT * FROM `stock_list` where `code` = '{$code}' " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
-		if ($this->capture_err())
-			return $this->capture_err();
-		if ($check > 0) {
-			$resp['status'] = 'failed';
-			$resp['msg'] = "มีรหัสสต๊อกนี้อยู่แล้ว";
-			return json_encode($resp);
-			exit;
-		}
+
 		if (empty($id)) {
 			$sql = "INSERT INTO `stock_list` set {$data} ";
 		} else {
@@ -467,6 +460,7 @@ class Master extends DBConnection
 			$this->settings->set_flashdata('success', $resp['msg']);
 		return json_encode($resp);
 	}
+
 	function delete_stock()
 	{
 		extract($_POST);

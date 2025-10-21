@@ -161,7 +161,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 						<thead>
 							<tr>
 								<th class="p-1 text-center">วันที่</th>
-								<th class="p-1 text-center">รหัสสต๊อก</th>
+								<th class="p-1 text-center">SKU</th>
 								<th class="p-1 text-center">จำนวน</th>
 								<th class="p-1 text-center">จัดการ</th>
 							</tr>
@@ -174,7 +174,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 								?>
 									<tr class="<?= !empty($row['expiration']) && (strtotime($row['expiration']) <= strtotime(date("Y-m-d"))) ? "text-danger" : "" ?>">
 										<td class="p-1 align-middle"><?= date("M d, Y", strtotime($row['date_created'])) ?></td>
-										<td class="p-1 align-middle"><?= $row['code'] ?></td>
+										<td class="p-1 align-middle"><?= $row['sku'] ?></td>
 										<td class="p-1 text-right align-middle"><?= format_num($row['quantity'], 0) ?><?= !empty($row['expiration']) && (strtotime($row['expiration']) <= strtotime(date("Y-m-d"))) ? " (Expired)" : "" ?></td>
 										<td class="p-1 text-center align-middle">
 											<div class="btn-group">

@@ -3,7 +3,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 	$qry = $conn->query("SELECT p.*, c.id as `category_id`, c.name as `category`, 
 (COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = p.id), 0)
 - COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = p.id), 0)
-) as `available`
+) as `available`,
+(SELECT s.sku FROM stock_list s WHERE s.product_id = p.id LIMIT 1) as `sku`
 FROM product_list p
 INNER JOIN category_list c ON p.category_id = c.id
 WHERE p.id = '{$_GET['id']}' AND p.delete_flag = 0");
@@ -329,7 +330,7 @@ if (!function_exists('format_price_custom')) {
 										// แสดงเฉพาะหมวดหมู่หลักอย่างเดียว
 										echo '<a href="./?p=products&cid=' . $category_id . '" class="plain-link"><b>' . $main_name . '</b></a>';
 										?>
-										<label class="sku"> | </label> <label class="sku">รหัสสินค้า:</label> <b style="margin-left: 0.5rem;"><?= $sku ?> </b>
+										<label class="sku"> | </label> <label class="sku">SKU :</label> <b style="margin-left: 0.5rem;"><?= $sku ?> </b>
 									</p>
 
 									<div class=" mt-4">
