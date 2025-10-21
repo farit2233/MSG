@@ -279,10 +279,10 @@ exit;
                                     $gt += $price_to_use * $row['quantity'];
                                 ?>
 
-                                    <label class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
+                                    <div class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
                                         data-id='<?= $row['id'] ?>'
-                                        data-max='<?= $max_order_qty ?>'
-                                        style="cursor: pointer;">
+                                        data-max='<?= $max_order_qty ?>'>
+
                                         <div class="col-auto pr-2">
                                             <input type="checkbox"
                                                 class="form-check-input cart-check"
@@ -295,11 +295,16 @@ exit;
 
                                         <div class="cart-item-content d-flex w-100 align-items-start">
                                             <div class="col-3 text-center">
-                                                <img src="<?= validate_image($row['image_path']) ?>" class="product-logo" alt="">
+                                                <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>">
+                                                    <img src="<?= validate_image($row['image_path']) ?>" class="product-logo" alt="" style="cursor: pointer;">
+                                                </a>
                                             </div>
 
                                             <div class="col-auto flex-shrink-1 flex-grow-1">
-                                                <h4 class="product-title"><?= $row['product'] ?></h4>
+                                                <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>" style="text-decoration: none; color: inherit;">
+                                                    <h4 class="product-title" style="cursor: pointer;"><?= $row['product'] ?></h4>
+                                                </a>
+
                                                 <div class="text-muted d-flex w-100">
                                                     <div class="input-group" style="width: 20rem;">
                                                         <button class="btn addcart-plus minus-qty" type="button">-</button>
@@ -312,6 +317,7 @@ exit;
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div class="col-auto text-right">
                                             <?php if ($show_discount): ?>
                                                 <h5 class="text-muted mb-0">
@@ -319,12 +325,11 @@ exit;
                                                 </h5>
                                                 <h4><b class="text-danger">ลดเหลือ: <?= format_num($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
                                             <?php else: ?>
-
                                                 <h4><b>ราคา: <?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
                                             <?php endif; ?>
                                         </div>
 
-                                    </label>
+                                    </div>
                                 <?php endwhile; ?>
 
                             </div>
@@ -535,31 +540,43 @@ exit;
                     const subtotal = price_to_use * currentQty;
 
                     html += `
-                <label class="list-group-item cart-item d-flex w-100 ${isOutOfStock ? 'out-of-stock' : ''}" data-id="${index}" data-product-id="${item.id}" data-max="${max_order_qty}">
-                    <div class="col-auto pr-2">
-                        <input type="checkbox" class="form-check-input cart-check guest" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''} />
-                    </div>
-                    <div class="cart-item-content d-flex w-100 align-items-start">
-                        <div class="col-3 text-center"><img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt=""></div>
-                        <div class="col-auto flex-shrink-1 flex-grow-1">
-                            <h4 class="product-title">${item.name}</h4>
-                            <div class="text-muted d-flex w-100">
-                                <div class="input-group" style="width: 20rem;">
-                                    <button class="btn addcart-plus minus-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>−</button>
-                                    <input type="number" class="form-control text-center qty guest" value="${currentQty}" min="1" max="${max_order_qty}" ${isOutOfStock ? 'disabled' : ''}>
-                                    <button class="btn addcart-plus add-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>+</button>
-                                    <button class="btn btn-danger ms-2 del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
+                <div class="list-group-item cart-item d-flex w-100 ${isOutOfStock ? 'out-of-stock' : ''}" data-id="${index}" data-product-id="${item.id}" data-max="${max_order_qty}">
+                        
+                        <div class="col-auto pr-2">
+                            <input type="checkbox" class="form-check-input cart-check guest" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''} />
+                        </div>
+
+                        <div class="cart-item-content d-flex w-100 align-items-start">
+                            <div class="col-3 text-center">
+                                <a href="./?p=view_product&id=${item.id}">
+                                    <img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt="" style="cursor: pointer;">
+                                </a>
+                            </div>
+                            
+                            <div class="col-auto flex-shrink-1 flex-grow-1">
+                                <a href="./?p=view_product&id=${item.id}" style="text-decoration: none; color: inherit;">
+                                    <h4 class="product-title" style="cursor: pointer;">${item.name}</h4>
+                                </a>
+                                
+                                <div class="text-muted d-flex w-100">
+                                    <div class="input-group" style="width: 20rem;">
+                                        <button class="btn addcart-plus minus-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>−</button>
+                                        <input type="number" class="form-control text-center qty guest" value="${currentQty}" min="1" max="${max_order_qty}" ${isOutOfStock ? 'disabled' : ''}>
+                                        <button class="btn addcart-plus add-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>+</button>
+                                        <button class="btn btn-danger ms-2 del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-auto text-right">
-                        ${show_discount
-                            ? `<h5 class="text-muted mb-0"><del>${formatPriceForGuest(item.vat_price * currentQty)} บาท</del></h5><h4><b class="text-danger">ลดเหลือ: ${formatPriceForGuest(subtotal)} บาท</b></h4>`
-                            : `<h4><b>ราคา: ${formatPriceForGuest(subtotal)} บาท</b></h4>`
-                        }
-                    </div>
-                </label>`;
+                        
+                        <div class="col-auto text-right">
+                            ${show_discount
+                                ? `<h5 class="text-muted mb-0"><del>${formatPriceForGuest(item.vat_price * currentQty)} บาท</del></h5><h4><b class="text-danger">ลดเหลือ: ${formatPriceForGuest(subtotal)} บาท</b></h4>`
+                                : `<h4><b>ราคา: ${formatPriceForGuest(subtotal)} บาท</b></h4>`
+                            }
+                        </div>
+
+                    </div>`;
                 });
                 container.innerHTML = html;
                 container.style.display = 'block';
