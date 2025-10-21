@@ -9,7 +9,7 @@ set SCRIPT_PATH="%~dp0index.php"
 
 REM --- สั่งรันสคริปต์ ---
 echo Running Stock Check Script...
-%PHP_EXE% %SCRIPT_PATH%
+%PHP_EXE% %SCRIPT_PATH% > NUL 2>&1
 
 echo.
 echo Script execution finished.
