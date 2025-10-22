@@ -1,8 +1,7 @@
 <?php
 $i = 1;
 $qry = $conn->query("
-    SELECT * 
-    FROM coupon_code_list 
+    SELECT * FROM coupon_code_list 
     WHERE status = 1 
       AND delete_flag = 0
       AND start_date <= NOW() 
@@ -14,8 +13,7 @@ $qry = $conn->query("
     LIMIT 5
 ");
 $qry_promo_recommand = $conn->query("
-    SELECT * 
-    FROM promotions_list 
+    SELECT * FROM promotions_list 
     WHERE status = 1 
       AND delete_flag = 0
       AND start_date <= NOW() 
@@ -57,6 +55,35 @@ $page_description = "";
 $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page">โปรโมชัน</li>'; // HTML สำหรับ Breadcrumb เส้นที่ 2 (ค่าเริ่มต้น)
 
 ?>
+
+<style>
+    /* 1. ตัว Container หลัก (แทน .row) */
+    .custom-promo-container {
+        display: flex;
+        flex-wrap: wrap;
+
+        /* ⭐️ บังคับชิดซ้ายเสมอ */
+        justify-content: flex-start !important;
+
+        gap: 24px;
+        /* ⭐️ ระยะห่างระหว่าง card (ปรับได้) */
+    }
+
+    /* 2. ตัว Card Wrapper (แทน .col-md-3) */
+    .custom-promo-card-wrapper {
+        width: 323.5px;
+        /* ⭐️⭐️⭐️ กำหนดขนาดตายตัวที่นี่ ⭐️⭐️⭐️ */
+        display: flex;
+        /* จำเป็นเพื่อให้ card ภายในยืดสูงเท่ากัน */
+    }
+
+    /* 3. แก้ไข <a> ภายใน (เพื่อให้ .h-100 ทำงานถูก) */
+    .custom-promo-card-wrapper a.text-decoration-none {
+        display: block;
+        /* ทำให้ <a> ขยายเต็ม wrapper */
+        width: 100%;
+    }
+</style>
 <div class="promotion-background">
     <section class="py-5 mx-5">
         <div class="d-flex flex-column justify-content-center align-items-center text-center">
@@ -76,7 +103,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
         </nav>
         <div class="d-flex justify-content-between mt-3">
             <h3>คูปอง</h3>
-            <a href="./?p=promotions/coupon_codes_list" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a> <!-- จัดลิงก์ให้ไปขวา -->
+            <a href="./?p=promotions/coupon_codes_list" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a>
         </div>
         <div class="container-coupon">
             <div class="container-custom">
@@ -147,39 +174,37 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
             <h3>โปรโมชันแนะนำ</h3>
             <a href="./?p=promotions/promotions_list" class="text-dark"><u>ดูเพิ่มเติม <i class="fa-solid fa-arrow-right"></i></u></a>
         </div>
-        <div class="card rounded-0 pt-4">
-            <div class="container-custom">
-                <div class="card-group">
-                    <div class="row g-4">
 
-                        <?php
-                        // ใช้ลูปเดียวสำหรับการแสดงข้อมูล
-                        while ($row = $qry_promo_recommand->fetch_assoc()): ?>
-                            <div class="col-md-3 mb-4">
-                                <!-- ลิงก์ไปยังหน้าโปรโมชัน -->
-                                <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
-                                    <div class="card card-promotion h-100">
-                                        <div class="card-promotion-holder">
-                                            <img class="card-img-top promotion-img" src="<?= $row['image_path'] ?>" alt="Card image cap">
-                                            <h5 class="card-title card-title-promotion">
-                                                <?= $row['name'] ?>
-                                            </h5>
-                                        </div>
-                                        <div class="card-body card-promotion-body d-flex flex-column">
-                                            <p class="card-text promotion-description text-dark"><?= $row['description'] ?></p>
-                                            <p class="card-text mt-auto">
-                                                <small class="text-muted">
-                                                    <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
-                                                    <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
-                                                </small>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
+        <div class="card rounded-0 pt-4 px-4">
+            <div class="custom-promo-container">
+
+                <?php
+                // (เพิ่ม mysqli_data_seek เพื่อความปลอดภัย)
+                mysqli_data_seek($qry_promo_recommand, 0);
+                while ($row = $qry_promo_recommand->fetch_assoc()): ?>
+
+                    <div class="custom-promo-card-wrapper">
+                        <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
+                            <div class="card card-promotion h-100">
+                                <div class="card-promotion-holder">
+                                    <img class="card-img-top promotion-img" src="<?= $row['image_path'] ?>" alt="Card image cap">
+                                    <h5 class="card-title card-title-promotion">
+                                        <?= $row['name'] ?>
+                                    </h5>
+                                </div>
+                                <div class="card-body card-promotion-body d-flex flex-column">
+                                    <p class="card-text promotion-description text-dark"><?= $row['description'] ?></p>
+                                    <p class="card-text mt-auto">
+                                        <small class="text-muted">
+                                            <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
+                                            <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
+                                        </small>
+                                    </p>
+                                </div>
                             </div>
-                        <?php endwhile; ?>
+                        </a>
                     </div>
-                </div>
+                <?php endwhile; ?>
             </div>
         </div>
     </section>
