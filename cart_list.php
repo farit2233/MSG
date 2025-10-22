@@ -548,13 +548,13 @@ exit;
 
                         <div class="cart-item-content d-flex w-100 align-items-start">
                             <div class="col-3 text-center">
-                                <a href="./?p=view_product&id=${item.id}">
+                                <a href="./?p=products/view_product&id=${item.id}">
                                     <img src="${item.image || 'assets/img/default.png'}" class="product-logo" alt="" style="cursor: pointer;">
                                 </a>
                             </div>
                             
                             <div class="col-auto flex-shrink-1 flex-grow-1">
-                                <a href="./?p=view_product&id=${item.id}" style="text-decoration: none; color: inherit;">
+                                <a href="./?p=products/view_product&id=${item.id}" style="text-decoration: none; color: inherit;">
                                     <h4 class="product-title" style="cursor: pointer;">${item.name}</h4>
                                 </a>
                                 
