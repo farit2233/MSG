@@ -119,105 +119,6 @@
             <div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
                 <div class="card card-outline rounded-0">
                     <div class="card-body">
-                        <h1 align="center">สินค้าแนะนำ</h1>
-                        <div class="row gy-3 gx-3">
-                            <?php
-                            if (!function_exists('format_price_custom')) {
-                                function format_price_custom($price)
-                                {
-                                    $formatted_price = format_num($price, 2);
-                                    if (substr($formatted_price, -3) == '.00') {
-                                        return format_num($price, 0);
-                                    }
-                                    return $formatted_price;
-                                }
-                            }
-
-                            $qry = $conn->query("
-                                SELECT *, 
-                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
-                                    COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
-                                FROM `product_list` 
-                                WHERE 
-                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
-                                    COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
-                                    AND `status` = 1
-                                    AND `delete_flag` = 0
-                                ORDER BY 
-                                    IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
-                                    RAND() 
-                                LIMIT 8
-                            ");
-                            while ($row = $qry->fetch_assoc()):
-                            ?>
-                                <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
-                                    <a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
-                                        <div class="position-relative">
-                                            <div class="img-top position-relative product-img-holder">
-                                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
-                                            </div>
-                                        </div>
-                                        <div class="card-body d-flex flex-column">
-                                            <div>
-                                                <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
-                                                <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
-                                                    <div class="w-100">
-                                                        <small class="text-muted" style="line-height: 1.25em; display: block;">
-                                                            <?= $row['brand'] ?>
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="d-flex justify-content-end align-items-center mt-auto">
-                                                <?php
-                                                // เริ่มต้นด้วย price เป็น fallback
-                                                $display_price = isset($row['price']) && $row['price'] > 0 ? $row['price'] : 0;
-
-                                                if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $row['price']) {
-                                                    $display_price = $row['discounted_price'];
-                                                    $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
-                                                    echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
-                                                    echo '<span class="badge badge-sm prdouct-badge text-white">- ' . $discount_percentage . '%</span>';
-                                                } elseif (!is_null($row['vat_price']) && $row['vat_price'] > 0) {
-                                                    $display_price = $row['vat_price'];
-                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
-                                                } else {
-                                                    // fallback ใช้ price จริง
-                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
-                                                }
-                                                ?>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            <?php endwhile; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="container py-4 text-center">
-        <div class="position-relative d-inline-block">
-            <span class="text-muted px-3 bg-white position-relative z-1" style="font-weight: 500;">
-                หรือดูสินค้าทั้งหมด
-            </span>
-            <div class="position-absolute top-50 start-0 w-100 translate-middle-y" style="height: 1px; background: #ccc; z-index: 0;"></div>
-        </div>
-
-        <div class="pt-3">
-            <a href="./?p=products" class="btn btn-product rounded-pill">
-                ดูสินค้าอื่น ๆ คลิก <span class="arrow-move"><i class="fa-solid fa-angles-right"></i></span>
-            </a>
-        </div>
-    </div>
-
-    <div class="container py-4">
-        <div class="row mt-n3 justify-content-center">
-            <div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
-                <div class="card card-outline rounded-0">
-                    <div class="card-body">
                         <h1 align="center">สินค้าใหม่</h1>
                         <div class="row gy-3 gx-3">
                             <?php
@@ -269,6 +170,106 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="d-flex justify-content-end align-items-center mt-auto">
+                                                <?php
+                                                // เริ่มต้นด้วย price เป็น fallback
+                                                $display_price = isset($row['price']) && $row['price'] > 0 ? $row['price'] : 0;
+
+                                                if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $row['price']) {
+                                                    $display_price = $row['discounted_price'];
+                                                    $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
+                                                    echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
+                                                    echo '<span class="badge badge-sm prdouct-badge text-white">- ' . $discount_percentage . '%</span>';
+                                                } elseif (!is_null($row['vat_price']) && $row['vat_price'] > 0) {
+                                                    $display_price = $row['vat_price'];
+                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+                                                } else {
+                                                    // fallback ใช้ price จริง
+                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            <?php endwhile; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container py-4 text-center">
+        <div class="position-relative d-inline-block">
+            <span class="text-muted px-3 bg-white position-relative z-1" style="font-weight: 500;">
+                หรือดูสินค้าทั้งหมด
+            </span>
+            <div class="position-absolute top-50 start-0 w-100 translate-middle-y" style="height: 1px; background: #ccc; z-index: 0;"></div>
+        </div>
+
+        <div class="pt-3">
+            <a href="./?p=products" class="btn btn-product rounded-pill">
+                ดูสินค้าอื่น ๆ คลิก <span class="arrow-move"><i class="fa-solid fa-angles-right"></i></span>
+            </a>
+        </div>
+    </div>
+
+    <div class="container py-4">
+
+        <div class="row mt-n3 justify-content-center">
+            <div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
+                <div class="card card-outline rounded-0">
+                    <div class="card-body">
+                        <h1 align="center">สินค้าแนะนำ</h1>
+                        <div class="row gy-3 gx-3">
+                            <?php
+                            if (!function_exists('format_price_custom')) {
+                                function format_price_custom($price)
+                                {
+                                    $formatted_price = format_num($price, 2);
+                                    if (substr($formatted_price, -3) == '.00') {
+                                        return format_num($price, 0);
+                                    }
+                                    return $formatted_price;
+                                }
+                            }
+
+                            $qry = $conn->query("
+                                SELECT *, 
+                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                    COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+                                FROM `product_list` 
+                                WHERE 
+                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id), 0) - 
+                                    COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) > 0 
+                                    AND `status` = 1
+                                    AND `delete_flag` = 0
+                                ORDER BY 
+                                    IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
+                                    RAND() 
+                                LIMIT 8
+                            ");
+                            while ($row = $qry->fetch_assoc()):
+                            ?>
+                                <div class="col-6 col-md-4 col-lg-3 d-flex" style="margin-top: 1rem;">
+                                    <a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
+                                        <div class="position-relative">
+                                            <div class="img-top position-relative product-img-holder">
+                                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
+                                            </div>
+                                        </div>
+                                        <div class="card-body d-flex flex-column">
+                                            <div>
+                                                <div class="card-title w-100 mb-0"><?= $row['name'] ?></div>
+                                                <div class="d-flex justify-content-between w-100 mb-3" style="height: 2.5em; overflow: hidden;">
+                                                    <div class="w-100">
+                                                        <small class="text-muted" style="line-height: 1.25em; display: block;">
+                                                            <?= $row['brand'] ?>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div class="d-flex justify-content-end align-items-center mt-auto">
                                                 <?php
                                                 // เริ่มต้นด้วย price เป็น fallback
