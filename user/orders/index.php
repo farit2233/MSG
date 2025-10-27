@@ -9,6 +9,9 @@ $filter_options = [
     'cancelled' => 'ยกเลิกแล้ว',
     'returned' => 'คืนเงิน/คืนสินค้า',
 ];
+$limit = 5; // จำนวนออเดอร์ต่อหน้า
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
+$offset = ($page - 1) * $limit;
 ?>
 <section class="py-5 profile-page">
     <div class="container">
@@ -35,7 +38,7 @@ $filter_options = [
                                 </div>
                             </div>
                             <form method="get" class="d-flex align-items-center gap-2" style="margin-top: 10px;margin-bottom: 10px;">
-                                <input type="hidden" name="p" value="orders">
+                                <input type="hidden" name="p" value="user/orders">
                                 <input type="hidden" name="filter" value="<?= htmlspecialchars($filter) ?>">
                                 <input type="text" name="keyword" class="form-control form-control-sm" placeholder="ค้นหาชื่อสินค้า หรือเลขคำสั่งซื้อ" value="<?= htmlspecialchars($_GET['keyword'] ?? '') ?>">
                                 <button type="submit" class="btn btn-search-orders">ค้นหา</button>
@@ -77,7 +80,12 @@ $filter_options = [
                                     break;
                                     // 'all' doesn't need condition
                             }
-                            $orders = $conn->query("SELECT * FROM `order_list` WHERE {$where} ORDER BY date_created DESC");
+
+                            $count_qry = $conn->query("SELECT COUNT(id) as total_orders FROM `order_list` WHERE {$where}");
+                            $total_orders = $count_qry->fetch_assoc()['total_orders'];
+                            $total_pages = ceil($total_orders / $limit);
+
+                            $orders = $conn->query("SELECT * FROM `order_list` WHERE {$where} ORDER BY date_created DESC LIMIT {$limit} OFFSET {$offset}");
                             if ($orders->num_rows > 0):
                                 while ($row = $orders->fetch_assoc()):
                                     $payment_status = (int)$row['payment_status'];
@@ -146,6 +154,34 @@ $filter_options = [
                                 <?php endwhile;
                             else: ?>
                                 <div class="alert" style="background-color: #f57421;color:white;">ไม่พบคำสั่งซื้อในระบบ</div>
+                            <?php endif; ?>
+                            <?php
+                            if ($total_pages > 1):
+                                // 1. ดึง query parameters ปัจจุบันทั้งหมด
+                                $query_params = $_GET;
+                            ?>
+                                <div class="d-flex justify-content-center mt-4">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination">
+                                            <li class="page-item <?= ($page == 1) ? 'disabled' : '' ?>">
+                                                <?php $query_params['page'] = $page - 1; ?>
+                                                <a class="page-link" href="?<?= http_build_query($query_params) ?>" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                                            </li>
+
+                                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                                <?php $query_params['page'] = $i; ?>
+                                                <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                                                    <a class="page-link" href="?<?= http_build_query($query_params) ?>"><?= $i ?></a>
+                                                </li>
+                                            <?php endfor; ?>
+
+                                            <li class="page-item <?= ($page == $total_pages) ? 'disabled' : '' ?>">
+                                                <?php $query_params['page'] = $page + 1; ?>
+                                                <a class="page-link" href="?<?= http_build_query($query_params) ?>" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>
