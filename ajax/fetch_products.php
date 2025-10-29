@@ -195,26 +195,93 @@ ob_start();
         <p>ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
     </div>
 <?php endif; ?>
-<?php if ($total_pages > 1) { ?>
+<?php
+if ($total_pages > 1) {
+    // --- กำหนดค่า ---
+    // จำนวนหน้าที่แสดงผลคงที่ (ช่วง đầu)
+    $num_fixed_pages = 5;
+    // จำนวนหน้าข้างเคียง (สำหรับสถานะกลาง)
+    $adjacents = 2;
+?>
     <div class="col-12 d-flex justify-content-center mt-4">
         <nav aria-label="Page navigation">
             <ul class="pagination">
                 <li class="page-item <?= ($page == 1) ? 'disabled' : '' ?>">
                     <a class="page-link" href="javascript:void(0)" data-page="<?= $page - 1 ?>" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
                 </li>
-                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                        <a class="page-link" href="javascript:void(0)" data-page="<?= $i ?>"><?= $i ?></a>
-                    </li>
-                <?php endfor; ?>
+
+                <?php
+                // --- Logic การแสดงผลตัวเลขหน้า ---
+
+                // 1. กรณีที่จำนวนหน้ารวมน้อย (น้อยกว่า 5+1)
+                if ($total_pages <= ($num_fixed_pages + 1)) {
+                    for ($i = 1; $i <= $total_pages; $i++) {
+                        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+                        echo '<a class="page-link" href="javascript:void(0)" data-page="' . $i . '">' . $i . '</a>';
+                        echo '</li>';
+                    }
+                }
+
+                // 2. สถานะเริ่มต้น (เมื่ออยู่หน้า 1, 2, 3, 4)
+                // (1 2 3 [4] 5 ... 10)
+                elseif ($page < $num_fixed_pages) {
+                    // แสดง 1-5
+                    for ($i = 1; $i <= $num_fixed_pages; $i++) {
+                        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+                        echo '<a class="page-link" href="javascript:void(0)" data-page="' . $i . '">' . $i . '</a>';
+                        echo '</li>';
+                    }
+                    // แสดง ...
+                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    // แสดงหน้าสุดท้าย
+                    echo '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="' . $total_pages . '">' . $total_pages . '</a></li>';
+                }
+
+                // 3. สถานะท้าย (เมื่ออยู่ใกล้หน้าสุดท้าย)
+                // (1 ... 6 [7] 8 9 10)
+                elseif ($page >= ($total_pages - ($num_fixed_pages - 2))) {
+                    // แสดง 1
+                    echo '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="1">1</a></li>';
+                    // แสดง ...
+                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    // แสดง 5 หน้าสุดท้าย
+                    $start = $total_pages - ($num_fixed_pages - 1);
+                    for ($i = $start; $i <= $total_pages; $i++) {
+                        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+                        echo '<a class="page-link" href="javascript:void(0)" data-page="' . $i . '">' . $i . '</a>';
+                        echo '</li>';
+                    }
+                }
+
+                // 4. สถานะกลาง (เลื่อนไปเรื่อยๆ)
+                // (1 ... 3 4 [5] 6 7 ... 10)
+                else {
+                    // แสดง 1
+                    echo '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="1">1</a></li>';
+                    // แสดง ...
+                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+
+                    // แสดงหน้าต่าง (เช่น 3 4 5 6 7)
+                    $start = $page - $adjacents;
+                    $end = $page + $adjacents;
+                    for ($i = $start; $i <= $end; $i++) {
+                        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+                        echo '<a class="page-link" href="javascript:void(0)" data-page="' . $i . '">' . $i . '</a>';
+                        echo '</li>';
+                    }
+
+                    // แสดง ...
+                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    // แสดงหน้าสุดท้าย
+                    echo '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="' . $total_pages . '">' . $total_pages . '</a></li>';
+                }
+                ?>
+
                 <li class="page-item <?= ($page == $total_pages) ? 'disabled' : '' ?>">
                     <a class="page-link" href="javascript:void(0)" data-page="<?= $page + 1 ?>" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
                 </li>
             </ul>
         </nav>
     </div>
-<?php }
-
-// ส่ง Output ทั้งหมดกลับไป
-echo ob_get_clean();
+<?php } // สิ้นสุด if ($total_pages > 1) 
 ?>
