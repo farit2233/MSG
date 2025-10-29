@@ -247,9 +247,9 @@ if (!function_exists('format_price_custom')) {
             var sortBy = $('#sort_by').val();
             var productContainer = $('#product-list-container');
             var loadingSpinnerHTML = `<div class="col-12 text-center py-5">
-                <div class="spinner-border text-primary" role="status"><span class="sr-only"></span></div>
-                <p class="mt-2">กำลังโหลดสินค้า...</p>
-            </div>`;
+                <div class="spinner-border text-primary" role="status"><span class="sr-only"></span></div>
+                <p class="mt-2">กำลังโหลดสินค้า...</p>
+            </div>`;
 
             productContainer.html(loadingSpinnerHTML);
 
@@ -274,7 +274,13 @@ if (!function_exists('format_price_custom')) {
                     pid: currentPid
                 },
                 success: function(response) {
+                    // 1. โหลดเนื้อหาใหม่
                     productContainer.html(response);
+
+                    // 2. ⬆️ สั่งให้เลื่อนไปบนสุดของหน้า
+                    $('html, body').animate({
+                        scrollTop: 0
+                    }, 400);
                 },
                 error: function(xhr, status, error) {
                     console.error("AJAX Error: ", status, error);
@@ -283,6 +289,7 @@ if (!function_exists('format_price_custom')) {
             });
         }
 
+        // --- ส่วนที่เหลือไม่ต้องแก้ไข ---
         loadProducts(1);
 
         $('#sort_by').on('change', function() {
