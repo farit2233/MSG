@@ -40,7 +40,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
     // ดึงข้อมูลราคาตามน้ำหนัก
     $weight_ranges = [];
-    $price_qry = $conn->query("SELECT * FROM shipping_prices WHERE shipping_methods_id = '{$id}'");
+
+    // *** แก้ไข: เพิ่ม AND status = 1 และ ORDER BY min_weight ASC ***
+    $price_qry = $conn->query("SELECT * FROM shipping_prices 
+                              WHERE shipping_methods_id = '{$id}' AND status = 1 
+                              ORDER BY min_weight ASC");
+
     while ($price_row = $price_qry->fetch_assoc()) {
         $weight_ranges[] = $price_row; // เก็บข้อมูลในอาร์เรย์
     }
@@ -59,18 +64,13 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
     .swal2-confirm {
         background-color: #28a745 !important;
-        /* สีเขียว */
         border-color: #28a745 !important;
-        /* สีเขียว */
         color: white !important;
-        /* สีตัวอักษรเป็นขาว */
     }
 
     .swal2-confirm:hover {
         background-color: #218838 !important;
-        /* สีเขียวเข้ม */
         border-color: #1e7e34 !important;
-        /* สีเขียวเข้ม */
     }
 </style>
 <section class="card card-outline card-orange rounded-0">
@@ -133,24 +133,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="form-group" id="weight_cost_group">
                         <label>ค่าจัดส่งตามน้ำหนัก <span class="text-danger">*</span></label>
                         <div id="weight-price-group">
-                            <?php if (empty($weight_ranges)): ?>
-                                <div class="row weight-price-row mb-2">
-                                    <div class="col-md-3">
-                                        <label>ราคา</label>
-                                        <input type="number" step="0.01" name="price[]" class="form-control" placeholder="เช่น 40" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label>น้ำหนักเริ่มต้น (กรัม.)</label>
-                                        <input type="number" step="0.01" name="weight_from[]" class="form-control" placeholder="เช่น 0" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label>น้ำหนักสูงสุด (กรัม.)</label>
-                                        <input type="number" step="0.01" name="weight_to[]" class="form-control" placeholder="เช่น 1000" required>
-                                    </div>
-                                    <div class="col-md-3 d-flex align-items-end button-container">
-                                    </div>
-                                </div>
-                            <?php else: ?>
+
+                            <?php if (isset($weight_ranges) && !empty($weight_ranges)): ?>
                                 <?php foreach ($weight_ranges as $range): ?>
                                     <div class="row weight-price-row mb-2">
                                         <div class="col-md-3">
@@ -159,17 +143,18 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                                         </div>
                                         <div class="col-md-3">
                                             <label>น้ำหนักเริ่มต้น (กรัม.)</label>
-                                            <input type="number" step="0.01" name="weight_from[]" class="form-control" value="<?= htmlspecialchars($range['min_weight']) ?>" required>
+                                            <input type="number" step="1" name="weight_from[]" class="form-control" value="<?= htmlspecialchars($range['min_weight']) ?>" required>
                                         </div>
                                         <div class="col-md-3">
                                             <label>น้ำหนักสูงสุด (กรัม.)</label>
-                                            <input type="number" step="0.01" name="weight_to[]" class="form-control" value="<?= htmlspecialchars($range['max_weight']) ?>" required>
+                                            <input type="number" step="1" name="weight_to[]" class="form-control" value="<?= htmlspecialchars($range['max_weight']) ?>" required>
                                         </div>
                                         <div class="col-md-3 d-flex align-items-end button-container">
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
+
                         </div>
                     </div>
                 </div>
@@ -280,11 +265,11 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             </div>
             <div class="col-md-3">
                 <label>น้ำหนักเริ่มต้น (กรัม.)</label>
-                <input type="number" step="0.01" name="weight_from[]" class="form-control" placeholder="เช่น 1001" required>
+                <input type="number" step="1" name="weight_from[]" class="form-control" placeholder="เช่น 0" required>
             </div>
             <div class="col-md-3">
                 <label>น้ำหนักสูงสุด (กรัม.)</label>
-                <input type="number" step="0.01" name="weight_to[]" class="form-control" placeholder="เช่น 2000" required>
+                <input type="number" step="1" name="weight_to[]" class="form-control" placeholder="เช่น 1000" required>
             </div>
             <div class="col-md-3 d-flex align-items-end button-container">
                 </div>
@@ -294,7 +279,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         function updateWeightPriceButtons() {
             const rows = $('#weight-price-group .weight-price-row');
 
-            // ถ้าไม่มีแถวเลย ให้เพิ่มแถวเริ่มต้น 1 แถว (เป็น safety net)
+            // *** [สำคัญ] แก้ไขจุดนี้: ถ้าไม่มีแถวเลย (เช่น ตอน "เพิ่มใหม่") ให้เพิ่ม 1 แถว ***
             if (rows.length === 0) {
                 $('#weight-price-group').append(newRowTemplate);
                 updateWeightPriceButtons(); // เรียกใช้ฟังก์ชันอีกครั้งเพื่อใส่ปุ่ม
@@ -330,6 +315,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         });
 
         // เรียกใช้ฟังก์ชันเพื่อตั้งค่าปุ่มเมื่อหน้าเว็บโหลดเสร็จ
+        // (นี่จะเป็นตัวสร้างแถวแรกในหน้า "เพิ่มใหม่" ด้วย)
         updateWeightPriceButtons();
 
         // --- END: โค้ดส่วน JavaScript ---

@@ -598,12 +598,104 @@ class Master extends DBConnection
 		}
 	}
 
+	function get_shipping_details()
+	{
+
+		// 1. รับค่า ID ขนส่ง และ ID สินค้า จาก AJAX
+		$shipping_id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+		$selected_items_str = isset($_POST['selected_items']) ? $this->conn->real_escape_string($_POST['selected_items']) : '';
+
+		// เตรียมข้อมูลตอบกลับ (Default คือล้มเหลว)
+		$response = ['success' => false, 'error' => 'เกิดข้อผิดพลาดที่ไม่รู้จัก'];
+
+		if ($shipping_id == 0) {
+			$response['error'] = 'ไม่ได้เลือกขนส่ง';
+			echo json_encode($response);
+			exit;
+		}
+		if (empty($selected_items_str)) {
+			$response['error'] = 'ไม่พบสินค้าในตะกร้า';
+			echo json_encode($response);
+			exit;
+		}
+
+		// 2. คำนวณน้ำหนักรวม (Total Weight) จาก selected_items
+		$total_weight = 0;
+		$ids_array = array_map('intval', explode(',', $selected_items_str));
+		$safe_ids = implode(',', $ids_array);
+
+		if (!empty($safe_ids)) {
+			$weight_qry = $this->conn->query("
+                SELECT 
+                    c.quantity, 
+                    p.product_weight 
+                FROM cart_list c
+                INNER JOIN product_list p ON c.product_id = p.id
+                WHERE c.id IN ({$safe_ids}) AND c.customer_id = '{$this->settings->userdata('id')}'
+            ");
+
+			if ($weight_qry) {
+				while ($row = $weight_qry->fetch_assoc()) {
+					$total_weight += ($row['product_weight'] ?? 0) * $row['quantity'];
+				}
+			}
+		}
+
+		// 3. Query หาค่าส่ง, ชื่อ, และสถานะ COD ของขนส่งที่เลือก
+		//    โดยอิงจากน้ำหนักที่คำนวณได้
+		$shipping_query_string = "
+            SELECT 
+                sm.id, 
+                sm.name, 
+                sm.cod_enabled, 
+                sp.price as cost
+            FROM 
+                shipping_methods sm
+            LEFT JOIN 
+                shipping_prices sp ON sm.id = sp.shipping_methods_id
+            WHERE 
+                sm.id = {$shipping_id}  -- 1. กรองเฉพาะ ID ขนส่งที่เลือก
+                AND sm.status = 1 
+                AND sm.delete_flag = 0
+                AND ('{$total_weight}' >= sp.min_weight AND '{$total_weight}' <= sp.max_weight) -- 2. หาน้ำหนักที่ตรงช่วง
+            LIMIT 1
+        ";
+
+		$shipping_qry = $this->conn->query($shipping_query_string);
+
+		// 4. สร้าง JSON ตอบกลับ
+		if ($shipping_qry && $shipping_qry->num_rows > 0) {
+			$row = $shipping_qry->fetch_assoc();
+
+			$response['success'] = true;
+			$response['shipping_info'] = [
+				'id' => (int)$row['id'],
+				'name' => $row['name'],
+				'cost' => (float)$row['cost'],
+				'cod_enabled' => (int)$row['cod_enabled']
+			];
+			// ลบ error message เริ่มต้นทิ้งไป
+			unset($response['error']);
+		} else {
+			// !! จุดสำคัญที่แก้ปัญหา !!
+			// ถ้าไม่เจอ (num_rows = 0) ให้ส่ง JSON บอกว่าไม่เจอ
+			// ไม่ใช่ส่งค่าว่าง ("")
+			$response['error'] = 'ไม่พบค่าจัดส่งสำหรับน้ำหนักนี้ (' . $total_weight . ' kg)';
+		}
+
+		// 5. ส่ง JSON กลับไปให้ JavaScript
+		echo json_encode($response);
+		exit; // จบการทำงานทันที
+	}
+
 	function place_order()
 	{
 		extract($_POST);
 		$customer_id = $this->settings->userdata('id');
 		$pref = date("Ymd");
 		$code = sprintf("%'.05d", 1);
+
+		$resp = [];
 
 		$this->conn->query("START TRANSACTION");
 
@@ -826,18 +918,67 @@ class Master extends DBConnection
 					$shipping_methods_name = $ship['name'];
 				}
 			}
+			$order_status = 0;   // 0 = Pending (รอตรวจสอบสลิป)
+			$payment_status = 0; // 0 = Unpaid (ยังไม่จ่ายเงิน)
+			$is_cod = 0;         // ✨ 1. กำหนดค่าเริ่มต้นสำหรับ cod เป็น 0 (โอนเงิน)
+
+			if (isset($payment_method) && $payment_method == 'cod') {
+				// ถ้าเป็น COD, ให้อัปเดตสถานะออเดอร์ทันที
+				$order_status = 1;     // 1 = Packed (พร้อมจัดส่ง)
+				$is_cod = 1;         // ✨ 2. ถ้าเป็น COD ให้เปลี่ยนค่าเป็น 1
+			}
+
 
 			// --- ✨ บันทึกข้อมูลลง order_list (แก้ไข Query) ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-            (`code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`,shipping_prices_id, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`) 
-            VALUES 
-            ('{$code}', '{$customer_id}', '{$name}', '{$contact}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id},{$shipping_prices_id}, {$applied_promo_id}, {$applied_coupon_id}, 0, 0, 0)");
+			(`code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`, `shipping_prices_id`, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`, `cod`) 
+			VALUES 
+			('{$code}', '{$customer_id}', '{$name}', '{$contact}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id}, {$shipping_prices_id}, {$applied_promo_id}, {$applied_coupon_id}, '{$order_status}', '{$payment_status}', 0, '{$is_cod}')");
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
 			$oid = $this->conn->insert_id;
 
+			if (isset($payment_method) && $payment_method == 'transfer') {
 
+				if (isset($_FILES['payment_slip']) && $_FILES['payment_slip']['error'] == 0) {
+					// 1. กำหนดตำแหน่งที่จะเก็บไฟล์
+					$upload_path = base_app . 'uploads/slips/';
+					if (!is_dir($upload_path)) {
+						mkdir($upload_path, 0777, true);
+					}
 
+					// 2. สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน เพื่อความปลอดภัย
+					$file_ext = pathinfo($_FILES['payment_slip']['name'], PATHINFO_EXTENSION);
+					$allowed_exts = ['jpg', 'jpeg', 'png'];
+					if (!in_array(strtolower($file_ext), $allowed_exts)) {
+						throw new Exception('รูปแบบไฟล์สลิปไม่ถูกต้อง ต้องเป็น JPG, JPEG, หรือ PNG เท่านั้น');
+					}
+					$file_name = "slip_" . $oid . "_" . time() . "." . uniqid() . "." . $file_ext;
+					$target_file = $upload_path . $file_name;
+
+					// 3. ย้ายไฟล์ไปยังโฟลเดอร์ที่กำหนด
+					if (move_uploaded_file($_FILES['payment_slip']['tmp_name'], $target_file)) {
+
+						// 4. ถ้าสำเร็จ บันทึก path ลงฐานข้อมูล payment_slips
+						$image_db_path = 'uploads/slips/' . $file_name;
+						$slip_insert_sql = "INSERT INTO `payment_slips` (`customer_id`, `order_id`, `image_path`, `approve`) 
+                                        VALUES ('{$customer_id}', '{$oid}', '{$image_db_path}', 0)";
+
+						if (!$this->conn->query($slip_insert_sql)) {
+							// ถ้าบันทึกลง DB ไม่สำเร็จ ให้ลบไฟล์ที่อัปโหลดทิ้ง
+							if (file_exists($target_file)) unlink($target_file);
+							throw new Exception('ไม่สามารถบันทึกข้อมูลสลิปได้: ' . $this->conn->error);
+						}
+
+						$this->conn->query("UPDATE `order_list` SET `payment_status` = 1 WHERE id = '{$oid}'");
+					} else {
+						throw new Exception('ไม่สามารถอัปโหลดไฟล์สลิปได้');
+					}
+				} else {
+					// ถ้าไม่มีไฟล์แนบมาหรือไฟล์มีปัญหา ให้ยกเลิก
+					throw new Exception('กรุณาแนบไฟล์สลิปการโอนเงิน');
+				}
+			}
 			if ($promotion_id > 0) {
 				// ถ้าเป็นโปรส่งฟรี ให้ส่งค่า shipping_discount ไปบันทึก, ถ้าไม่ใช่ส่ง promotion_discount_amount
 				$logged_promo_discount = ($promo_data['type'] === 'free_shipping') ? $shipping_discount : $promotion_discount_amount;
@@ -918,7 +1059,7 @@ class Master extends DBConnection
 				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
 				$mail->addAddress($customer_email, $customer_name);
 				$body = "
-						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
+						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
 							<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
 							<p>เรียนคุณ <strong>{$customer_name}</strong></p>
 							<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
@@ -1032,7 +1173,7 @@ class Master extends DBConnection
 
 				// สร้างเนื้อหาของอีเมล
 				$admin_body = "
-				<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
+				<div  style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
 					<h2 style='color: #16542b; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
 					<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
 					<p><strong>ชื่อผู้ใช้:</strong> $customer_name</p>
@@ -1227,6 +1368,155 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
+	// เพิ่มฟังก์ชันนี้เข้าไปในไฟล์ classes/Master.php
+	function approve_slip()
+	{
+		// ดึงค่า 'id' (ของสลิป) และ 'approve' (สถานะที่เลือก) จากฟอร์ม
+		extract($_POST);
+
+		// อัปเดตตาราง payment_slips ตามสถานะที่เลือก
+		$update_slip = $this->conn->query("UPDATE `payment_slips` SET approve = '{$approve}' WHERE id = '{$id}'");
+
+		if (!$update_slip) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'ไม่สามารถอัปเดตสถานะสลิปได้';
+			return json_encode($resp);
+		}
+
+		// --- Logic เพิ่มเติม: อัปเดตสถานะในตาราง order_list ด้วย ---
+
+		// 1. ค้นหา order_id จาก slip_id
+		$slip_qry = $this->conn->query("SELECT order_id FROM `payment_slips` WHERE id = '{$id}'");
+		$order_id = $slip_qry->fetch_assoc()['order_id'];
+
+		$payment_status = 1; // สถานะเริ่มต้น = รอตรวจสอบ
+
+		if ($approve == 1) { // ถ้าอนุมัติ
+			$payment_status = 2; // เปลี่ยนเป็น "ชำระเงินแล้ว"
+		} else if ($approve == 2) { // ถ้าไม่อนุมัติ
+			$payment_status = 3; // เปลี่ยนเป็น "ชำระเงินล้มเหลว"
+		}
+
+		// 2. อัปเดตสถานะในตาราง order_list
+		$update_order = $this->conn->query("UPDATE `order_list` SET payment_status = '{$payment_status}' WHERE id = '{$order_id}'");
+
+		if ($update_order) {
+			$this->settings->set_flashdata('success', 'อัปเดตสถานะการชำระเงินเรียบร้อยแล้ว');
+			$resp['status'] = 'success';
+		} else {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'อัปเดตสถานะสลิปสำเร็จ แต่ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้';
+		}
+
+		$order_id = '';
+		$code = '';
+		$customer_email = '';
+		$customer_name = '';
+
+		// ค้นหา order_id จาก slip_id
+		$slip_qry = $this->conn->query("SELECT order_id FROM `payment_slips` WHERE id = '{$id}'");
+		if ($slip_qry->num_rows > 0) {
+			$order_id = $slip_qry->fetch_assoc()['order_id'];
+
+			// ค้นหาข้อมูลออเดอร์และลูกค้าจาก order_id
+			$order_qry = $this->conn->query("
+            SELECT o.code, c.email, CONCAT(c.firstname, ' ', c.lastname) as fullname
+            FROM `order_list` o
+            INNER JOIN `customer_list` c ON o.customer_id = c.id
+            WHERE o.id = '{$order_id}'
+        ");
+			if ($order_qry->num_rows > 0) {
+				$data = $order_qry->fetch_assoc();
+				$code = $data['code'];
+				$customer_email = $data['email'];
+				$customer_name = $data['fullname'];
+			}
+		}
+
+		// --- อัปเดตฐานข้อมูล ---
+		// อัปเดตสถานะในตาราง payment_slips
+		$update_slip = $this->conn->query("UPDATE `payment_slips` SET approve = '{$approve}' WHERE id = '{$id}'");
+
+		// กำหนดค่า payment_status สำหรับตาราง order_list
+		$payment_status = 1; // 1 = รอตรวจสอบ (Default)
+		if ($approve == 1) { // ถ้าอนุมัติ
+			$payment_status = 2; // 2 = ชำระเงินแล้ว
+		} else if ($approve == 2) { // ถ้าไม่อนุมัติ
+			$payment_status = 3; // 3 = ชำระเงินล้มเหลว
+		}
+
+		// อัปเดตสถานะในตาราง order_list
+		$update_order = $this->conn->query("UPDATE `order_list` SET payment_status = '{$payment_status}' WHERE id = '{$order_id}'");
+
+		// --- ตรวจสอบผลลัพธ์และส่งอีเมล ---
+		if ($update_slip && $update_order) {
+
+			// ✨ --- เริ่มส่วนการส่งอีเมล --- ✨
+			$mail = new PHPMailer(true);
+			try {
+				// --- กำหนดค่า SMTP (ควรเก็บเป็นตัวแปรภายนอกเพื่อความปลอดภัย) ---
+				$mail->isSMTP();
+				$mail->Host = 'smtp.gmail.com';
+				$mail->Port = 465;
+				$mail->SMTPAuth = true;
+				$mail->Username = "faritre5566@gmail.com"; // ⚠️ ควรใช้ตัวแปรจาก config
+				$mail->Password = "bchljhaxoqflmbys";      // ⚠️ ควรใช้ตัวแปรจาก config
+				$mail->SMTPSecure = "ssl";
+				$mail->CharSet = 'UTF-8';
+
+				// --- เตรียมเนื้อหาอีเมลตามสถานะ ---
+				$subject = '';
+				$email_heading = '';
+				$email_body_text = '';
+
+				if ($approve == 1) { // กรณี "อนุมัติ"
+					$subject = "✅ การชำระเงินของคุณได้รับการอนุมัติแล้ว";
+					$email_heading = "การชำระเงินได้รับการยืนยัน";
+					$email_body_text = "เราได้ตรวจสอบและยืนยันการชำระเงินสำหรับคำสั่งซื้อของคุณเรียบร้อยแล้ว และกำลังดำเนินการจัดเตรียมสินค้าเพื่อจัดส่งต่อไป";
+				} else if ($approve == 2) { // กรณี "ไม่อนุมัติ"
+					$subject = "❌ การชำระเงินของคุณไม่ได้รับการอนุมัติ";
+					$email_heading = "การชำระเงินไม่สำเร็จ";
+					$email_body_text = "เราต้องขออภัยที่ต้องแจ้งให้ทราบว่า การชำระเงินของคุณไม่ได้รับการอนุมัติ อาจเนื่องมาจากปัญหาบางประการ เช่น ภาพสลิปไม่ชัดเจน หรือยอดเงินไม่ถูกต้อง กรุณาติดต่อเราเพื่อสอบถามข้อมูลเพิ่มเติม หรือทำการอัปโหลดสลิปอีกครั้ง";
+				}
+
+				// --- ส่งอีเมลถ้ามีหัวข้อ (คือเป็นสถานะ อนุมัติ หรือ ไม่อนุมัติ เท่านั้น) ---
+				if (!empty($subject)) {
+					$mail->isHTML(true);
+					$mail->Subject = $subject . " [#{$code}]";
+					$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+					$mail->addAddress($customer_email, $customer_name);
+
+					$body = "
+                    <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
+                        <h2 style='color: #16542b; text-align:center;'>{$email_heading}</h2>
+                        <p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
+                        <p>{$email_body_text}</p>
+                        <hr>
+                        <p><strong>รหัสคำสั่งซื้อ:</strong> {$code}</p>
+                        <p style='text-align:center; margin-top:20px;'>
+                            <a href='" . base_url . "?p=user/orders' style='background-color: #16542b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>ดูรายละเอียดคำสั่งซื้อ</a>
+                        </p>
+                      <p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+                    </div>";
+
+					$mail->Body = $body;
+					$mail->send();
+				}
+			} catch (Exception $e) {
+				// บันทึก log หากส่งอีเมลไม่สำเร็จ (แต่ไม่ต้องแจ้งผู้ใช้)
+				error_log("❌ ส่งอีเมลแจ้งเตือนสถานะสลิปไม่สำเร็จ: " . $mail->ErrorInfo);
+			}
+			// ✨ --- สิ้นสุดส่วนการส่งอีเมล --- ✨
+
+			$this->settings->set_flashdata('success', 'อัปเดตสถานะการชำระเงินเรียบร้อยแล้ว');
+			$resp['status'] = 'success';
+		} else {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'เกิดข้อผิดพลาดในการอัปเดตฐานข้อมูล';
+		}
+
+		return json_encode($resp);
+	}
 	function cancel_order()
 	{
 		// ใช้ extract เพื่อรับค่า 'order_id' จาก AJAX POST request
@@ -1896,6 +2186,7 @@ class Master extends DBConnection
 
 		$this->conn->begin_transaction();
 		try {
+			// ส่วนนี้เหมือนเดิม: บันทึกข้อมูลหลักของ shipping_methods
 			if ($id > 0) {
 				$sql = "UPDATE `shipping_methods` SET 
                 provider_id = '{$provider_id}',
@@ -1918,12 +2209,29 @@ class Master extends DBConnection
 
 			$shipping_methods_id = ($id > 0) ? $id : $this->conn->insert_id;
 
-			// ลบช่วงน้ำหนักเดิมถ้าแก้ไข
+			// --- [START] แก้ไขส่วนการบันทึกราคาตามน้ำหนัก (UPSERT Logic) ---
+			// ข้อควรระวัง: โค้ดนี้ต้องการคอลัมน์ `status` ในตาราง `shipping_prices`
+
 			if ($id > 0) {
-				$this->conn->query("DELETE FROM `shipping_prices` WHERE shipping_methods_id = {$shipping_methods_id}");
+				// 1. ถ้าเป็นการแก้ไข (id > 0) ให้ตั้งค่าราคาทั้งหมดเป็น 'inactive' (status = 0) ก่อน
+				// เราจะทำการอัปเดต/เปิดใช้งาน (status = 1) เฉพาะรายการที่ส่งมาในฟอร์ม
+				$this->conn->query("UPDATE `shipping_prices` SET status = 0 WHERE shipping_methods_id = {$shipping_methods_id}");
 			}
 
-			// บันทึกค่าจัดส่งตามน้ำหนัก
+			// 2. เตรียม Prepared Statements สำหรับการ UPSERT
+			// ใช้เพื่อตรวจสอบว่ามีแถว (ตามช่วงน้ำหนัก) นี้อยู่แล้วหรือไม่
+			$stmt_check = $this->conn->prepare("SELECT id FROM shipping_prices WHERE shipping_methods_id = ? AND min_weight = ? AND max_weight = ?");
+
+			// ใช้เพื่ออัปเดตแถวที่มีอยู่ (เปลี่ยนราคา และตั้ง status = 1)
+			$stmt_update = $this->conn->prepare("UPDATE shipping_prices SET price = ?, status = 1 WHERE id = ?");
+
+			// ใช้เพื่อเพิ่มแถวใหม่ (พร้อม status = 1)
+			// (ต้องเพิ่มคอลัมน์ status ในคำสั่ง INSERT)
+			$stmt_insert = $this->conn->prepare("INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price, status)
+                                                VALUES (?, ?, ?, ?, 1)");
+
+
+			// 3. วนลูปข้อมูลที่ส่งมา
 			if (!empty($_POST['weight_from']) && !empty($_POST['weight_to']) && !empty($_POST['price'])) {
 				$weight_from = $_POST['weight_from'];
 				$weight_to = $_POST['weight_to'];
@@ -1934,6 +2242,7 @@ class Master extends DBConnection
 					$w_to = intval($weight_to[$i]);
 					$p = floatval($price[$i]);
 
+					// Validation (เหมือนเดิม)
 					if ($w_from >= $w_to) {
 						throw new Exception('น้ำหนักเริ่มต้นต้องน้อยกว่าน้ำหนักสูงสุด');
 					}
@@ -1941,14 +2250,42 @@ class Master extends DBConnection
 						throw new Exception('ราคาต้องไม่ติดลบ');
 					}
 
-					$stmt_price = $this->conn->prepare("INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price)
-                                                    VALUES (?, ?, ?, ?)");
-					$stmt_price->bind_param('iiid', $shipping_methods_id, $w_from, $w_to, $p);
-					if (!$stmt_price->execute()) {
-						throw new Exception('ไม่สามารถบันทึกข้อมูลราคาจัดส่งตามน้ำหนัก');
+					// 4. ตรวจสอบว่ามีแถวนี้อยู่แล้วหรือไม่ (เฉพาะกรณีแก้ไข)
+					$existing_id = null;
+					if ($id > 0) {
+						$stmt_check->bind_param('iii', $shipping_methods_id, $w_from, $w_to);
+						$stmt_check->execute();
+						$result = $stmt_check->get_result();
+						if ($result->num_rows > 0) {
+							$existing_id = $result->fetch_assoc()['id'];
+						}
+					}
+
+					if ($existing_id) {
+						// 5a. ถ้ามี: อัปเดตราคา และตั้ง status = 1 (เปิดใช้งาน)
+						$stmt_update->bind_param('di', $p, $existing_id);
+						if (!$stmt_update->execute()) {
+							throw new Exception('ไม่สามารถอัปเดตข้อมูลราคาจัดส่งเดิม: ' . $stmt_update->error);
+						}
+					} else {
+						// 5b. ถ้าไม่มี (หรือเป็นการสร้างใหม่): เพิ่มแถวใหม่ด้วย status = 1
+						$stmt_insert->bind_param('iiid', $shipping_methods_id, $w_from, $w_to, $p);
+						if (!$stmt_insert->execute()) {
+							throw new Exception('ไม่สามารถบันทึกข้อมูลราคาจัดส่งใหม่: ' . $stmt_insert->error);
+						}
 					}
 				}
 			}
+			// (ถ้า $id > 0 และไม่มีการส่ง 'weight_from' มาเลย หมายถึงผู้ใช้ลบออกทั้งหมด
+			// รายการทั้งหมดจะถูกตั้งค่าเป็น status = 0 จากขั้นตอนที่ 1 โดยอัตโนมัติ)
+
+			// 6. ปิด statements
+			$stmt_check->close();
+			$stmt_update->close();
+			$stmt_insert->close();
+
+			// --- [END] แก้ไขส่วนการบันทึกราคาตามน้ำหนัก ---
+
 
 			$this->conn->commit();
 			echo json_encode(['status' => 'success']);
@@ -1957,7 +2294,6 @@ class Master extends DBConnection
 			echo json_encode(['status' => 'failed', 'msg' => $e->getMessage()]);
 		}
 	}
-
 	function delete_shipping()
 	{
 		extract($_POST);
@@ -2708,8 +3044,13 @@ switch ($action) {
 	case 'delete_cart':
 		echo $Master->delete_cart();
 		break;
+
 	case 'get_shipping_cost':
 		$Master->get_shipping_cost();
+		break;
+
+	case 'get_shipping_details':
+		$Master->get_shipping_details();
 		break;
 
 	case 'place_order':
@@ -2717,6 +3058,11 @@ switch ($action) {
 		ob_end_clean();  // เคลียร์ buffer
 		echo $result;
 		break;
+
+	case 'approve_slip':
+		$result = $Master->approve_slip();
+		break;
+
 	case 'cancel_order':
 		echo $Master->cancel_order();
 		break;

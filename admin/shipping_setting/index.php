@@ -56,6 +56,7 @@
                     <tbody>
                         <?php
                         $i = 1;
+                        // *** [START] แก้ไข SQL Query ***
                         // Query to fetch shipping methods and price range (min_price, max_price)
                         $qry = $conn->query("
                         SELECT 
@@ -70,14 +71,15 @@
                         FROM 
                             shipping_methods sm
                         LEFT JOIN 
-                            shipping_prices sp ON sm.id = sp.shipping_methods_id
+                            shipping_prices sp ON sm.id = sp.shipping_methods_id AND sp.status = 1 -- *** แก้ไข: เพิ่ม AND sp.status = 1 ตรงนี้ ***
                         WHERE 
                             sm.delete_flag = 0
                         GROUP BY 
                             sm.id
                         ORDER BY 
                             sm.id
-                    ");
+                        ");
+                        // *** [END] แก้ไข SQL Query ***
 
                         while ($row = $qry->fetch_assoc()):
                         ?>
@@ -87,8 +89,15 @@
                                 <td class=""><?= $row['shipping_method_description'] ?></td>
                                 <td class="text-center">
                                     <?php
-                                    // Show min price and max price
-                                    echo format_num($row['min_price'], 2) . " ฿ - " . format_num($row['max_price'], 2) . " ฿";
+                                    // *** [START] แก้ไขการแสดงผล (แนะนำ) ***
+                                    // ตรวจสอบว่า min_price ไม่ใช่ NULL (หมายถึงมีราคาที่ status=1)
+                                    if ($row['min_price'] !== null):
+                                        echo format_num($row['min_price'], 2) . " ฿ - " . format_num($row['max_price'], 2) . " ฿";
+                                    else:
+                                        // ถ้าเป็น NULL (ไม่มีราคาที่ใช้งาน) ให้แสดง -
+                                        echo "-";
+                                    endif;
+                                    // *** [END] แก้ไขการแสดงผล ***
                                     ?>
                                 </td>
                                 <td class="text-center">
