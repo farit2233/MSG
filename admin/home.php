@@ -137,10 +137,10 @@ $delivery_status_map = [
         <div class="stat-card bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-500">ยอดขายวันนี้</p>
-            <p class="text-3xl font-bold text-gray-800">฿<?php echo format_num($today_sales, 2); ?></p>
+            <p class="text-3xl font-bold text-gray-800"><?php echo format_num($today_sales, 2); ?></p>
           </div>
           <div class="p-3">
-            <i class="fas fa-dollar-sign text-xl text-primary"></i>
+            <i class="fas fa-baht-sign text-xl text-primary"></i>
           </div>
         </div>
       </a>
