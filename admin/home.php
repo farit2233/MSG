@@ -117,6 +117,10 @@ $delivery_status_map = [
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   }
+
+  .icon-color {
+    color: #f57421;
+  }
 </style>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -140,7 +144,7 @@ $delivery_status_map = [
             <p class="text-3xl font-bold text-gray-800"><?php echo format_num($today_sales, 2); ?></p>
           </div>
           <div class="p-3">
-            <i class="fas fa-baht-sign text-xl text-primary"></i>
+            <i class="fas fa-baht-sign text-xl icon-color"></i>
           </div>
         </div>
       </a>
@@ -153,7 +157,7 @@ $delivery_status_map = [
           <p class="text-3xl font-bold text-gray-800"><?php echo format_num($total_orders); ?></p>
         </div>
         <div class="p-3">
-          <i class="fas fa-shopping-cart text-xl text-primary"></i>
+          <i class="fas fa-shopping-cart text-xl icon-color"></i>
         </div>
       </div>
     </a>
@@ -165,7 +169,7 @@ $delivery_status_map = [
           <p class="text-3xl font-bold text-gray-800"><?php echo format_num($total_products); ?></p>
         </div>
         <div class="p-3">
-          <i class="fas fa-boxes text-xl text-primary"></i>
+          <i class="fas fa-boxes text-xl icon-color"></i>
         </div>
       </div>
     </a>
@@ -184,7 +188,7 @@ $delivery_status_map = [
           <?php endif; ?>
         </div>
         <div class="p-3">
-          <i class="fas <?php echo $low_stock_count > 0 ? 'fa-exclamation-triangle text-danger' : 'fa-warehouse text-primary'; ?> text-xl"></i>
+          <i class="fas <?php echo $low_stock_count > 0 ? 'fa-exclamation-triangle text-danger' : 'fa-warehouse icon-color'; ?> text-xl"></i>
         </div>
       </div>
     </a>
@@ -284,16 +288,16 @@ $delivery_status_map = [
           datasets: [{
             label: 'ยอดขาย (บาท)',
             data: <?php echo $sales_chart_data_json; ?>,
-            backgroundColor: 'rgba(79, 70, 229, 0.1)',
-            borderColor: 'rgba(79, 70, 229, 1)',
+            backgroundColor: 'rgba(245, 116, 33,0.1)',
+            borderColor: 'rgba(245, 116, 33)',
             borderWidth: 2,
             tension: 0.4,
             fill: true,
-            pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+            pointBackgroundColor: 'rgba(245, 116, 33,1)',
             pointBorderColor: '#fff',
             pointHoverRadius: 6,
             pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgba(79, 70, 229, 1)'
+            pointHoverBorderColor: 'rgba(245, 116, 33,1)'
           }]
         },
         options: {
