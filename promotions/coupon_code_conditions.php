@@ -39,7 +39,7 @@ function formatDateThai($date)
     $timestamp = strtotime($date);
     $day = date("j", $timestamp); // วัน (1-31)
     $month = date("n", $timestamp); // เดือน (1-12)
-    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+    $year = date("Y", $timestamp); // ปี (พ.ศ.)
     return "{$day}/{$month}/{$year}";
 }
 
@@ -48,7 +48,7 @@ function formatDateThaiConditions($date)
     $timestamp = strtotime($date);
     $day = date("j", $timestamp); // วัน (1-31)
     $month = date("n", $timestamp); // เดือน (1-12)
-    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+    $year = date("Y", $timestamp); // ปี (พ.ศ.)
     $hour = date("H", $timestamp); // ชั่วโมง (00-23)
     $minute = date("i", $timestamp); // นาที (00-59)
     return "{$day}/{$month}/{$year} {$hour}:{$minute}";

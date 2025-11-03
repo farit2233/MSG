@@ -18,7 +18,7 @@ $qry_promo_recommand = $conn->query("
         minimum_order ASC,
         date_created ASC,
         name ASC
-    LIMIT 8
+    LIMIT 4
 ");
 $qry_promo_free_shipping = $conn->query("SELECT * FROM promotions_list WHERE type = 'free_shipping' AND status = 1 AND delete_flag = 0 AND start_date <= NOW() AND end_date >= NOW() ORDER BY date_created ASC, name ASC");
 $qry_promo = $conn->query("SELECT * FROM promotions_list WHERE status = 1 AND delete_flag = 0 AND start_date <= NOW() AND end_date >= NOW()  ORDER BY date_created ASC, name ASC");
@@ -34,7 +34,7 @@ function formatDateThai($date)
     $timestamp = strtotime($date);
     $day = date("j", $timestamp); // วัน (1-31)
     $month = date("n", $timestamp); // เดือน (1-12)
-    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+    $year = date("Y", $timestamp); // ปี (พ.ศ.)
     $hour = date("H", $timestamp); // ชั่วโมง (00-23)
     $minute = date("i", $timestamp); // นาที (00-59)
     // สร้างวันที่ในรูปแบบไทย
@@ -55,13 +55,14 @@ $total_promotions = $qry_promo->num_rows;
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-start !important;
-        /* ชิดซ้าย */
         gap: 24px;
+        padding-bottom: 24px;
     }
 
     .custom-promo-card-wrapper {
         width: 323.5px;
         display: flex;
+
     }
 
     .custom-promo-card-wrapper a.text-decoration-none {
@@ -95,46 +96,64 @@ $total_promotions = $qry_promo->num_rows;
                 </div>
                 <div class="card rounded-0 pt-4 px-4">
                     <div class="custom-promo-container">
+
                         <?php
-                        mysqli_data_seek($qry_promo_recommand, 0);
-                        while ($row = $qry_promo_recommand->fetch_assoc()): ?>
-                            <div class="custom-promo-card-wrapper">
-                                <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
-                                    <div class="card card-promotion h-100">
-                                        <div class="card-promotion-holder">
-                                            <img class="card-img-top promotion-img" src="<?= $row['image_path'] ?>" alt="Card image cap">
-                                            <h5 class="card-title card-title-promotion">
-                                                <?= $row['name'] ?>
-                                            </h5>
+                        // ตรวจสอบว่ามีข้อมูลโปรโมชันหรือไม่
+                        if ($qry_promo_recommand->num_rows > 0):
+                            // ⬇️ ถ้ามีข้อมูล ให้เริ่มวนลูป while
+                            while ($row = $qry_promo_recommand->fetch_assoc()):
+                        ?>
+                                <div class="custom-promo-card-wrapper">
+                                    <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
+                                        <div class="card card-promotion h-100">
+                                            <div class="card-promotion-holder">
+                                                <img class="card-img-top promotion-img" src="<?= $row['image_path'] ?>" alt="Card image cap">
+                                                <h5 class="card-title card-title-promotion">
+                                                    <?= $row['name'] ?>
+                                                </h5>
+                                            </div>
+                                            <div class="card-body card-promotion-body d-flex flex-column">
+                                                <p class="card-text promotion-description text-dark"><?= $row['description'] ?></p>
+                                                <p class="card-text mt-auto">
+                                                    <small class="text-muted">
+                                                        <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
+                                                        <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
+                                                    </small>
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div class="card-body card-promotion-body d-flex flex-column">
-                                            <p class="card-text promotion-description text-dark"><?= $row['description'] ?></p>
-                                            <p class="card-text mt-auto">
-                                                <small class="text-muted">
-                                                    <span>เริ่ม: <?= formatDateThai($row['start_date']) ?></span>
-                                                    <span> ถึง สิ้นสุด: <?= formatDateThai($row['end_date']) ?></span>
-                                                </small>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
+                                    </a>
+                                </div>
+                            <?php
+                            endwhile; // สิ้นสุด while loop
+                        else:
+                            // ⬇️ ถ้าไม่มีข้อมูลเลย (num_rows == 0)
+                            ?>
+                            <div class="w-100 empty-message-center py-5">
+                                <h4 class="text-muted">ไม่มีโปรโมชันในขณะนี้</h4>
                             </div>
-                        <?php endwhile; ?>
+                        <?php
+                        endif; // สิ้นสุด if-else
+                        ?>
                     </div>
                 </div>
             <?php endif; ?>
     </section>
 
-    <?php if ($qry_promo_free_shipping->num_rows > 0): ?>
-        <section class="mx-5">
-            <div class="d-flex justify-content-between mt-3">
-                <h3>โปรโมชันส่งฟรีทั้งหมด</h3>
-            </div>
-            <div class="card rounded-0 pt-4 px-4">
+    <section class="mx-5">
+        <div class="d-flex justify-content-between mt-3">
+            <h3>โปรโมชันส่งฟรีทั้งหมด</h3>
+        </div>
+        <div class="card rounded-0 pt-4 px-4">
+
+            <?php
+            // ⭐️ 1. ตรวจสอบข้อมูล ($qry_promo_free_shipping) ก่อนสร้าง container
+            if ($qry_promo_free_shipping->num_rows > 0):
+            ?>
                 <div class="custom-promo-container">
                     <?php
-                    mysqli_data_seek($qry_promo_free_shipping, 0);
-                    while ($row = $qry_promo_free_shipping->fetch_assoc()): ?>
+                    while ($row = $qry_promo_free_shipping->fetch_assoc()):
+                    ?>
                         <div class="custom-promo-card-wrapper">
                             <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
                                 <div class="card card-promotion h-100">
@@ -156,11 +175,22 @@ $total_promotions = $qry_promo->num_rows;
                                 </div>
                             </a>
                         </div>
-                    <?php endwhile; ?>
+                    <?php
+                    endwhile; // สิ้นสุด while loop
+                    ?>
+                </div> <?php
+                    else:
+                        // 3. ถ้าไม่มีข้อมูล: แสดงข้อความ (โดยไม่อยู่ใน .custom-promo-container)
+                        // (ใช้ class ของ Bootstrap ธรรมดาได้เลย)
+                        ?>
+                <div class="d-flex justify-content-center align-items-center py-5">
+                    <h4 class="text-muted">ไม่มีโปรโมชันส่งฟรีในขณะนี้</h4>
                 </div>
-            </div>
-        </section>
-    <?php endif; ?>
+            <?php
+                    endif; // สิ้นสุด if-else
+            ?>
+        </div>
+    </section>
 
     <?php if ($qry_promo->num_rows > 0): ?>
         <section class="pt-5 mx-5">
@@ -169,9 +199,12 @@ $total_promotions = $qry_promo->num_rows;
             </div>
             <div class="card rounded-0 pt-4 px-4">
                 <div class="custom-promo-container">
+
                     <?php
-                    mysqli_data_seek($qry_promo, 0);
-                    while ($row = $qry_promo->fetch_assoc()): ?>
+                    // ตรวจสอบว่ามีข้อมูลโปรโมชันหรือไม่
+
+                    while ($row = $qry_promo->fetch_assoc()):
+                    ?>
                         <div class="custom-promo-card-wrapper">
                             <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
                                 <div class="card card-promotion h-100">
@@ -193,12 +226,14 @@ $total_promotions = $qry_promo->num_rows;
                                 </div>
                             </a>
                         </div>
-                    <?php endwhile; ?>
-
+                    <?php
+                    endwhile; // สิ้นสุด while loop
+                    ?>
                 </div>
             </div>
         </section>
     <?php endif; ?>
+
 <?php else: ?>
     <div class="d-flex justify-content-center align-items-center py-5">
         <h4 class="text-muted">ไม่มีโปรโมชันในขณะนี้</h4>

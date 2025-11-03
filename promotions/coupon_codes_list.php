@@ -1,34 +1,40 @@
 <?php
 $i = 1;
 $qry_limit = $conn->query("
-    SELECT * 
-    FROM coupon_code_list 
+    SELECT * FROM coupon_code_list 
     WHERE status = 1 
       AND delete_flag = 0
       AND start_date <= NOW() 
       AND end_date >= NOW() 
     ORDER BY 
         type = 'free_shipping' DESC,  -- free_shipping อยู่หน้าสุด
-        discount_value DESC,           -- จัดลำดับตามส่วนลดจากมากไปหาน้อย
-        date_created DESC              -- ใหม่สุดอยู่ก่อน
+        discount_value DESC,          -- จัดลำดับตามส่วนลดจากมากไปหาน้อย
+        date_created DESC             -- ใหม่สุดอยู่ก่อน
     LIMIT 5
 ");
 
-$qry_free_shipping = $conn->query("SELECT * FROM coupon_code_list WHERE type = 'free_shipping' ORDER BY date_created ASC, name ASC");
-$qry = $conn->query("SELECT * 
-    FROM coupon_code_list 
+$qry_free_shipping = $conn->query("SELECT * FROM coupon_code_list
+    WHERE status = 1 
+      AND type = 'free_shipping'
+      AND delete_flag = 0
+      AND start_date <= NOW() 
+      AND end_date >= NOW()
+    ORDER BY date_created ASC, name ASC");
+
+$qry = $conn->query("SELECT * FROM coupon_code_list 
     WHERE status = 1 
       AND delete_flag = 0
       AND start_date <= NOW() 
       AND end_date >= NOW() 
     ORDER BY date_created ASC, name ASC");
+
 function formatDateThai($date)
 {
     // แปลงวันที่เป็นตัวแปร timestamp
     $timestamp = strtotime($date);
     $day = date("j", $timestamp); // วัน (1-31)
     $month = date("n", $timestamp); // เดือน (1-12)
-    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+    $year = date("Y", $timestamp); // ปี (พ.ศ.)
     // สร้างวันที่ในรูปแบบไทย
     return "{$day}/{$month}/{$year}";
 }
@@ -56,131 +62,147 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                 <?= $breadcrumb_item_2_html ?>
             </ol>
         </nav>
-        <div class="mt-3">
-            <h3>คูปองแนะนำ</h3>
-        </div>
-        <div class="container-coupon">
-            <div class="container-custom">
-                <div class="row row-cols-1 row-cols-md-5 g-4">
-                    <?php
-                    mysqli_data_seek($qry, 0);
-                    while ($row = $qry_limit->fetch_assoc()): ?>
-                        <div class="col mb-4">
-                            <div class="card" style="width: 16.5rem;">
-                                <div class="card-img" style="position: relative;">
-                                    <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
-                                    <div class="card-body card-coupon-body">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <label class="card-title coupon-head mb-0">
-                                                <?php
-                                                // เช็คว่าเป็น free shipping หรือไม่
-                                                if ($row['type'] == 'free_shipping') {
-                                                    echo 'ส่งฟรี'; // ถ้าเป็น free_shipping ให้แสดงแค่คำว่า "ส่งฟรี"
-                                                } elseif ($row['discount_value'] > 0) {
-                                                    // ถ้ามีส่วนลดจริงๆ จะโชว์ "ลด" และจำนวนที่เหมาะสม
-                                                    echo 'ลด ' . $row['discount_value'];
-                                                    switch ($row['type'] ?? '') {
-                                                        case 'fixed':
-                                                            echo ' บาท';
-                                                            break;
-                                                        case 'percent':
-                                                            echo '%';
-                                                            break;
-                                                        default:
-                                                            echo '-';
+
+        <?php
+        if ($qry->num_rows > 0):
+        ?>
+
+            <div class="mt-3">
+                <h3>คูปองแนะนำ</h3>
+            </div>
+            <div class="container-coupon">
+                <div class="container-custom">
+                    <div class="row row-cols-1 row-cols-md-5 g-4">
+                        <?php
+                        while ($row = $qry_limit->fetch_assoc()): ?>
+                            <div class="col mb-4">
+                                <div class="card" style="width: 16.5rem;">
+                                    <div class="card-img" style="position: relative;">
+                                        <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
+                                        <div class="card-body card-coupon-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <label class="card-title coupon-head mb-0">
+                                                    <?php
+                                                    if ($row['type'] == 'free_shipping') {
+                                                        echo 'ส่งฟรี';
+                                                    } elseif ($row['discount_value'] > 0) {
+                                                        echo 'ลด ' . $row['discount_value'];
+                                                        switch ($row['type'] ?? '') {
+                                                            case 'fixed':
+                                                                echo ' บาท';
+                                                                break;
+                                                            case 'percent':
+                                                                echo '%';
+                                                                break;
+                                                            default:
+                                                                echo '-';
+                                                        }
+                                                    } else {
+                                                        echo '';
                                                     }
-                                                } else {
-                                                    echo ''; // ถ้าเป็น 0 หรือไม่มีส่วนลด จะไม่แสดงอะไร
-                                                }
-                                                ?>
-                                            </label>
-                                            <div class="copy-tooltip">
-                                                <span class="tooltip-text">คัดลอกแล้ว</span>
-                                                <a href="#" class="text-white copy" id="copy-button-<?= $row['coupon_code'] ?>" data-code="<?= $row['coupon_code'] ?>">
-                                                    <u>คัดลอก</u>
-                                                </a>
+                                                    ?>
+                                                </label>
+                                                <div class="copy-tooltip">
+                                                    <span class="tooltip-text">คัดลอกแล้ว</span>
+                                                    <a href="#" class="text-white copy" id="copy-button-<?= $row['coupon_code'] ?>" data-code="<?= $row['coupon_code'] ?>">
+                                                        <u>คัดลอก</u>
+                                                    </a>
+                                                </div>
                                             </div>
+                                            <p class="card-text coupon-code"><?= $row['coupon_code'] ?></p>
+                                            <p class="card-text coupon-description"><?= $row['description'] ?></p>
+                                            <small>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
+                                                    <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
+                                                        เงื่อนไข
+                                                    </a>
+                                                </div>
+                                            </small>
                                         </div>
-                                        <p class="card-text coupon-code"><?= $row['coupon_code'] ?></p>
-                                        <p class="card-text coupon-description"><?= $row['description'] ?></p>
-                                        <small>
-                                            <div class="d-flex justify-content-between">
-                                                <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
-                                                    เงื่อนไข
-                                                </a>
-                                            </div>
-                                        </small>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endwhile; ?>
+                        <?php endwhile; ?>
+                    </div>
                 </div>
             </div>
-        </div>
     </section>
-
     <section class="mx-5">
         <h3>คูปองส่งฟรีทั้งหมด</h3>
         <div class="card rounded-0 pt-4">
             <div class="container-coupon">
-                <div class="row row-cols-1 row-cols-md-5 g-4">
-                    <?php
-                    mysqli_data_seek($qry_free_shipping, 0);
-                    while ($row = $qry_free_shipping->fetch_assoc()): ?>
-                        <div class="col mb-4">
-                            <div class="card" style="width: 16.5rem;">
-                                <div class="card-img" style="position: relative;">
-                                    <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
-                                    <div class="card-body card-coupon-body">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <label class="card-title coupon-head mb-0">
-                                                <?php
-                                                // เช็คว่าเป็น free shipping หรือไม่
-                                                if ($row['type'] == 'free_shipping') {
-                                                    echo 'ส่งฟรี'; // ถ้าเป็น free_shipping ให้แสดงแค่คำว่า "ส่งฟรี"
-                                                } elseif ($row['discount_value'] > 0) {
-                                                    // ถ้ามีส่วนลดจริงๆ จะโชว์ "ลด" และจำนวนที่เหมาะสม
-                                                    echo 'ลด ' . $row['discount_value'];
-                                                    switch ($row['type'] ?? '') {
-                                                        case 'fixed':
-                                                            echo ' บาท';
-                                                            break;
-                                                        case 'percent':
-                                                            echo '%';
-                                                            break;
-                                                        default:
-                                                            echo '-';
+
+                <?php
+                // ⭐️ 1. ตรวจสอบข้อมูล ($qry_free_shipping) ก่อนสร้างแถว
+                if ($qry_free_shipping->num_rows > 0):
+                ?>
+                    <div class="row row-cols-1 row-cols-md-5 g-4">
+                        <?php
+                        while ($row = $qry_free_shipping->fetch_assoc()): ?>
+                            <div class="col mb-4">
+                                <div class="card" style="width: 16.5rem;">
+                                    <div class="card-img" style="position: relative;">
+                                        <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
+                                        <div class="card-body card-coupon-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <label class="card-title coupon-head mb-0">
+                                                    <?php
+                                                    if ($row['type'] == 'free_shipping') {
+                                                        echo 'ส่งฟรี';
+                                                    } elseif ($row['discount_value'] > 0) {
+                                                        echo 'ลด ' . $row['discount_value'];
+                                                        switch ($row['type'] ?? '') {
+                                                            case 'fixed':
+                                                                echo ' บาท';
+                                                                break;
+                                                            case 'percent':
+                                                                echo '%';
+                                                                break;
+                                                            default:
+                                                                echo '-';
+                                                        }
+                                                    } else {
+                                                        echo '';
                                                     }
-                                                } else {
-                                                    echo ''; // ถ้าเป็น 0 หรือไม่มีส่วนลด จะไม่แสดงอะไร
-                                                }
-                                                ?>
-                                            </label>
-                                            <div class="copy-tooltip">
-                                                <span class="tooltip-text">คัดลอกแล้ว</span>
-                                                <a href="#" class="text-white copy" id="copy-button-<?= $row['coupon_code'] ?>" data-code="<?= $row['coupon_code'] ?>">
-                                                    <u>คัดลอก</u>
-                                                </a>
+                                                    ?>
+                                                </label>
+                                                <div class="copy-tooltip">
+                                                    <span class="tooltip-text">คัดลอกแล้ว</span>
+                                                    <a href="#" class="text-white copy" id="copy-button-<?= $row['coupon_code'] ?>" data-code="<?= $row['coupon_code'] ?>">
+                                                        <u>คัดลอก</u>
+                                                    </a>
+                                                </div>
                                             </div>
+                                            <p class="card-text coupon-code"><?= $row['coupon_code'] ?></p>
+                                            <p class="card-text coupon-description"><?= $row['description'] ?></p>
+                                            <small>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
+                                                    <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
+                                                        เงื่อนไข
+                                                    </a>
+                                                </div>
+                                            </small>
                                         </div>
-                                        <p class="card-text coupon-code"><?= $row['coupon_code'] ?></p>
-                                        <p class="card-text coupon-description"><?= $row['description'] ?></p>
-                                        <small>
-                                            <div class="d-flex justify-content-between">
-                                                <span>วันนี้ ถึง <?= formatDateThai($row['end_date']) ?></span>
-                                                <a class="text-white" type="button" id="coupon_code_conditions" data-coupon-id="<?= $row['id'] ?>">
-                                                    เงื่อนไข
-                                                </a>
-                                            </div>
-                                        </small>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endwhile; ?>
-                </div>
+                        <?php
+                        endwhile;
+                        ?>
+                    </div> <?php
+                        else:
+                            // 3. ถ้าไม่มีข้อมูล: แสดงข้อความ (โดยไม่อยู่ใน .row)
+                            // (ผมเปลี่ยนข้อความให้ตรงหมวดหมู่มากขึ้นครับ)
+                            ?>
+                    <div class="d-flex justify-content-center align-items-center py-5">
+                        <h4 class="text-muted">ไม่มีคูปองส่งฟรีในขณะนี้</h4>
+                    </div>
+                <?php
+                        endif; // สิ้นสุด if-else
+                ?>
+
             </div>
         </div>
     </section>
@@ -201,11 +223,9 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                                         <div class="d-flex justify-content-between align-items-center">
                                             <label class="card-title coupon-head mb-0">
                                                 <?php
-                                                // เช็คว่าเป็น free shipping หรือไม่
                                                 if ($row['type'] == 'free_shipping') {
-                                                    echo 'ส่งฟรี'; // ถ้าเป็น free_shipping ให้แสดงแค่คำว่า "ส่งฟรี"
+                                                    echo 'ส่งฟรี';
                                                 } elseif ($row['discount_value'] > 0) {
-                                                    // ถ้ามีส่วนลดจริงๆ จะโชว์ "ลด" และจำนวนที่เหมาะสม
                                                     echo 'ลด ' . $row['discount_value'];
                                                     switch ($row['type'] ?? '') {
                                                         case 'fixed':
@@ -218,7 +238,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                                                             echo '-';
                                                     }
                                                 } else {
-                                                    echo ''; // ถ้าเป็น 0 หรือไม่มีส่วนลด จะไม่แสดงอะไร
+                                                    echo '';
                                                 }
                                                 ?>
                                             </label>
@@ -248,6 +268,16 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
             </div>
         </div>
     </section>
+
+<?php
+        else:
+?>
+    <div class="d-flex justify-content-center align-items-center py-5">
+        <h4 class="text-muted">ไม่มีคูปองโค้ดในขณะนี้</h4>
+    </div>
+<?php
+        endif;
+?>
 </div>
 <script>
     $(function() {
