@@ -247,9 +247,9 @@ if (!function_exists('format_price_custom')) {
             var sortBy = $('#sort_by').val();
             var productContainer = $('#product-list-container');
             var loadingSpinnerHTML = `<div class="col-12 text-center py-5">
-                <div class="spinner-border text-primary" role="status"><span class="sr-only"></span></div>
-                <p class="mt-2">กำลังโหลดสินค้า...</p>
-            </div>`;
+        <div class="spinner-border text-primary" role="status"><span class="sr-only"></span></div>
+        <p class="mt-2">กำลังโหลดสินค้า...</p>
+      </div>`;
 
             productContainer.html(loadingSpinnerHTML);
 
