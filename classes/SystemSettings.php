@@ -290,7 +290,7 @@ $_settings->load_system_info();
 $action = !isset($_GET['f']) ? 'none' : strtolower($_GET['f']);
 $sysset = new SystemSettings();
 switch ($action) {
-	case 'update_settings':
+	case 'update_settings_info':
 		echo $sysset->update_settings_info();
 		break;
 	default:

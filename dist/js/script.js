@@ -123,7 +123,7 @@ $(document).ready(function() {
         if ($('.err_msg').length > 0)
             $('.err_msg').remove()
         $.ajax({
-            url: _base_url_ + 'classes/SystemSettings.php?f=update_settings',
+            url: _base_url_ + 'classes/SystemSettings.php?f=update_settings_info',
             data: new FormData($(this)[0]),
             cache: false,
             contentType: false,
