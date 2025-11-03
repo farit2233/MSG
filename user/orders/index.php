@@ -12,6 +12,30 @@ $filter_options = [
 $limit = 5; // จำนวนออเดอร์ต่อหน้า
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
+
+function formatDateThai($date)
+{
+    // ถ้าวันที่ว่างหรือไม่ถูกต้อง
+    if (empty($date)) {
+        return 'ข้อมูลวันที่ไม่ถูกต้อง';
+    }
+
+    // แปลงวันที่เป็น timestamp
+    $timestamp = strtotime($date);
+    if ($timestamp === false) {
+        return 'ข้อมูลวันที่ไม่ถูกต้อง';
+    }
+
+    // ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+    $day = date("j", $timestamp);
+    $month = date("n", $timestamp);
+    $year = date("Y", $timestamp); // ปี (พ.ศ.)
+    $hour = date("H", $timestamp); // ชั่วโมง (00-23)
+    $minute = date("i", $timestamp); // นาที (00-59)
+
+    // ส่งคืนวันที่ในรูปแบบไทย
+    return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
 ?>
 <section class="py-5 profile-page">
     <div class="container">
@@ -119,7 +143,7 @@ $offset = ($page - 1) * $limit;
                                         <div class="order-header">
                                             <div class="order-info">
                                                 <strong>เลขที่คำสั่งซื้อ</strong> <?= $row['code'] ?><br>
-                                                <small class="text-muted">วันที่สั่ง: <?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></small>
+                                                <small class="text-muted">วันที่สั่ง: <?= formatDateThai($row['date_created']); ?></small>
                                             </div>
                                             <div class="d-flex flex-column">
                                                 <button class="btn btn-orders view-order mb-2" data-id="<?= $row['id'] ?>">
