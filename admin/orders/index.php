@@ -2,11 +2,37 @@
 	<script>
 		alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
 	</script>
-<?php endif; ?>
+<?php endif;
+
+function formatDateThai($date)
+{
+	// ถ้าวันที่ว่างหรือไม่ถูกต้อง
+	if (empty($date)) {
+		return 'ข้อมูลวันที่ไม่ถูกต้อง';
+	}
+
+	// แปลงวันที่เป็น timestamp
+	$timestamp = strtotime($date);
+	if ($timestamp === false) {
+		return 'ข้อมูลวันที่ไม่ถูกต้อง';
+	}
+
+	// ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+	$day = date("j", $timestamp);
+	$month = date("n", $timestamp);
+	$year = date("Y", $timestamp); // ปี (พ.ศ.)
+	$hour = date("H", $timestamp); // ชั่วโมง (00-23)
+	$minute = date("i", $timestamp); // นาที (00-59)
+
+	// ส่งคืนวันที่ในรูปแบบไทย
+	return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
+?>
 <?php
 $payment_status = isset($_GET['payment_status']) ? $_GET['payment_status'] : '';
 $delivery_status = isset($_GET['delivery_status']) ? $_GET['delivery_status'] : '';
 $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจสอบ', 'ชำระเงินแล้ว', 'ชำระล้มเหลว', 'คืนเงินแล้ว']
+
 ?>
 <style>
 	.card-title {
@@ -124,7 +150,7 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 								<td class="p-1 align-middle text-center"><?= $row['code'] ?></td>
 								<td class="p-1 align-middle"><?= $row['customer'] ?></td>
 								<td class="p-1 align-middle text-center"><?= format_num($row['total_amount'], 2) ?> ฿</td>
-								<td class="p-1 align-middle text-center"><?= date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+								<td class="p-1 align-middle text-center"><?= formatDateThai($row['date_created']); ?></td>
 								<td class="p-1 align-middle text-center">
 									<?php
 									switch ((int)$row['payment_status']) {

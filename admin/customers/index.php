@@ -2,7 +2,32 @@
 	<script>
 		alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
 	</script>
-<?php endif; ?>
+<?php endif;
+
+function formatDateThai($date)
+{
+	// ถ้าวันที่ว่างหรือไม่ถูกต้อง
+	if (empty($date)) {
+		return 'ข้อมูลวันที่ไม่ถูกต้อง';
+	}
+
+	// แปลงวันที่เป็น timestamp
+	$timestamp = strtotime($date);
+	if ($timestamp === false) {
+		return 'ข้อมูลวันที่ไม่ถูกต้อง';
+	}
+
+	// ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+	$day = date("j", $timestamp);
+	$month = date("n", $timestamp);
+	$year = date("Y", $timestamp); // ปี (พ.ศ.)
+	$hour = date("H", $timestamp); // ชั่วโมง (00-23)
+	$minute = date("i", $timestamp); // นาที (00-59)
+
+	// ส่งคืนวันที่ในรูปแบบไทย
+	return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
+?>
 <style>
 	.customer-avatar {
 		width: 3rem;
@@ -63,7 +88,7 @@
 								</td>
 								<td><?php echo $row['name'] ?></td>
 								<td><?php echo $row['email'] ?></td>
-								<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_updated'])) ?></td>
+								<td class="text-center"><?php echo formatDateThai($row['date_created']); ?></td>
 								<td class="text-center">
 									<button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
 										จัดการ

@@ -39,7 +39,7 @@ function formatDateThai($date)
   // ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
   $day = date("j", $timestamp);
   $month = date("n", $timestamp);
-  $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
+  $year = date("Y", $timestamp); // ปี (พ.ศ.)
   $hour = date("H", $timestamp); // ชั่วโมง (00-23)
   $minute = date("i", $timestamp); // นาที (00-59)
 

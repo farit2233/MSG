@@ -21,6 +21,30 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 		}
 	}
 }
+
+function formatDateThai($date)
+{
+	// ถ้าวันที่ว่างหรือไม่ถูกต้อง
+	if (empty($date)) {
+		return 'ข้อมูลวันที่ไม่ถูกต้อง';
+	}
+
+	// แปลงวันที่เป็น timestamp
+	$timestamp = strtotime($date);
+	if ($timestamp === false) {
+		return 'ข้อมูลวันที่ไม่ถูกต้อง';
+	}
+
+	// ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+	$day = date("j", $timestamp);
+	$month = date("n", $timestamp);
+	$year = date("Y", $timestamp); // ปี (พ.ศ.)
+	$hour = date("H", $timestamp); // ชั่วโมง (00-23)
+	$minute = date("i", $timestamp); // นาที (00-59)
+
+	// ส่งคืนวันที่ในรูปแบบไทย
+	return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
 ?>
 <style>
 	#product-img {
@@ -173,7 +197,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 								while ($row = $stocks->fetch_assoc()):
 								?>
 									<tr class="<?= !empty($row['expiration']) && (strtotime($row['expiration']) <= strtotime(date("Y-m-d"))) ? "text-danger" : "" ?>">
-										<td class="p-1 align-middle"><?= date("M d, Y", strtotime($row['date_created'])) ?></td>
+										<td class="p-1 align-middle"><?= formatDateThai($row['date_created']); ?></td>
 										<td class="p-1 align-middle"><?= $row['sku'] ?></td>
 										<td class="p-1 text-right align-middle"><?= format_num($row['quantity'], 0) ?><?= !empty($row['expiration']) && (strtotime($row['expiration']) <= strtotime(date("Y-m-d"))) ? " (Expired)" : "" ?></td>
 										<td class="p-1 text-center align-middle">

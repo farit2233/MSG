@@ -2,7 +2,33 @@
 	<script>
 		alert_toast("<?php echo $_settings->flashdata('success') ?>", 'success')
 	</script>
-<?php endif; ?>
+<?php endif;
+
+function formatDateThai($date)
+{
+	// ถ้าวันที่ว่างหรือไม่ถูกต้อง
+	if (empty($date)) {
+		return 'ข้อมูลวันที่ไม่ถูกต้อง';
+	}
+
+	// แปลงวันที่เป็น timestamp
+	$timestamp = strtotime($date);
+	if ($timestamp === false) {
+		return 'ข้อมูลวันที่ไม่ถูกต้อง';
+	}
+
+	// ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+	$day = date("j", $timestamp);
+	$month = date("n", $timestamp);
+	$year = date("Y", $timestamp); // ปี (พ.ศ.)
+	$hour = date("H", $timestamp); // ชั่วโมง (00-23)
+	$minute = date("i", $timestamp); // นาที (00-59)
+
+	// ส่งคืนวันที่ในรูปแบบไทย
+	return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+}
+
+?>
 <style>
 	.product-img {
 		width: 3em;
@@ -83,7 +109,7 @@
 									</div>
 								</td>
 								<td class="text-center <?= $stock_class ?>"><?= format_num($row['available'], 0) ?></td>
-								<td class="text-center"><?php echo date("Y-m-d H:i", strtotime($row['date_created'])) ?></td>
+								<td class="text-center"><?php echo formatDateThai($row['date_created']); ?></td>
 								<td class="text-center">
 									<a class="btn btn-sm btn-flat btn-light bg-gradient-light border" href="./?page=inventory/view_inventory&id=<?php echo $row['id'] ?>">
 										<span class="fa fa-edit text-dark"></span> แก้ไขสต๊อก
