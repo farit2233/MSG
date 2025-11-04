@@ -75,7 +75,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                     <div class="row row-cols-1 row-cols-md-5 g-4">
                         <?php
                         while ($row = $qry_limit->fetch_assoc()): ?>
-                            <div class="col mb-4">
+                            <div class="col">
                                 <div class="card" style="width: 16.5rem;">
                                     <div class="card-img" style="position: relative;">
                                         <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
@@ -140,7 +140,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                     <div class="row row-cols-1 row-cols-md-5 g-4">
                         <?php
                         while ($row = $qry_free_shipping->fetch_assoc()): ?>
-                            <div class="col mb-4">
+                            <div class="col">
                                 <div class="card" style="width: 16.5rem;">
                                     <div class="card-img" style="position: relative;">
                                         <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
@@ -193,8 +193,6 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                         ?>
                     </div> <?php
                         else:
-                            // 3. ถ้าไม่มีข้อมูล: แสดงข้อความ (โดยไม่อยู่ใน .row)
-                            // (ผมเปลี่ยนข้อความให้ตรงหมวดหมู่มากขึ้นครับ)
                             ?>
                     <div class="d-flex justify-content-center align-items-center py-5">
                         <h4 class="text-muted">ไม่มีคูปองส่งฟรีในขณะนี้</h4>
@@ -215,7 +213,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                     <?php
                     mysqli_data_seek($qry, 0);
                     while ($row = $qry->fetch_assoc()): ?>
-                        <div class="col mb-4">
+                        <div class="col">
                             <div class="card" style="width: 16.5rem;">
                                 <div class="card-img" style="position: relative;">
                                     <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
