@@ -244,10 +244,12 @@
 
           <!-- ช่องทางการติดต่อ -->
           <div class="col-md-3 mb-4">
-            <h6>ติดตามเรา</h6>
-            <p class="mb-1"><i class="fab fa-line text-white"></i><a href="<?php echo $_settings->info('Line') ?>" target="_blank" class="text-white"> Line </a></p>
+            <h6>ติดต่อเรา</h6>
+            <p class="mb-1"><i class="fas fa-location-dot text-white"></i> <?php echo $_settings->info('address') ?> </p>
+            <p class="mb-1"><i class="fas fa-phone text-white"></i> <?php echo $_settings->info('mobile') ?></p>
+            <p class="mb-1"><i class="fab fa-line text-white"></i> <?php echo $_settings->info('Line') ?></p>
             <p class="mb-0"><i class="fab fa-facebook text-white"></i><a href="<?php echo $_settings->info('Facebook') ?>" target="_blank" class="text-white"> Facebook </a></p>
-            <p class="mb-0"><i class="fab fa-tiktok text-white"></i><a href="<?php echo $_settings->info('TikTok') ?>" target="_blank" class="text-white"> TikTok </a></p>
+            <p class="mb-0"><i class="fas fa-envelope text-white"></i><a href="mailto:<?php echo $_settings->info('email') ?>" target="blank" target="_blank" class="text-white"> <?php echo $_settings->info('email') ?> </a></p>
           </div>
         </div>
 
