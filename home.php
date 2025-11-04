@@ -201,7 +201,7 @@
     </div>
     <div class="container py-4 text-center">
         <div class="position-relative d-inline-block">
-            <span class="text-muted px-3 bg-white position-relative z-1" style="font-weight: 500;">
+            <span class="text-muted px-3 position-relative z-1" style="font-weight: 500;">
                 หรือดูสินค้าทั้งหมด
             </span>
             <div class="position-absolute top-50 start-0 w-100 translate-middle-y" style="height: 1px; background: #ccc; z-index: 0;"></div>
