@@ -131,13 +131,30 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="form-group row">
                         <div class="col-md-6">
                             <label>เริ่มวันที่ <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="start_date" class="form-control" required value="<?= isset($start_date) ? date('Y-m-d\TH:i', strtotime($start_date)) : '' ?>">
+                            <div class="input-group flatpickr-thai">
+                                <input type="text" name="start_date" class="form-control" placeholder="เลือกวัน-เวลาเริ่มต้น..."
+                                    value="<?= isset($start_date) ? date('Y-m-d H:i', strtotime($start_date)) : '' ?>" required data-input>
+
+                                <div class="input-group-append">
+                                    <a class="input-group-text" title="เปิด/ปิดปฏิทิน" data-toggle>
+                                        <i class="fa fa-calendar"></i> </a>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label>สิ้นสุดวันที่ <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="end_date" class="form-control" required value="<?= isset($end_date) ? date('Y-m-d\TH:i', strtotime($end_date)) : '' ?>">
+                            <div class="input-group flatpickr-thai">
+                                <input type="text" name="end_date" class="form-control" placeholder="เลือกวัน-เวลาสิ้นสุด..."
+                                    value="<?= isset($end_date) ? date('Y-m-d H:i', strtotime($end_date)) : '' ?>" required data-input>
+
+                                <div class="input-group-append">
+                                    <a class="input-group-text" title="เปิด/ปิดปฏิทิน" data-toggle>
+                                        <i class="fa fa-calendar"></i> </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
             <div class="card card-outline card-dark rounded-0 mb-3">
@@ -181,6 +198,18 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         // ใช้ select2 สำหรับหมวดหมู่
         $('.select2').select2({
             width: '100%'
+        });
+
+        flatpickr(".flatpickr-thai", {
+            wrap: true,
+            enableTime: true, // เปิดให้เลือกเวลา
+            time_24hr: true, // ใช้เวลารูปแบบ 24 ชั่วโมง
+            locale: "th", // ใช้งานภาษาไทย (ต้อง import ไฟล์ th.js ในขั้นตอนที่ 1)
+
+            // --- ส่วนสำคัญ ---
+            altInput: true, // สร้าง input อีกอันไว้แสดงผล (ช่องเดิมจะถูกซ่อนไว้ส่งค่า)
+            altFormat: "j F พ.ศ. Y (H:i น.)", // รูปแบบที่แสดงให้ผู้ใช้เห็น (เช่น 4 พฤศจิกายน พ.ศ. 2568 (09:30 น.))
+            dateFormat: "Y-m-d H:i", // รูปแบบข้อมูลที่จะ *ส่งไปให้ Server* (เช่น 2025-11-04 09:30)
         });
 
         let formChanged = false;

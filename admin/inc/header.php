@@ -46,6 +46,14 @@ require_once('sess_auth.php');
   <!-- Custom CSS -->
   <link rel="stylesheet" href="assets/css/promotion_products.css">
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+
+
   <style type="text/css">
     /* Chart.js */
     @keyframes chartjs-render-animation {
