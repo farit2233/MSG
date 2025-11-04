@@ -15,22 +15,30 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 // ======================= START: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชันและคูปอง =======================
 $promotion_name = '';
+$promotion_type = ''; // <-- เพิ่มบรรทัดนี้
 if (!empty($promotion_id)) {
-    $promo_qry = $conn->query("SELECT name FROM `promotions_list` WHERE id = '{$promotion_id}'");
+    // V แก้ SELECT ให้ดึง type มาด้วย V
+    $promo_qry = $conn->query("SELECT name, type FROM `promotions_list` WHERE id = '{$promotion_id}'");
     if ($promo_qry->num_rows > 0) {
-        $promotion_name = $promo_qry->fetch_assoc()['name'];
+        $promo_data = $promo_qry->fetch_assoc(); // <-- แก้ตรงนี้
+        $promotion_name = $promo_data['name'];   // <-- แก้ตรงนี้
+        $promotion_type = $promo_data['type'];   // <-- เพิ่มบรรทัดนี้
     } else {
-        $promotion_name = "โปรโมชัน"; // แสดงข้อความทั่วไปหากไม่พบ
+        $promotion_name = "โปรโมชัน";
     }
 }
 
 $coupon_name = '';
+$coupon_type = ''; // <-- เพิ่มบรรทัดนี้
 if (!empty($coupon_code_id)) {
-    $coupon_qry = $conn->query("SELECT coupon_code FROM `coupon_code_list` WHERE id = '{$coupon_code_id}'");
+    // V แก้ SELECT ให้ดึง type มาด้วย V
+    $coupon_qry = $conn->query("SELECT coupon_code, type FROM `coupon_code_list` WHERE id = '{$coupon_code_id}'");
     if ($coupon_qry->num_rows > 0) {
-        $coupon_name = $coupon_qry->fetch_assoc()['coupon_code'];
+        $coupon_data = $coupon_qry->fetch_assoc(); // <-- แก้ตรงนี้
+        $coupon_name = $coupon_data['coupon_code']; // <-- แก้ตรงนี้
+        $coupon_type = $coupon_data['type'];      // <-- เพิ่มบรรทัดนี้
     } else {
-        $coupon_name = "คูปองส่วนลด"; // แสดงข้อความทั่วไปหากไม่พบ
+        $coupon_name = "คูปองส่วนลด";
     }
 }
 // ======================= END: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชันและคูปอง =======================
@@ -291,19 +299,40 @@ if (!function_exists('format_price_custom')) {
                     <span><?= isset($shipping_cost) ? format_price_custom($shipping_cost, 2) : '0.00' ?> บาท</span>
                 </div>
 
-                <?php if (!empty($promotion_name) && isset($promotion_discount) && $promotion_discount > 0): ?>
+                <?php
+                // V แก้ไขเงื่อนไข if ตรงนี้ V
+                if (!empty($promotion_name) && ((isset($promotion_discount) && $promotion_discount > 0) || $promotion_type == 'free_shipping')):
+                ?>
                     <div class="d-flex justify-content-between text-danger order-total-detail ">
                         <span>โปรโมชัน (<?= htmlspecialchars($promotion_name) ?>):</span>
-                        <span>-<?= format_price_custom($promotion_discount, 2) ?> บาท</span>
+
+                        <?php if ($promotion_type == 'free_shipping'): // <-- เพิ่ม if นี้ 
+                        ?>
+                            <span>ส่งฟรี</span>
+                        <?php else: ?>
+                            <span>-<?= format_price_custom($promotion_discount, 2) ?> บาท</span>
+                        <?php endif; ?>
+
+
                     </div>
                 <?php endif; ?>
 
-                <?php if (!empty($coupon_name) && isset($coupon_discount) && $coupon_discount > 0): ?>
+                <?php
+                // V แก้ไขเงื่อนไข if ตรงนี้ V
+                if (!empty($coupon_name) && ((isset($coupon_discount) && $coupon_discount > 0) || $coupon_type == 'free_shipping')):
+                ?>
                     <div class="d-flex justify-content-between text-danger order-total-detail ">
                         <span>คูปอง (<?= htmlspecialchars($coupon_name) ?>):</span>
-                        <span>-<?= format_price_custom($coupon_discount, 2) ?> บาท</span>
+
+                        <?php if ($coupon_type == 'free_shipping'): // <-- เพิ่ม if นี้ 
+                        ?>
+                            <span>ส่งฟรี</span>
+                        <?php else: ?>
+                            <span>-<?= format_price_custom($coupon_discount, 2) ?> บาท</span>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
+
                 <div class="d-flex justify-content-between order-total-detail ">
                     <span>ยอดสั่งซื้อ<small> รวม VAT:</small></span>
                     <span><?= isset($total_amount) ? format_price_custom($total_amount, 2) : '0.00' ?> บาท</span>
