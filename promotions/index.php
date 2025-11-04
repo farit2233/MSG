@@ -31,7 +31,7 @@ $qry_promo_recommand = $conn->query("
         minimum_order ASC,
         date_created ASC,
         name ASC
-    LIMIT 1
+    LIMIT 4
 ");
 
 
@@ -62,6 +62,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
         flex-wrap: wrap;
         justify-content: flex-start !important;
         gap: 24px;
+        padding-bottom: 24px;
     }
 
     .custom-promo-card-wrapper {
@@ -192,7 +193,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                     // ⬇️ ถ้ามีข้อมูล ให้เริ่มวนลูป while
                     while ($row = $qry_promo_recommand->fetch_assoc()):
                 ?>
-                        <div class="col-md-3 mb-4">
+                        <div class="custom-promo-card-wrapper">
                             <a href="<?= base_url . "?p=products&pid=" . $row['id'] ?>" class="text-decoration-none">
                                 <div class="card card-promotion h-100">
                                     <div class="card-promotion-holder">
