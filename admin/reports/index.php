@@ -1,5 +1,34 @@
 <?php
 $date = isset($_GET['date']) ? $_GET['date'] : date("Y-m-d");
+
+function formatThaiDate($dateStr)
+{
+    $thaiMonths = [
+        "มกราคม",
+        "กุมภาพันธ์",
+        "มีนาคม",
+        "เมษายน",
+        "พฤษภาคม",
+        "มิถุนายน",
+        "กรกฎาคม",
+        "สิงหาคม",
+        "กันยายน",
+        "ตุลาคม",
+        "พฤศจิกายน",
+        "ธันวาคม"
+    ];
+
+    // แปลง YYYY-MM-DD เป็น timestamp
+    $timestamp = strtotime($dateStr);
+
+    // ดึงค่า วัน, เดือน (index), ปี (ค.ศ.)
+    $day = date('j', $timestamp);
+    $month = $thaiMonths[date('n', $timestamp) - 1]; // -1 เพื่อใช้เป็น index array
+    $year = date('Y', $timestamp) + 543; // +543 เพื่อแปลงเป็น พ.ศ.
+
+    // คืนค่าเป็น "4 พฤศจิกายน 2568"
+    return "$day $month $year";
+}
 ?>
 <style>
     .card-title {
@@ -31,7 +60,19 @@ $date = isset($_GET['date']) ? $_GET['date'] : date("Y-m-d");
                     <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
                         <div class="form-group">
                             <label for="date" class="control-label contact-label">เลือกวันที่</label>
-                            <input type="date" class="form-control form-control-sm rounded-0 contact-input" name="date" id="date" value="<?= $date ?>" required="required">
+
+                            <div class="input-group flatpickr-thai-date">
+
+                                <input type="text" class="form-control form-control-sm rounded-0 contact-input"
+                                    name="date" id="date" value="<?= $date ?>" required="required"
+                                    placeholder="เลือกวันที่..." data-input>
+
+                                <div class="input-group-append">
+                                    <a class="input-group-text" title="เปิด/ปิดปฏิทิน" data-toggle>
+                                        <i class="fa fa-calendar"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -126,7 +167,7 @@ $date = isset($_GET['date']) ? $_GET['date'] : date("Y-m-d");
                     <div class="text-center font-weight-bold h5 mb-0">
                         <large>รายงานการขายประจำวัน</large>
                     </div>
-                    <div class="text-center font-weight-bold h5 mb-0">วันที่ <?= date("F d, Y", strtotime($date)) ?></div>
+                    <div class="text-center font-weight-bold h5 mb-0">วันที่ <?= formatThaiDate($date) ?></div>
                 </div>
             </div>
         </div>
@@ -154,6 +195,17 @@ $date = isset($_GET['date']) ? $_GET['date'] : date("Y-m-d");
         }, 300);
     }
     $(function() {
+
+        flatpickr(".flatpickr-thai-date", {
+            wrap: true, // สำหรับการใช้งานไอคอน (input-group)
+            locale: "th", // ใช้งานภาษาไทย
+
+            // --- ส่วนสำคัญ (หน้านี้ไม่ต้องเลือกเวลา) ---
+            altInput: true, // สร้าง input อีกอันไว้แสดงผล
+            altFormat: "j F พ.ศ. Y", // รูปแบบที่แสดงให้ผู้ใช้เห็น (เช่น 4 พฤศจิกายน พ.ศ. 2568)
+            dateFormat: "Y-m-d", // รูปแบบข้อมูลที่จะส่งไปให้ Server (ตรงกับ $date เดิม)
+        });
+
         $('#filter-form').submit(function(e) {
             e.preventDefault()
             location.href = './?page=reports&' + $(this).serialize()
