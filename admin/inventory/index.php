@@ -86,7 +86,7 @@ function formatDateThai($date)
 								(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = pl.id), 0) 
 								- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = pl.id), 0)) AS available
 							FROM `product_list` pl
-							WHERE pl.delete_flag = 0 AND pl.`status` = 1
+							WHERE pl.delete_flag = 0
 							ORDER BY 
 								available ASC,       -- สินค้าใกล้หมดขึ้นก่อน
 								pl.brand ASC, 
