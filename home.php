@@ -38,9 +38,7 @@
     <div class="container py-5">
         <h2 class="text-center mb-4">ประเภทสินค้า</h2>
         <p class="text-center mb-5">"สำรวจประเภทสินค้าที่ออกแบบมาเพื่อสนับสนุนการเรียนรู้ของเด็ก พร้อมตอบโจทย์ความต้องการของคุณครู และผู้ปกครอง"</p>
-
         <div class="row gx-3 gy-4 justify-content-center">
-            <!-- การ์ดที่ 1 -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                 <a href="?p=products&tid=1" class="text-decoration-none">
                     <div class="card shadow-sm border-0 text-center h-100 hover-card">
@@ -51,8 +49,6 @@
                     </div>
                 </a>
             </div>
-
-            <!-- การ์ดที่ 2 -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                 <a href="?p=products&tid=2" class="text-decoration-none">
                     <div class="card shadow-sm border-0 text-center h-100 hover-card">
@@ -63,8 +59,6 @@
                     </div>
                 </a>
             </div>
-
-            <!-- การ์ดที่ 3 -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                 <a href="?p=products&tid=3" class="text-decoration-none">
                     <div class="card shadow-sm border-0 text-center h-100 hover-card">
@@ -75,8 +69,6 @@
                     </div>
                 </a>
             </div>
-
-            <!-- การ์ดที่ 4 -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                 <a href="?p=products&tid=4" class="text-decoration-none">
                     <div class="card shadow-sm border-0 text-center h-100 hover-card">
@@ -87,8 +79,6 @@
                     </div>
                 </a>
             </div>
-
-            <!-- การ์ดที่ 5 -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                 <a href="?p=products&tid=5" class="text-decoration-none">
                     <div class="card shadow-sm border-0 text-center h-100 hover-card">
@@ -99,8 +89,6 @@
                     </div>
                 </a>
             </div>
-
-            <!-- การ์ดที่ 6 -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                 <a href="?p=products" class="text-decoration-none">
                     <div class="card shadow-sm border-0 text-center h-100 hover-card">
@@ -156,7 +144,13 @@
                                                 <div class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 small" style="z-index: 1;">
                                                     ใหม่
                                                 </div>
-                                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
+                                                <?php
+                                                // 1. ดึง Path หลัก
+                                                $new_product_main_path = $row['image_path'];
+                                                // 2. แปลงเป็น Path ขนาดกลาง (Medium)
+                                                $new_product_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $new_product_main_path);
+                                                ?>
+                                                <img src="<?= validate_image($new_product_medium_path) ?>" alt="" class="product-img">
                                             </div>
                                         </div>
                                         <div class="card-body d-flex flex-column">
@@ -172,9 +166,7 @@
                                             </div>
                                             <div class="d-flex justify-content-end align-items-center mt-auto">
                                                 <?php
-                                                // เริ่มต้นด้วย price เป็น fallback
                                                 $display_price = isset($row['price']) && $row['price'] > 0 ? $row['price'] : 0;
-
                                                 if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $row['price']) {
                                                     $display_price = $row['discounted_price'];
                                                     $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
@@ -184,7 +176,6 @@
                                                     $display_price = $row['vat_price'];
                                                     echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
                                                 } else {
-                                                    // fallback ใช้ price จริง
                                                     echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
                                                 }
                                                 ?>
@@ -206,7 +197,6 @@
             </span>
             <div class="position-absolute top-50 start-0 w-100 translate-middle-y" style="height: 1px; background: #ccc; z-index: 0;"></div>
         </div>
-
         <div class="pt-3">
             <a href="./?p=products" class="btn btn-product rounded-pill">
                 ดูสินค้าอื่น ๆ คลิก <span class="arrow-move"><i class="fa-solid fa-angles-right"></i></span>
@@ -215,7 +205,6 @@
     </div>
 
     <div class="container py-4">
-
         <div class="row mt-n3 justify-content-center">
             <div class="col-lg-10 col-md-11 col-sm-11 col-sm-11">
                 <div class="card card-outline rounded-0">
@@ -247,7 +236,7 @@
                                 ORDER BY 
                                     IF(discounted_price IS NOT NULL AND discounted_price < price, 1, 0) DESC, 
                                     RAND() 
-                                LIMIT 8
+                                LIMIT 24
                             ");
                             while ($row = $qry->fetch_assoc()):
                             ?>
@@ -255,7 +244,13 @@
                                     <a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $row['id'] ?>">
                                         <div class="position-relative">
                                             <div class="img-top position-relative product-img-holder">
-                                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="product-img">
+                                                <?php
+                                                // 1. ดึง Path หลัก
+                                                $rec_product_main_path = $row['image_path'];
+                                                // 2. แปลงเป็น Path ขนาดกลาง (Medium)
+                                                $rec_product_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $rec_product_main_path);
+                                                ?>
+                                                <img src="<?= validate_image($rec_product_medium_path) ?>" alt="" class="product-img">
                                             </div>
                                         </div>
                                         <div class="card-body d-flex flex-column">
@@ -269,12 +264,9 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="d-flex justify-content-end align-items-center mt-auto">
                                                 <?php
-                                                // เริ่มต้นด้วย price เป็น fallback
                                                 $display_price = isset($row['price']) && $row['price'] > 0 ? $row['price'] : 0;
-
                                                 if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $row['price']) {
                                                     $display_price = $row['discounted_price'];
                                                     $discount_percentage = round((($row['price'] - $row['discounted_price']) / $row['price']) * 100);
@@ -284,7 +276,6 @@
                                                     $display_price = $row['vat_price'];
                                                     echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
                                                 } else {
-                                                    // fallback ใช้ price จริง
                                                     echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
                                                 }
                                                 ?>

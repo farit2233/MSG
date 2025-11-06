@@ -33,26 +33,25 @@ class Master extends DBConnection
 			exit;
 		}
 	}
-	function resize_image($src_path, $dest_path, $max_width, $max_height)
+	function resize_image_to_webp($src_path, $dest_path_webp, $max_width, $max_height, $quality = 80)
 	{
 		list($src_w, $src_h, $type) = getimagesize($src_path);
 
+		if ($type != IMAGETYPE_JPEG && $type != IMAGETYPE_PNG) {
+			return false; // ไม่รองรับไฟล์ประเภทอื่น
+		}
+
+		// 1. คำนวณขนาดใหม่ (ไม่ขยายภาพที่เล็กกว่า max)
 		$scale = min($max_width / $src_w, $max_height / $src_h);
-		if ($scale >= 1) { // ภาพเล็กกว่าขนาด max ไม่ต้องย่อ
-			return copy($src_path, $dest_path);
+		if ($scale >= 1) { // ถ้าภาพต้นฉบับเล็กกว่าหรือเท่ากับ max
+			$new_w = $src_w;
+			$new_h = $src_h;
+		} else { // ถ้าภาพใหญ่กว่า max ให้ย่อลง
+			$new_w = floor($src_w * $scale);
+			$new_h = floor($src_h * $scale);
 		}
 
-		$new_w = floor($src_w * $scale);
-		$new_h = floor($src_h * $scale);
-
-		$dst_img = imagecreatetruecolor($new_w, $new_h);
-
-		// สำหรับ PNG ให้รองรับ transparency
-		if ($type == IMAGETYPE_PNG) {
-			imagealphablending($dst_img, false);
-			imagesavealpha($dst_img, true);
-		}
-
+		// 2. สร้าง Resource จากไฟล์ต้นทาง
 		switch ($type) {
 			case IMAGETYPE_JPEG:
 				$src_img = imagecreatefromjpeg($src_path);
@@ -61,21 +60,31 @@ class Master extends DBConnection
 				$src_img = imagecreatefrompng($src_path);
 				break;
 			default:
-				return false; // ไฟล์ประเภทอื่นไม่รองรับ
+				return false;
 		}
 
+		// 3. สร้าง Canvas ปลายทาง
+		$dst_img = imagecreatetruecolor($new_w, $new_h);
+
+		// 4. (ข้อ 2) จัดการความโปร่งใสสำหรับ PNG
+		if ($type == IMAGETYPE_PNG) {
+			imagealphablending($dst_img, false);
+			imagesavealpha($dst_img, true);
+			$transparent = imagecolorallocatealpha($dst_img, 255, 255, 255, 127);
+			imagefilledrectangle($dst_img, 0, 0, $new_w, $new_h, $transparent);
+		}
+
+		// 5. (ข้อ 1) ย่อ/ขยายภาพ
 		imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $new_w, $new_h, $src_w, $src_h);
 
-		if ($type == IMAGETYPE_JPEG) {
-			imagejpeg($dst_img, $dest_path, 85);
-		} elseif ($type == IMAGETYPE_PNG) {
-			imagepng($dst_img, $dest_path);
-		}
+		// 6. (ข้อ 2) บันทึกเป็น WebP
+		$success = imagewebp($dst_img, $dest_path_webp, $quality);
 
+		// 7. เคลียร์หน่วยความจำ
 		imagedestroy($src_img);
 		imagedestroy($dst_img);
 
-		return true;
+		return $success;
 	}
 	function delete_img()
 	{
@@ -298,63 +307,122 @@ class Master extends DBConnection
 			// เซฟลิงก์
 			$this->save_product_link($product_id);
 
-			// อัปโหลดรูปภาพ
+			// ==================================================================
+			// START: ส่วนแก้ไขการอัปโหลดรูปภาพหลัก (ข้อ 0, 1, 2, 3)
+			// ==================================================================
 			if (!empty($_FILES['img']['tmp_name'])) {
-				$img_path = "uploads/product/";
+				$img_path = "uploads/product/"; // โฟลเดอร์รูปหลัก
+
+				// (ข้อ 0) สร้างโฟลเดอร์ด้วยสิทธิ์ 0755 ที่ปลอดภัย
 				if (!is_dir(base_app . $img_path)) {
 					mkdir(base_app . $img_path, 0755, true);
 				}
+
 				$accept = ['image/jpeg', 'image/png', 'image/jpg'];
 				if (!in_array($_FILES['img']['type'], $accept)) {
-					$resp['msg'] .= " Image file type is invalid";
+					$resp['msg'] .= " | ประเภทไฟล์รูปภาพหลักไม่ถูกต้อง";
 				} else {
-					$filename = $_FILES['img']['name'];
-					$spath = $img_path . $filename;
-					$i = 1;
-					while (is_file(base_app . $spath)) {
-						$spath = $img_path . $i++ . '_' . $filename;
-					}
-					$success = $this->resize_image($_FILES['img']['tmp_name'], base_app . $spath, 1000, 1000);
-					if ($success) {
-						$this->conn->query("UPDATE product_list SET image_path = CONCAT('{$spath}', '?v=', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = '{$product_id}'");
-					} else {
-						$resp['msg'] .= " Failed to resize image.";
+					// (ข้อ 0) สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน
+					$base_filename = uniqid('prod_', true);
+
+					// กำหนดขนาดและ Path (คุณสามารถปรับขนาด 400 และ 150 ได้ตามต้องการ)
+					$paths = [
+						'main' => ['path' => $img_path . $base_filename . '.webp', 'w' => 1000, 'h' => 1000],
+						'medium' => ['path' => $img_path . $base_filename . '_medium.webp', 'w' => 400, 'h' => 400], // (ข้อ 3)
+						'thumb' => ['path' => $img_path . $base_filename . '_thumb.webp', 'w' => 150, 'h' => 150]  // (ข้อ 3)
+					];
+
+					// (ข้อ 1, 2, 3) ประมวลผลและบันทึกทุกขนาด
+					foreach ($paths as $key => $p) {
+						$success = $this->resize_image_to_webp(
+							$_FILES['img']['tmp_name'], // Source
+							base_app . $p['path'], // Destination
+							$p['w'], // Max Width
+							$p['h']  // Max Height
+						);
+
+						if ($key == 'main') {
+							if ($success) {
+								// บันทึก Path รูปหลัก (1000px) ลง DB
+								$db_path = $p['path'];
+								$this->conn->query("UPDATE product_list SET image_path = CONCAT('{$db_path}', '?v=', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = '{$product_id}'");
+							} else {
+								$resp['msg'] .= " | ไม่สามารถบันทึกรูปภาพหลักได้";
+							}
+						}
+						if (!$success) {
+							$resp['msg'] .= " | ไม่สามารถสร้างรูปภาพขนาด {$key} ได้";
+						}
 					}
 				}
 			}
+			// ==================================================================
+			// END: ส่วนแก้ไขการอัปโหลดรูปภาพหลัก
+			// ==================================================================
+
+
+			// ==================================================================
+			// START: ส่วนแก้ไขการอัปโหลดรูปแกลเลอรี (ข้อ 0, 1, 2, 3)
+			// ==================================================================
 			if (isset($_FILES['gallery_imgs']) && is_array($_FILES['gallery_imgs']['name'])) {
-				$gallery_path = "uploads/products/"; // ใช้โฟลเดอร์เดียวกับรูปหลัก หรือเปลี่ยนได้ตามต้องการ
+				$gallery_path = "uploads/products/"; // โฟลเดอร์รูปแกลเลอรี
+
+				// (ข้อ 0) สร้างโฟลเดอร์ด้วยสิทธิ์ 0755 ที่ปลอดภัย
 				if (!is_dir(base_app . $gallery_path)) {
-					mkdir(base_app . $gallery_path, 0777, true);
+					mkdir(base_app . $gallery_path, 0755, true);
 				}
+
 				$accept = ['image/jpeg', 'image/png', 'image/jpg'];
 
 				foreach ($_FILES['gallery_imgs']['name'] as $key => $filename) {
-					// ตรวจสอบว่ามีไฟล์ถูกอัปโหลดมาจริงหรือไม่
 					if (!empty($_FILES['gallery_imgs']['tmp_name'][$key])) {
 						$file_type = $_FILES['gallery_imgs']['type'][$key];
 
 						if (!in_array($file_type, $accept)) {
 							$resp['msg'] .= " | ไฟล์แกลเลอรี '{$filename}' มีประเภทไม่ถูกต้อง";
-							continue; // ข้ามไปไฟล์ถัดไป
+							continue;
 						}
 
-						// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำกัน
-						$file_ext = pathinfo($filename, PATHINFO_EXTENSION);
-						$new_filename = uniqid('gallery_', true) . '.' . $file_ext;
-						$target_path = $gallery_path . $new_filename;
+						// (ข้อ 0) สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน
+						$base_filename = uniqid('gallery_', true);
 
-						// ย้ายไฟล์ที่อัปโหลดไปยังตำแหน่งที่ต้องการ
-						if (move_uploaded_file($_FILES['gallery_imgs']['tmp_name'][$key], base_app . $target_path)) {
-							// บันทึก path ลงในตาราง product_image_path
-							$escaped_path = $this->conn->real_escape_string($target_path);
-							$this->conn->query("INSERT INTO `product_image_path` (product_id, image_path) VALUES ('{$product_id}', '{$escaped_path}')");
-						} else {
-							$resp['msg'] .= " | ไม่สามารถอัปโหลดไฟล์แกลเลอรี '{$filename}' ได้";
+						// กำหนดขนาดและ Path (ใช้ขนาดเดียวกับรูปหลัก)
+						$paths = [
+							'main' => ['path' => $gallery_path . $base_filename . '.webp', 'w' => 1000, 'h' => 1000],
+							'medium' => ['path' => $gallery_path . $base_filename . '_medium.webp', 'w' => 400, 'h' => 400], // (ข้อ 3)
+							'thumb' => ['path' => $gallery_path . $base_filename . '_thumb.webp', 'w' => 150, 'h' => 150]  // (ข้อ 3)
+						];
+
+						// (ข้อ 1, 2, 3) ประมวลผลและบันทึกทุกขนาด
+						foreach ($paths as $size_key => $p) {
+							$success = $this->resize_image_to_webp(
+								$_FILES['gallery_imgs']['tmp_name'][$key], // Source
+								base_app . $p['path'], // Destination
+								$p['w'], // Max Width
+								$p['h']  // Max Height
+							);
+
+							if ($size_key == 'main') {
+								if ($success) {
+									// บันทึก Path รูปหลัก (1000px) ลง DB
+									$db_path = $p['path'];
+									$escaped_path = $this->conn->real_escape_string($db_path);
+									$this->conn->query("INSERT INTO `product_image_path` (product_id, image_path) VALUES ('{$product_id}', '{$escaped_path}')");
+								} else {
+									$resp['msg'] .= " | ไม่สามารถอัปโหลดไฟล์แกลเลอรี '{$filename}' (main) ได้";
+								}
+							}
+							if (!$success) {
+								$resp['msg'] .= " | ไม่สามารถสร้างไฟล์แกลเลอรี '{$filename}' ({$size_key}) ได้";
+							}
 						}
 					}
 				}
 			}
+			// ==================================================================
+			// END: ส่วนแก้ไขการอัปโหลดรูปแกลเลอรี
+			// ==================================================================
+
 		} else {
 			return json_encode(['status' => 'failed', 'err' => $this->conn->error . " [{$sql}]"]);
 		}
@@ -2383,7 +2451,7 @@ class Master extends DBConnection
 
 			// ใช้ move_uploaded_file หรือฟังก์ชัน resize ของคุณ
 			// สมมติว่า resize_image จะย้ายไฟล์และคืนค่า true/false
-			$success = $this->resize_image($_FILES['img']['tmp_name'], $full_path, 1000, 600);
+			$success = $this->resize_image_to_webp($_FILES['img']['tmp_name'], $full_path, 1000, 600);
 
 			if ($success) {
 				// ถ้าย้าย/resize รูปสำเร็จ ให้เตรียม SQL สำหรับคอลัมน์ image_path

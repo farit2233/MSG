@@ -37,7 +37,6 @@ if (isset($_GET['sort'])) {
 }
 
 // สร้างเงื่อนไขเพิ่มเติมจาก GET
-// สร้างเงื่อนไขเพิ่มเติมจาก GET
 $additional_where = "";
 
 // A. จัดการตัวกรองหมวดหมู่ (แบบเลือกได้หลายอัน)
@@ -49,8 +48,6 @@ if (isset($_GET['cids']) && is_array($_GET['cids']) && count($_GET['cids']) > 0)
         $additional_where .= " AND pl.category_id IN ({$cids_list})";
     }
 }
-// หมายเหตุ: โค้ดกรอง cid แบบเดี่ยวเดิมสามารถลบออกได้ 
-// if (isset($_GET['cid']) && is_numeric($_GET['cid'])) { ... } // <-- ลบส่วนนี้ทิ้ง
 
 if (isset($_GET['tid']) && is_numeric($_GET['tid'])) {
     $tid = intval($_GET['tid']);
@@ -64,7 +61,6 @@ if (isset($_GET['pid']) && is_numeric($_GET['pid'])) {
 }
 
 // B. จัดการตัวกรองราคา
-// สร้างตัวแปรเก็บ Logic การเช็คราคาจริง (ราคาลด vs ราคาปกติ) เพื่อนำไปใช้ซ้ำ
 $price_logic = "IF(pl.discounted_price IS NOT NULL AND pl.discounted_price > 0 AND pl.discounted_price < pl.vat_price, pl.discounted_price, pl.vat_price)";
 
 // กรองราคาขั้นต่ำ
@@ -156,7 +152,13 @@ ob_start();
                             </div>
                         <?php endif; ?>
 
-                        <img src="<?= validate_image($row['image_path']) ?>" alt="<?= $row['name'] ?>" class="product-img">
+                        <?php
+                        // 1. ดึง Path หลัก
+                        $list_main_path = $row['image_path'];
+                        // 2. แปลงเป็น Path ขนาดกลาง (Medium)
+                        $list_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $list_main_path);
+                        ?>
+                        <img src="<?= validate_image($list_medium_path) ?>" alt="<?= $row['name'] ?>" class="product-img">
                     </div>
                 </div>
                 <div class="card-body d-flex flex-column">
@@ -196,11 +198,10 @@ ob_start();
     </div>
 <?php endif; ?>
 <?php
+// (ส่วน Pagination... เหมือนเดิม)
 if ($total_pages > 1) {
     // --- กำหนดค่า ---
-    // จำนวนหน้าที่แสดงผลคงที่ (ช่วง đầu)
     $num_fixed_pages = 5;
-    // จำนวนหน้าข้างเคียง (สำหรับสถานะกลาง)
     $adjacents = 2;
 ?>
     <div class="col-12 d-flex justify-content-center mt-4">
@@ -213,7 +214,7 @@ if ($total_pages > 1) {
                 <?php
                 // --- Logic การแสดงผลตัวเลขหน้า ---
 
-                // 1. กรณีที่จำนวนหน้ารวมน้อย (น้อยกว่า 5+1)
+                // 1. กรณีที่จำนวนหน้ารวมน้อย
                 if ($total_pages <= ($num_fixed_pages + 1)) {
                     for ($i = 1; $i <= $total_pages; $i++) {
                         echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
@@ -222,29 +223,21 @@ if ($total_pages > 1) {
                     }
                 }
 
-                // 2. สถานะเริ่มต้น (เมื่ออยู่หน้า 1, 2, 3, 4)
-                // (1 2 3 [4] 5 ... 10)
+                // 2. สถานะเริ่มต้น
                 elseif ($page < $num_fixed_pages) {
-                    // แสดง 1-5
                     for ($i = 1; $i <= $num_fixed_pages; $i++) {
                         echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
                         echo '<a class="page-link" href="javascript:void(0)" data-page="' . $i . '">' . $i . '</a>';
                         echo '</li>';
                     }
-                    // แสดง ...
                     echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                    // แสดงหน้าสุดท้าย
                     echo '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="' . $total_pages . '">' . $total_pages . '</a></li>';
                 }
 
-                // 3. สถานะท้าย (เมื่ออยู่ใกล้หน้าสุดท้าย)
-                // (1 ... 6 [7] 8 9 10)
+                // 3. สถานะท้าย
                 elseif ($page >= ($total_pages - ($num_fixed_pages - 2))) {
-                    // แสดง 1
                     echo '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="1">1</a></li>';
-                    // แสดง ...
                     echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                    // แสดง 5 หน้าสุดท้าย
                     $start = $total_pages - ($num_fixed_pages - 1);
                     for ($i = $start; $i <= $total_pages; $i++) {
                         echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
@@ -253,15 +246,11 @@ if ($total_pages > 1) {
                     }
                 }
 
-                // 4. สถานะกลาง (เลื่อนไปเรื่อยๆ)
-                // (1 ... 3 4 [5] 6 7 ... 10)
+                // 4. สถานะกลาง
                 else {
-                    // แสดง 1
                     echo '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="1">1</a></li>';
-                    // แสดง ...
                     echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
 
-                    // แสดงหน้าต่าง (เช่น 3 4 5 6 7)
                     $start = $page - $adjacents;
                     $end = $page + $adjacents;
                     for ($i = $start; $i <= $end; $i++) {
@@ -270,9 +259,7 @@ if ($total_pages > 1) {
                         echo '</li>';
                     }
 
-                    // แสดง ...
                     echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                    // แสดงหน้าสุดท้าย
                     echo '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="' . $total_pages . '">' . $total_pages . '</a></li>';
                 }
                 ?>

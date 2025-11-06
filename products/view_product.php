@@ -79,7 +79,7 @@ if (!function_exists('format_price_custom')) {
 ?>
 <style>
 	#productImageModal .modal-dialog {
-		max-width: 800px !important;
+		max-width: 600px !important;
 		z-index: 1050 !important;
 		margin: auto;
 		position: fixed;
@@ -131,6 +131,7 @@ if (!function_exists('format_price_custom')) {
 				</ol>
 			</nav>
 		</div>
+
 		<div class="row mt-lg-n4 mt-md-n4 justify-content-center">
 			<div class="col-lg-12 col-md-10 col-sm-12 col-xs-12">
 				<div class="card rounded-0">
@@ -139,21 +140,29 @@ if (!function_exists('format_price_custom')) {
 							<div class="row align-items-start">
 								<div class="col-md-5 mb-3">
 									<a href="#" data-toggle="modal" data-target="#productImageModal">
-										<img src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
-											alt="<?= isset($name) ? $name : '' ?>"
+
+										<?php
+										// 1. ดึง Path หลัก (ใช้ไฟล์หลัก 1000px เพื่อความคมชัด)
+										$main_display_path = isset($image_path) ? $image_path : '';
+										?>
+										<img src="<?= validate_image($main_display_path) ?>" alt="<?= isset($name) ? $name : '' ?>"
 											class="img-thumbnail p-0 border w-100"
 											id="product-img">
 									</a>
 									<div class="product-gallery-container mt-2">
 										<button class="gallery-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
 										<div class="product-gallery">
+
 											<?php foreach ($product_images as $index => $img_src): ?>
+												<?php
+												// $img_src คือ Path หลัก (main.webp)
+												// 1. แปลงเป็น Path ขนาดเล็ก (Thumb)
+												$thumb_path = preg_replace('/(\.webp)(\?.*)?$/', '_thumb.webp$2', $img_src);
+												?>
 												<a href="#" data-toggle="modal" data-target="#productImageModal">
-													<img src="<?= $img_src ?>"
-														alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
+													<img src="<?= $thumb_path ?>" alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
 														class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
-														data-full-src="<?= $img_src ?>"
-														data-index="<?= $index ?>">
+														data-full-src="<?= $img_src ?>" data-index="<?= $index ?>">
 												</a>
 											<?php endforeach; ?>
 										</div>
@@ -201,13 +210,10 @@ if (!function_exists('format_price_custom')) {
 								<div class="col-md-7 product-info-sticky">
 									<h2 class="fw-bold mb-3"><?= isset($name) ? $name : "" ?></h2>
 									<p class="mb-3 text-muted">แบรนด์: <b><?= isset($brand) ? $brand : "" ?></b></p>
-
 									<?php
 									$final_price = $vat_price;
 									$percent_off = 0;
 									$discount_type_label = null;
-
-									// ตรวจสอบว่ามี discounted_price ไหม
 									if (!empty($discounted_price) && $discounted_price < $vat_price) {
 										$final_price = $discounted_price;
 										$percent_off = round((($vat_price - $discounted_price) / $vat_price) * 100);
@@ -216,7 +222,6 @@ if (!function_exists('format_price_custom')) {
 										$final_price = $vat_price;
 									}
 									?>
-
 									<?php if ($discount_type_label === 'hot'): ?>
 										<section class="mb-3">
 											<div class="border rounded overflow-hidden shadow-sm">
@@ -236,7 +241,6 @@ if (!function_exists('format_price_custom')) {
 												</div>
 											</div>
 										</section>
-
 									<?php elseif ($discount_type_label === 'normal'): ?>
 										<section class="mb-3">
 											<div class="border rounded overflow-hidden shadow-sm">
@@ -256,21 +260,17 @@ if (!function_exists('format_price_custom')) {
 												</div>
 											</div>
 										</section>
-
 									<?php else: ?>
 										<dl>
 											<dd class="price-n"><?= format_price_custom($final_price, 2) ?> ฿</dd>
 										</dl>
 									<?php endif; ?>
-
-
 									<dl>
 										<dt class="text-muted stock">สินค้าในคลัง</dt>
 										<dd class="pl-4 stock-n">
 											<?= isset($available) ? format_num($available, 0) : "" ?>
 										</dd>
 									</dl>
-
 									<div class="mb-3">
 										<?php if ($available > 0): ?>
 											<div class="d-flex flex-wrap align-items-center group-qty">
@@ -326,13 +326,11 @@ if (!function_exists('format_price_custom')) {
 										// ดึงหมวดหมู่หลัก
 										$cat_main = $conn->query("SELECT name FROM category_list WHERE id = {$category_id}")->fetch_assoc();
 										$main_name = $cat_main['name'] ?? 'ไม่ระบุ';
-
 										// แสดงเฉพาะหมวดหมู่หลักอย่างเดียว
 										echo '<a href="./?p=products&cid=' . $category_id . '" class="plain-link"><b>' . $main_name . '</b></a>';
 										?>
 										<label class="sku"> | </label> <label class="sku">SKU :</label> <b style="margin-left: 0.5rem;"><?= $sku ?> </b>
 									</p>
-
 									<div class=" mt-4">
 										<div class="border rounded p-3 bg-light shadow-sm">
 											<h6 class="fw-bold">ติดต่อสอบถาม</h6>
@@ -342,46 +340,46 @@ if (!function_exists('format_price_custom')) {
 										</div>
 									</div>
 
-									<div class="product-description-mobile mt-3">
-										<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
-										<div class="product-specs">
-											<div class="spec-row">
-												<div class="spec-label">น้ำหนักสินค้า</div>
-												<div class="spec-value"><?= $product_weight ?> กรัม.</div>
-											</div>
-											<?php if (!empty($product_width) && !empty($product_length) && !empty($product_height)): ?>
-												<div class="spec-row">
-													<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
-													<div class="spec-value"><?= $product_width ?> x <?= $product_length ?> x <?= $product_height ?> ซม.</div>
-												</div>
-											<?php endif; ?>
-										</div>
-									</div>
-									<div class="col-md-5 mb-3">
-										<?php if (!empty($description)): ?>
-											<div class="product-description-mobile mt-3">
-												<h5><b>รายละเอียด</b></h5>
-												<div id="text-mobile" class="collapsed">
-													<div class="more-text">
-														<?php
-														$paragraphs = preg_split('/\r\n|\r|\n/', trim($description));
-														foreach ($paragraphs as $para) {
-															if (trim($para) !== '') {
-																echo '<p>' . htmlspecialchars(trim($para)) . '</p>';
-															}
-														}
-														?>
-													</div>
-												</div>
-												<div class="text-center mt-2">
-													<button class="btn btn-readmore rounded-pill" id="toggleButton-mobile">ดูเพิ่มเติม +</button>
-												</div>
-											</div>
+								</div>
 
+								<div class="product-description-mobile mt-3">
+									<h5><b>ข้อมูลจำเพาะของสินค้า</b></h5>
+									<div class="product-specs">
+										<div class="spec-row">
+											<div class="spec-label">น้ำหนักสินค้า</div>
+											<div class="spec-value"><?= $product_weight ?> กรัม.</div>
+										</div>
+										<?php if (!empty($product_width) && !empty($product_length) && !empty($product_height)): ?>
+											<div class="spec-row">
+												<div class="spec-label">ขนาดสินค้า (ก x ย x ส)</div>
+												<div class="spec-value"><?= $product_width ?> x <?= $product_length ?> x <?= $product_height ?> ซม.</div>
+											</div>
 										<?php endif; ?>
 									</div>
-
 								</div>
+								<div class="col-md-5 mb-3">
+									<?php if (!empty($description)): ?>
+										<div class="product-description-mobile mt-3">
+											<h5><b>รายละเอียด</b></h5>
+											<div id="text-mobile" class="collapsed">
+												<div class="more-text">
+													<?php
+													$paragraphs = preg_split('/\r\n|\r|\n/', trim($description));
+													foreach ($paragraphs as $para) {
+														if (trim($para) !== '') {
+															echo '<p>' . htmlspecialchars(trim($para)) . '</p>';
+														}
+													}
+													?>
+												</div>
+											</div>
+											<div class="text-center mt-2">
+												<button class="btn btn-readmore rounded-pill" id="toggleButton-mobile">ดูเพิ่มเติม +</button>
+											</div>
+										</div>
+									<?php endif; ?>
+								</div>
+
 							</div>
 						</div>
 					</div>
@@ -399,13 +397,17 @@ if (!function_exists('format_price_custom')) {
 									<img id="modal-image" src="<?= validate_image(isset($image_path) ? $image_path : '') ?>"
 										alt="<?= isset($name) ? $name : '' ?>" class="img-fluid rounded">
 								</div>
+
 								<div class="product-gallery mt-2">
 									<?php foreach ($product_images as $index => $img_src): ?>
-										<img src="<?= $img_src ?>"
-											alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
+										<?php
+										// $img_src คือ Path หลัก (main.webp)
+										// 1. แปลงเป็น Path ขนาดเล็ก (Thumb)
+										$thumb_path_modal = preg_replace('/(\.webp)(\?.*)?$/', '_thumb.webp$2', $img_src);
+										?>
+										<img src="<?= $thumb_path_modal ?>" alt="<?= isset($name) ? $name : '' ?> - Thumbnail <?= $index + 1 ?>"
 											class="gallery-thumbnail <?= ($index == 0) ? 'active' : '' ?>"
-											data-full-src="<?= $img_src ?>"
-											data-index="<?= $index ?>">
+											data-full-src="<?= $img_src ?>" data-index="<?= $index ?>">
 									<?php endforeach; ?>
 								</div>
 
@@ -415,27 +417,23 @@ if (!function_exists('format_price_custom')) {
 						</div>
 					</div>
 				</div>
-
 			</div>
-
 		</div>
 	</div>
 </section>
+
 <section class="py-3">
 	<div class="container">
 		<?php
 		//สินค้าที่เกี่ยวข้อง
-		// เพิ่มการคำนวณ 'available' ในส่วนของสินค้าที่เกี่ยวข้อง
 		$related = $conn->query("SELECT *, 
-			(COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
-			- COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
-			FROM `product_list` 
-			WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
-			ORDER BY RAND() LIMIT 4");
+            (COALESCE((SELECT SUM(quantity) FROM `stock_list` WHERE product_id = product_list.id ), 0) 
+            - COALESCE((SELECT SUM(quantity) FROM `order_items` WHERE product_id = product_list.id), 0)) as `available` 
+            FROM `product_list` 
+            WHERE category_id = '{$category_id}' AND id != '{$id}' AND delete_flag = 0 
+            ORDER BY RAND() LIMIT 4");
 
-		// ============== โค้ดที่แก้ไข เริ่มต้นที่นี่ ==============
-
-		// ตรวจสอบและสร้างฟังก์ชันสำหรับจัดรูปแบบราคา (หากยังไม่มี)
+		// (โค้ดฟังก์ชัน format_price_custom... เหมือนเดิม)
 		if (!function_exists('format_price_custom')) {
 			function format_price_custom($price)
 			{
@@ -460,7 +458,13 @@ if (!function_exists('format_price_custom')) {
 										<a class="card rounded-0 product-item text-decoration-none text-reset h-100" href="./?p=products/view_product&id=<?= $rel['id'] ?>">
 											<div class="position-relative">
 												<div class="img-top position-relative product-img-holder">
-													<img src="<?= validate_image($rel['image_path']) ?>" alt="" class="product-img">
+													<?php
+													// 1. ดึง Path หลัก
+													$related_main_path = $rel['image_path'];
+													// 2. แปลงเป็น Path ขนาดกลาง (Medium)
+													$related_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $related_main_path);
+													?>
+													<img src="<?= validate_image($related_medium_path) ?>" alt="" class="product-img">
 												</div>
 											</div>
 											<div class="card-body d-flex flex-column">
@@ -474,12 +478,10 @@ if (!function_exists('format_price_custom')) {
 														</div>
 													</div>
 												</div>
-
 												<div class="d-flex justify-content-end align-items-center mt-auto">
 													<?php
-													// เริ่มต้นด้วย price เป็น fallback
+													// (โค้ดแสดงราคาสินค้าเกี่ยวข้อง... เหมือนเดิม)
 													$display_price = isset($rel['price']) && $rel['price'] > 0 ? $rel['price'] : 0;
-
 													if (!is_null($rel['discounted_price']) && $rel['discounted_price'] > 0 && $rel['discounted_price'] < $rel['price']) {
 														$display_price = $rel['discounted_price'];
 														$discount_percentage = round((($rel['price'] - $rel['discounted_price']) / $rel['price']) * 100);
@@ -489,7 +491,6 @@ if (!function_exists('format_price_custom')) {
 														$display_price = $rel['vat_price'];
 														echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
 													} else {
-														// fallback ใช้ price จริง
 														echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
 													}
 													?>

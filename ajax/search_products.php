@@ -113,7 +113,7 @@ $qry = $conn->query($qry_str);
 
 
 //
-// ส่วนที่เหลือของไฟล์ (การแสดงผล HTML) เหมือนเดิมทั้งหมด ไม่ต้องแก้ไข
+// ส่วนที่เหลือของไฟล์ (การแสดงผล HTML) 
 //
 
 // ดึงสินค้าใหม่ล่าสุด 4 ชิ้น (ส่วนนี้ยังคงเดิม)
@@ -161,7 +161,13 @@ ob_start();
                             </div>
                         <?php endif; ?>
 
-                        <img src="<?= validate_image($row['image_path']) ?>" alt="<?= $row['name'] ?>" class="product-img">
+                        <?php
+                        // 1. ดึง Path หลัก
+                        $search_main_path = $row['image_path'];
+                        // 2. แปลงเป็น Path ขนาดกลาง (Medium)
+                        $search_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $search_main_path);
+                        ?>
+                        <img src="<?= validate_image($search_medium_path) ?>" alt="<?= $row['name'] ?>" class="product-img">
                     </div>
                 </div>
                 <div class="card-body d-flex flex-column">
