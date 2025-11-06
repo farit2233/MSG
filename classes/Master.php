@@ -2444,14 +2444,20 @@ class Master extends DBConnection
 				return json_encode($resp);
 			}
 
-			// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำ
-			$file_extension = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-			$filename = uniqid('promo_') . '_' . time() . '.' . $file_extension;
+			// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำ และบังคับเป็น .webp
+			// $file_extension = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION); // <-- ไม่ใช้ตัวนี้
+			$filename = uniqid('promo_') . '_' . time() . '.webp'; // <-- บังคับนามสกุล .webp
 			$full_path = base_app . $upload_dir . $filename;
 
 			// ใช้ move_uploaded_file หรือฟังก์ชัน resize ของคุณ
 			// สมมติว่า resize_image จะย้ายไฟล์และคืนค่า true/false
-			$success = $this->resize_image_to_webp($_FILES['img']['tmp_name'], $full_path, 1000, 600);
+			// 1. กำหนดขนาดและคุณภาพ (ตามที่คุณต้องการ)
+			$max_width = 1000;  // ขนาดเดียว (กว้างไม่เกิน 1000)
+			$max_height = 600; // ขนาดเดียว (สูงไม่เกิน 600)
+			$quality = 80;     // คุณภาพ (80% คือ กลางค่อนข้างชัด)
+
+			// 2. เรียกใช้ฟังก์ชัน resize พร้อมระบุคุณภาพ
+			$success = $this->resize_image_to_webp($_FILES['img']['tmp_name'], $full_path, $max_width, $max_height, $quality);
 
 			if ($success) {
 				// ถ้าย้าย/resize รูปสำเร็จ ให้เตรียม SQL สำหรับคอลัมน์ image_path
