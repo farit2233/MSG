@@ -95,7 +95,7 @@ if ($cpromo == 1) {
 <div class="container d-flex justify-content-center">
     <div class="card" style="width: 16.5rem;">
         <div class="card-img" style="position: relative;">
-            <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
+            <img src="../uploads/coupon/coupon.webp" class="card-img-top" alt="Coupon Image">
             <div class="card-body card-coupon-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="card-title coupon-head mb-0">

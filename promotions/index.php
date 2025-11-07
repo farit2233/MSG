@@ -116,7 +116,7 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
                             <div class="col mb-4">
                                 <div class="card" style="width: 16.5rem;">
                                     <div class="card-img" style="position: relative;">
-                                        <img src="../uploads/coupon/coupon3.png" class="card-img-top" alt="Coupon Image">
+                                        <img src="../uploads/coupon/coupon.webp" class="card-img-top" alt="Coupon Image">
                                         <div class="card-body card-coupon-body">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <label class="card-title coupon-head mb-0">
