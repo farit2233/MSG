@@ -103,13 +103,32 @@ while ($op_row = $other_promo_qry->fetch_assoc()) {
                 data-promo-status="<?= $promo_status ?>">
                 <label class="w-100 mb-0 d-flex align-items-center" style="<?= !empty($is_disabled) ? 'cursor:not-allowed;' : 'cursor:pointer;' ?>">
                     <input type="checkbox" name="product_id[]" class="form-check-input product-checkbox mr-3" value="<?= $row['id'] ?>" <?= $is_checked ?> <?= $is_disabled ?>>
+
+                    <?php
+                    // --- [แก้ไข] START: สร้าง Path สำหรับรูป Thumb ---
+                    // 1. ดึง path รูปหลัก
+                    $image_path_with_query = $row['image_path'];
+
+                    // 2. แยก path ออกจาก query string
+                    $path_parts = explode('?', $image_path_with_query);
+                    $clean_path = $path_parts[0];
+                    $query_string = isset($path_parts[1]) ? '?' . $path_parts[1] : '';
+
+                    // 3. สร้าง path ของ thumb
+                    $thumb_path = str_replace('.webp', '_thumb.webp', $clean_path);
+
+                    // 4. ประกอบ path กลับ
+                    $final_thumb_path = $thumb_path . $query_string;
+                    // --- [แก้ไข] END ---
+                    ?>
+
                     <div class="product-info">
-                        <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
+                        <img src="<?= validate_image($final_thumb_path) ?>" alt="" class="img-thumbnail p-0 border product-img">
                         <span class="font-weight-bold"> <?= $row['name'] ?> </span>
                         <?php if (!empty($is_disabled)): ?>
                             <span class="badge badge-warning ml-2">อยู่ในโปรโมชันอื่น</span>
                         <?php endif; ?>
-                        <span class="d-block text-muted small">SKU : <?= $row['sku'] ?> | ราคา: <?= number_format($row['price'], 2) ?> บาท | หมวดหมู่: <?= $row['category_name'] ?></span>
+                        <span class="d-block text-muted small">ราคา: <?= number_format($row['price'], 2) ?> บาท | หมวดหมู่: <?= $row['category_name'] ?></span>
                     </div>
                 </label>
             </div>
