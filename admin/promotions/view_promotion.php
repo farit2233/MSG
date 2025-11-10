@@ -1,328 +1,470 @@
 <?php
+$gt = 0; // กำหนดค่าเริ่มต้นให้กับ $gt ที่นี่
+
+// ดึงข้อมูลคำสั่งซื้อ
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $qry = $conn->query("SELECT * FROM promotions_list WHERE id = '{$_GET['id']}' and delete_flag = 0 ");
+    // ### MODIFIED QUERY: ไม่จำเป็นต้องระบุคอลัมน์ซ้ำซ้อน แค่ ol.* ก็พอ ###
+    $qry = $conn->query("SELECT ol.* FROM `order_list` ol WHERE ol.id = '{$_GET['id']}' ");
     if ($qry->num_rows > 0) {
         foreach ($qry->fetch_assoc() as $k => $v) {
             $$k = $v;
         }
     }
 }
-function formatDateThai($date)
-{
-    // แปลงวันที่เป็นตัวแปร timestamp
-    $timestamp = strtotime($date);
-    $day = date("j", $timestamp); // วัน (1-31)
-    $month = date("n", $timestamp); // เดือน (1-12)
-    $year = date("Y", $timestamp) + 543; // ปี (พ.ศ.)
-    $hour = date("H", $timestamp); // ชั่วโมง (00-23)
-    $minute = date("i", $timestamp); // นาที (00-59)
 
-    // สร้างวันที่ในรูปแบบไทย
-    return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
+$promotion_name = '';
+if (!empty($promotion_id)) {
+    // คิวรีหาชื่อโปรโมชันจาก promotion_id ที่ได้มา
+    $promo_qry = $conn->query("SELECT name FROM `promotions_list` WHERE id = '{$promotion_id}'");
+    if ($promo_qry->num_rows > 0) {
+        $promotion_name = $promo_qry->fetch_assoc()['name'];
+    } else {
+        $promotion_name = "โปรโมชันที่ถูกลบไปแล้ว";
+    }
+}
+
+$coupon_name = '';
+if (!empty($coupon_code_id)) {
+    // คิวรีหาชื่อ/โค้ดคูปองจาก coupon_code_id ที่ได้มา
+    // สมมติว่าตารางชื่อ coupon_code_list และคอลัมน์ที่เก็บโค้ดชื่อ code
+    $coupon_qry = $conn->query("SELECT coupon_code FROM `coupon_code_list` WHERE id = '{$coupon_code_id}'");
+    if ($coupon_qry->num_rows > 0) {
+        $coupon_name = $coupon_qry->fetch_assoc()['coupon_code'];
+    } else {
+        $coupon_name = "คูปองที่ถูกลบไปแล้ว";
+    }
+}
+
+// ข้อมูลขนส่ง
+$shipping_methods_name = 'ไม่ระบุขนส่ง';
+if (!empty($shipping_methods_id)) {
+    $shipping_query = $conn->query("SELECT name, cost FROM shipping_methods WHERE id = '{$shipping_methods_id}'");
+    if ($shipping_query->num_rows > 0) {
+        $shipping_data = $shipping_query->fetch_assoc();
+        $shipping_methods_name = $shipping_data['name'];
+    } else {
+        $shipping_methods_name = 'ไม่พบข้อมูลขนส่ง';
+    }
+}
+
+$total_weight = 0;
+if (isset($id)) {
+    $weight_qry = $conn->query("
+        SELECT
+            oi.quantity,
+            p.product_weight
+        FROM order_items oi
+        INNER JOIN product_list p ON oi.product_id = p.id
+        WHERE oi.order_id = '{$id}'
+    ");
+    while ($w = $weight_qry->fetch_assoc()) {
+        $total_weight += ($w['product_weight'] * $w['quantity']);
+    }
+}
+
+$shipping_cost = 0.00;
+if (!empty($shipping_prices_id)) {
+    // ### MODIFIED: ดึงค่าจัดส่งจาก shipping_prices_id ที่บันทึกไว้ใน order_list โดยตรง ###
+    $cost_qry = $conn->query("SELECT price FROM shipping_prices WHERE id = '{$shipping_prices_id}'");
+    if ($cost_qry && $cost_qry->num_rows > 0) {
+        $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
+    }
+} elseif (!empty($shipping_methods_id)) {
+    // Fallbackเผื่อกรณีที่ไม่ได้บันทึก shipping_prices_id แต่มี methods_id
+    $cost_qry = $conn->query("
+        SELECT price FROM shipping_prices
+        WHERE shipping_methods_id = '{$shipping_methods_id}' AND {$total_weight} BETWEEN min_weight AND max_weight
+        LIMIT 1
+    ");
+    if ($cost_qry && $cost_qry->num_rows > 0) {
+        $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
+    }
+}
+
+// คำนวณยอดรวมสุดท้าย
+$grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amount จาก order_list โดยตรง
+
+$slip_data = null; // กำหนดตัวแปรเริ่มต้นเป็น null
+if (isset($id)) {
+    // ใช้ order id ($id) ที่มีอยู่แล้วในการค้นหา
+    $slip_qry = $conn->query("SELECT * FROM `payment_slips` WHERE order_id = '{$id}'");
+    if ($slip_qry->num_rows > 0) {
+        $slip_data = $slip_qry->fetch_assoc();
+    }
 }
 ?>
+
 <style>
-    .card-title {
-        font-size: 20px !important;
-        font-weight: bold;
-    }
-
-    section {
-        font-size: 16px;
-    }
-
-    a {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    a:hover {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .info-box:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-    }
-
-    .info-box {
-        transition: transform 0.5s ease, box-shadow 0.5s ease;
-        display: inline-flex !important;
-        width: 100%;
-        max-width: 240px;
-        padding: 0.4rem 0.6rem;
-        min-height: auto;
-        border-radius: 0.35rem;
-        margin: 8px;
-    }
-
-    .info-box-content {
-        padding-left: 0.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .info-box-text {
-        font-size: 16px;
-        color: #444;
-        margin-bottom: 0.2rem;
-    }
-
-    .info-box-number {
-        font-size: 16px;
-        font-weight: bold;
-        color: #000;
+    .product-name-link:hover {
+        text-decoration: underline;
     }
 </style>
 <section class="card card-outline card-orange rounded-0">
     <div class="card-header">
-        <div class="card-title">ข้อมูลเบื้องต้น</div>
+        <div class="card-title">รายละเอียดคำสั่งซื้อ</div>
     </div>
     <div class="card-body">
-        <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12">
-            <dl>
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <dt class="text-muted">ชื่อโปรโมชัน</dt>
-                            <dd><?= isset($name) ? $name : "" ?></dd>
-                        </div>
-                        <div class="col-md-3">
-                            <dt class="text-muted">รายละเอียดโปรโมชัน</dt>
-                            <dd><?= $description ?? '' ?></dd>
-                        </div>
-                        <div class="col-md-3">&nbsp;</div>
+        <div class="flex-column  justify-content-center align-items-center">
+            <div class="card card-outline card-dark rounded-0 mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="card-title m-0 flex-grow-1" style="font-size: 18px !important;">รายละเอียดคำสั่งซื้อหมายเลข : <?= isset($code) ? $code : '' ?></div>
+                    <div class="card-tools text-end">
+                        <a class="btn btn-light btn-sm bg-gradient-light border rounded-0 mb-1" href="./?page=orders">
+                            <i class="fa fa-angle-left"></i> กลับ
+                        </a>
+                        <button class="btn btn-danger btn-sm bg-gradient-danger rounded-0 mb-1" type="button" id="delete_data">
+                            <i class="fa fa-trash"></i> ลบ
+                        </button>
+                        <button class="btn btn-navy btn-sm bg-gradient-navy rounded-0 mb-1" type="button" id="print">
+                            <i class="fa fa-print"></i> พิมพ์
+                        </button>
+                        <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="update_status">
+                            อัปเดตสถานะ
+                        </button>
+                        <button class="btn btn-success btn-sm bg-gradient-success rounded-0 mb-1" type="button" id="approve_status" <?php if (isset($cod) && $cod == 1) echo 'disabled'; ?>>
+                            อัปเดตสถานะสลิป
+                        </button>
+                        <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="update_tracking">
+                            อัปเดตเลขขนส่ง
+                        </button>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-3">
-                            <dt class="text-muted">ประเภท</dt>
-                            <dd>
-                                <?php
-                                switch ($type ?? '') {
-                                    case 'fixed':
-                                        echo 'ลดราคา (บาท)';
-                                        break;
-                                    case 'percent':
-                                        echo 'ลดเปอร์เซ็นต์';
-                                        break;
-                                    case 'free_shipping':
-                                        echo 'ส่งฟรี';
-                                        break;
-                                    case 'code':
-                                        echo 'โค้ดส่วนลด';
-                                        break;
-                                    default:
-                                        echo '-';
-                                }
-                                ?>
-                            </dd>
-                        </div>
-                        <div class="col-md-3">
-                            <dt class="text-muted">มูลค่าส่วนลด</dt>
-                            <dd><?= $discount_value ?? '' ?></dd>
-                        </div>
-                        <div class="col-md-4">
-                            <dt class="text-muted">ช่วงเวลา</dt>
-                            <span>เริ่ม: <?= formatDateThai($start_date) ?></span>
-                            <span> ถึง </span><br>
-                            <span>สิ้นสุด: <?= formatDateThai($end_date) ?></span>
-                        </div>
-                    </div>
-                </div>
-
-            </dl>
-        </div>
-        <div class="card card-outline card-dark rounded-0 mb-3">
-            <div class="card-header">
-                <div class="card-title">สินค้าที่มีโปรโมชัน</div>
-                <div class="card-tools">
-                    <button class="btn btn-flat btn-danger delete_all_data" type="button" data-id="<?= $id ?>">
-                        <i class="fas fa-trash"></i> ลบสินค้าทั้งหมด
-                    </button>
-                    <button class="btn btn-flat btn-dark" type="button" id="promotion_products">
-                        <i class="fas fa-plus"></i> เพิ่มสินค้า
-                    </button>
-                </div>
-
-            </div>
-            <div class="card-body">
-                <div class="container-fluid">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-striped table-bordered" id="list">
-                            <colgroup>
-                                <col width="5%">
-                                <col width="10%">
-                                <col width="15%">
-                                <col width="25%">
-                                <col width="10%">
-                                <col width="10%">
-                            </colgroup>
-                            <thead class="text-center">
-                                <tr>
-                                    <th>ที่</th>
-                                    <th>รูปภาพสินค้า</th>
-                                    <th>แบรนด์</th>
-                                    <th>ชื่อสินค้า</th>
-                                    <th>ราคา</th>
-                                    <th>จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $i = 1;
-                                // ======================= แก้ไขจุดที่ 1: เพิ่ม WHERE clause เพื่อกรองสินค้า =======================
-                                $qry = $conn->query("
-                                        SELECT 
-                                            pp.id as pp_id,
-                                            p.id as product_id,
-                                            p.name as product_name,
-                                            p.brand,
-                                            p.price,
-                                            p.vat_price,
-                                            p.discounted_price,
-                                            p.image_path
-                                        FROM promotion_products pp
-                                        INNER JOIN product_list p ON pp.product_id = p.id
-                                        WHERE pp.promotion_id = '{$id}'
-                                    ");
-                                while ($row = $qry->fetch_assoc()):
-                                ?>
-                                    <tr>
-                                        <td class="text-center"><?= $i++ ?></td>
-
-                                        <?php
-                                        // --- [แก้ไข] START: สร้าง Path สำหรับรูป Thumb ---
-                                        // 1. ดึง path รูปหลัก
-                                        $image_path_with_query = $row['image_path'];
-
-                                        // 2. แยก path ออกจาก query string
-                                        $path_parts = explode('?', $image_path_with_query);
-                                        $clean_path = $path_parts[0];
-                                        $query_string = isset($path_parts[1]) ? '?' . $path_parts[1] : '';
-
-                                        // 3. สร้าง path ของ thumb
-                                        $thumb_path = str_replace('.webp', '_thumb.webp', $clean_path);
-
-                                        // 4. ประกอบ path กลับ
-                                        $final_thumb_path = $thumb_path . $query_string;
-                                        // --- [แก้ไข] END ---
-                                        ?>
-
-                                        <td class="text-center">
-                                            <img src="<?= validate_image($final_thumb_path) ?>" alt="" class="img-thumbnail p-0 border product-img">
-                                        </td>
-                                        <td><?= htmlspecialchars($row['brand']) ?></td>
-                                        <td><?= htmlspecialchars($row['product_name']) ?></td>
-                                        <td class="text-right">
-                                            <?php
-                                            $price = (float)$row['price'];
-                                            $vat_price = !empty($row['vat_price']) ? (float)$row['vat_price'] : null;
-                                            $discounted_price = !empty($row['discounted_price']) ? (float)$row['discounted_price'] : null;
-
-                                            // กำหนดตัวแปรแสดงผลหลัก
-                                            $display_price = $discounted_price ?? $vat_price ?? $price;
-                                            $original_price = $vat_price ?? $price;
-
-                                            // แสดงผล
-                                            if (!is_null($discounted_price) && $discounted_price < $original_price) {
-                                                // มีส่วนลด: ขีดฆ่า original และแสดง discounted สีแดง
-                                                echo '<span class="text-muted" style="text-decoration: line-through;">' . number_format($original_price, 0, '.', ',') . ' ฿</span><br>';
-                                                echo '<span class="text-danger font-weight-bold">' . number_format($discounted_price, 0, '.', ',') . ' ฿</span>';
-                                            } else {
-                                                // ไม่มีส่วนลด: แสดง display_price ปกติ
-                                                echo '<span class="font-weight-bold">' . number_format($display_price, 0, '.', ',') . ' ฿</span>';
-                                            }
-                                            ?>
-                                        </td>
-
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-flat p-1 btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
-                                                จัดการ
-                                                <span class="sr-only">Toggle Dropdown</span>
-                                            </button>
-                                            <div class="dropdown-menu" role="menu">
-                                                <a class="dropdown-item" href="./?page=products/manage_product&id=<?= $row['product_id'] ?>">
-                                                    <span class="fa fa-eye text-dark"></span> ดู
-                                                </a>
-                                                <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="<?= $row['pp_id'] ?>">
-                                                    <span class="fa fa-trash text-danger"></span> ลบรายการ
-                                                </a>
+                    <div class="card-body ">
+                        <div class="container-fluid">
+                            <div class=" printout">
+                                <div class="row mb-3">
+                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 ">
+                                        <div class="mb-3">
+                                            <label for="" class="control-label head-detail">หมายเลขคำสั่งซื้อ :</label>
+                                            <div class="pl-4"><?= isset($code) ? $code : '' ?></div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="" class="control-label head-detail">ชื่อผู้รับ และเบอร์โทร :</label>
+                                            <div class="pl-4"><?= !empty($name) ? htmlentities($name) : 'ไม่พบข้อมูลลูกค้า' ?>, <br>
+                                                <?= !empty($contact) ? htmlentities($contact) : 'ไม่พบเบอร์โทร' ?></div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="" class="control-label head-detail">ที่อยู่จัดส่ง :</label>
+                                            <div class="pl-4"><?= isset($delivery_address) ? str_replace(["\r\n", "\r", "\n"], "<br>", $delivery_address) : '' ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                        <div class="mb-3">
+                                            <label for="" class="control-label head-detail">สถานะการชำระเงิน :</label>
+                                            <div class="pl-4 ">
+                                                <?php
+                                                if (isset($payment_status)) {
+                                                    switch ((int)$payment_status) {
+                                                        case 0:
+                                                            echo '<span>ยังไม่ชำระเงิน</span>';
+                                                            break;
+                                                        case 1:
+                                                            echo '<span>รอตรวจสอบ</span>';
+                                                            break;
+                                                        case 2:
+                                                            echo '<span>ชำระเงินแล้ว</span>';
+                                                            break;
+                                                        case 3:
+                                                            echo '<span>ชำระเงินล้มเหลว</span>';
+                                                            break;
+                                                        case 4:
+                                                            echo '<span>รอการยกเลิกคำสั่งซื้อ</span>';
+                                                            break;
+                                                        case 5:
+                                                            echo '<span>ขอคืนเงิน</span>';
+                                                            break;
+                                                        case 6:
+                                                            echo '<span>คืนเงินแล้ว</span>';
+                                                            break;
+                                                        default:
+                                                            echo '<span>N/A</span>';
+                                                            break;
+                                                    }
+                                                } else {
+                                                    echo '<span>N/A</span>';
+                                                }
+                                                ?>
                                             </div>
-                                        </td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="" class="control-label head-detail">สถานะการจัดส่ง :</label>
+                                            <div class="pl-4 ">
+                                                <?php
+                                                if (isset($delivery_status)) {
+                                                    switch ((int)$delivery_status) {
+                                                        case 0:
+                                                            echo '<span>ตรวจสอบคำสั่งซื้อ</span>';
+                                                            break;
+                                                        case 1:
+                                                            echo '<span>กำลังเตรียมของ</span>';
+                                                            break;
+                                                        case 2:
+                                                            echo '<span>แพ๊กของแล้ว</span>';
+                                                            break;
+                                                        case 3:
+                                                            echo '<span>กำลังจัดส่ง</span>';
+                                                            break;
+                                                        case 4:
+                                                            echo '<span>จัดส่งสำเร็จ</span>';
+                                                            break;
+                                                        case 5:
+                                                            echo '<span>ส่งไม่สำเร็จ</span>';
+                                                            break;
+                                                        case 6:
+                                                            echo '<span>รอการยกเลิกคำสั่งซื้อ</span>';
+                                                            break;
+                                                        case 7:
+                                                            echo '<span>คืนของระหว่างทาง</span>';
+                                                            break;
+                                                        case 8:
+                                                            echo '<span>ขอคืนสินค้า</span>';
+                                                            break;
+                                                        case 9:
+                                                            echo '<span>คืนของสำเร็จ</span>';
+                                                            break;
+                                                        case 10:
+                                                            echo '<span>ยกเลิกแล้ว</span>';
+                                                            break;
+                                                        default:
+                                                            echo '<span>N/A</span>';
+                                                            break;
+                                                    }
+                                                } else {
+                                                    echo '<span>N/A</span>';
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="control-label head-detail">บริษัทขนส่ง :</label>
+                                            <div class="pl-4 ">
+                                                <?= htmlentities($tracking_id ?: 'ไม่พบเลขขนส่ง') ?>
+                                                <br>
+                                                <?= htmlentities($shipping_methods_name) ?>
+                                                <br>
+                                                น้ำหนักรวม: <?= number_format($total_weight, 0) ?> กรัม
+                                                <br>
+                                                ค่าส่ง: <?= number_format($shipping_cost, 2) ?> บาท
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="control-label head-detail">หลักฐานการชำระเงิน :</label>
+                                            <div class="pl-4">
+                                                <?php if (isset($cod) && $cod == 1): ?>
+
+                                                    <span>ชำระเงินปลายทาง</span>
+
+                                                <?php elseif ($slip_data): ?>
+
+                                                    <a href="<?= validate_image($slip_data['image_path']) ?>" target="_blank">
+                                                        <img src="<?= validate_image($slip_data['image_path']) ?>" alt="Payment Slip" class="img-thumbnail" style="max-width: 250px; cursor: pointer;">
+                                                    </a>
+                                                    <div class="mt-2">
+                                                        <strong>สถานะสลิป:</strong>
+                                                        <?php if ($slip_data['approve'] == 1): ?>
+                                                            <span>อนุมัติแล้ว</span>
+                                                        <?php elseif ($slip_data['approve'] == 2): ?>
+                                                            <span>ไม่อนุมัติ</span>
+                                                        <?php else: // กรณีเป็น 0 หรือค่าอื่นๆ 
+                                                        ?>
+                                                            <span>รอตรวจสอบ</span>
+                                                        <?php endif; ?>
+                                                    </div>
+
+                                                <?php else: ?>
+
+                                                    <span>ไม่พบข้อมูลสลิป</span>
+
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="item_list" class="list-group">
+                                    <?php
+                                    $gt = 0;
+                                    if (isset($id)) {
+                                        // --- query ของคุณ (ไม่ต้องแก้) ---
+                                        $order_items = $conn->query("SELECT o.*, p.name as product, p.brand as brand, p.price, p.discounted_price, cc.name as category, p.image_path, COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) as `available` FROM `order_items` o inner join product_list p on o.product_id = p.id inner join category_list cc on p.category_id = cc.id where order_id = '{$id}' ");
+
+                                        // --- เริ่มต้น Loop (ตรงนี้คือส่วนที่แก้ไข) ---
+                                        while ($row = $order_items->fetch_assoc()):
+                                            $price = $row['price'];
+                                            $discounted_price = $row['discounted_price'];
+                                            $has_discount = isset($discounted_price) && $discounted_price > 0;
+
+                                            $effective_price = $has_discount ? $discounted_price : $price;
+                                            $item_total = $effective_price * $row['quantity'];
+                                            $gt += $item_total;
+                                    ?>
+                                            <div class="list-group-item cart-item" data-id='<?= $row['id'] ?>' data-max='<?= format_num($row['available'], 0) ?>'>
+                                                <div class="d-flex w-100 align-items-center">
+                                                    <div class="col-2 text-center">
+
+                                                        <?php
+                                                        // --- [แก้ไข] START: สร้าง Path สำหรับรูป Medium ---
+                                                        // 1. ดึง path รูปหลัก
+                                                        $image_path_with_query = $row['image_path'];
+
+                                                        // 2. แยก path ออกจาก query string
+                                                        $path_parts = explode('?', $image_path_with_query);
+                                                        $clean_path = $path_parts[0];
+                                                        $query_string = isset($path_parts[1]) ? '?' . $path_parts[1] : '';
+
+                                                        // 3. สร้าง path ของ medium
+                                                        $medium_path = str_replace('.webp', '_medium.webp', $clean_path);
+
+                                                        // 4. ประกอบ path กลับ
+                                                        $final_medium_path = $medium_path . $query_string;
+                                                        // --- [แก้ไข] END ---
+                                                        ?>
+
+                                                        <a href="./?page=products/manage_product&id=<?= $row['product_id'] ?>">
+                                                            <img src="<?= validate_image($final_medium_path) ?>" alt="" class="img-thumbnail border p-0 product-logo">
+                                                        </a>
+                                                    </div>
+                                                    <div class="col-auto flex-shrink-1 flex-grow-1">
+                                                        <div style="line-height:1em">
+
+                                                            <div class='mb-0'>
+                                                                <a href="./?page=products/manage_product&id=<?= $row['product_id'] ?>" class="text-dark font-weight-bold product-name-link" style="font-size: 1.1em;">
+                                                                    <?= $row['product'] ?>
+                                                                </a>
+                                                            </div>
+                                                            <div class="text-muted"><?= $row['brand'] ?></div>
+                                                            <div class="text-muted"><?= $row['category'] ?></div>
+                                                            <div class="text-muted d-flex w-100">
+                                                                <?= format_num($row['quantity'], 0) ?> x
+                                                                <?php if ($has_discount): ?>
+                                                                    <span class="text-danger px-2"><del><?= format_num($price, 2) ?></del></span> <b><?= format_num($effective_price, 2) ?></b>
+                                                                <?php else: ?>
+                                                                    <span class="px-2"><b><?= format_num($effective_price, 2) ?></b></span>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <h5 class="text-bold"><?= format_num($item_total, 2) ?></h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    <?php
+                                        endwhile;
+                                    }
+                                    ?>
+                                </div>
+                                <?php if (!isset($order_items) || $order_items->num_rows <= 0): ?>
+                                    <h5 class="text-center text-muted">ไม่มีสินค้าที่สั่งซื้อ</h5>
+                                <?php endif; ?>
+
+                                <div class="d-flex justify-content-end py-3">
+                                    <div class="col-auto">
+                                        <div class="text-right">
+                                            <h5>ยอดรวมสินค้า: <?= format_num($gt, 2) ?> บาท</h5>
+                                            <h5>ค่าจัดส่ง: <?= number_format($shipping_cost, 2) ?> บาท</h5>
+
+                                            <?php if (!empty($promotion_name) && isset($promotion_discount) && $promotion_discount > 0): ?>
+                                                <h5>
+                                                    ส่วนลดโปรโมชัน (<?= htmlspecialchars($promotion_name) ?>):
+                                                    <span class="text-danger">(-<?= format_num($promotion_discount, 2) ?> บาท)</span>
+                                                </h5>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($coupon_name) && isset($coupon_discount) && $coupon_discount > 0): ?>
+                                                <h5>
+                                                    ส่วนลดคูปอง (<?= htmlspecialchars($coupon_name) ?>):
+                                                    <span class="text-danger">(-<?= format_num($coupon_discount, 2) ?> บาท)</span>
+                                                </h5>
+                                            <?php endif; ?>
+
+                                            <h5>ยอดสั่งซื้อ <small> รวม VAT:</small> <?= format_num($grand_total, 2) ?> บาท</h5>
+                                            <hr>
+                                            <h4><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="card-footer py-1 text-center">
-        <a class="btn btn-light btn-sm border btn-flat" href="./?page=promotions"><i class="fa fa-angle-left"></i> กลับ</a>
-    </div>
+
+        <noscript id="print-header">
+            <div class="d-flex w-100 align-items-center">
+                <div class="col-2 text-center">
+                    <img src="<?= validate_image($_settings->info('logo')) ?>" alt="" class="rounded-circle border" style="width: 5em;height: 5em;object-fit:cover;object-position:center center">
+                </div>
+                <div class="col-8">
+                    <div style="line-height:1em">
+                        <div class="text-center font-weight-bold">
+                            <large><?= $_settings->info('name') ?></large>
+                        </div>
+                        <div class="text-center font-weight-bold">
+                            <large>รายละเอียดคำสั่งซื้อ</large>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+        </noscript>
 </section>
+
 <script>
-    $(document).ready(function() {
-        $('#list').dataTable({
-            columnDefs: [{
-                orderable: false,
-                targets: [2, 5]
-            }],
-            order: [
-                [0, 'asc']
-            ],
-            language: {
-                lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
-                zeroRecords: "ไม่พบข้อมูล",
-                info: "หน้า _PAGE_ จาก _PAGES_ หน้า",
-                infoEmpty: "ไม่มีข้อมูลที่จะแสดง",
-                infoFiltered: "(กรองจาก _MAX_ รายการทั้งหมด)",
-                search: "ค้นหา:",
-                paginate: {
-                    first: "หน้าแรก",
-                    last: "หน้าสุดท้าย",
-                    next: "ถัดไป",
-                    previous: "ก่อนหน้า"
-                }
-            }
-        });
-
-        $('.delete_data').click(function() {
-            const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_promotion", [id]);
-        });
-        $('.delete_all_data').click(function() {
-            const promotion_id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้าทั้งหมดออกจากโปรโมชันนี้?", "delete_all_promotion_products", [promotion_id]);
-        });
-    });
+    function print_t() {
+        var h = $('head').clone()
+        var el = ""
+        $('.printout').map(function() {
+            var p = $(this).clone()
+            p.find('.btn').remove()
+            p.find('.card').addClass('border')
+            p.removeClass('col-lg-8 col-md-10 col-sm-12 col-xs-12')
+            p.addClass('col-12')
+            el += p[0].outerHTML
+        })
+        var ph = $($('noscript#print-header').html()).clone()
+        h.find('title').text("รายละเอียดคำสั่งซื้อ - มุมมองการพิพม์")
+        var nw = window.open("", "_blank", "width=" + ($(window).width() * .8) + ",left=" + ($(window).width() * .1) + ",height=" + ($(window).height() * .8) + ",top=" + ($(window).height() * .1))
+        nw.document.querySelector('head').innerHTML = h.html()
+        nw.document.querySelector('body').innerHTML = ph[0].outerHTML
+        nw.document.querySelector('body').innerHTML += el
+        nw.document.close()
+        start_loader()
+        setTimeout(() => {
+            nw.print()
+            setTimeout(() => {
+                nw.close()
+                end_loader()
+            }, 200);
+        }, 300);
+    }
     $(function() {
+        $('#print').click(function() {
+            print_t()
+        })
+        $('#assign_team').click(function() {
+            uni_modal("Assign a Team", 'orders/assign_team.php?id=<?= isset($id) ? $id : '' ?>')
+        })
         $('#delete_data').click(function() {
-            _conf("Are you sure to delete this product_type permanently?", "delete_product_type", ["<?= isset($id) ? $id : '' ?>"])
+            _conf("คุณแน่ใจหรือไม่ที่จะลบคำสั่งซื้อนี้?", "delete_order", ["<?= isset($id) ? $id : '' ?>"])
+        })
+        $('#update_status').click(function() {
+            uni_modal_order("อัปเดตสถานะ <small>*บันทึกเพื่ออัปเดตสถานะคำสั่งซื้อ และส่งอีเมล์</small>", "orders/update_status.php?id=<?= isset($id) ? $id : '' ?>")
+        })
+        $('#approve_status').click(function() {
+            uni_modal_payment("อัปเดตสถานะสลิป", "orders/update_status_payment.php?id=<?= isset($slip_data['id']) ? $slip_data['id'] : '' ?>")
+        })
+        $('#update_tracking').click(function() {
+            uni_modal_tracking("อัปเดตเลขขนส่ง <small>*บันทึกเพื่ออัปเดตสถานะเลขขนส่ง</small>", "orders/update_tracking.php?id=<?= isset($id) ? $id : '' ?>")
         })
     })
 
-    $(function() {
-        $('.delete_data').click(function() {
-            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้ออกจากโปรโมชัน?", "delete_promotion_product", [$(this).attr('data-id')])
-        });
-        $('#promotion_products').click(function() {
-            uni_modal_promotion("เพิ่มสินค้า", "promotions/promotion_products.php?id=<?= isset($id) ? $id : '' ?>")
-        })
-    })
-
-    // ฟังก์ชันใหม่สำหรับลบสินค้าออกจากโปรโมชัน
-    function delete_promotion_product($id) {
+    function delete_order($id) {
         start_loader();
-        alert_toast('กำลังลบสินค้าออกจากโปรโมชัน...', 'info');
         $.ajax({
-            // ส่งไปที่ฟังก์ชันใหม่ใน Master.php
-            url: _base_url_ + "classes/Master.php?f=delete_promotion_product",
+            url: _base_url_ + "classes/Master.php?f=delete_order",
             method: "POST",
             data: {
                 id: $id
@@ -335,41 +477,12 @@ function formatDateThai($date)
             },
             success: function(resp) {
                 if (typeof resp == 'object' && resp.status == 'success') {
-                    // เมื่อสำเร็จ ให้รีโหลดหน้าปัจจุบัน
-                    location.reload();
+                    location.replace("./?page=orders");
                 } else {
                     alert_toast("An error occured.", 'error');
                     end_loader();
                 }
             }
-        });
-    }
-    // ฟังก์ชันสำหรับลบสินค้าทั้งหมดออกจากโปรโมชัน
-    function delete_all_promotion_products(promotion_id) {
-        start_loader();
-        alert_toast('กำลังลบสินค้าทั้งหมดออกจากโปรโมชัน...', 'info');
-        $.ajax({
-            url: _base_url_ + "classes/Master.php?f=delete_all_promotion_products",
-            method: "POST",
-            data: {
-                promotion_id: promotion_id
-            },
-            dataType: "json",
-            error: function(err) {
-                console.log(err);
-                alert_toast("เกิดข้อผิดพลาด", 'error');
-                end_loader();
-            },
-            success: function(resp) {
-                if (resp.status == 'success') {
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1500);
-                } else {
-                    alert_toast('เกิดข้อผิดพลาด', 'error');
-                    end_loader();
-                }
-            }
-        });
+        })
     }
 </script>
