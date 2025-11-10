@@ -42,43 +42,29 @@
 				if (strlen($password) < 8) {
 					$errors[] = "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร";
 				}
-
-				// ตรวจสอบตัวอักษรพิมพ์เล็ก
 				if (!preg_match('/[a-z]/', $password)) {
 					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว";
 				}
-
-				// ตรวจสอบตัวเลข
 				if (!preg_match('/[0-9]/', $password)) {
 					$errors[] = "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว";
 				}
-
-				// ตรวจสอบตัวอักษรพิมพ์ใหญ่
 				if (!preg_match('/[A-Z]/', $password)) {
 					$errors[] = "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัว";
 				}
-
-				// ตรวจสอบสัญลักษณ์พิเศษ
 				if (!preg_match('/[\W_]/', $password)) {
 					$errors[] = "รหัสผ่านต้องมีสัญลักษณ์พิเศษอย่างน้อย 1 ตัว (เช่น @, #, $, %)";
 				}
 
-				// หากมีข้อผิดพลาดในการตรวจสอบรหัสผ่าน
 				if (!empty($errors)) {
 					echo json_encode(['status' => 'failed', 'msg' => implode('<br>', $errors)]);
 					return;
 				}
-
-				// Hash the password only after validation passes
 				$_POST['password'] = password_hash($password, PASSWORD_DEFAULT);
 			} else {
-				// If password is not being set, remove it from the data to be saved
 				unset($_POST['password']);
 			}
 
 			$data = '';
-
-			// Whitelist of allowed fields from the form (username removed)
 			$allowed_fields = ['firstname', 'middlename', 'lastname', 'username', 'password', 'type'];
 
 			foreach ($_POST as $k => $v) {
@@ -101,24 +87,32 @@
 					$resp['msg'] = 'สร้างบัญชีสมาชิกเรียบร้อย';
 					$this->settings->set_flashdata('success', 'สร้างบัญชีสมาชิกเรียบร้อย');
 
-					// --- Start: Save cropped image logic (UNCHANGED) ---
+					// --- Start: Save cropped image logic (MODIFIED) ---
 					if (!empty($cropped_image_data)) {
 						$upload_path = base_app . "uploads/avatars/";
 						if (!is_dir($upload_path))
 							mkdir($upload_path, 0755, true);
 
 						$image_parts = explode(";base64,", $cropped_image_data);
-						$image_base64 = base64_decode($image_parts[1]);
-						$fname = "{$upload_path}{$new_user_id}.png";
-
-						if (file_put_contents($fname, $image_base64)) {
-							$avatar_path = "uploads/avatars/{$new_user_id}.png";
-							$this->conn->query("UPDATE `users` SET `avatar` = '{$this->conn->real_escape_string($avatar_path)}' WHERE id = '{$new_user_id}'");
-
-							if ($this->settings->userdata('id') == $new_user_id)
-								$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
+						if (count($image_parts) < 2) {
+							$resp['msg'] .= " (แต่ข้อมูลรูปภาพที่ส่งมาไม่ถูกต้อง)";
 						} else {
-							$resp['msg'] .= " (แต่บันทึกรูปโปรไฟล์ไม่สำเร็จ)";
+							$image_base64 = base64_decode($image_parts[1]);
+
+							// [แก้ไข] บันทึกเป็น .webp
+							$fname = "{$upload_path}{$new_user_id}.webp";
+
+							if (file_put_contents($fname, $image_base64)) {
+								// [แก้ไข] path เป็น .webp
+								$avatar_path = "uploads/avatars/{$new_user_id}.webp";
+								// [แก้ไข] เพิ่ม cache buster ลง DB
+								$this->conn->query("UPDATE `users` SET `avatar` = CONCAT('{$this->conn->real_escape_string($avatar_path)}', '?v=', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = '{$new_user_id}'");
+
+								if ($this->settings->userdata('id') == $new_user_id)
+									$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
+							} else {
+								$resp['msg'] .= " (แต่บันทึกรูปโปรไฟล์ไม่สำเร็จ)";
+							}
 						}
 					}
 					// --- End: Save cropped image logic ---
@@ -141,24 +135,54 @@
 							$this->settings->set_userdata($k, $v);
 					}
 
-					// --- Start: Save cropped image logic (UNCHANGED) ---
+					// --- Start: Save cropped image logic (MODIFIED) ---
 					if (!empty($cropped_image_data)) {
+
+						// [เพิ่ม] 1. ค้นหาและลบรูปเก่า
+						$old_avatar_query = $this->conn->query("SELECT avatar FROM `users` WHERE id = '{$id}'");
+						if ($old_avatar_query->num_rows > 0) {
+							$old_avatar_data = $old_avatar_query->fetch_assoc();
+							$old_avatar_path = $old_avatar_data['avatar'];
+
+							// ทำความสะอาด path (ลบ ?v=... ออก)
+							$path_parts = explode('?', $old_avatar_path);
+							$clean_old_path = $path_parts[0];
+
+							if (!empty($clean_old_path) && is_file(base_app . $clean_old_path)) {
+								@unlink(base_app . $clean_old_path);
+							}
+						}
+						// [เพิ่ม] ลบไฟล์ .png เก่า (เผื่อกรณีเปลี่ยนจาก .png เป็น .webp)
+						$old_png_path = base_app . "uploads/avatars/{$id}.png";
+						if (is_file($old_png_path)) {
+							@unlink($old_png_path);
+						}
+
+						// 2. บันทึกรูปใหม่เป็น .webp
 						$upload_path = base_app . "uploads/avatars/";
 						if (!is_dir($upload_path))
 							mkdir($upload_path, 0755, true);
 
 						$image_parts = explode(";base64,", $cropped_image_data);
-						$image_base64 = base64_decode($image_parts[1]);
-						$fname = "{$upload_path}{$id}.png";
-
-						if (file_put_contents($fname, $image_base64)) {
-							$avatar_path = "uploads/avatars/{$id}.png";
-							$this->conn->query("UPDATE `users` SET `avatar` = '{$this->conn->real_escape_string($avatar_path)}' WHERE id = '{$id}'");
-
-							if ($this->settings->userdata('id') == $id)
-								$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
+						if (count($image_parts) < 2) {
+							$resp['msg'] .= " (แต่ข้อมูลรูปภาพที่ส่งมาไม่ถูกต้อง)";
 						} else {
-							$resp['msg'] .= " (แต่บันทึกรูปโปรไฟล์ไม่สำเร็จ)";
+							$image_base64 = base64_decode($image_parts[1]);
+
+							// [แก้ไข] บันทึกเป็น .webp
+							$fname = "{$upload_path}{$id}.webp";
+
+							if (file_put_contents($fname, $image_base64)) {
+								// [แก้ไข] path เป็น .webp
+								$avatar_path = "uploads/avatars/{$id}.webp";
+								// [แก้ไข] เพิ่ม cache buster ลง DB
+								$this->conn->query("UPDATE `users` SET `avatar` = CONCAT('{$this->conn->real_escape_string($avatar_path)}', '?v=', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = '{$id}'");
+
+								if ($this->settings->userdata('id') == $id)
+									$this->settings->set_userdata('avatar', $avatar_path . "?v=" . time());
+							} else {
+								$resp['msg'] .= " (แต่บันทึกรูปโปรไฟล์ไม่สำเร็จ)";
+							}
 						}
 					}
 					// --- End: Save cropped image logic ---
@@ -172,19 +196,44 @@
 			echo json_encode($resp);
 		}
 
-
 		public function delete_users()
 		{
 			extract($_POST);
-			$qry = $this->conn->query("DELETE FROM users where id = $id");
-			if ($qry) {
-				$this->settings->set_flashdata('success', 'แก้ไขข้อมูลส่วนตัวเรียบร้อย');
-				if (is_file(base_app . "uploads/avatars/$id.png"))
-					unlink(base_app . "uploads/avatars/$id.png");
-				return 1;
-			} else {
-				return false;
+			$resp = array();
+
+			// [แก้ไข] ดึง path รูปมาก่อนลบ
+			$qry = $this->conn->query("SELECT avatar FROM `users` where id = $id");
+			$avatar_path = null;
+			if ($qry->num_rows > 0) {
+				$data = $qry->fetch_assoc();
+				if (!empty($data['avatar'])) {
+					$path_parts = explode('?', $data['avatar']);
+					$avatar_path = $path_parts[0];
+				}
 			}
+
+			$sql = "DELETE FROM `users` where id = $id";
+			$delete = $this->conn->query($sql);
+
+			if ($delete) {
+				$resp['status'] = 'success';
+				$resp['msg'] = 'ลบบัญชีสมาชิกเรียบร้อย';
+				$this->settings->set_flashdata('success', 'ลบบัญชีสมาชิกเรียบร้อย');
+
+				// [แก้ไข] ลบไฟล์ตาม path ที่ดึงมา
+				if ($avatar_path && is_file(base_app . $avatar_path)) {
+					@unlink(base_app . $avatar_path);
+				}
+				// [แก้ไข] ลบไฟล์ .png เก่า (เผื่อยังค้าง)
+				$old_png_path = base_app . "uploads/avatars/$id.png";
+				if (is_file($old_png_path)) {
+					@unlink($old_png_path);
+				}
+			} else {
+				$resp['status'] = 'failed';
+				$resp['msg'] = $this->conn->error;
+			}
+			echo json_encode($resp);
 		}
 
 		function registration()

@@ -407,7 +407,8 @@ foreach ($user->fetch_array() as $k => $v) {
 				imageSmoothingQuality: 'high',
 			});
 
-			var base64data = canvas.toDataURL('image/jpeg');
+			var base64data = canvas.toDataURL('image/webp', 0.7);
+
 			$('#cimg').attr('src', base64data);
 			$('#cropped_image').val(base64data); // Store base64 data in hidden input
 			$modal.modal('hide');
