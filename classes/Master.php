@@ -221,7 +221,6 @@ class Master extends DBConnection
 
 	function save_product()
 	{
-
 		// ตรวจสอบน้ำหนักก่อนบันทึก
 		$max_weight_allowed = 25000; // กำหนดขีดจำกัดสูงสุดที่อนุญาต (กรัม)
 
@@ -282,7 +281,6 @@ class Master extends DBConnection
 			}
 		}
 
-
 		// ตรวจสอบสินค้าซ้ำ
 		$check = $this->conn->query("SELECT * FROM `product_list` where `brand` = '{$brand}' and `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
 		if ($this->capture_err()) return $this->capture_err();
@@ -308,9 +306,50 @@ class Master extends DBConnection
 			$this->save_product_link($product_id);
 
 			// ==================================================================
-			// START: ส่วนแก้ไขการอัปโหลดรูปภาพหลัก (ข้อ 0, 1, 2, 3)
+			// START: ส่วนแก้ไขการอัปโหลดรูปภาพหลัก
 			// ==================================================================
 			if (!empty($_FILES['img']['tmp_name'])) {
+
+				// ==================================================================
+				// START: [แก้ไข] ลบรูปเก่า (ย้ายมาไว้ตรงนี้ และแก้ไขตรรกะ)
+				// ==================================================================
+				if (!empty($id)) { // ตรวจสอบว่าเป็นการอัปเดต (ไม่ใช่การสร้างใหม่)
+					// 1. ค้นหา path รูปเก่าจาก DB
+					$old_image_query = $this->conn->query("SELECT image_path FROM `product_list` WHERE id = '{$id}'");
+					if ($old_image_query && $old_image_query->num_rows > 0) {
+						$old_image_data = $old_image_query->fetch_assoc();
+						$old_image_path_with_query = $old_image_data['image_path'];
+
+						if (!empty($old_image_path_with_query)) {
+							// 2. เอารส่วน query string (?v=...) ออก
+							$path_parts = explode('?', $old_image_path_with_query);
+							$clean_old_path = $path_parts[0]; // (e.g., uploads/product/prod_xyz.webp)
+
+							// 3. แยกส่วนประกอบของ Path
+							$file_info = pathinfo($clean_old_path);
+							$dir = $file_info['dirname'];       // (e.g., uploads/product)
+							$filename = $file_info['filename']; // (e.g., prod_xyz)
+
+							// 4. สร้างรายการไฟล์ที่จะลบ (ครบ 3 ขนาด)
+							$files_to_delete = [
+								base_app . $dir . '/' . $filename . '.webp',       // .../prod_xyz.webp
+								base_app . $dir . '/' . $filename . '_medium.webp', // .../prod_xyz_medium.webp
+								base_app . $dir . '/' . $filename . '_thumb.webp'  // .../prod_xyz_thumb.webp
+							];
+
+							// 5. วนลูปเพื่อลบไฟล์
+							foreach ($files_to_delete as $file) {
+								if (is_file($file)) {
+									@unlink($file);
+								}
+							}
+						}
+					}
+				}
+				// ==================================================================
+				// END: ลบรูปเก่า
+				// ==================================================================
+
 				$img_path = "uploads/product/"; // โฟลเดอร์รูปหลัก
 
 				// (ข้อ 0) สร้างโฟลเดอร์ด้วยสิทธิ์ 0755 ที่ปลอดภัย
@@ -360,9 +399,10 @@ class Master extends DBConnection
 			// END: ส่วนแก้ไขการอัปโหลดรูปภาพหลัก
 			// ==================================================================
 
+			// *** บล็อก "ลบรูปเก่า" เดิมที่เคยอยู่ตรงนี้ ถูกลบออกไปแล้ว ***
 
 			// ==================================================================
-			// START: ส่วนแก้ไขการอัปโหลดรูปแกลเลอรี (ข้อ 0, 1, 2, 3)
+			// START: ส่วนแก้ไขการอัปโหลดรูปแกลเลอรี
 			// ==================================================================
 			if (isset($_FILES['gallery_imgs']) && is_array($_FILES['gallery_imgs']['name'])) {
 				$gallery_path = "uploads/products/"; // โฟลเดอร์รูปแกลเลอรี
@@ -422,7 +462,6 @@ class Master extends DBConnection
 			// ==================================================================
 			// END: ส่วนแก้ไขการอัปโหลดรูปแกลเลอรี
 			// ==================================================================
-
 		} else {
 			return json_encode(['status' => 'failed', 'err' => $this->conn->error . " [{$sql}]"]);
 		}
@@ -436,21 +475,65 @@ class Master extends DBConnection
 
 	function delete_gallery_image()
 	{
-		extract($_POST);
-		$qry = $this->conn->query("SELECT * FROM `product_image_path` where id = '{$id}'");
-		if ($qry->num_rows > 0) {
-			$res = $qry->fetch_array();
-			$path = base_app . $res['path'];
+		extract($_POST); // $id จะถูกดึงมาจาก $_POST
+
+		if (empty($id)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'ไม่พบ ID ของรูปภาพ';
+			return json_encode($resp);
 		}
-		$del = $this->conn->query("DELETE FROM `product_image_path` where id = '{$id}'");
-		if ($del) {
-			if (isset($path) && is_file($path))
-				unlink($path);
-			$resp['status'] = 'success';
+
+		// 1. ค้นหา path ของไฟล์ก่อน
+		$stmt_select = $this->conn->prepare("SELECT `image_path` FROM `product_image_path` WHERE `id` = ?");
+		$stmt_select->bind_param("i", $id);
+		$stmt_select->execute();
+		$result = $stmt_select->get_result();
+
+		if ($result->num_rows > 0) {
+			$row = $result->fetch_assoc();
+			$file_path = $row['image_path'];
+
+			// 2. สร้าง path จริงของไฟล์บน server
+			$absolute_path = __DIR__ . '/../' . $file_path;
+
+			// 3. ลบไฟล์จริง (ถ้ามีอยู่)
+			if (is_file($absolute_path)) {
+				@unlink($absolute_path); // ลบไฟล์ต้นฉบับ (jpg, png)
+			}
+
+			// 4. (Bonus) ลบไฟล์ .webp ที่เกี่ยวข้องทั้งหมด (normal, medium, thumb)
+			$dir = pathinfo($absolute_path, PATHINFO_DIRNAME);
+			$filename = pathinfo($absolute_path, PATHINFO_FILENAME);
+
+			// สร้าง List ของไฟล์ .webp ทั้ง 3 ขนาด
+			$webp_files_to_delete = [
+				$dir . '/' . $filename . '.webp',     // ไฟล์ปกติ
+				$dir . '/' . $filename . '_medium.webp', // ไฟล์ medium
+				$dir . '/' . $filename . '_thumb.webp'  // ไฟล์ thumb
+			];
+
+			// วนลูปเช็คและลบไฟล์
+			foreach ($webp_files_to_delete as $file) {
+				if (is_file($file)) {
+					@unlink($file); // ใช้ @ เพื่อ suppress warning กรณีไฟล์ลบไม่ได้
+				}
+			}
+
+			// 5. ลบข้อมูลออกจากฐานข้อมูล
+			$stmt_delete = $this->conn->prepare("DELETE FROM `product_image_path` WHERE `id` = ?");
+			$stmt_delete->bind_param("i", $id);
+
+			if ($stmt_delete->execute()) {
+				$resp['status'] = 'success';
+			} else {
+				$resp['status'] = 'failed';
+				$resp['msg'] = 'ลบข้อมูลในฐานข้อมูลไม่สำเร็จ: ' . $this->conn->error;
+			}
 		} else {
 			$resp['status'] = 'failed';
-			$resp['error'] = $this->conn->error;
+			$resp['msg'] = 'ไม่พบรูปภาพ ID นี้ในฐานข้อมูล';
 		}
+
 		return json_encode($resp);
 	}
 
