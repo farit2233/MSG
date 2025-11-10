@@ -222,26 +222,45 @@ function formatDateThai($date)
                                 $i = 1;
                                 // ======================= แก้ไขจุดที่ 1: เพิ่ม WHERE clause เพื่อกรองสินค้า =======================
                                 $qry = $conn->query("
-                                        SELECT 
-                                            ccp.id as ccd_id,
-                                            p.id as product_id, 
-                                            p.name as product_name,
-                                            p.brand,
-                                            p.price,
-                                            p.vat_price,
-                                            p.discounted_price,
-                                            p.image_path
-                                        FROM coupon_code_products ccp
-                                        INNER JOIN product_list p ON ccp.product_id = p.id
-                                        WHERE ccp.coupon_code_id = '{$id}'
+                                            SELECT 
+                                                ccp.id as ccd_id,
+                                                p.id as product_id, 
+                                                p.name as product_name,
+                                                p.brand,
+                                                p.price,
+                                                p.vat_price,
+                                                p.discounted_price,
+                                                p.image_path
+                                            FROM coupon_code_products ccp
+                                            INNER JOIN product_list p ON ccp.product_id = p.id
+                                            WHERE ccp.coupon_code_id = '{$id}'
                                 ");
 
                                 while ($row = $qry->fetch_assoc()):
                                 ?>
                                     <tr>
                                         <td class="text-center"><?= $i++ ?></td>
+
+                                        <?php
+                                        // --- [แก้ไข] START: สร้าง Path สำหรับรูป Thumb ---
+                                        // 1. ดึง path รูปหลัก
+                                        $image_path_with_query = $row['image_path'];
+
+                                        // 2. แยก path ออกจาก query string
+                                        $path_parts = explode('?', $image_path_with_query);
+                                        $clean_path = $path_parts[0];
+                                        $query_string = isset($path_parts[1]) ? '?' . $path_parts[1] : '';
+
+                                        // 3. สร้าง path ของ thumb
+                                        $thumb_path = str_replace('.webp', '_thumb.webp', $clean_path);
+
+                                        // 4. ประกอบ path กลับ
+                                        $final_thumb_path = $thumb_path . $query_string;
+                                        // --- [แก้ไข] END ---
+                                        ?>
+
                                         <td class="text-center">
-                                            <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
+                                            <img src="<?= validate_image($final_thumb_path) ?>" alt="" class="img-thumbnail p-0 border product-img">
                                         </td>
                                         <td><?= htmlspecialchars($row['brand']) ?></td>
                                         <td><?= htmlspecialchars($row['product_name']) ?></td>
