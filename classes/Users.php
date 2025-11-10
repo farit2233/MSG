@@ -196,7 +196,7 @@
 			echo json_encode($resp);
 		}
 
-		public function delete_users()
+		function delete_users()
 		{
 			extract($_POST);
 			$resp = array();
@@ -945,7 +945,7 @@
 		case 'save_users':
 			echo $users->save_users();
 			break;
-		case 'delete':
+		case 'delete_users':
 			echo $users->delete_users();
 			break;
 		case 'registration':

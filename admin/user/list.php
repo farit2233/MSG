@@ -152,21 +152,25 @@ function formatDateThai($date)
 	function delete_user($id) {
 		start_loader();
 		$.ajax({
-			url: _base_url_ + "classes/Users.php?f=delete",
+			url: _base_url_ + "classes/Users.php?f=delete_users",
 			method: "POST",
 			data: {
 				id: $id
 			},
+			dataType: 'json', // <-- 1. เพิ่มบรรทัดนี้ เพื่อบอกว่าเราคาดหวัง JSON
 			error: err => {
 				console.log(err)
 				alert_toast("An error occured.", 'error');
 				end_loader();
 			},
 			success: function(resp) {
-				if (resp == 1) {
-					location.reload();
+				// 2. แก้ไขเงื่อนไขให้ตรวจสอบ status จาก JSON
+				if (typeof resp == 'object' && resp.status == 'success') {
+					location.reload(); // โหลดหน้าใหม่เมื่อสำเร็จ
 				} else {
-					alert_toast("An error occured.", 'error');
+					// แสดงข้อความ error จาก PHP (ถ้ามี)
+					var msg = (resp && resp.msg) ? resp.msg : "An error occured.";
+					alert_toast(msg, 'error');
 					end_loader();
 				}
 			}
