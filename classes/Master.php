@@ -2490,6 +2490,7 @@ class Master extends DBConnection
 
 		return json_encode(['status' => 'success']);
 	}
+
 	function save_promotions()
 	{
 		// ใช้ real_escape_string กับ description เพื่อความปลอดภัย
@@ -2507,7 +2508,25 @@ class Master extends DBConnection
 
 		// --- ส่วนจัดการรูปภาพที่ย้ายขึ้นมาและแก้ไขใหม่ ---
 		$image_path_sql = ""; // เตรียมตัวแปรสำหรับเก็บ path รูป
+		$old_image_path_to_delete = null; // [เพิ่ม] ตัวแปรเก็บ path รูปเก่า
+
 		if (isset($_FILES['img']) && !empty($_FILES['img']['tmp_name'])) {
+			// [เพิ่ม] 1. ตรวจสอบว่าเป็นการอัปเดตหรือไม่ ถ้าใช่ ให้ดึง path รูปเก่ามาก่อน
+			if (!empty($id)) {
+				$stmt = $this->conn->prepare("SELECT image_path FROM `promotions_list` WHERE id = ?");
+				$stmt->bind_param("i", $id);
+				$stmt->execute();
+				$result = $stmt->get_result();
+				if ($result->num_rows > 0) {
+					$row = $result->fetch_assoc();
+					if (!empty($row['image_path'])) {
+						// [เพิ่ม] 2. ทำความสะอาด path (ตัด ?v=... ออก)
+						$path_parts = explode('?', $row['image_path']);
+						$old_image_path_to_delete = $path_parts[0]; // (e.g., uploads/promotions/promo_xyz.webp)
+					}
+				}
+			}
+
 			// ตรวจสอบว่ามีไฟล์ถูกอัปโหลดมาหรือไม่
 			if ($_FILES['img']['error'] != UPLOAD_ERR_OK) {
 				$resp['status'] = 'failed';
@@ -2517,7 +2536,7 @@ class Master extends DBConnection
 
 			$upload_dir = "uploads/promotions/";
 			if (!is_dir(base_app . $upload_dir)) {
-				mkdir(base_app . $upload_dir, 0777, true); // ใช้ 0777 เพื่อให้แน่ใจว่าเขียนไฟล์ได้
+				mkdir(base_app . $upload_dir, 0755, true); // ใช้ 0777 เพื่อให้แน่ใจว่าเขียนไฟล์ได้
 			}
 
 			$accept = ['image/jpeg', 'image/png'];
@@ -2528,12 +2547,9 @@ class Master extends DBConnection
 			}
 
 			// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำ และบังคับเป็น .webp
-			// $file_extension = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION); // <-- ไม่ใช้ตัวนี้
 			$filename = uniqid('promo_') . '_' . time() . '.webp'; // <-- บังคับนามสกุล .webp
 			$full_path = base_app . $upload_dir . $filename;
 
-			// ใช้ move_uploaded_file หรือฟังก์ชัน resize ของคุณ
-			// สมมติว่า resize_image จะย้ายไฟล์และคืนค่า true/false
 			// 1. กำหนดขนาดและคุณภาพ (ตามที่คุณต้องการ)
 			$max_width = 1000;  // ขนาดเดียว (กว้างไม่เกิน 1000)
 			$max_height = 600; // ขนาดเดียว (สูงไม่เกิน 600)
@@ -2543,6 +2559,14 @@ class Master extends DBConnection
 			$success = $this->resize_image_to_webp($_FILES['img']['tmp_name'], $full_path, $max_width, $max_height, $quality);
 
 			if ($success) {
+				// [เพิ่ม] 3. ถ้ารูปใหม่สำเร็จ ค่อยลบรูปเก่า
+				if ($old_image_path_to_delete) {
+					$absolute_old_path = base_app . $old_image_path_to_delete;
+					if (is_file($absolute_old_path)) {
+						@unlink($absolute_old_path);
+					}
+				}
+
 				// ถ้าย้าย/resize รูปสำเร็จ ให้เตรียม SQL สำหรับคอลัมน์ image_path
 				$db_path = $this->conn->real_escape_string($upload_dir . $filename);
 				$image_path_sql = ", `image_path` = '{$db_path}?v=" . time() . "'";
@@ -2590,6 +2614,7 @@ class Master extends DBConnection
 
 		return json_encode($resp);
 	}
+
 	function delete_promotion()
 	{
 		extract($_POST);
