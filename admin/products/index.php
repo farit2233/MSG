@@ -88,8 +88,26 @@ function formatDateThai($date)
 							<tr>
 								<td class="text-center"><?php echo $i++; ?></td>
 
+								<?php
+								// --- [แก้ไข] START: สร้าง Path สำหรับรูป Thumb ---
+								// 1. ดึง path รูปหลัก (เช่น .../img.webp?v=123)
+								$image_path_with_query = $row['image_path'];
+
+								// 2. แยก path ออกจาก query string (เช่น ?v=123)
+								$path_parts = explode('?', $image_path_with_query);
+								$clean_path = $path_parts[0]; // (เช่น .../img.webp)
+								$query_string = isset($path_parts[1]) ? '?' . $path_parts[1] : '';
+
+								// 3. สร้าง path ของ thumb โดยแทนที่ .webp ด้วย _thumb.webp
+								$thumb_path = str_replace('.webp', '_thumb.webp', $clean_path);
+
+								// 4. ประกอบ path กลับพร้อม query string (เช่น .../img_thumb.webp?v=123)
+								$final_thumb_path = $thumb_path . $query_string;
+								// --- [แก้ไข] END ---
+								?>
+
 								<td class="text-center">
-									<img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail p-0 border product-img">
+									<img src="<?= validate_image($final_thumb_path) ?>" alt="" class="img-thumbnail p-0 border product-img">
 								</td>
 								<td class=""><?= $row['brand'] ?></td>
 								<td class="">
@@ -105,16 +123,13 @@ function formatDateThai($date)
 								?>
 								<td class="text-right">
 									<?php if (!is_null($discounted_price)): ?>
-										<!-- แสดงราคาส่วนลด -->
 										<span class="text-muted" style="text-decoration: line-through;">
 											<?= number_format($vat_price ?? $price, 0, '.', ',') ?> ฿
 										</span><br>
 										<span class="text-danger font-weight-bold"><?= number_format($discounted_price, 0, '.', ',') ?> ฿</span>
 									<?php elseif (!is_null($vat_price)): ?>
-										<!-- แสดง VAT -->
 										<span class="font-weight-bold"><?= number_format($vat_price, 0, '.', ',') ?> ฿</span>
 									<?php else: ?>
-										<!-- แสดงราคาเต็ม -->
 										<span class="font-weight-bold"><?= number_format($price, 0, '.', ',') ?> ฿</span>
 									<?php endif; ?>
 								</td>

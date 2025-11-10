@@ -515,9 +515,18 @@ if (isset($id)) {
 
 	function previewGallery(input) {
 		const previewContainer = document.getElementById("gallery-preview-container");
-		previewContainer.innerHTML = ''; // ล้าง preview เก่าทุกครั้งที่เลือกใหม่
-		galleryFiles = Array.from(input.files); // นำไฟล์ทั้งหมดมาเก็บใน Array ของเรา
 
+		// 1. ดึงไฟล์ที่เลือก "ใหม่" ในรอบนี้
+		const newFiles = Array.from(input.files);
+
+		// 2. [จุดสำคัญ] "เพิ่ม" ไฟล์ใหม่ (newFiles) ต่อท้าย Array เดิม (galleryFiles)
+		//    เราใช้ ... (spread operator) เพื่อเพิ่มสมาชิกทั้งหมดเข้าไป
+		galleryFiles.push(...newFiles);
+
+		// 3. ล้างการแสดงผลเก่า (เพราะเราจะวาดใหม่ทั้งหมดจาก Array ที่อัปเดตแล้ว)
+		previewContainer.innerHTML = '';
+
+		// 4. วนลูป `galleryFiles` (ที่มีทั้งของเก่าและของใหม่) เพื่อแสดงผลทั้งหมด
 		if (galleryFiles.length > 0) {
 			galleryFiles.forEach((file, index) => {
 				const reader = new FileReader();
@@ -525,7 +534,9 @@ if (isset($id)) {
 				reader.onload = function(e) {
 					const imgContainer = document.createElement('div');
 					imgContainer.classList.add('gallery-item');
-					// CHANGE 2: เพิ่ม data-index เพื่ออ้างอิงถึงไฟล์ใน Array
+
+					// 5. data-index จะถูกกำหนดใหม่ทั้งหมด ทำให้ถูกต้องเสมอ (0, 1, 2, ...)
+					//    ฟังก์ชัน removeNewImage ของคุณจะยังทำงานได้ปกติครับ
 					imgContainer.setAttribute('data-index', index);
 					imgContainer.innerHTML = `
                         <img src="${e.target.result}" alt="Preview Image">
@@ -538,6 +549,10 @@ if (isset($id)) {
 				reader.readAsDataURL(file);
 			});
 		}
+
+		// 6. [สำคัญมาก] ล้างค่าใน input file 
+		//    เพื่อให้ User สามารถกดเลือกไฟล์ชุดใหม่ (หรือไฟล์เดิม) ได้อีกครั้ง
+		input.value = null;
 	}
 
 	// CHANGE 3: ฟังก์ชันลบรูปใหม่ที่ยังไม่ได้อัปโหลด
