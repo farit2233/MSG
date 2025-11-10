@@ -1095,7 +1095,7 @@ class Master extends DBConnection
 					// 1. กำหนดตำแหน่งที่จะเก็บไฟล์
 					$upload_path = base_app . 'uploads/slips/';
 					if (!is_dir($upload_path)) {
-						mkdir($upload_path, 0777, true);
+						mkdir($upload_path, 0755, true);
 					}
 
 					// 2. สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน เพื่อความปลอดภัย
@@ -2536,7 +2536,7 @@ class Master extends DBConnection
 
 			$upload_dir = "uploads/promotions/";
 			if (!is_dir(base_app . $upload_dir)) {
-				mkdir(base_app . $upload_dir, 0755, true); // ใช้ 0777 เพื่อให้แน่ใจว่าเขียนไฟล์ได้
+				mkdir(base_app . $upload_dir, 0755, true); // ใช้ 0755 เพื่อให้แน่ใจว่าเขียนไฟล์ได้
 			}
 
 			$accept = ['image/jpeg', 'image/png'];

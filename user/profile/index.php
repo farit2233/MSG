@@ -293,7 +293,7 @@ if ($_settings->userdata('id') != '') {
                 imageSmoothingQuality: 'high',
             });
 
-            var base64data = canvas.toDataURL('image/jpeg');
+            var base64data = canvas.toDataURL('image/webp', 0.8); // 0.8 คือ 80% quality
             $('#cimg').attr('src', base64data);
             $('#cropped_image').val(base64data);
             $modal.modal('hide');

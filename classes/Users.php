@@ -105,7 +105,7 @@
 					if (!empty($cropped_image_data)) {
 						$upload_path = base_app . "uploads/avatars/";
 						if (!is_dir($upload_path))
-							mkdir($upload_path, 0777, true);
+							mkdir($upload_path, 0755, true);
 
 						$image_parts = explode(";base64,", $cropped_image_data);
 						$image_base64 = base64_decode($image_parts[1]);
@@ -145,7 +145,7 @@
 					if (!empty($cropped_image_data)) {
 						$upload_path = base_app . "uploads/avatars/";
 						if (!is_dir($upload_path))
-							mkdir($upload_path, 0777, true);
+							mkdir($upload_path, 0755, true);
 
 						$image_parts = explode(";base64,", $cropped_image_data);
 						$image_base64 = base64_decode($image_parts[1]);
@@ -220,16 +220,10 @@
 			} else {
 				unset($_POST['password']);
 			}
-			/*
-			if (!empty($_POST['password']))
-				$_POST['password'] = md5($_POST['password']);
-			else
-				unset($_POST['password']);*/
 
 			$cropped_image_data = isset($_POST['cropped_image']) ? $_POST['cropped_image'] : null;
 			unset($_POST['cropped_image']);
 
-			// extract($_POST); // ย้ายไปไว้ด้านบนแล้ว
 			$main_field = [
 				'firstname',
 				'middlename',
@@ -272,33 +266,33 @@
 				// === ส่วนจัดการรูปภาพที่แก้ไขใหม่ ===
 				if (!empty($cropped_image_data)) {
 					if (!is_dir(base_app . "uploads/customers"))
-						mkdir(base_app . "uploads/customers", 0777, true);
+						mkdir(base_app . "uploads/customers", 0755, true);
 
-					// แยกส่วนหัวของ base64 ออกไป (เช่น data:image/png;base64,)
+					// แยกส่วนหัวของ base64 ออกไป (เช่น data:image/webp;base64,)
 					$image_parts = explode(";base64,", $cropped_image_data);
-					$image_type_aux = explode("image/", $image_parts[0]);
-					$image_type = $image_type_aux[1]; // png, jpeg, etc.
-					$image_base64 = base64_decode($image_parts[1]);
 
-					// กำหนดชื่อไฟล์และ path
-					$fname = "uploads/customers/{$uid}.png"; // บันทึกเป็น .png เสมอเพื่อให้สอดคล้องกับ client-side
-
-					// บันทึกไฟล์
-					$file_saved = file_put_contents(base_app . $fname, $image_base64);
-
-					if ($file_saved) {
-						// อัปเดต path รูปในฐานข้อมูล
-						$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
+					// [แก้ไข] ตรวจสอบว่า base64 มาถูกต้องหรือไม่
+					if (count($image_parts) < 2) {
+						$resp['msg'] .= " (แต่ข้อมูลรูปภาพที่ส่งมาไม่ถูกต้อง)";
 					} else {
-						$resp['msg'] .= " (แต่ไม่สามารถบันทึกรูปโปรไฟล์ได้)";
-					}
-				} else {
-					// กรณีไม่มีการอัปโหลดรูป ให้ใช้รูป default หรือรูปเก่าจากฐานข้อมูล
-					$existing_avatar = $this->conn->query("SELECT avatar FROM `customer_list` WHERE id = '{$uid}'")->fetch_object()->avatar;
-					if ($existing_avatar) {
-						$this->conn->query("UPDATE `customer_list` set `avatar` = '{$existing_avatar}' where id = '{$uid}'");
+						$image_base64 = base64_decode($image_parts[1]);
+
+						// [แก้ไข] กำหนดชื่อไฟล์เป็น .webp
+						$fname = "uploads/customers/{$uid}.webp";
+
+						// บันทึกไฟล์
+						$file_saved = file_put_contents(base_app . $fname, $image_base64);
+
+						if ($file_saved) {
+							// อัปเดต path รูปในฐานข้อมูล
+							$this->conn->query("UPDATE `customer_list` set `avatar` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$uid}'");
+						} else {
+							$resp['msg'] .= " (แต่ไม่สามารถบันทึกรูปโปรไฟล์ได้)";
+						}
 					}
 				}
+				// [แก้ไข] ลบ else block ที่ไม่จำเป็นออก
+				// (ถ้าไม่มีการอัปโหลดรูป ก็ไม่จำเป็นต้อง query หรือ update avatar)
 
 				if (!empty($uid) && $this->settings->userdata('login_type') != 1) {
 					$user = $this->conn->query("SELECT * FROM `customer_list` where id = '{$uid}' ");
