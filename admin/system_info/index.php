@@ -182,32 +182,41 @@
 						</div>
 						<small><i>เลือกไฟล์รูปเพื่ออัปโหลดไปยังภาพสไลด์หน้าเว็บ</i></small>
 					</div>
-
 					<div class="form-group">
 						<label class="control-label head-label">ภาพสไลด์ที่มีอยู่</label>
-						<div class="banner-grid-container">
+						<div class="banner-grid-container" id="existing-banners">
 							<?php
 							$upload_path = "uploads/banner";
 							if (is_dir(base_app . $upload_path)):
-								$file = scandir(base_app . $upload_path);
+								$files = scandir(base_app . $upload_path); // 1. ใช้ scandir ธรรมดา (มันจะเรียงตามชื่อ)
 								$has_images = false;
-								foreach ($file as $img):
+
+								foreach ($files as $img):
 									if (in_array($img, array('.', '..')))
 										continue;
-									$has_images = true;
-							?>
-									<div class="img-item banner-thumb">
-										<img src="<?php echo base_url . $upload_path . '/' . $img . "?v=" . (time()) ?>" class="img-thumbnail" alt="Banner Image">
-										<button class="btn btn-sm btn-danger rem_img" type="button" data-path="<?php echo base_app . $upload_path . '/' . $img ?>" title="ลบรูปภาพนี้">
-											<i class="fa fa-trash"></i>
-										</button>
-									</div>
-								<?php endforeach; ?>
 
-								<?php if (!$has_images): ?>
+									$filepath = base_app . $upload_path . '/' . $img;
+									// 2. แค่เช็คว่าเป็นไฟล์รูปภาพหรือไม่
+									if (is_file($filepath) && in_array(strtolower(pathinfo($img, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp'])):
+										$has_images = true;
+							?>
+										<div class="img-item banner-thumb">
+											<img src="<?php echo base_url . $upload_path . '/' . $img . "?v=" . (time()) ?>" class="img-thumbnail" alt="Banner Image">
+											<button class="btn btn-sm btn-danger rem_img" type="button" data-path="<?php echo base_app . $upload_path . '/' . $img ?>" title="ลบรูปภาพนี้">
+												<i class="fa fa-trash"></i>
+											</button>
+										</div>
+									<?php
+									endif;
+								endforeach;
+
+								if (!$has_images):
+									?>
 									<p class="text-muted w-100 text-center" style="margin-top: 10px;">-- ยังไม่มีภาพสไลด์ --</p>
-								<?php endif; ?>
-							<?php else: ?>
+								<?php
+								endif;
+							else:
+								?>
 								<p class="text-muted w-100 text-center" style="margin-top: 10px;">-- ไม่พบโฟลเดอร์ <?php echo $upload_path ?> --</p>
 							<?php endif; ?>
 						</div>
@@ -222,6 +231,8 @@
 	</div>
 </section>
 <script>
+	var stagedFiles = [];
+
 	function displayImg(input, _this) {
 		if (input.files && input.files[0]) {
 			var reader = new FileReader();
@@ -247,12 +258,79 @@
 	}
 
 	function displayImg3(input, _this) {
-		var fnames = [];
-		Object.keys(input.files).map(function(k) {
-			fnames.push(input.files[k].name)
+		var newFiles = input.files;
+		var fileCount = newFiles.length;
 
-		})
-		_this.siblings('.custom-file-label').html(fnames.join(", "))
+		if (fileCount > 0) {
+			// 1. เพิ่มไฟล์ที่ "เลือกใหม่" ลงใน "ตะกร้า" (stagedFiles)
+			for (let i = 0; i < fileCount; i++) {
+				stagedFiles.push(newFiles[i]);
+			}
+
+			// 2. อัปเดตป้ายกำกับ (Label) ของ input
+			_this.siblings('.custom-file-label').html(stagedFiles.length + " รูปที่เลือก (เลือกเพิ่มได้)");
+
+			// 3. ค้นหา/สร้าง Container สำหรับ Preview
+			var previewContainer = $('#banner-previews');
+			if (!previewContainer.length) {
+				// ถ้ายังไม่มี container, ให้สร้างขึ้นมาใหม่
+				previewContainer = $('<div class="banner-grid-container" id="banner-previews" style="margin-top: 15px; border-style: dashed; background-color: #f0f8ff;"></div>');
+
+				// สร้างปุ่ม "ล้าง"
+				var clearBtn = $('<button type="button" class="btn btn-sm btn-outline-danger" id="clear-staged-files" style="width: 100%; margin: 5px 0 10px 0;"><i class="fa fa-times"></i> ล้างรูปที่เลือกใหม่ทั้งหมด</button>');
+				previewContainer.append(clearBtn);
+
+				// เพิ่มหัวข้อ
+				previewContainer.append('<p class="text-muted w-100" style="margin-bottom: 10px; padding: 5px 0 0 5px;"><strong>รูปภาพที่จะอัปโหลดใหม่ (ตามลำดับนี้):</strong></p>');
+
+				// แทรก container นี้หลังจาก .form-group ของ input
+				_this.closest('.form-group').after(previewContainer);
+			}
+
+			// 4. ล้างเฉพาะ "รูปภาพ" พรีวิวเก่า
+			previewContainer.find('.banner-thumb-preview').remove();
+
+			// 5. [!! แก้ไข] วาดรูปพรีวิว "ใหม่ทั้งหมด" จาก "ตะกร้า" (stagedFiles)
+			//    สร้าง "กล่องเปล่า" (Placeholder) ก่อน แล้วค่อยโหลดรูป
+			stagedFiles.forEach(function(file, i) {
+
+				// 5.1 สร้าง HTML (Placeholder)
+				//     เราใส่ ID ที่มี index (i) เพื่อให้ FileReader (async) รู้ว่าจะไปเติมรูปที่ไหน
+				var thumbHtml =
+					'<div class="banner-thumb banner-thumb-preview" id="preview-thumb-' + i + '" style="width: 150px; height: 100px; position: relative; display: inline-block; margin: 5px; opacity: 0.9; background: #eee; border-radius: 4px;">' +
+					// ลำดับเลข
+					'<span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); color: white; border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; z-index: 1;">' + (i + 1) + '</span>' +
+
+					// Placeholder สำหรับรูปภาพ (ยังไม่มี src)
+					'<img src="" class="preview-img-target" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />' +
+
+					// ชื่อไฟล์
+					'<small style="position: absolute; bottom: 5px; left: 5px; right: 5px; color: white; background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 3px; font-size: 11px; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box;">' +
+					file.name +
+					'</small>' +
+					'</div>';
+
+				// 5.2 Append Placeholder ลง DOM (ตอนนี้ลำดับถูกต้องแล้ว)
+				previewContainer.append(thumbHtml);
+
+				// 5.3 สร้าง FileReader
+				var reader = new FileReader();
+
+				// 5.4 ตั้งค่า Onload (async callback)
+				reader.onload = function(e) {
+					// 5.5 [สำคัญ] ค้นหา placeholder ที่ถูกต้อง แล้วใส่ src 
+					$('#preview-thumb-' + i + ' .preview-img-target').attr('src', e.target.result);
+					// (ลบ background เทาๆ ออก)
+					$('#preview-thumb-' + i).css('background', 'none');
+				}
+
+				// 5.6 สั่งให้ FileReader เริ่มทำงาน (async)
+				reader.readAsDataURL(file);
+			});
+		}
+
+		// 6. [สำคัญมาก] ล้างค่าไฟล์ใน input
+		$(input).val('');
 	}
 
 	function delete_img($path) {
@@ -293,6 +371,14 @@
 		// ตรวจสอบการเปลี่ยนแปลงของฟอร์ม
 		$('#system-frm input, #system-frm textarea').on('input', function() {
 			formChanged = true;
+		});
+
+		$(document).on('click', '#clear-staged-files', function() {
+			stagedFiles = []; // 1. ล้าง "ตะกร้า"
+			$('#banner-previews').remove(); // 2. ลบกล่องพรีวิว
+
+			// 3. รีเซ็ตป้ายกำกับของ input
+			$('#customFile3').siblings('.custom-file-label').html('เลือกไฟล์');
 		});
 
 		// เมื่อกดปุ่ม "ยกเลิก"
@@ -363,6 +449,18 @@
 		// สั่งให้ฟอร์มทำงาน (แต่ไม่ submit แบบดั้งเดิม)
 		var form = $('#system-frm')[0];
 		var formData = new FormData(form);
+
+		// --- [ START โค้ดที่เพิ่มใหม่ ] ---
+		// 1. ลบ 'banners[]' ที่อาจมาจาก input (ซึ่งไม่สมบูรณ์)
+		formData.delete('banners[]');
+
+		// 2. วนลูป "ตะกร้า" (stagedFiles) ของเรา แล้วยัดไฟล์ทั้งหมดลงใน formData
+		//    ลำดับไฟล์ในตะกร้า คือ ลำดับที่เราต้องการ
+		if (stagedFiles.length > 0) {
+			stagedFiles.forEach(function(file) {
+				formData.append('banners[]', file, file.name);
+			});
+		}
 
 		start_loader(); // โหลดตัวหมุน ถ้ามี
 

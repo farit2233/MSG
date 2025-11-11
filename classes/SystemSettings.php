@@ -146,66 +146,109 @@ class SystemSettings extends DBConnection
 			}
 			imagedestroy($temp);
 		}
+
 		if (isset($_FILES['banners']) && count($_FILES['banners']['tmp_name']) > 0) {
 			$err = '';
 			$banner_path = "uploads/banner/";
+			if (!is_dir(base_app . $banner_path)) {
+				mkdir(base_app . $banner_path, 0755, true);
+			}
+
+			$target_width = 1920;
+			$target_height = 600;
+
+			// วนลูปตามลำดับที่ JavaScript (stagedFiles) ส่งมา
 			foreach ($_FILES['banners']['tmp_name'] as $k => $v) {
 				if (!empty($_FILES['banners']['tmp_name'][$k])) {
-					$accept = ['image/jpeg', 'image/png'];
+					$accept = ['image/jpeg', 'image/png', 'image/gif'];
 					$type = $_FILES['banners']['type'][$k];
 
 					if (!in_array($type, $accept)) {
-						$err = "Image file type is invalid";
-						break;
+						$err = "Image file type is invalid (ไฟล์: " . $_FILES['banners']['name'][$k] . ")";
+						continue; // ข้ามไฟล์นี้ไปทำไฟล์อื่น
 					}
 
+					$uploadfile = null;
 					if ($type == 'image/jpeg')
 						$uploadfile = imagecreatefromjpeg($_FILES['banners']['tmp_name'][$k]);
 					elseif ($type == 'image/png')
 						$uploadfile = imagecreatefrompng($_FILES['banners']['tmp_name'][$k]);
+					elseif ($type == 'image/gif')
+						$uploadfile = imagecreatefromgif($_FILES['banners']['tmp_name'][$k]);
 
 					if (!$uploadfile) {
-						$err = "Image is invalid";
-						break;
+						$err = "Image is invalid (ไฟล์: " . $_FILES['banners']['name'][$k] . ")";
+						continue; // ข้ามไฟล์นี้
 					}
 
 					list($width, $height) = getimagesize($_FILES['banners']['tmp_name'][$k]);
 
-					$temp = imagecreatetruecolor(1920, 600);
+					// สร้าง canvas ปลายทาง
+					$temp = imagecreatetruecolor($target_width, $target_height);
+					imagealphablending($temp, false);
+					imagesavealpha($temp, true);
+					$transparent = imagecolorallocatealpha($temp, 255, 255, 255, 127); // สีโปร่งใส
+					imagefilledrectangle($temp, 0, 0, $target_width, $target_height, $transparent);
 
-					// สำหรับ PNG: เปิด transparency
-					if ($type == 'image/png') {
-						imagealphablending($temp, false);
-						imagesavealpha($temp, true);
-						$transparent = imagecolorallocatealpha($temp, 0, 0, 0, 127);
-						imagefilledrectangle($temp, 0, 0, 1920, 600, $transparent);
+					// --- ตรรกะการปรับขนาดแบบ "Contain" (ไม่ยืดภาพ) ---
+					$target_ratio = $target_width / $target_height;
+					$source_ratio = $width / $height;
+					if ($source_ratio > $target_ratio) {
+						$new_width = $target_width;
+						$new_height = (int)($target_width / $source_ratio);
+					} else {
+						$new_height = $target_height;
+						$new_width = (int)($target_height * $source_ratio);
+					}
+					$dest_x = (int)(($target_width - $new_width) / 2);
+					$dest_y = (int)(($target_height - $new_height) / 2);
+					imagecopyresampled($temp, $uploadfile, $dest_x, $dest_y, 0, 0, $new_width, $new_height, $width, $height);
+					// --- จบตรรกะ "Contain" ---
+
+
+					// --- [START] โค้ดแก้ไขการตั้งชื่อไฟล์เพื่อเรียงลำดับ ---
+
+					// 1. สร้าง Prefix ที่เรียงลำดับได้ (เช่น "1678886400_123456")
+					//    ใช้ microtime() เพื่อให้ได้ค่าที่ไม่ซ้ำกัน
+					$prefix = str_replace('.', '_', microtime(true));
+
+					// 2. เอาชื่อไฟล์เดิม (ทำให้ปลอดภัย)
+					$original_name = $_FILES['banners']['name'][$k];
+					$base_name = pathinfo($original_name, PATHINFO_FILENAME); // เอาแค่ชื่อไฟล์
+
+					// ทำให้ชื่อไฟล์ปลอดภัย (ลบอักขระพิเศษ)
+					$safe_base_name = preg_replace("/[^a-zA-Z0-9_\-\.]/", "", $base_name);
+					if (empty($safe_base_name)) $safe_base_name = 'file'; // กันชื่อไฟล์ว่าง
+
+					// 3. สร้างชื่อไฟล์ใหม่โดยมี Prefix นำหน้า
+					//    ผลลัพธ์: "1678886400_123456_original_name.webp"
+					$new_name = $prefix . '_' . $safe_base_name . '.webp';
+					$spath = base_app . $banner_path . $new_name;
+
+					// 4. บันทึกเป็น WebP
+					if (!imagewebp($temp, $spath, 85)) {
+						$err = "ไม่สามารถบันทึกไฟล์ WebP ได้ (ไฟล์: " . $new_name . ")";
 					}
 
-					imagecopyresampled($temp, $uploadfile, 0, 0, 0, 0, 1920, 600, $width, $height);
+					// 5. ลบโค้ด while loop ที่เช็คชื่อซ้ำ (ไม่จำเป็นแล้ว เพราะ prefix ไม่ซ้ำ)
 
-					// 🔥 สำคัญมาก: ตั้งชื่อ path ปลายทาง
-					$spath = base_app . $banner_path . '/' . $_FILES['banners']['name'][$k];
-					$i = 1;
-					while (is_file($spath)) {
-						$spath = base_app . $banner_path . '/' . ($i++) . '_' . $_FILES['banners']['name'][$k];
-					}
+					// --- [END] โค้ดแก้ไข ---
 
-					// Save ไฟล์
-					if ($type == 'image/jpeg')
-						imagejpeg($temp, $spath, 90);
-					elseif ($type == 'image/png')
-						imagepng($temp, $spath, 6);
-
+					// คืนหน่วยความจำ
 					imagedestroy($temp);
 					imagedestroy($uploadfile);
+
+					// 6. [สำคัญมาก] หน่วงเวลา 1 มิลลิวินาที (1000 ไมโครวินาที)
+					// เพื่อการันตีว่า microtime() ลูปถัดไปจะไม่ซ้ำกันแน่นอน 100%
+					usleep(1000);
 				}
 			}
+
 			if (!empty($err)) {
 				$resp['status'] = 'failed';
 				$resp['msg'] = $err;
 			}
 		}
-
 
 		$update = $this->update_system_info();
 		$flash = $this->set_flashdata('success', 'อัปเดตระบบเรียบร้อย');
