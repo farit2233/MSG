@@ -33,25 +33,26 @@ class Master extends DBConnection
 			exit;
 		}
 	}
-	function resize_image_to_webp($src_path, $dest_path_webp, $max_width, $max_height, $quality = 80)
+	function resize_image($src_path, $dest_path, $max_width, $max_height)
 	{
 		list($src_w, $src_h, $type) = getimagesize($src_path);
 
-		if ($type != IMAGETYPE_JPEG && $type != IMAGETYPE_PNG) {
-			return false; // ไม่รองรับไฟล์ประเภทอื่น
-		}
-
-		// 1. คำนวณขนาดใหม่ (ไม่ขยายภาพที่เล็กกว่า max)
 		$scale = min($max_width / $src_w, $max_height / $src_h);
-		if ($scale >= 1) { // ถ้าภาพต้นฉบับเล็กกว่าหรือเท่ากับ max
-			$new_w = $src_w;
-			$new_h = $src_h;
-		} else { // ถ้าภาพใหญ่กว่า max ให้ย่อลง
-			$new_w = floor($src_w * $scale);
-			$new_h = floor($src_h * $scale);
+		if ($scale >= 1) { // ภาพเล็กกว่าขนาด max ไม่ต้องย่อ
+			return copy($src_path, $dest_path);
 		}
 
-		// 2. สร้าง Resource จากไฟล์ต้นทาง
+		$new_w = floor($src_w * $scale);
+		$new_h = floor($src_h * $scale);
+
+		$dst_img = imagecreatetruecolor($new_w, $new_h);
+
+		// สำหรับ PNG ให้รองรับ transparency
+		if ($type == IMAGETYPE_PNG) {
+			imagealphablending($dst_img, false);
+			imagesavealpha($dst_img, true);
+		}
+
 		switch ($type) {
 			case IMAGETYPE_JPEG:
 				$src_img = imagecreatefromjpeg($src_path);
@@ -60,31 +61,21 @@ class Master extends DBConnection
 				$src_img = imagecreatefrompng($src_path);
 				break;
 			default:
-				return false;
+				return false; // ไฟล์ประเภทอื่นไม่รองรับ
 		}
 
-		// 3. สร้าง Canvas ปลายทาง
-		$dst_img = imagecreatetruecolor($new_w, $new_h);
-
-		// 4. (ข้อ 2) จัดการความโปร่งใสสำหรับ PNG
-		if ($type == IMAGETYPE_PNG) {
-			imagealphablending($dst_img, false);
-			imagesavealpha($dst_img, true);
-			$transparent = imagecolorallocatealpha($dst_img, 255, 255, 255, 127);
-			imagefilledrectangle($dst_img, 0, 0, $new_w, $new_h, $transparent);
-		}
-
-		// 5. (ข้อ 1) ย่อ/ขยายภาพ
 		imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $new_w, $new_h, $src_w, $src_h);
 
-		// 6. (ข้อ 2) บันทึกเป็น WebP
-		$success = imagewebp($dst_img, $dest_path_webp, $quality);
+		if ($type == IMAGETYPE_JPEG) {
+			imagejpeg($dst_img, $dest_path, 85);
+		} elseif ($type == IMAGETYPE_PNG) {
+			imagepng($dst_img, $dest_path);
+		}
 
-		// 7. เคลียร์หน่วยความจำ
 		imagedestroy($src_img);
 		imagedestroy($dst_img);
 
-		return $success;
+		return true;
 	}
 	function delete_img()
 	{
@@ -221,6 +212,7 @@ class Master extends DBConnection
 
 	function save_product()
 	{
+
 		// ตรวจสอบน้ำหนักก่อนบันทึก
 		$max_weight_allowed = 25000; // กำหนดขีดจำกัดสูงสุดที่อนุญาต (กรัม)
 
@@ -281,6 +273,7 @@ class Master extends DBConnection
 			}
 		}
 
+
 		// ตรวจสอบสินค้าซ้ำ
 		$check = $this->conn->query("SELECT * FROM `product_list` where `brand` = '{$brand}' and `name` = '{$name}' and delete_flag = 0 " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
 		if ($this->capture_err()) return $this->capture_err();
@@ -305,163 +298,63 @@ class Master extends DBConnection
 			// เซฟลิงก์
 			$this->save_product_link($product_id);
 
-			// ==================================================================
-			// START: ส่วนแก้ไขการอัปโหลดรูปภาพหลัก
-			// ==================================================================
+			// อัปโหลดรูปภาพ
 			if (!empty($_FILES['img']['tmp_name'])) {
-
-				// ==================================================================
-				// START: [แก้ไข] ลบรูปเก่า (ย้ายมาไว้ตรงนี้ และแก้ไขตรรกะ)
-				// ==================================================================
-				if (!empty($id)) { // ตรวจสอบว่าเป็นการอัปเดต (ไม่ใช่การสร้างใหม่)
-					// 1. ค้นหา path รูปเก่าจาก DB
-					$old_image_query = $this->conn->query("SELECT image_path FROM `product_list` WHERE id = '{$id}'");
-					if ($old_image_query && $old_image_query->num_rows > 0) {
-						$old_image_data = $old_image_query->fetch_assoc();
-						$old_image_path_with_query = $old_image_data['image_path'];
-
-						if (!empty($old_image_path_with_query)) {
-							// 2. เอารส่วน query string (?v=...) ออก
-							$path_parts = explode('?', $old_image_path_with_query);
-							$clean_old_path = $path_parts[0]; // (e.g., uploads/product/prod_xyz.webp)
-
-							// 3. แยกส่วนประกอบของ Path
-							$file_info = pathinfo($clean_old_path);
-							$dir = $file_info['dirname'];       // (e.g., uploads/product)
-							$filename = $file_info['filename']; // (e.g., prod_xyz)
-
-							// 4. สร้างรายการไฟล์ที่จะลบ (ครบ 3 ขนาด)
-							$files_to_delete = [
-								base_app . $dir . '/' . $filename . '.webp',       // .../prod_xyz.webp
-								base_app . $dir . '/' . $filename . '_medium.webp', // .../prod_xyz_medium.webp
-								base_app . $dir . '/' . $filename . '_thumb.webp'  // .../prod_xyz_thumb.webp
-							];
-
-							// 5. วนลูปเพื่อลบไฟล์
-							foreach ($files_to_delete as $file) {
-								if (is_file($file)) {
-									@unlink($file);
-								}
-							}
-						}
-					}
-				}
-				// ==================================================================
-				// END: ลบรูปเก่า
-				// ==================================================================
-
-				$img_path = "uploads/product/"; // โฟลเดอร์รูปหลัก
-
-				// (ข้อ 0) สร้างโฟลเดอร์ด้วยสิทธิ์ 0755 ที่ปลอดภัย
+				$img_path = "uploads/product/";
 				if (!is_dir(base_app . $img_path)) {
 					mkdir(base_app . $img_path, 0755, true);
 				}
-
 				$accept = ['image/jpeg', 'image/png', 'image/jpg'];
 				if (!in_array($_FILES['img']['type'], $accept)) {
-					$resp['msg'] .= " | ประเภทไฟล์รูปภาพหลักไม่ถูกต้อง";
+					$resp['msg'] .= " Image file type is invalid";
 				} else {
-					// (ข้อ 0) สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน
-					$base_filename = uniqid('prod_', true);
-
-					// กำหนดขนาดและ Path (คุณสามารถปรับขนาด 400 และ 150 ได้ตามต้องการ)
-					$paths = [
-						'main' => ['path' => $img_path . $base_filename . '.webp', 'w' => 1000, 'h' => 1000],
-						'medium' => ['path' => $img_path . $base_filename . '_medium.webp', 'w' => 400, 'h' => 400], // (ข้อ 3)
-						'thumb' => ['path' => $img_path . $base_filename . '_thumb.webp', 'w' => 150, 'h' => 150]  // (ข้อ 3)
-					];
-
-					// (ข้อ 1, 2, 3) ประมวลผลและบันทึกทุกขนาด
-					foreach ($paths as $key => $p) {
-						$success = $this->resize_image_to_webp(
-							$_FILES['img']['tmp_name'], // Source
-							base_app . $p['path'], // Destination
-							$p['w'], // Max Width
-							$p['h']  // Max Height
-						);
-
-						if ($key == 'main') {
-							if ($success) {
-								// บันทึก Path รูปหลัก (1000px) ลง DB
-								$db_path = $p['path'];
-								$this->conn->query("UPDATE product_list SET image_path = CONCAT('{$db_path}', '?v=', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = '{$product_id}'");
-							} else {
-								$resp['msg'] .= " | ไม่สามารถบันทึกรูปภาพหลักได้";
-							}
-						}
-						if (!$success) {
-							$resp['msg'] .= " | ไม่สามารถสร้างรูปภาพขนาด {$key} ได้";
-						}
+					$filename = $_FILES['img']['name'];
+					$spath = $img_path . $filename;
+					$i = 1;
+					while (is_file(base_app . $spath)) {
+						$spath = $img_path . $i++ . '_' . $filename;
+					}
+					$success = $this->resize_image($_FILES['img']['tmp_name'], base_app . $spath, 1000, 1000);
+					if ($success) {
+						$this->conn->query("UPDATE product_list SET image_path = CONCAT('{$spath}', '?v=', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = '{$product_id}'");
+					} else {
+						$resp['msg'] .= " Failed to resize image.";
 					}
 				}
 			}
-			// ==================================================================
-			// END: ส่วนแก้ไขการอัปโหลดรูปภาพหลัก
-			// ==================================================================
-
-			// *** บล็อก "ลบรูปเก่า" เดิมที่เคยอยู่ตรงนี้ ถูกลบออกไปแล้ว ***
-
-			// ==================================================================
-			// START: ส่วนแก้ไขการอัปโหลดรูปแกลเลอรี
-			// ==================================================================
 			if (isset($_FILES['gallery_imgs']) && is_array($_FILES['gallery_imgs']['name'])) {
-				$gallery_path = "uploads/products/"; // โฟลเดอร์รูปแกลเลอรี
-
-				// (ข้อ 0) สร้างโฟลเดอร์ด้วยสิทธิ์ 0755 ที่ปลอดภัย
+				$gallery_path = "uploads/products/"; // ใช้โฟลเดอร์เดียวกับรูปหลัก หรือเปลี่ยนได้ตามต้องการ
 				if (!is_dir(base_app . $gallery_path)) {
-					mkdir(base_app . $gallery_path, 0755, true);
+					mkdir(base_app . $gallery_path, 0777, true);
 				}
-
 				$accept = ['image/jpeg', 'image/png', 'image/jpg'];
 
 				foreach ($_FILES['gallery_imgs']['name'] as $key => $filename) {
+					// ตรวจสอบว่ามีไฟล์ถูกอัปโหลดมาจริงหรือไม่
 					if (!empty($_FILES['gallery_imgs']['tmp_name'][$key])) {
 						$file_type = $_FILES['gallery_imgs']['type'][$key];
 
 						if (!in_array($file_type, $accept)) {
 							$resp['msg'] .= " | ไฟล์แกลเลอรี '{$filename}' มีประเภทไม่ถูกต้อง";
-							continue;
+							continue; // ข้ามไปไฟล์ถัดไป
 						}
 
-						// (ข้อ 0) สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน
-						$base_filename = uniqid('gallery_', true);
+						// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำกัน
+						$file_ext = pathinfo($filename, PATHINFO_EXTENSION);
+						$new_filename = uniqid('gallery_', true) . '.' . $file_ext;
+						$target_path = $gallery_path . $new_filename;
 
-						// กำหนดขนาดและ Path (ใช้ขนาดเดียวกับรูปหลัก)
-						$paths = [
-							'main' => ['path' => $gallery_path . $base_filename . '.webp', 'w' => 1000, 'h' => 1000],
-							'medium' => ['path' => $gallery_path . $base_filename . '_medium.webp', 'w' => 400, 'h' => 400], // (ข้อ 3)
-							'thumb' => ['path' => $gallery_path . $base_filename . '_thumb.webp', 'w' => 150, 'h' => 150]  // (ข้อ 3)
-						];
-
-						// (ข้อ 1, 2, 3) ประมวลผลและบันทึกทุกขนาด
-						foreach ($paths as $size_key => $p) {
-							$success = $this->resize_image_to_webp(
-								$_FILES['gallery_imgs']['tmp_name'][$key], // Source
-								base_app . $p['path'], // Destination
-								$p['w'], // Max Width
-								$p['h']  // Max Height
-							);
-
-							if ($size_key == 'main') {
-								if ($success) {
-									// บันทึก Path รูปหลัก (1000px) ลง DB
-									$db_path = $p['path'];
-									$escaped_path = $this->conn->real_escape_string($db_path);
-									$this->conn->query("INSERT INTO `product_image_path` (product_id, image_path) VALUES ('{$product_id}', '{$escaped_path}')");
-								} else {
-									$resp['msg'] .= " | ไม่สามารถอัปโหลดไฟล์แกลเลอรี '{$filename}' (main) ได้";
-								}
-							}
-							if (!$success) {
-								$resp['msg'] .= " | ไม่สามารถสร้างไฟล์แกลเลอรี '{$filename}' ({$size_key}) ได้";
-							}
+						// ย้ายไฟล์ที่อัปโหลดไปยังตำแหน่งที่ต้องการ
+						if (move_uploaded_file($_FILES['gallery_imgs']['tmp_name'][$key], base_app . $target_path)) {
+							// บันทึก path ลงในตาราง product_image_path
+							$escaped_path = $this->conn->real_escape_string($target_path);
+							$this->conn->query("INSERT INTO `product_image_path` (product_id, image_path) VALUES ('{$product_id}', '{$escaped_path}')");
+						} else {
+							$resp['msg'] .= " | ไม่สามารถอัปโหลดไฟล์แกลเลอรี '{$filename}' ได้";
 						}
 					}
 				}
 			}
-			// ==================================================================
-			// END: ส่วนแก้ไขการอัปโหลดรูปแกลเลอรี
-			// ==================================================================
 		} else {
 			return json_encode(['status' => 'failed', 'err' => $this->conn->error . " [{$sql}]"]);
 		}
@@ -475,65 +368,21 @@ class Master extends DBConnection
 
 	function delete_gallery_image()
 	{
-		extract($_POST); // $id จะถูกดึงมาจาก $_POST
-
-		if (empty($id)) {
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'ไม่พบ ID ของรูปภาพ';
-			return json_encode($resp);
+		extract($_POST);
+		$qry = $this->conn->query("SELECT * FROM `product_image_path` where id = '{$id}'");
+		if ($qry->num_rows > 0) {
+			$res = $qry->fetch_array();
+			$path = base_app . $res['path'];
 		}
-
-		// 1. ค้นหา path ของไฟล์ก่อน
-		$stmt_select = $this->conn->prepare("SELECT `image_path` FROM `product_image_path` WHERE `id` = ?");
-		$stmt_select->bind_param("i", $id);
-		$stmt_select->execute();
-		$result = $stmt_select->get_result();
-
-		if ($result->num_rows > 0) {
-			$row = $result->fetch_assoc();
-			$file_path = $row['image_path'];
-
-			// 2. สร้าง path จริงของไฟล์บน server
-			$absolute_path = __DIR__ . '/../' . $file_path;
-
-			// 3. ลบไฟล์จริง (ถ้ามีอยู่)
-			if (is_file($absolute_path)) {
-				@unlink($absolute_path); // ลบไฟล์ต้นฉบับ (jpg, png)
-			}
-
-			// 4. (Bonus) ลบไฟล์ .webp ที่เกี่ยวข้องทั้งหมด (normal, medium, thumb)
-			$dir = pathinfo($absolute_path, PATHINFO_DIRNAME);
-			$filename = pathinfo($absolute_path, PATHINFO_FILENAME);
-
-			// สร้าง List ของไฟล์ .webp ทั้ง 3 ขนาด
-			$webp_files_to_delete = [
-				$dir . '/' . $filename . '.webp',     // ไฟล์ปกติ
-				$dir . '/' . $filename . '_medium.webp', // ไฟล์ medium
-				$dir . '/' . $filename . '_thumb.webp'  // ไฟล์ thumb
-			];
-
-			// วนลูปเช็คและลบไฟล์
-			foreach ($webp_files_to_delete as $file) {
-				if (is_file($file)) {
-					@unlink($file); // ใช้ @ เพื่อ suppress warning กรณีไฟล์ลบไม่ได้
-				}
-			}
-
-			// 5. ลบข้อมูลออกจากฐานข้อมูล
-			$stmt_delete = $this->conn->prepare("DELETE FROM `product_image_path` WHERE `id` = ?");
-			$stmt_delete->bind_param("i", $id);
-
-			if ($stmt_delete->execute()) {
-				$resp['status'] = 'success';
-			} else {
-				$resp['status'] = 'failed';
-				$resp['msg'] = 'ลบข้อมูลในฐานข้อมูลไม่สำเร็จ: ' . $this->conn->error;
-			}
+		$del = $this->conn->query("DELETE FROM `product_image_path` where id = '{$id}'");
+		if ($del) {
+			if (isset($path) && is_file($path))
+				unlink($path);
+			$resp['status'] = 'success';
 		} else {
 			$resp['status'] = 'failed';
-			$resp['msg'] = 'ไม่พบรูปภาพ ID นี้ในฐานข้อมูล';
+			$resp['error'] = $this->conn->error;
 		}
-
 		return json_encode($resp);
 	}
 
@@ -749,104 +598,12 @@ class Master extends DBConnection
 		}
 	}
 
-	function get_shipping_details()
-	{
-
-		// 1. รับค่า ID ขนส่ง และ ID สินค้า จาก AJAX
-		$shipping_id = isset($_POST['id']) ? intval($_POST['id']) : 0;
-		$selected_items_str = isset($_POST['selected_items']) ? $this->conn->real_escape_string($_POST['selected_items']) : '';
-
-		// เตรียมข้อมูลตอบกลับ (Default คือล้มเหลว)
-		$response = ['success' => false, 'error' => 'เกิดข้อผิดพลาดที่ไม่รู้จัก'];
-
-		if ($shipping_id == 0) {
-			$response['error'] = 'ไม่ได้เลือกขนส่ง';
-			echo json_encode($response);
-			exit;
-		}
-		if (empty($selected_items_str)) {
-			$response['error'] = 'ไม่พบสินค้าในตะกร้า';
-			echo json_encode($response);
-			exit;
-		}
-
-		// 2. คำนวณน้ำหนักรวม (Total Weight) จาก selected_items
-		$total_weight = 0;
-		$ids_array = array_map('intval', explode(',', $selected_items_str));
-		$safe_ids = implode(',', $ids_array);
-
-		if (!empty($safe_ids)) {
-			$weight_qry = $this->conn->query("
-                SELECT 
-                    c.quantity, 
-                    p.product_weight 
-                FROM cart_list c
-                INNER JOIN product_list p ON c.product_id = p.id
-                WHERE c.id IN ({$safe_ids}) AND c.customer_id = '{$this->settings->userdata('id')}'
-            ");
-
-			if ($weight_qry) {
-				while ($row = $weight_qry->fetch_assoc()) {
-					$total_weight += ($row['product_weight'] ?? 0) * $row['quantity'];
-				}
-			}
-		}
-
-		// 3. Query หาค่าส่ง, ชื่อ, และสถานะ COD ของขนส่งที่เลือก
-		//    โดยอิงจากน้ำหนักที่คำนวณได้
-		$shipping_query_string = "
-            SELECT 
-                sm.id, 
-                sm.name, 
-                sm.cod_enabled, 
-                sp.price as cost
-            FROM 
-                shipping_methods sm
-            LEFT JOIN 
-                shipping_prices sp ON sm.id = sp.shipping_methods_id
-            WHERE 
-                sm.id = {$shipping_id}  -- 1. กรองเฉพาะ ID ขนส่งที่เลือก
-                AND sm.status = 1 
-                AND sm.delete_flag = 0
-                AND ('{$total_weight}' >= sp.min_weight AND '{$total_weight}' <= sp.max_weight) -- 2. หาน้ำหนักที่ตรงช่วง
-            LIMIT 1
-        ";
-
-		$shipping_qry = $this->conn->query($shipping_query_string);
-
-		// 4. สร้าง JSON ตอบกลับ
-		if ($shipping_qry && $shipping_qry->num_rows > 0) {
-			$row = $shipping_qry->fetch_assoc();
-
-			$response['success'] = true;
-			$response['shipping_info'] = [
-				'id' => (int)$row['id'],
-				'name' => $row['name'],
-				'cost' => (float)$row['cost'],
-				'cod_enabled' => (int)$row['cod_enabled']
-			];
-			// ลบ error message เริ่มต้นทิ้งไป
-			unset($response['error']);
-		} else {
-			// !! จุดสำคัญที่แก้ปัญหา !!
-			// ถ้าไม่เจอ (num_rows = 0) ให้ส่ง JSON บอกว่าไม่เจอ
-			// ไม่ใช่ส่งค่าว่าง ("")
-			$response['error'] = 'ไม่พบค่าจัดส่งสำหรับน้ำหนักนี้ (' . $total_weight . ' kg)';
-		}
-
-		// 5. ส่ง JSON กลับไปให้ JavaScript
-		echo json_encode($response);
-		exit; // จบการทำงานทันที
-	}
-
 	function place_order()
 	{
 		extract($_POST);
 		$customer_id = $this->settings->userdata('id');
 		$pref = date("Ymd");
 		$code = sprintf("%'.05d", 1);
-
-		$resp = [];
 
 		$this->conn->query("START TRANSACTION");
 
@@ -1069,67 +826,18 @@ class Master extends DBConnection
 					$shipping_methods_name = $ship['name'];
 				}
 			}
-			$order_status = 0;   // 0 = Pending (รอตรวจสอบสลิป)
-			$payment_status = 0; // 0 = Unpaid (ยังไม่จ่ายเงิน)
-			$is_cod = 0;         // ✨ 1. กำหนดค่าเริ่มต้นสำหรับ cod เป็น 0 (โอนเงิน)
-
-			if (isset($payment_method) && $payment_method == 'cod') {
-				// ถ้าเป็น COD, ให้อัปเดตสถานะออเดอร์ทันที
-				$order_status = 1;     // 1 = Packed (พร้อมจัดส่ง)
-				$is_cod = 1;         // ✨ 2. ถ้าเป็น COD ให้เปลี่ยนค่าเป็น 1
-			}
-
 
 			// --- ✨ บันทึกข้อมูลลง order_list (แก้ไข Query) ---
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-			(`code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`, `shipping_prices_id`, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`, `cod`) 
-			VALUES 
-			('{$code}', '{$customer_id}', '{$name}', '{$contact}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id}, {$shipping_prices_id}, {$applied_promo_id}, {$applied_coupon_id}, '{$order_status}', '{$payment_status}', 0, '{$is_cod}')");
+            (`code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `promotion_discount`, `coupon_discount`, `shipping_methods_id`,shipping_prices_id, `promotion_id`, `coupon_code_id`, `status`, `payment_status`, `delivery_status`) 
+            VALUES 
+            ('{$code}', '{$customer_id}', '{$name}', '{$contact}', '{$delivery_address}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$selected_shipping_method_id},{$shipping_prices_id}, {$applied_promo_id}, {$applied_coupon_id}, 0, 0, 0)");
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
 			$oid = $this->conn->insert_id;
 
-			if (isset($payment_method) && $payment_method == 'transfer') {
 
-				if (isset($_FILES['payment_slip']) && $_FILES['payment_slip']['error'] == 0) {
-					// 1. กำหนดตำแหน่งที่จะเก็บไฟล์
-					$upload_path = base_app . 'uploads/slips/';
-					if (!is_dir($upload_path)) {
-						mkdir($upload_path, 0755, true);
-					}
 
-					// 2. สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน เพื่อความปลอดภัย
-					$file_ext = pathinfo($_FILES['payment_slip']['name'], PATHINFO_EXTENSION);
-					$allowed_exts = ['jpg', 'jpeg', 'png'];
-					if (!in_array(strtolower($file_ext), $allowed_exts)) {
-						throw new Exception('รูปแบบไฟล์สลิปไม่ถูกต้อง ต้องเป็น JPG, JPEG, หรือ PNG เท่านั้น');
-					}
-					$file_name = "slip_" . $oid . "_" . time() . "." . uniqid() . "." . $file_ext;
-					$target_file = $upload_path . $file_name;
-
-					// 3. ย้ายไฟล์ไปยังโฟลเดอร์ที่กำหนด
-					if (move_uploaded_file($_FILES['payment_slip']['tmp_name'], $target_file)) {
-
-						// 4. ถ้าสำเร็จ บันทึก path ลงฐานข้อมูล payment_slips
-						$image_db_path = 'uploads/slips/' . $file_name;
-						$slip_insert_sql = "INSERT INTO `payment_slips` (`customer_id`, `order_id`, `image_path`, `approve`) 
-                                        VALUES ('{$customer_id}', '{$oid}', '{$image_db_path}', 0)";
-
-						if (!$this->conn->query($slip_insert_sql)) {
-							// ถ้าบันทึกลง DB ไม่สำเร็จ ให้ลบไฟล์ที่อัปโหลดทิ้ง
-							if (file_exists($target_file)) unlink($target_file);
-							throw new Exception('ไม่สามารถบันทึกข้อมูลสลิปได้: ' . $this->conn->error);
-						}
-
-						$this->conn->query("UPDATE `order_list` SET `payment_status` = 1 WHERE id = '{$oid}'");
-					} else {
-						throw new Exception('ไม่สามารถอัปโหลดไฟล์สลิปได้');
-					}
-				} else {
-					// ถ้าไม่มีไฟล์แนบมาหรือไฟล์มีปัญหา ให้ยกเลิก
-					throw new Exception('กรุณาแนบไฟล์สลิปการโอนเงิน');
-				}
-			}
 			if ($promotion_id > 0) {
 				// ถ้าเป็นโปรส่งฟรี ให้ส่งค่า shipping_discount ไปบันทึก, ถ้าไม่ใช่ส่ง promotion_discount_amount
 				$logged_promo_discount = ($promo_data['type'] === 'free_shipping') ? $shipping_discount : $promotion_discount_amount;
@@ -1210,7 +918,7 @@ class Master extends DBConnection
 				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
 				$mail->addAddress($customer_email, $customer_name);
 				$body = "
-						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
+						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
 							<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
 							<p>เรียนคุณ <strong>{$customer_name}</strong></p>
 							<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
@@ -1324,7 +1032,7 @@ class Master extends DBConnection
 
 				// สร้างเนื้อหาของอีเมล
 				$admin_body = "
-				<div  style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
+				<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;'>
 					<h2 style='color: #16542b; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
 					<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
 					<p><strong>ชื่อผู้ใช้:</strong> $customer_name</p>
@@ -1519,155 +1227,6 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
-	// เพิ่มฟังก์ชันนี้เข้าไปในไฟล์ classes/Master.php
-	function approve_slip()
-	{
-		// ดึงค่า 'id' (ของสลิป) และ 'approve' (สถานะที่เลือก) จากฟอร์ม
-		extract($_POST);
-
-		// อัปเดตตาราง payment_slips ตามสถานะที่เลือก
-		$update_slip = $this->conn->query("UPDATE `payment_slips` SET approve = '{$approve}' WHERE id = '{$id}'");
-
-		if (!$update_slip) {
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'ไม่สามารถอัปเดตสถานะสลิปได้';
-			return json_encode($resp);
-		}
-
-		// --- Logic เพิ่มเติม: อัปเดตสถานะในตาราง order_list ด้วย ---
-
-		// 1. ค้นหา order_id จาก slip_id
-		$slip_qry = $this->conn->query("SELECT order_id FROM `payment_slips` WHERE id = '{$id}'");
-		$order_id = $slip_qry->fetch_assoc()['order_id'];
-
-		$payment_status = 1; // สถานะเริ่มต้น = รอตรวจสอบ
-
-		if ($approve == 1) { // ถ้าอนุมัติ
-			$payment_status = 2; // เปลี่ยนเป็น "ชำระเงินแล้ว"
-		} else if ($approve == 2) { // ถ้าไม่อนุมัติ
-			$payment_status = 3; // เปลี่ยนเป็น "ชำระเงินล้มเหลว"
-		}
-
-		// 2. อัปเดตสถานะในตาราง order_list
-		$update_order = $this->conn->query("UPDATE `order_list` SET payment_status = '{$payment_status}' WHERE id = '{$order_id}'");
-
-		if ($update_order) {
-			$this->settings->set_flashdata('success', 'อัปเดตสถานะการชำระเงินเรียบร้อยแล้ว');
-			$resp['status'] = 'success';
-		} else {
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'อัปเดตสถานะสลิปสำเร็จ แต่ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้';
-		}
-
-		$order_id = '';
-		$code = '';
-		$customer_email = '';
-		$customer_name = '';
-
-		// ค้นหา order_id จาก slip_id
-		$slip_qry = $this->conn->query("SELECT order_id FROM `payment_slips` WHERE id = '{$id}'");
-		if ($slip_qry->num_rows > 0) {
-			$order_id = $slip_qry->fetch_assoc()['order_id'];
-
-			// ค้นหาข้อมูลออเดอร์และลูกค้าจาก order_id
-			$order_qry = $this->conn->query("
-            SELECT o.code, c.email, CONCAT(c.firstname, ' ', c.lastname) as fullname
-            FROM `order_list` o
-            INNER JOIN `customer_list` c ON o.customer_id = c.id
-            WHERE o.id = '{$order_id}'
-        ");
-			if ($order_qry->num_rows > 0) {
-				$data = $order_qry->fetch_assoc();
-				$code = $data['code'];
-				$customer_email = $data['email'];
-				$customer_name = $data['fullname'];
-			}
-		}
-
-		// --- อัปเดตฐานข้อมูล ---
-		// อัปเดตสถานะในตาราง payment_slips
-		$update_slip = $this->conn->query("UPDATE `payment_slips` SET approve = '{$approve}' WHERE id = '{$id}'");
-
-		// กำหนดค่า payment_status สำหรับตาราง order_list
-		$payment_status = 1; // 1 = รอตรวจสอบ (Default)
-		if ($approve == 1) { // ถ้าอนุมัติ
-			$payment_status = 2; // 2 = ชำระเงินแล้ว
-		} else if ($approve == 2) { // ถ้าไม่อนุมัติ
-			$payment_status = 3; // 3 = ชำระเงินล้มเหลว
-		}
-
-		// อัปเดตสถานะในตาราง order_list
-		$update_order = $this->conn->query("UPDATE `order_list` SET payment_status = '{$payment_status}' WHERE id = '{$order_id}'");
-
-		// --- ตรวจสอบผลลัพธ์และส่งอีเมล ---
-		if ($update_slip && $update_order) {
-
-			// ✨ --- เริ่มส่วนการส่งอีเมล --- ✨
-			$mail = new PHPMailer(true);
-			try {
-				// --- กำหนดค่า SMTP (ควรเก็บเป็นตัวแปรภายนอกเพื่อความปลอดภัย) ---
-				$mail->isSMTP();
-				$mail->Host = 'smtp.gmail.com';
-				$mail->Port = 465;
-				$mail->SMTPAuth = true;
-				$mail->Username = "faritre5566@gmail.com"; // ⚠️ ควรใช้ตัวแปรจาก config
-				$mail->Password = "bchljhaxoqflmbys";      // ⚠️ ควรใช้ตัวแปรจาก config
-				$mail->SMTPSecure = "ssl";
-				$mail->CharSet = 'UTF-8';
-
-				// --- เตรียมเนื้อหาอีเมลตามสถานะ ---
-				$subject = '';
-				$email_heading = '';
-				$email_body_text = '';
-
-				if ($approve == 1) { // กรณี "อนุมัติ"
-					$subject = "✅ การชำระเงินของคุณได้รับการอนุมัติแล้ว";
-					$email_heading = "การชำระเงินได้รับการยืนยัน";
-					$email_body_text = "เราได้ตรวจสอบและยืนยันการชำระเงินสำหรับคำสั่งซื้อของคุณเรียบร้อยแล้ว และกำลังดำเนินการจัดเตรียมสินค้าเพื่อจัดส่งต่อไป";
-				} else if ($approve == 2) { // กรณี "ไม่อนุมัติ"
-					$subject = "❌ การชำระเงินของคุณไม่ได้รับการอนุมัติ";
-					$email_heading = "การชำระเงินไม่สำเร็จ";
-					$email_body_text = "เราต้องขออภัยที่ต้องแจ้งให้ทราบว่า การชำระเงินของคุณไม่ได้รับการอนุมัติ อาจเนื่องมาจากปัญหาบางประการ เช่น ภาพสลิปไม่ชัดเจน หรือยอดเงินไม่ถูกต้อง กรุณาติดต่อเราเพื่อสอบถามข้อมูลเพิ่มเติม หรือทำการอัปโหลดสลิปอีกครั้ง";
-				}
-
-				// --- ส่งอีเมลถ้ามีหัวข้อ (คือเป็นสถานะ อนุมัติ หรือ ไม่อนุมัติ เท่านั้น) ---
-				if (!empty($subject)) {
-					$mail->isHTML(true);
-					$mail->Subject = $subject . " [#{$code}]";
-					$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
-					$mail->addAddress($customer_email, $customer_name);
-
-					$body = "
-                    <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
-                        <h2 style='color: #16542b; text-align:center;'>{$email_heading}</h2>
-                        <p>เรียนคุณ <strong>{$customer_name}</strong>,</p>
-                        <p>{$email_body_text}</p>
-                        <hr>
-                        <p><strong>รหัสคำสั่งซื้อ:</strong> {$code}</p>
-                        <p style='text-align:center; margin-top:20px;'>
-                            <a href='" . base_url . "?p=user/orders' style='background-color: #16542b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>ดูรายละเอียดคำสั่งซื้อ</a>
-                        </p>
-                      <p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
-                    </div>";
-
-					$mail->Body = $body;
-					$mail->send();
-				}
-			} catch (Exception $e) {
-				// บันทึก log หากส่งอีเมลไม่สำเร็จ (แต่ไม่ต้องแจ้งผู้ใช้)
-				error_log("❌ ส่งอีเมลแจ้งเตือนสถานะสลิปไม่สำเร็จ: " . $mail->ErrorInfo);
-			}
-			// ✨ --- สิ้นสุดส่วนการส่งอีเมล --- ✨
-
-			$this->settings->set_flashdata('success', 'อัปเดตสถานะการชำระเงินเรียบร้อยแล้ว');
-			$resp['status'] = 'success';
-		} else {
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'เกิดข้อผิดพลาดในการอัปเดตฐานข้อมูล';
-		}
-
-		return json_encode($resp);
-	}
 	function cancel_order()
 	{
 		// ใช้ extract เพื่อรับค่า 'order_id' จาก AJAX POST request
@@ -2337,7 +1896,6 @@ class Master extends DBConnection
 
 		$this->conn->begin_transaction();
 		try {
-			// ส่วนนี้เหมือนเดิม: บันทึกข้อมูลหลักของ shipping_methods
 			if ($id > 0) {
 				$sql = "UPDATE `shipping_methods` SET 
                 provider_id = '{$provider_id}',
@@ -2360,29 +1918,12 @@ class Master extends DBConnection
 
 			$shipping_methods_id = ($id > 0) ? $id : $this->conn->insert_id;
 
-			// --- [START] แก้ไขส่วนการบันทึกราคาตามน้ำหนัก (UPSERT Logic) ---
-			// ข้อควรระวัง: โค้ดนี้ต้องการคอลัมน์ `status` ในตาราง `shipping_prices`
-
+			// ลบช่วงน้ำหนักเดิมถ้าแก้ไข
 			if ($id > 0) {
-				// 1. ถ้าเป็นการแก้ไข (id > 0) ให้ตั้งค่าราคาทั้งหมดเป็น 'inactive' (status = 0) ก่อน
-				// เราจะทำการอัปเดต/เปิดใช้งาน (status = 1) เฉพาะรายการที่ส่งมาในฟอร์ม
-				$this->conn->query("UPDATE `shipping_prices` SET status = 0 WHERE shipping_methods_id = {$shipping_methods_id}");
+				$this->conn->query("DELETE FROM `shipping_prices` WHERE shipping_methods_id = {$shipping_methods_id}");
 			}
 
-			// 2. เตรียม Prepared Statements สำหรับการ UPSERT
-			// ใช้เพื่อตรวจสอบว่ามีแถว (ตามช่วงน้ำหนัก) นี้อยู่แล้วหรือไม่
-			$stmt_check = $this->conn->prepare("SELECT id FROM shipping_prices WHERE shipping_methods_id = ? AND min_weight = ? AND max_weight = ?");
-
-			// ใช้เพื่ออัปเดตแถวที่มีอยู่ (เปลี่ยนราคา และตั้ง status = 1)
-			$stmt_update = $this->conn->prepare("UPDATE shipping_prices SET price = ?, status = 1 WHERE id = ?");
-
-			// ใช้เพื่อเพิ่มแถวใหม่ (พร้อม status = 1)
-			// (ต้องเพิ่มคอลัมน์ status ในคำสั่ง INSERT)
-			$stmt_insert = $this->conn->prepare("INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price, status)
-                                                VALUES (?, ?, ?, ?, 1)");
-
-
-			// 3. วนลูปข้อมูลที่ส่งมา
+			// บันทึกค่าจัดส่งตามน้ำหนัก
 			if (!empty($_POST['weight_from']) && !empty($_POST['weight_to']) && !empty($_POST['price'])) {
 				$weight_from = $_POST['weight_from'];
 				$weight_to = $_POST['weight_to'];
@@ -2393,7 +1934,6 @@ class Master extends DBConnection
 					$w_to = intval($weight_to[$i]);
 					$p = floatval($price[$i]);
 
-					// Validation (เหมือนเดิม)
 					if ($w_from >= $w_to) {
 						throw new Exception('น้ำหนักเริ่มต้นต้องน้อยกว่าน้ำหนักสูงสุด');
 					}
@@ -2401,42 +1941,14 @@ class Master extends DBConnection
 						throw new Exception('ราคาต้องไม่ติดลบ');
 					}
 
-					// 4. ตรวจสอบว่ามีแถวนี้อยู่แล้วหรือไม่ (เฉพาะกรณีแก้ไข)
-					$existing_id = null;
-					if ($id > 0) {
-						$stmt_check->bind_param('iii', $shipping_methods_id, $w_from, $w_to);
-						$stmt_check->execute();
-						$result = $stmt_check->get_result();
-						if ($result->num_rows > 0) {
-							$existing_id = $result->fetch_assoc()['id'];
-						}
-					}
-
-					if ($existing_id) {
-						// 5a. ถ้ามี: อัปเดตราคา และตั้ง status = 1 (เปิดใช้งาน)
-						$stmt_update->bind_param('di', $p, $existing_id);
-						if (!$stmt_update->execute()) {
-							throw new Exception('ไม่สามารถอัปเดตข้อมูลราคาจัดส่งเดิม: ' . $stmt_update->error);
-						}
-					} else {
-						// 5b. ถ้าไม่มี (หรือเป็นการสร้างใหม่): เพิ่มแถวใหม่ด้วย status = 1
-						$stmt_insert->bind_param('iiid', $shipping_methods_id, $w_from, $w_to, $p);
-						if (!$stmt_insert->execute()) {
-							throw new Exception('ไม่สามารถบันทึกข้อมูลราคาจัดส่งใหม่: ' . $stmt_insert->error);
-						}
+					$stmt_price = $this->conn->prepare("INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price)
+                                                    VALUES (?, ?, ?, ?)");
+					$stmt_price->bind_param('iiid', $shipping_methods_id, $w_from, $w_to, $p);
+					if (!$stmt_price->execute()) {
+						throw new Exception('ไม่สามารถบันทึกข้อมูลราคาจัดส่งตามน้ำหนัก');
 					}
 				}
 			}
-			// (ถ้า $id > 0 และไม่มีการส่ง 'weight_from' มาเลย หมายถึงผู้ใช้ลบออกทั้งหมด
-			// รายการทั้งหมดจะถูกตั้งค่าเป็น status = 0 จากขั้นตอนที่ 1 โดยอัตโนมัติ)
-
-			// 6. ปิด statements
-			$stmt_check->close();
-			$stmt_update->close();
-			$stmt_insert->close();
-
-			// --- [END] แก้ไขส่วนการบันทึกราคาตามน้ำหนัก ---
-
 
 			$this->conn->commit();
 			echo json_encode(['status' => 'success']);
@@ -2445,6 +1957,7 @@ class Master extends DBConnection
 			echo json_encode(['status' => 'failed', 'msg' => $e->getMessage()]);
 		}
 	}
+
 	function delete_shipping()
 	{
 		extract($_POST);
@@ -2490,7 +2003,6 @@ class Master extends DBConnection
 
 		return json_encode(['status' => 'success']);
 	}
-
 	function save_promotions()
 	{
 		// ใช้ real_escape_string กับ description เพื่อความปลอดภัย
@@ -2508,25 +2020,7 @@ class Master extends DBConnection
 
 		// --- ส่วนจัดการรูปภาพที่ย้ายขึ้นมาและแก้ไขใหม่ ---
 		$image_path_sql = ""; // เตรียมตัวแปรสำหรับเก็บ path รูป
-		$old_image_path_to_delete = null; // [เพิ่ม] ตัวแปรเก็บ path รูปเก่า
-
 		if (isset($_FILES['img']) && !empty($_FILES['img']['tmp_name'])) {
-			// [เพิ่ม] 1. ตรวจสอบว่าเป็นการอัปเดตหรือไม่ ถ้าใช่ ให้ดึง path รูปเก่ามาก่อน
-			if (!empty($id)) {
-				$stmt = $this->conn->prepare("SELECT image_path FROM `promotions_list` WHERE id = ?");
-				$stmt->bind_param("i", $id);
-				$stmt->execute();
-				$result = $stmt->get_result();
-				if ($result->num_rows > 0) {
-					$row = $result->fetch_assoc();
-					if (!empty($row['image_path'])) {
-						// [เพิ่ม] 2. ทำความสะอาด path (ตัด ?v=... ออก)
-						$path_parts = explode('?', $row['image_path']);
-						$old_image_path_to_delete = $path_parts[0]; // (e.g., uploads/promotions/promo_xyz.webp)
-					}
-				}
-			}
-
 			// ตรวจสอบว่ามีไฟล์ถูกอัปโหลดมาหรือไม่
 			if ($_FILES['img']['error'] != UPLOAD_ERR_OK) {
 				$resp['status'] = 'failed';
@@ -2536,7 +2030,7 @@ class Master extends DBConnection
 
 			$upload_dir = "uploads/promotions/";
 			if (!is_dir(base_app . $upload_dir)) {
-				mkdir(base_app . $upload_dir, 0755, true); // ใช้ 0755 เพื่อให้แน่ใจว่าเขียนไฟล์ได้
+				mkdir(base_app . $upload_dir, 0777, true); // ใช้ 0777 เพื่อให้แน่ใจว่าเขียนไฟล์ได้
 			}
 
 			$accept = ['image/jpeg', 'image/png'];
@@ -2546,27 +2040,16 @@ class Master extends DBConnection
 				return json_encode($resp);
 			}
 
-			// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำ และบังคับเป็น .webp
-			$filename = uniqid('promo_') . '_' . time() . '.webp'; // <-- บังคับนามสกุล .webp
+			// สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำ
+			$file_extension = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
+			$filename = uniqid('promo_') . '_' . time() . '.' . $file_extension;
 			$full_path = base_app . $upload_dir . $filename;
 
-			// 1. กำหนดขนาดและคุณภาพ (ตามที่คุณต้องการ)
-			$max_width = 1000;  // ขนาดเดียว (กว้างไม่เกิน 1000)
-			$max_height = 600; // ขนาดเดียว (สูงไม่เกิน 600)
-			$quality = 80;     // คุณภาพ (80% คือ กลางค่อนข้างชัด)
-
-			// 2. เรียกใช้ฟังก์ชัน resize พร้อมระบุคุณภาพ
-			$success = $this->resize_image_to_webp($_FILES['img']['tmp_name'], $full_path, $max_width, $max_height, $quality);
+			// ใช้ move_uploaded_file หรือฟังก์ชัน resize ของคุณ
+			// สมมติว่า resize_image จะย้ายไฟล์และคืนค่า true/false
+			$success = $this->resize_image($_FILES['img']['tmp_name'], $full_path, 1000, 600);
 
 			if ($success) {
-				// [เพิ่ม] 3. ถ้ารูปใหม่สำเร็จ ค่อยลบรูปเก่า
-				if ($old_image_path_to_delete) {
-					$absolute_old_path = base_app . $old_image_path_to_delete;
-					if (is_file($absolute_old_path)) {
-						@unlink($absolute_old_path);
-					}
-				}
-
 				// ถ้าย้าย/resize รูปสำเร็จ ให้เตรียม SQL สำหรับคอลัมน์ image_path
 				$db_path = $this->conn->real_escape_string($upload_dir . $filename);
 				$image_path_sql = ", `image_path` = '{$db_path}?v=" . time() . "'";
@@ -2614,7 +2097,6 @@ class Master extends DBConnection
 
 		return json_encode($resp);
 	}
-
 	function delete_promotion()
 	{
 		extract($_POST);
@@ -3226,13 +2708,8 @@ switch ($action) {
 	case 'delete_cart':
 		echo $Master->delete_cart();
 		break;
-
 	case 'get_shipping_cost':
 		$Master->get_shipping_cost();
-		break;
-
-	case 'get_shipping_details':
-		$Master->get_shipping_details();
 		break;
 
 	case 'place_order':
@@ -3240,11 +2717,6 @@ switch ($action) {
 		ob_end_clean();  // เคลียร์ buffer
 		echo $result;
 		break;
-
-	case 'approve_slip':
-		$result = $Master->approve_slip();
-		break;
-
 	case 'cancel_order':
 		echo $Master->cancel_order();
 		break;
