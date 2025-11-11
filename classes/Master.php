@@ -1471,7 +1471,6 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
-
 	function cancel_order()
 	{
 		// ใช้ extract เพื่อรับค่า 'order_id' จาก AJAX POST request
@@ -1494,11 +1493,13 @@ class Master extends DBConnection
 			$order = $qry->fetch_assoc();
 			$order_code = $order['code'];
 			$customer_name = $order['customer_name'];
+			// ✨ ดึง contact จาก $order array ที่เรา query มา
+			$contact = $order['contact'];
 
 			// 2. อัปเดตสถานะ payment_status เป็น 4 และ delivery_status เป็น 6
 			$update = $this->conn->query("UPDATE order_list 
-			SET payment_status = 4, delivery_status = 6, is_seen = 0, date_updated = NOW() 
-			WHERE id = {$order_id}");
+            SET payment_status = 4, delivery_status = 6, is_seen = 0, date_updated = NOW() 
+            WHERE id = {$order_id}");
 
 			if (!$update) {
 				throw new Exception("ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้: " . $this->conn->error);
@@ -1508,46 +1509,35 @@ class Master extends DBConnection
 			try {
 				//SMTP Setting
 				$mail->isSMTP();
-				//$mail->Host = 'localhost';
-				//$mail->Port = 1025;
-				//$mail->SMTPAuth = false;
-
-
 				$mail->Host = 'smtp.gmail.com';
 				$mail->Port = 465;
 				$mail->SMTPAuth = true;
 				$mail->Username = "faritre5566@gmail.com";
 				$mail->Password = "bchljhaxoqflmbys";
 				$mail->SMTPSecure = "ssl";
-
 				$mail->CharSet = 'UTF-8';
-				//Email Setting
 				$mail->isHTML(true);
 				$mail->Subject = "คำสั่งซื้อกำลังดำเนินการยกเลิก #{$order_code}";
-
 				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
 				$mail->addAddress($order['email'], $customer_name);
-
 				$body = "
-					<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
-						<h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังดำเนินการยกเลิก</h2>
-						<p>เรียนคุณลูกค้า <strong>{$customer_name}</strong>,</p>
-						<p>หมายเลขคำสั่งซื้อ <strong>#{$order_code}</strong> กำลังดำเนินการยกเลิก</p>
-						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
-						<p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
-						<hr>
-						<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
-					</div>
-				";
-
+                    <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
+                        <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังดำเนินการยกเลิก</h2>
+                        <p>เรียนคุณลูกค้า <strong>{$customer_name}</strong>,</p>
+                        <p>หมายเลขคำสั่งซื้อ <strong>#{$order_code}</strong> กำลังดำเนินการยกเลิก</p>
+                        <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
+                        <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
+                        <hr>
+                        <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+                    </div>
+                ";
 				$mail->Body = $body;
 				$mail->send();
 			} catch (Exception $e) {
-				// หากส่งอีเมลไม่สำเร็จ ให้บันทึก error ไว้ แต่ไม่ต้องหยุดการทำงาน
 				error_log("❌ ส่งอีเมลแจ้งยกเลิกไม่สำเร็จ: " . $mail->ErrorInfo);
 			}
 
-			// 3. ส่วนของการส่งอีเมล (คงเดิม)
+			// 3. ส่วนของการส่งอีเมลแอดมิน
 			$mail_admin = new PHPMailer(true);
 			try {
 				$mail_admin->isSMTP();
@@ -1560,74 +1550,73 @@ class Master extends DBConnection
 				$mail_admin->CharSet = 'UTF-8';
 				$mail_admin->isHTML(true);
 				$mail_admin->Subject = "ลูกค้าได้ทำการยกเลิกคำสั่งซื้อหมายเลข #{$order_code}";
-
 				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
-				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
+				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');
 				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
 				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
-				$admin_body = "
-					<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
-						<h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการยกเลิก</h2>
-						<p>ลูกค้า <strong>{$customer_name}</strong>,{$contact}</p>
-						<p>หมายเลขคำสั่งซื้อ <strong>#{$order_code}</strong> กำลังรอดำเนินการยกเลิก</p>
-						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
-						<p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
-					</div>
-				";
 
+				// ✨✨ แก้ไขตรงนี้: เปลี่ยน {$contact} เป็น {$order['contact']} ✨✨
+				$admin_body = "
+                    <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
+                        <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการยกเลิก</h2>
+                        <p>ลูกค้า <strong>{$customer_name}</strong>, {$order['contact']}</p> 
+                        <p>หมายเลขคำสั่งซื้อ <strong>#{$order_code}</strong> กำลังรอดำเนินการยกเลิก</p>
+                        <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
+                        <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
+                    </div>
+                ";
 				$mail_admin->Body = $admin_body;
 				$mail_admin->send();
 			} catch (Exception $e) {
-				// หากส่งอีเมลไม่สำเร็จ ให้บันทึก error ไว้ แต่ไม่ต้องหยุดการทำงาน
 				error_log("❌ ส่งอีเมลแจ้งยกเลิกไม่สำเร็จ: " . $mail_admin->ErrorInfo);
 			}
 
-			// 4. ส่งค่า 1 กลับไปให้ AJAX เพื่อยืนยันว่าทำรายการสำเร็จ
+			// 4. ส่งค่า 1 กลับไปให้ AJAX
 			echo 1;
 
-			// ฟังก์ชันส่ง Telegram
-			function sendTelegramNotificationCancelOrder($message)
-			{
-				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
-				$chat_id = "-4869854888";      // ใช้ Chat ID ของแอดมินหรือ Group
-
-				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
-
-				$data = [
-					'chat_id' => $chat_id,
-					'text' => $message,
-					'parse_mode' => 'HTML',  // ถ้าคุณต้องการให้ข้อความในรูปแบบ HTML
-				];
-
-				// ส่งข้อความด้วย cURL
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $url);
-				curl_setopt($ch, CURLOPT_POST, true);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-				$response = curl_exec($ch);
-				curl_close($ch);
-
-				return $response;
-			}
-
+			// ✨✨ แก้ไขตรงนี้: เปลี่ยน {$contact} เป็น {$order['contact']} ✨✨
 			$telegram_message = "
-			ลูกค้าได้ทำการยกเลิกคำสั่งซื้อ
-			- หมายเลขคำสั่งซื้อ: {$order_code}
-			- ลูกค้า: {$customer_name}
-			- เบอร์โทร : {$contact}
-			- ที่อยู่จัดส่ง: {$order['delivery_address']}
-			- ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท";
-			// ส่งข้อความ Telegram
-			sendTelegramNotificationCancelOrder($telegram_message);
+            ลูกค้าได้ทำการยกเลิกคำสั่งซื้อ
+            - หมายเลขคำสั่งซื้อ: {$order_code}
+            - ลูกค้า: {$customer_name}
+            - เบอร์โทร : {$order['contact']}
+            - ที่อยู่จัดส่ง: {$order['delivery_address']}
+            - ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท";
+
+			// ✨✨ แก้ไขตรงนี้: เรียกใช้ฟังก์ชัน Telegram ผ่าน $this-> ✨✨
+			$this->sendTelegramNotificationCancelOrder($telegram_message);
 		} catch (Exception $e) {
-			// หากเกิดข้อผิดพลาดใดๆ ใน try block ให้ส่งข้อความ error กลับไปให้ AJAX
 			echo $e->getMessage();
 		}
 	}
 
+	// (ฟังก์ชันนี้ควรจะอยู่นอก cancel_order แต่ยังอยู่ใน Class Master)
+	function sendTelegramNotificationCancelOrder($message)
+	{
+		$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk"; // ใช้ Bot Token ของคุณ
+		$chat_id = "-4869854888"; // ใช้ Chat ID ของแอดมินหรือ Group
+
+		$url = "https://api.telegram.org/bot$bot_token/sendMessage";
+
+		$data = [
+			'chat_id' => $chat_id,
+			'text' => $message,
+			'parse_mode' => 'HTML', // ถ้าคุณต้องการให้ข้อความในรูปแบบ HTML
+		];
+
+		// ส่งข้อความด้วย cURL
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+		$response = curl_exec($ch);
+		curl_close($ch);
+
+		return $response;
+	}
 	function return_order()
 	{
 		// ใช้ extract เพื่อรับค่า 'order_id' จาก AJAX POST request
