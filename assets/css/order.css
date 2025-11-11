@@ -75,7 +75,7 @@
     }
 
     .btn-orders {
-        font-size: 14px;
+        font-size: 12px !important;
         background-color: #f57421;
         border-radius: 13px;
         color: white;
@@ -88,7 +88,7 @@
     }
 
     .btn-order-cancel {
-        font-size: 14px;
+        font-size: 12px !important;
         background-color: #dc3545;
         border-radius: 13px;
         color: white;
