@@ -52,6 +52,7 @@
   <!--Custom css-->
   <link rel="stylesheet" href="assets/css/address_option.css">
   <link rel="stylesheet" href="assets/css/checkout.css">
+  <link rel="stylesheet" href="assets/css/cart_list.css">
   <link rel="stylesheet" href="assets/css/fetch_product.css">
   <link rel="stylesheet" href="assets/css/footer.css">
   <link rel="stylesheet" href="assets/css/home.css">

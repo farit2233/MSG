@@ -1,0 +1,197 @@
+
+    /* ปรับให้ทันสมัย */
+    .cart-product-logo {
+        width: 6em;
+        height: 6em;
+        object-fit: cover;
+        object-position: center center;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Header bar */
+    .cart-header-bar {
+        border-left: 4px solid #ff6600;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ข้อความสินค้า */
+    .cart-product-title {
+        font-size: 18px;
+        font-weight: 600;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .cart-list-item .text-muted {
+        font-size: 14px;
+    }
+
+    /* ปรับขนาดและสี checkbox ให้เห็นชัด */
+    .cart-list-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-top: 6px;
+    }
+
+    .addcart-plus {
+        background: none;
+        color: #f57421;
+        border: 2px solid #f57421;
+        padding: 5px 15px;
+        margin-right: 1rem;
+    }
+
+    .addcart {
+        background: none;
+        color: #f57421;
+        border: 2px solid #f57421;
+        padding: 10px 50px;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .addcart:hover,
+    .addcart-plus:hover {
+        background-color: #f57421;
+        color: white;
+        display: inline-block;
+    }
+
+
+    .cart-list-item.out-of-stock {
+        background-color: #f8d7da;
+        /* แดงอ่อน */
+        border: 1px solid #f5c6cb;
+        position: relative;
+        opacity: 0.8;
+    }
+
+    .cart-list-item.out-of-stock::before {
+        content: "สินค้าหมด";
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #dc3545;
+        color: white;
+        padding: 3px 8px;
+        font-size: 0.9rem;
+        border-radius: 4px;
+        font-weight: bold;
+        z-index: 2;
+    }
+    .check-all{
+        width: 20px;
+        height: 20px;
+        padding-right: 6px;
+    }
+    .title-all{
+        cursor: pointer;
+        margin-bottom: 0;
+        margin-left: 1rem;
+    }
+    @media (max-width: 431px) {
+
+        .cart-list-item h4,
+        .cart-list-item h5,
+        .cart-list-item .text-muted {
+            font-size: 14px !important;
+            line-height: 1.2;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+    }
+
+    @media (max-width: 932px) {
+
+        .cart-list-item {
+            flex-direction: column !important;
+            align-items: flex-start;
+            padding: 10px;
+        }
+
+        .cart-list-item .d-flex.w-100.align-items-center {
+            flex-direction: row;
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        .cart-list-item .col-2.text-center {
+            flex: 0 0 30%;
+            max-width: 30%;
+            padding-right: 10px;
+        }
+
+        .cart-list-item .cart-product-logo {
+            width: 100%;
+            height: auto;
+        }
+
+        .cart-list-item .col-auto.flex-shrink-1.flex-grow-1 {
+            flex: 1 1 70%;
+            max-width: 70%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .cart-list-item .col-auto.text-right {
+            width: 100%;
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .cart-list-item .input-group {
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        .cart-list-item h4,
+        .cart-list-item h5,
+        .cart-list-item .text-muted {
+            font-size: 22px;
+            line-height: 1.2;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .input-group input.qty {
+            width: 3.5rem;
+            min-width: 3.5rem;
+        }
+
+        .cart-list-item .addcart-plus,
+        .cart-list-item .addcart-minus,
+        .cart-list-item .qty,
+        .cart-list-item .del-item {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.8rem !important;
+            min-width: 35px;
+            height: 35px;
+        }
+
+        .cart-list-item .qty {
+            width: 40px;
+            text-align: center;
+        }
+
+        .cart-list-item .del-item i {
+            font-size: 0.9rem !important;
+        }
+
+        .cart-list-item .text-muted.brand,
+        .cart-list-item .text-muted.category {
+            font-size: 0.75rem !important;
+            /* หรือ 12px */
+            line-height: 1.2;
+        }
+
+        .selected-total {
+            font-size: 20px;
+        }
+    }

@@ -1,229 +1,10 @@
 <?php
 
 if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) {
-    // โหลดจาก database (สำหรับคน login)
 } else {
-    // ใช้ JavaScript อ่านจาก localStorage แล้วแสดงรายการตะกร้า
 }
-
-
-/*if ($_settings->userdata('id') == '' || $_settings->userdata('login_type') != 2) {
- echo "<script>
-    Swal.fire({
-      icon: 'warning',
-    title: 'คุณยังไม่ได้เข้าสู่ระบบ',
-  text: 'โปรดเข้าสู่ระบบก่อนใช้งาน',
-confirmButtonText: 'เข้าสู่ระบบ',
-allowOutsideClick: false,
-allowEscapeKey: false
-}).then((result) => {
-   if (result.isConfirmed) {
-     window.location.replace('./login.php');
-}
- });
-
-</script>";
-exit;
-}*/
 ?>
-<style>
-    /* ปรับให้ทันสมัย */
-    .product-logo {
-        width: 7em;
-        height: 7em;
-        object-fit: cover;
-        object-position: center center;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
 
-    /* Header bar */
-    .cart-header-bar {
-        border-left: 4px solid #ff6600;
-        padding: 16px 20px;
-        border-radius: 12px;
-        margin-bottom: 24px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    /* ข้อความสินค้า */
-    .product-title {
-        font-size: 18px;
-        font-weight: 600;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .cart-item .text-muted {
-        font-size: 14px;
-    }
-
-    /* Grand total */
-    .cart-total {
-        font-size: 22px;
-        font-weight: bold;
-        color: #333;
-        text-align: center !important;
-        margin-top: 1.5rem;
-    }
-
-    /* ปรับขนาดและสี checkbox ให้เห็นชัด */
-    .cart-item input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        margin-top: 6px;
-    }
-
-    .addcart-plus {
-        background: none;
-        color: #f57421;
-        border: 2px solid #f57421;
-        padding: 5px 15px;
-        margin-right: 1rem;
-    }
-
-    .addcart {
-        background: none;
-        color: #f57421;
-        border: 2px solid #f57421;
-        padding: 10px 50px;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .addcart:hover,
-    .addcart-plus:hover {
-        background-color: #f57421;
-        color: white;
-        display: inline-block;
-    }
-
-
-    .cart-item.out-of-stock {
-        background-color: #f8d7da;
-        /* แดงอ่อน */
-        border: 1px solid #f5c6cb;
-        position: relative;
-        opacity: 0.8;
-    }
-
-    .cart-item.out-of-stock::before {
-        content: "สินค้าหมด";
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #dc3545;
-        color: white;
-        padding: 3px 8px;
-        font-size: 0.9rem;
-        border-radius: 4px;
-        font-weight: bold;
-        z-index: 2;
-    }
-
-    @media (max-width: 431px) {
-
-        .cart-item h4,
-        .cart-item h5,
-        .cart-item .text-muted {
-            font-size: 14px !important;
-            line-height: 1.2;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-    }
-
-    @media (max-width: 932px) {
-
-        .cart-item {
-            flex-direction: column !important;
-            align-items: flex-start;
-            padding: 10px;
-        }
-
-        .cart-item .d-flex.w-100.align-items-center {
-            flex-direction: row;
-            flex-wrap: nowrap;
-            width: 100%;
-        }
-
-        .cart-item .col-2.text-center {
-            flex: 0 0 30%;
-            max-width: 30%;
-            padding-right: 10px;
-        }
-
-        .cart-item .product-logo {
-            width: 100%;
-            height: auto;
-        }
-
-        .cart-item .col-auto.flex-shrink-1.flex-grow-1 {
-            flex: 1 1 70%;
-            max-width: 70%;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .cart-item .col-auto.text-right {
-            width: 100%;
-            text-align: right;
-            margin-top: 10px;
-        }
-
-        .cart-item .input-group {
-            flex-wrap: nowrap;
-            width: 100%;
-        }
-
-        .cart-item h4,
-        .cart-item h5,
-        .cart-item .text-muted {
-            font-size: 22px;
-            line-height: 1.2;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        .input-group input.qty {
-            width: 3.5rem;
-            min-width: 3.5rem;
-        }
-
-        .cart-item .addcart-plus,
-        .cart-item .addcart-minus,
-        .cart-item .qty,
-        .cart-item .del-item {
-            padding: 0.25rem 0.5rem !important;
-            font-size: 0.8rem !important;
-            min-width: 35px;
-            height: 35px;
-        }
-
-        .cart-item .qty {
-            width: 40px;
-            text-align: center;
-        }
-
-        .cart-item .del-item i {
-            font-size: 0.9rem !important;
-        }
-
-        .cart-item .text-muted.brand,
-        .cart-item .text-muted.category {
-            font-size: 0.75rem !important;
-            /* หรือ 12px */
-            line-height: 1.2;
-        }
-
-        .selected-total {
-            font-size: 20px;
-        }
-    }
-</style>
 <section class="py-3">
     <div class="container">
         <div class="row mt-n4  justify-content-center align-items-center flex-column">
@@ -235,10 +16,28 @@ exit;
                                 <i class="fa fa-basket-shopping mr-2" style="font-size: 30px;"></i>
                                 <h3 class="d-inline mb-0">ตะกร้าของฉัน</h3>
                             </div>
+
+                            <div class="list-group-item d-flex w-100 align-items-center" style="border-bottom: 2px solid #eee; padding-top: 0.75rem; padding-bottom: 0.75rem;">
+
+                                <div class="col-auto flex-grow-1 d-flex align-items-center">
+
+                                    <input type="checkbox" class="form-check-input check-all" id="check-all-box" title="เลือกทั้งหมด">
+
+                                    <label for="check-all-box" class="title-all">เลือกทั้งหมด</label>
+                                </div>
+
+                                <div class="col-auto">
+                                    <a href="javascript:void(0)" id="deselect-all-link" class="text-danger" style="text-decoration: none; display: none;">ยกเลิกทั้งหมด</a>
+                                </div>
+                            </div>
                             <div id="item_list" class="list-group">
                                 <?php
-                                $gt = 0;
-                                $cart = $conn->query("SELECT 
+                                // ... (โค้ด PHP ที่เหลือ)
+                                ?>
+                                <div id="item_list" class="list-group">
+                                    <?php
+                                    $gt = 0;
+                                    $cart = $conn->query("SELECT 
                                     c.*, 
                                     p.name as product, 
                                     p.brand as brand, 
@@ -254,119 +53,119 @@ exit;
                                 INNER JOIN category_list cc ON p.category_id = cc.id 
                                 WHERE customer_id = '{$_settings->userdata('id')}'");
 
-                                while ($row = $cart->fetch_assoc()):
-                                    $available = $row['available'];
+                                    while ($row = $cart->fetch_assoc()):
+                                        $available = $row['available'];
 
-                                    if ($available >= 100) {
-                                        $max_order_qty = floor($available / 3);
-                                    } elseif ($available >= 50) {
-                                        $max_order_qty = floor($available / 2);
-                                    } elseif ($available >= 30) {
-                                        $max_order_qty = floor($available / 1.5);
-                                    } else {
-                                        $max_order_qty = max(1, floor($available / 1));
-                                    }
+                                        if ($available >= 100) {
+                                            $max_order_qty = floor($available / 3);
+                                        } elseif ($available >= 50) {
+                                            $max_order_qty = floor($available / 2);
+                                        } elseif ($available >= 30) {
+                                            $max_order_qty = floor($available / 1.5);
+                                        } else {
+                                            $max_order_qty = max(1, floor($available / 1));
+                                        }
 
-                                    // ✨ ตรวจสอบและปรับปรุงจำนวนสินค้าในตะกร้า หากเกินจำนวนที่สั่งได้
-                                    if ($row['quantity'] > $max_order_qty && $max_order_qty > 0) {
-                                        $row['quantity'] = $max_order_qty;
-                                        // อัปเดตฐานข้อมูลเบื้องหลังเพื่อความถูกต้อง
-                                        $conn->query("UPDATE `cart_list` SET quantity = '{$max_order_qty}' WHERE id = '{$row['id']}'");
-                                    }
+                                        // ✨ ตรวจสอบและปรับปรุงจำนวนสินค้าในตะกร้า หากเกินจำนวนที่สั่งได้
+                                        if ($row['quantity'] > $max_order_qty && $max_order_qty > 0) {
+                                            $row['quantity'] = $max_order_qty;
+                                            // อัปเดตฐานข้อมูลเบื้องหลังเพื่อความถูกต้อง
+                                            $conn->query("UPDATE `cart_list` SET quantity = '{$max_order_qty}' WHERE id = '{$row['id']}'");
+                                        }
 
-                                    $show_discount = !empty($row['discounted_price']) && $row['discounted_price'] < $row['price'];
-                                    $price_to_use = $show_discount ? $row['discounted_price'] : $row['price'];
-                                    $gt += $price_to_use * $row['quantity'];
-                                ?>
+                                        $show_discount = !empty($row['discounted_price']) && $row['discounted_price'] < $row['price'];
+                                        $price_to_use = $show_discount ? $row['discounted_price'] : $row['price'];
+                                        $gt += $price_to_use * $row['quantity'];
+                                    ?>
 
-                                    <div class="list-group-item cart-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
-                                        data-id='<?= $row['id'] ?>'
-                                        data-max='<?= $max_order_qty ?>'
-                                        data-unit-price='<?= $price_to_use ?>'
-                                        data-original-price='<?= $row['price'] ?>'>
+                                        <div class="list-group-item cart-list-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
+                                            data-id='<?= $row['id'] ?>'
+                                            data-max='<?= $max_order_qty ?>'
+                                            data-unit-price='<?= $price_to_use ?>'
+                                            data-original-price='<?= $row['price'] ?>'>
 
-                                        <div class="col-auto pr-2">
-                                            <input type="checkbox"
-                                                class="form-check-input cart-check"
-                                                name="selected_cart[]"
-                                                value="<?= $row['id'] ?>"
-                                                id="cart_check_<?= $row['id'] ?>"
-                                                data-price="<?= $price_to_use * $row['quantity'] ?>"
-                                                <?= $row['available'] <= 0 ? 'disabled' : '' ?>>
-                                        </div>
-
-                                        <div class="cart-item-content d-flex w-100 align-items-start">
-                                            <div class="col-3 text-center">
-                                                <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>">
-
-                                                    <?php
-                                                    // 1. ดึง Path หลัก
-                                                    $cart_main_path = $row['image_path'];
-                                                    // 2. แปลงเป็น Path ขนาดกลาง (Medium)
-                                                    $cart_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $cart_main_path);
-                                                    ?>
-                                                    <img src="<?= validate_image($cart_medium_path) ?>" class="product-logo" alt="" style="cursor: pointer;">
-                                                </a>
+                                            <div class="col-auto pr-2">
+                                                <input type="checkbox"
+                                                    class="form-check-input cart-check"
+                                                    name="selected_cart[]"
+                                                    value="<?= $row['id'] ?>"
+                                                    id="cart_check_<?= $row['id'] ?>"
+                                                    data-price="<?= $price_to_use * $row['quantity'] ?>"
+                                                    <?= $row['available'] <= 0 ? 'disabled' : '' ?>>
                                             </div>
 
-                                            <div class="col-auto flex-shrink-1 flex-grow-1">
-                                                <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>" style="text-decoration: none; color: inherit;">
-                                                    <h4 class="product-title" style="cursor: pointer;"><?= $row['product'] ?></h4>
-                                                </a>
+                                            <div class="cart-list-item-content d-flex w-100 align-items-start">
+                                                <div class="col-3 text-center">
+                                                    <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>">
 
-                                                <div class="text-muted d-flex w-100">
-                                                    <div class="input-group" style="width: 20rem;">
-                                                        <button class="btn addcart-plus minus-qty" type="button">-</button>
-                                                        <input type="number" class="form-control text-center qty" value="<?= $row['quantity'] ?>" min="1" max="<?= $row['available'] ?>" required>
-                                                        <button class="btn addcart-plus add-qty" type="button">+</button>
-                                                        <button class="btn btn-danger ms-2 del-item" type="button">
-                                                            <i class="fa-solid fa-trash-can"></i>
-                                                        </button>
+                                                        <?php
+                                                        // 1. ดึง Path หลัก
+                                                        $cart_main_path = $row['image_path'];
+                                                        // 2. แปลงเป็น Path ขนาดกลาง (Medium)
+                                                        $cart_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $cart_main_path);
+                                                        ?>
+                                                        <img src="<?= validate_image($cart_medium_path) ?>" class="cart-product-logo" alt="" style="cursor: pointer;">
+                                                    </a>
+                                                </div>
+
+                                                <div class="col-auto flex-shrink-1 flex-grow-1">
+                                                    <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>" style="text-decoration: none; color: inherit;">
+                                                        <h4 class="cart-product-title" style="cursor: pointer;"><?= $row['product'] ?></h4>
+                                                    </a>
+
+                                                    <div class="text-muted d-flex w-100">
+                                                        <div class="input-group" style="width: 20rem;">
+                                                            <button class="btn addcart-plus minus-qty" type="button">-</button>
+                                                            <input type="number" class="form-control text-center qty" value="<?= $row['quantity'] ?>" min="1" max="<?= $row['available'] ?>" required>
+                                                            <button class="btn addcart-plus add-qty" type="button">+</button>
+                                                            <button class="btn btn-danger ms-2 del-item" type="button">
+                                                                <i class="fa-solid fa-trash-can"></i>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-auto text-right">
-                                            <?php if ($show_discount): ?>
-                                                <h5 class="text-muted mb-0">
-                                                    <del><?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</del>
-                                                </h5>
-                                                <h4><b class="text-danger">ลดเหลือ: <?= format_num($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
-                                            <?php else: ?>
-                                                <h4><b>ราคา: <?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
-                                            <?php endif; ?>
-                                        </div>
+                                            <div class="col-auto text-right">
+                                                <?php if ($show_discount): ?>
+                                                    <h5 class="text-muted mb-0">
+                                                        <del><?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</del>
+                                                    </h5>
+                                                    <h4><b class="text-danger">ลดเหลือ: <?= format_num($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
+                                                <?php else: ?>
+                                                    <h4><b>ราคา: <?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
+                                                <?php endif; ?>
+                                            </div>
 
+                                        </div>
+                                    <?php endwhile; ?>
+
+                                </div>
+                                <div id="guest_cart_container" style="display: none;"></div>
+                                <?php if ($cart->num_rows <= 0 && $_settings->userdata('id') != ''): ?>
+                                    <h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>
+                                <?php endif; ?>
+                                <div class="d-flex justify-content-end py-3">
+                                    <div class="col-auto">
+                                        <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0.00</span></b> บาท</h3>
                                     </div>
-                                <?php endwhile; ?>
-
-                            </div>
-                            <div id="guest_cart_container" style="display: none;"></div>
-                            <?php if ($cart->num_rows <= 0 && $_settings->userdata('id') != ''): ?>
-                                <h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>
-                            <?php endif; ?>
-                            <div class="d-flex justify-content-end py-3">
-                                <div class="col-auto">
-                                    <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0.00</span></b> บาท</h3>
                                 </div>
+                                <?php if ($gt > 0): ?>
+                                    <div class="py-1 text-center">
+                                        <form id="checkout-form" method="post" action="./?p=checkout">
+                                            <input type="hidden" name="selected_items" id="selected_items">
+                                            <button type="submit" class="btn addcart rounded-pill">
+                                                ชำระรายการที่เลือก
+                                            </button>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
                             </div>
-                            <?php if ($gt > 0): ?>
-                                <div class="py-1 text-center">
-                                    <form id="checkout-form" method="post" action="./?p=checkout">
-                                        <input type="hidden" name="selected_items" id="selected_items">
-                                        <button type="submit" class="btn addcart rounded-pill">
-                                            ชำระรายการที่เลือก
-                                        </button>
-                                    </form>
-                                </div>
-                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
 </section>
 <script>
@@ -504,14 +303,14 @@ exit;
 
         // ✨ (แก้ไข) Event 'input': ทำงานทุกครั้งที่พิมพ์ อัปเดตราคาที่แสดงผล (No AJAX)
         $('.qty:not(.guest)').on('input', function() {
-            var item = $(this).closest('.cart-item');
+            var item = $(this).closest('.cart-list-item');
             // เรียกฟังก์ชันอัปเดตราคา (Visual only)
             update_visual_price(item);
         });
 
         // ✨ (ใหม่) Event 'change': ทำงานเมื่อคลิกออก/พิมพ์เสร็จ บันทึกลง DB (AJAX)
         $('.qty:not(.guest)').on('change', function() {
-            var item = $(this).closest('.cart-item');
+            var item = $(this).closest('.cart-list-item');
             var qtyInput = $(this);
             var qtyNum = parseInt(qtyInput.val());
             var max = parseInt(item.attr('data-max'));
@@ -533,7 +332,7 @@ exit;
 
         // (คงเดิม) Event ปุ่มบวก
         $('.add-qty:not(.guest)').click(function() {
-            var item = $(this).closest('.cart-item');
+            var item = $(this).closest('.cart-list-item');
             var qtyInput = item.find('.qty');
             var qty = parseInt(qtyInput.val()) || 1;
             var max = parseInt(item.attr('data-max'));
@@ -552,7 +351,7 @@ exit;
 
         // (คงเดิม) Event ปุ่มลบ
         $('.minus-qty:not(.guest)').click(function() {
-            var item = $(this).closest('.cart-item');
+            var item = $(this).closest('.cart-list-item');
             var qtyInput = item.find('.qty');
             var qty = parseInt(qtyInput.val()) || 1;
             if (qty > 1) {
@@ -564,7 +363,7 @@ exit;
 
         // (คงเดิม) Event ปุ่มลบสินค้า
         $('.del-item:not(.guest)').click(function() {
-            var id = $(this).closest('.cart-item').attr('data-id');
+            var id = $(this).closest('.cart-list-item').attr('data-id');
             Swal.fire({
                 icon: 'warning',
                 title: 'คุณแน่ใจไหม?',
@@ -591,7 +390,7 @@ exit;
     // ✨ (ใหม่) Event 'input' (สำหรับ Guest) - Visual only
     document.addEventListener('input', function(e) {
         if (!e.target.matches('.qty.guest')) return;
-        const itemEl = e.target.closest('.cart-item');
+        const itemEl = e.target.closest('.cart-list-item');
         const index = parseInt(itemEl.dataset.id);
         const newQty = e.target.value; // ส่งค่า string
         // (index, value, isDirectSet, saveToStorage)
@@ -601,7 +400,7 @@ exit;
     // ✨ (ใหม่) Event 'change' (สำหรับ Guest) - Save to localStorage
     document.addEventListener('change', function(e) {
         if (!e.target.matches('.qty.guest')) return;
-        const itemEl = e.target.closest('.cart-item');
+        const itemEl = e.target.closest('.cart-list-item');
         const index = parseInt(itemEl.dataset.id);
         const newQty = e.target.value; // ส่งค่า string
         // (index, value, isDirectSet, saveToStorage)
@@ -666,21 +465,21 @@ exit;
                     }
 
                     html += `
-            <div class="list-group-item cart-item d-flex w-100 ${isOutOfStock ? 'out-of-stock' : ''}" data-id="${index}" data-product-id="${item.id}" data-max="${max_order_qty}">
+            <div class="list-group-item cart-list-item d-flex w-100 ${isOutOfStock ? 'out-of-stock' : ''}" data-id="${index}" data-product-id="${item.id}" data-max="${max_order_qty}">
                 <div class="col-auto pr-2">
                     <input type="checkbox" class="form-check-input cart-check guest" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''} />
                 </div>
 
-                <div class="cart-item-content d-flex w-100 align-items-start">
+                <div class="cart-list-item-content d-flex w-100 align-items-start">
                     <div class="col-3 text-center">
                         <a href="./?p=products/view_product&id=${item.id}">
-                            <img src="${image_path}" class="product-logo" alt="" style="cursor: pointer;"> 
+                            <img src="${image_path}" class="cart-product-logo" alt="" style="cursor: pointer;"> 
                         </a>
                     </div>
 
                     <div class="col-auto flex-shrink-1 flex-grow-1">
                         <a href="./?p=products/view_product&id=${item.id}" style="text-decoration: none; color: inherit;">
-                            <h4 class="product-title" style="cursor: pointer;">${item.name}</h4>
+                            <h4 class="cart-product-title" style="cursor: pointer;">${item.name}</h4>
                         </a>
                         
                         <div class="text-muted d-flex w-100">
@@ -723,7 +522,7 @@ exit;
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.guest')) return;
 
-        const itemEl = e.target.closest('.cart-item');
+        const itemEl = e.target.closest('.cart-list-item');
         if (!itemEl) return;
         const index = parseInt(itemEl.dataset.id);
 
@@ -759,7 +558,7 @@ exit;
         if (!cart[index]) return;
 
         const itemData = cart[index];
-        const itemEl = document.querySelector(`.cart-item[data-id="${index}"]`);
+        const itemEl = document.querySelector(`.cart-list-item[data-id="${index}"]`);
         if (!itemEl) return;
 
         const qtyInput = itemEl.querySelector('.qty.guest');
@@ -846,9 +645,57 @@ exit;
     // ===================================
     // SECTION: Common Functions (คำนวณราคารวม, ตรวจสอบก่อนชำระเงิน)
     // ===================================
+
+    function syncSelectAll() {
+        var $totalCheckboxes = $('.cart-check:not(:disabled)');
+        var $totalChecked = $('.cart-check:not(:disabled):checked');
+        var $selectAllBox = $('#check-all-box');
+        var $deselectLink = $('#deselect-all-link');
+
+        if ($totalCheckboxes.length === 0) {
+            // ไม่มีสินค้าที่เลือกได้
+            $selectAllBox.prop('checked', false);
+            $selectAllBox.prop('disabled', true);
+            $deselectLink.hide();
+        } else {
+            // มีสินค้า
+            $selectAllBox.prop('disabled', false);
+            // ตรวจสอบว่า 'เลือกทั้งหมด' ควรถูกติ๊กหรือไม่
+            $selectAllBox.prop('checked', $totalCheckboxes.length === $totalChecked.length);
+
+            // แสดง/ซ่อน ลิงก์ 'ยกเลิกทั้งหมด'
+            if ($totalChecked.length > 0) {
+                $deselectLink.show();
+            } else {
+                $deselectLink.hide();
+            }
+        }
+    }
+
     $(function() {
-        calculateSelectedTotal();
-        $(document).on('change', '.cart-check', calculateSelectedTotal);
+
+        // ✨ (แก้ไข) Event เมื่อติ๊ก checkbox ของสินค้า
+        $(document).on('change', '.cart-check', function() {
+            calculateSelectedTotal(); // 1. คำนวณราคารวม (ตัวเดิม)
+            syncSelectAll(); // 2. ซิงค์ปุ่ม 'เลือกทั้งหมด'
+        });
+
+        // ✨ (ใหม่) Event เมื่อติ๊ก 'เลือกทั้งหมด'
+        $('#check-all-box').on('change', function() {
+            var isChecked = $(this).is(':checked');
+            // เลือก/ไม่เลือก รายการทั้งหมดที่ *ไม่พิการ*
+            // และสั่ง .trigger('change') เพื่อให้ listener ด้านบนทำงาน (คำนวณราคา + ซิงค์)
+            $('.cart-check:not(:disabled)').prop('checked', isChecked).trigger('change');
+        });
+
+        // ✨ (ใหม่) Event เมื่อคลิก 'ยกเลิกทั้งหมด'
+        $('#deselect-all-link').on('click', function(e) {
+            e.preventDefault();
+            // ยกเลิกการเลือก รายการที่ถูกติ๊กไว้
+            // และสั่ง .trigger('change') เพื่อให้ listener ด้านบนทำงาน (คำนวณราคา + ซิงค์)
+            $('.cart-check:checked').prop('checked', false).trigger('change');
+        });
+
 
         $('#checkout-form').submit(function(e) {
             var selected = [];
@@ -856,21 +703,18 @@ exit;
             var errorMessage = '';
 
             $('.cart-check:checked').each(function() {
-                var item = $(this).closest('.cart-item');
+                var item = $(this).closest('.cart-list-item');
                 if ($(this).hasClass('guest')) {
                     selected.push(item.data('id'));
                 } else {
                     selected.push($(this).val());
                 }
 
-                // ✨ (สำคัญ) อ่านค่า qty ล่าสุดจากช่อง input โดยตรง
+                // (คงเดิม) อ่านค่า qty ล่าสุด
                 var qty = parseInt(item.find('.qty').val());
-
-                // ✨ (สำคัญ) ตรวจสอบค่าว่าง/0 ก่อนส่ง
                 if (isNaN(qty) || qty < 1) {
-                    qty = 1; // (ถึงแม้ว่า change event จะดักไว้แล้ว แต่กันเหนียว)
+                    qty = 1;
                 }
-
                 var max = parseInt(item.attr('data-max'));
                 if (qty > max) {
                     valid = false;
@@ -899,11 +743,13 @@ exit;
             }
             $('#selected_items').val(selected.join(','));
         });
+
+        // ✨ (ใหม่) เรียกซิงค์สถานะครั้งแรกเมื่อโหลดหน้า
+        syncSelectAll();
+        calculateSelectedTotal(); // เรียกคำนวณราคาครั้งแรก
     });
 
-    /**
-     * (คงเดิม) ฟังก์ชันคำนวณยอดรวมที่เลือก
-     */
+
     function calculateSelectedTotal() {
         let total = 0;
         $('.cart-check:checked').each(function() {
@@ -913,11 +759,6 @@ exit;
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        if (formattedTotal.endsWith('.00')) {
-            formattedTotal = total.toLocaleString('th-TH', {
-                maximumFractionDigits: 0
-            });
-        }
         $('#selected-total').text(formattedTotal);
     }
 </script>
