@@ -203,7 +203,7 @@ function formatDateThai($date)
 										<td class="p-1 text-center align-middle">
 											<div class="btn-group">
 												<button class="btn btn-flat btn-xs bg-gradient-dark edit_stock" title="Edit Stock" type="button" data-id='<?= $row['id'] ?>'><i class="fa fa-edit text-sm"></i></button>
-												<button class="btn btn-flat btn-xs btn-danger bg-gradient-danger delete_stock" title="Delete Stock" type="button" data-code='<?= $row['code'] ?>' data-id='<?= $row['id'] ?>'><i class="fa fa-trash text-sm"></i></button>
+												<button class="btn btn-flat btn-xs btn-danger bg-gradient-danger delete_stock" title="Delete Stock" type="button" data-code='<?= $row['sku'] ?>' data-id='<?= $row['id'] ?>'><i class="fa fa-trash text-sm"></i></button>
 											</div>
 										</td>
 									</tr>
