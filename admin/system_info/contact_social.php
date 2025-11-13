@@ -55,20 +55,28 @@
                             <textarea row="3" class="form-control form-control-sm rounded-0 contact-input" name="Synopsis" id="Synopsis"><?php echo $_settings->info('Synopsis') ?></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="phone" class="control-label contact-label">โทรศัพท์</label>
+                            <label for="company_name" class="control-label contact-label">ชื่อบริษัท</label>
+                            <input type="text" class="form-control form-control-sm rounded-0 contact-input" name="company_name" id="company_name" value="<?php echo $_settings->info('company_name') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="head_office" class="control-label contact-label">สำนักงานใหญ่</label>
+                            <textarea row="3" class="form-control form-control-sm rounded-0 contact-input" name="head_office" id="head_office"><?php echo $_settings->info('head_office') ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="branch_office" class="control-label contact-label">สาขาย่อย</label>
+                            <textarea row="3" class="form-control form-control-sm rounded-0 contact-input" name="branch_office" id="branch_office"><?php echo $_settings->info('branch_office') ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone" class="control-label contact-label">หมายเลขโทรศัพท์</label>
                             <input type="text" class="form-control form-control-sm rounded-0 contact-input" name="phone" id="phone" value="<?php echo $_settings->info('phone') ?>">
                         </div>
                         <div class="form-group">
-                            <label for="mobile" class="control-label contact-label">เบอร์โทร</label>
+                            <label for="mobile" class="control-label contact-label">หมายเลขมือถือ</label>
                             <input type="text" class="form-control form-control-sm rounded-0 contact-input" name="mobile" id="mobile" value="<?php echo $_settings->info('mobile') ?>">
                         </div>
                         <div class="form-group">
                             <label for="email" class="control-label contact-label">Email</label>
                             <input type="email" class="form-control form-control-sm rounded-0 contact-input" name="email" id="email" value="<?php echo $_settings->info('email') ?>">
-                        </div>
-                        <div class="form-group">
-                            <label for="address" class="control-label contact-label">ที่อยู่</label>
-                            <textarea row="3" class="form-control form-control-sm rounded-0 contact-input" name="address" id="address"><?php echo $_settings->info('address') ?></textarea>
                         </div>
                         <div class="form-group">
                             <label for="office_hours" class="control-label contact-label">วันเวลาเปิดทำการ</label>
@@ -131,5 +139,45 @@
                 location.reload();
             }
         });
+
+        // --- เพิ่มส่วนสำหรับ submit form ---
+        $('#system-frm').submit(function(e) {
+            e.preventDefault();
+            var _this = $(this);
+            $('.err-msg').remove();
+            start_loader();
+            $.ajax({
+                url: _base_url_ + "classes/SystemSettings.php?f=update_settings",
+                data: new FormData($(this)[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    alert_toast("An error occured", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        alert_toast("บันทึกข้อมูลเรียบร้อยแล้ว", 'success');
+                        // รีเซ็ต formChanged หลังจากบันทึกสำเร็จ
+                        formChanged = false;
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        $('#msg').html('<div class="alert alert-danger">' + resp.msg + '</div>')
+                    } else {
+                        $('#msg').html('<div class="alert alert-danger">An error occured.</div>')
+                    }
+                    end_loader();
+                    // เลื่อนขึ้นไปบนสุดเพื่อดู message
+                    $('html, body').animate({
+                        scrollTop: 0
+                    }, 'fast');
+                }
+            })
+        })
+
     });
 </script>

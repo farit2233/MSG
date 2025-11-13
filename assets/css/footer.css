@@ -93,7 +93,7 @@
   .fab-container.active .fab-option:nth-child(7) { transition-delay: 0.35s; }/* Phone */
 
   /* 6. (Optional) สีเฉพาะสำหรับแต่ละปุ่ม */
-  .fab-option.phone { background-color: #007bff; color: white; } /* สีโทรศัพท์ (เหมือนปุ่มหลัก) */
+  .fab-option.phone { background-color: #28d230; color: white; } /* สีโทรศัพท์ (เหมือนปุ่มหลัก) */
   .fab-option.line  { background-color: #06C755; color: white; } /* สีเขียว Line */
   .fab-option.facebook { background-color: #1877F2; color: white; } /* สีฟ้า Facebook */
   .fab-option.email { background-color: #dc3545; color: white; } /* สีแดง (อีเมล) */
