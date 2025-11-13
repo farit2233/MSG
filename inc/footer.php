@@ -241,10 +241,19 @@
   <div class="fab-container" id="fab-contact-menu">
 
     <div class="fab-main" id="fab-main-button">
-      <i class="fas fa-plus"></i>
+      <i class="fas fa-plus fa-fw"></i>
     </div>
+
     <a href="mailto:<?php echo $_settings->info('email') ?>" target="_blank" class="fab-option email" title="อีเมล">
       <i class="fas fa-envelope"></i>
+    </a>
+
+    <a href="<?php echo $_settings->info('YouTube') ?>" target="_blank" class="fab-option youtube" title="YouTube">
+      <i class="fab fa-youtube"></i>
+    </a>
+
+    <a href="<?php echo $_settings->info('Instagram') ?>" target="_blank" class="fab-option instagram" title="Instagram">
+      <i class="fab fa-instagram"></i>
     </a>
 
     <a href="<?php echo $_settings->info('Facebook') ?>" target="_blank" class="fab-option facebook" title="Facebook">
@@ -260,7 +269,6 @@
       class="fab-option phone"
       title="ดูข้อมูลติดต่อ"
       data-tel="tel:<?php echo str_replace(['-', ' '], '', $_settings->info('mobile')) ?>">
-
       <i class="fas fa-phone"></i>
     </a>
 

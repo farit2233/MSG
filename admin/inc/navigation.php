@@ -335,7 +335,7 @@
                   </a>
                 </li-->
                 <li class="nav-item dropdown">
-                  <a href="<?php echo base_url ?>admin/?page=system_info/contact_info" class="nav-link nav-system_info_contact_info">
+                  <a href="<?php echo base_url ?>admin/?page=system_info/contact_social" class="nav-link nav-system_info_contact_social">
                     <i class="nav-icon fas fa-phone-square-alt"></i>
                     <p>
                       หน้าติดต่อ
