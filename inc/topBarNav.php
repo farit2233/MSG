@@ -493,7 +493,6 @@ while ($type_row = $type_qry->fetch_assoc()) {
 <script id="product-data-json" type="application/json">
   <?= json_encode($product_structure); ?>
 </script>
-<button id="toTopBtn" title="กลับขึ้นบน"><i class="fas fa-chevron-up"></i></button>
 
 <script>
   let scrollPosition = 0;
@@ -546,21 +545,6 @@ while ($type_row = $type_qry->fetch_assoc()) {
     }, false);
 
 
-    // --- To Top Button ---
-    const toTopBtn = document.getElementById('toTopBtn');
-    window.addEventListener('scroll', function() {
-      if (window.scrollY > 200) {
-        toTopBtn.classList.add('show');
-      } else {
-        toTopBtn.classList.remove('show');
-      }
-    });
-    toTopBtn.addEventListener('click', function() {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    });
 
     const accountMenu = document.querySelector('.account-menu');
     const toggleButton = document.getElementById('accountMenuToggle');

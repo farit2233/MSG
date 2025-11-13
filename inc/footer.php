@@ -3,6 +3,44 @@
       $('#p_use').click(function() {
         uni_modal("Privacy Policy", "policy.php", "mid-large")
       })
+
+      $('#fab-main-button').click(function(e) {
+        // ให้สลับ (toggle) คลาส 'active' ที่ตัวครอบ (ID: fab-contact-menu)
+        $('#fab-contact-menu').toggleClass('active');
+      });
+
+      function isMobileDevice() {
+        // ใช้ regex แบบง่ายๆ ตรวจสอบ User Agent
+        return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      }
+
+      // 2. ตรวจสอบและเปลี่ยนลิงก์
+      if (isMobileDevice()) {
+        var phoneButton = $('#fab-phone-button'); // หาปุ่มที่เราตั้ง id ไว้
+        var telLink = phoneButton.data('tel'); // ดึงเบอร์โทรจาก data-tel
+
+        if (telLink) {
+          phoneButton.attr('href', telLink); // 
+          phoneButton.attr('title', 'โทร'); // (Optional) เปลี่ยน title กลับเป็น "โทร"
+        }
+      }
+
+      // --- To Top Button ---
+      const toTopBtn = document.getElementById('toTopBtn');
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 200) {
+          toTopBtn.classList.add('show');
+        } else {
+          toTopBtn.classList.remove('show');
+        }
+      });
+      toTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+
       window.viewer_modal = function($src = '') {
         start_loader()
         var t = $src.split('.')
@@ -198,6 +236,40 @@
       }
     })
   </script>
+
+
+  <div class="fab-container" id="fab-contact-menu">
+
+    <div class="fab-main" id="fab-main-button">
+      <i class="fas fa-plus"></i>
+    </div>
+    <a href="mailto:<?php echo $_settings->info('email') ?>" target="_blank" class="fab-option email" title="อีเมล">
+      <i class="fas fa-envelope"></i>
+    </a>
+
+    <a href="<?php echo $_settings->info('Facebook') ?>" target="_blank" class="fab-option facebook" title="Facebook">
+      <i class="fab fa-facebook-f"></i>
+    </a>
+
+    <a href="https://line.me/ti/p/~<?php echo $_settings->info('Line') ?>" target="_blank" class="fab-option line" title="Line">
+      <i class="fab fa-line"></i>
+    </a>
+
+    <a href="./?p=contact"
+      id="fab-phone-button"
+      class="fab-option phone"
+      title="ดูข้อมูลติดต่อ"
+      data-tel="tel:<?php echo str_replace(['-', ' '], '', $_settings->info('mobile')) ?>">
+
+      <i class="fas fa-phone"></i>
+    </a>
+
+
+    <button id="toTopBtn" title="กลับขึ้นบน"><i class="fas fa-chevron-up"></i></button>
+
+  </div>
+
+
   <!-- Footer-->
   <?php if ($_settings->userdata('id') == '' && $_settings->userdata('login_type') != 2): ?>
     <hr class="my-4" style="border-top: 1px solid #ccc; margin: 2rem 0;">
@@ -210,6 +282,9 @@
       </div>
     <?php endif; ?>
     </div>
+
+
+
     <footer class="py-5 text-white bg-foot-msg">
       <div class="container">
         <div class="row">
@@ -221,24 +296,51 @@
 
           <!-- บริการลูกค้า -->
           <div class="col-md-3 mb-4">
-            <h6>บริการลูกค้า</h6>
+            <h6>ประเภทสินค้า</h6>
             <ul class="list-unstyled">
-              <li><a href="./?p=help" class="text-white">คำถามที่พบบ่อย</a></li>
-              <li><a href="./?p=help" class="text-white">การจัดส่ง</a></li>
-              <li><a href="./?p=help" class="text-white">การคืนสินค้า</a></li>
-              <li><a href="./?p=contact" class="text-white">ติดต่อเรา</a></li>
+              <?php
+              // --- ส่วนที่ 1: การเชื่อมต่อฐานข้อมูล ---
+              // สมมติว่าคุณมี $conn ที่ใช้เชื่อมต่อฐานข้อมูลแล้ว (เช่น มาจากไฟล์ include)
+              // ถ้ายังไม่มี คุณต้องเชื่อมต่อก่อน
+              // $conn = new mysqli($servername, $username, $password, $dbname);
+              // mysqli_set_charset($conn, "utf8"); // ตั้งค่า encoding (แนะนำ)
+
+
+              // --- ส่วนที่ 2: การดึงข้อมูล (Query) ---
+              // ดึงข้อมูลประเภทสินค้า 5 รายการ (ตามที่โจทย์ระบุ)
+              // ถ้าต้องการแสดง "ทุก" ประเภท ให้ลบ "LIMIT 5" ออก
+              $sql = "SELECT id, name FROM product_type LIMIT 5";
+              $result = $conn->query($sql);
+
+              // --- ส่วนที่ 3: การวนลูป (Loop) เพื่อแสดงผล ---
+              if ($result && $result->num_rows > 0) {
+                // วนลูปข้อมูลที่ได้มาทีละแถว
+                while ($row = $result->fetch_assoc()) {
+
+                  // สร้างลิงก์ตาม path ที่คุณต้องการ
+                  $link = "./?p=products&tid=" . $row['id'];
+
+                  // แสดงผล (echo) HTML ที่เป็น <li> ออกมา
+                  echo '<li><a href="' . $link . '" class="text-white">' . htmlspecialchars($row['name']) . '</a></li>';
+                }
+              } else {
+                // กรณีไม่พบข้อมูลในตาราง
+                echo '<li><span class="text-white">ไม่พบข้อมูล</span></li>';
+              }
+
+              // $conn->close(); // ปิดการเชื่อมต่อถ้าจำเป็น
+              ?>
             </ul>
           </div>
 
           <!-- นโยบายและข้อกำหนด -->
           <div class="col-md-3 mb-4">
-            <h6>นโยบายและข้อกำหนด</h6>
+            <h6>เกี่ยวกับเรา</h6>
             <ul class="list-unstyled">
+              <li><a href="./" class="text-white">หน้าแรก</a></li>
               <li><a href="./?p=about" class="text-white">เกี่ยวกับบริษัท</a></li>
-              <li><a href="./?p=about" class="text-white">โครงสร้างบริษัท</a></li>
-              <li><a href="#" class="text-white">ร่วมงานกับเรา</a></li>
-              <li><a href="./?p=about" class="text-white">ข้อตกลงการใช้งาน</a></li>
-              <li><a href="./?p=about" class="text-white">นโยบายความเป็นส่วนตัว</a></li>
+              <li><a href="./?p=contact" class="text-white">ติดต่อเรา</a></li>
+              <li><a href="./?p=promotions" class="text-white">โปรโมชัน</a></li>
             </ul>
           </div>
 
@@ -257,9 +359,6 @@
         <p class="text-center mb-0">&copy; <?php echo date('Y') ?> <?php echo $_settings->info('name') ?>. สงวนลิขสิทธิ์.</p>
       </div>
     </footer>
-
-
-
 
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
     <script>
