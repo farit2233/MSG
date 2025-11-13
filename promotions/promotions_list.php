@@ -74,14 +74,11 @@ $total_promotions = $qry_promo->num_rows;
 
 <div class="promotion-background">
     <section class="py-5 mx-5">
-        <div class="d-flex flex-column justify-content-center align-items-center text-center">
-            <h1 class="text-center head-promotion fw-bold text-orange">
-                <i class="fa-solid fa-ticket"></i> <?= $page_title ?>
+        <div class="content py-5 px-3">
+            <h1 class="text-center">
+                <?= $page_title ?>
             </h1>
-            <?php if (!empty($page_description)): ?>
-                <hr>
-                <p class="m-0"><small><em><?= html_entity_decode($page_description) ?></em></small></p>
-            <?php endif; ?>
+            <hr>
         </div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-transparent px-0">

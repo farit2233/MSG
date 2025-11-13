@@ -1,4 +1,10 @@
 <style>
+    .page-subtitle {
+        font-size: 20px;
+        font-weight: normal;
+        font-style: italic;
+    }
+
     .separator {
         font-size: 18px;
         padding: 0 10px;
@@ -150,12 +156,15 @@ if (!function_exists('format_price_custom')) {
 
 <section class="py-3">
     <div class="container">
-        <div class="content py-5 px-3" align="center">
-            <h1 class=""><?= $page_title ?></h1>
-            <?php if (!empty($page_description)): ?>
-                <hr>
-                <p class="m-0"><small><em><?= html_entity_decode($page_description) ?></em></small></p>
-            <?php endif; ?>
+        <div class="content py-5 px-3">
+            <h1>
+                <?= $page_title ?>
+
+                <?php if (!empty($page_description)): ?>
+                    <em class="page-subtitle"> - <?= html_entity_decode($page_description) ?></em>
+                <?php endif; ?>
+            </h1>
+            <hr>
         </div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-transparent px-0">
