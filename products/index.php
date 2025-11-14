@@ -154,9 +154,9 @@ if (!function_exists('format_price_custom')) {
 }
 ?>
 
-<section class="py-5">
+<section class="py-3">
     <div class="container">
-        <div class="content py-4 px-3">
+        <div class="content py-5 px-3">
             <h1>
                 <?= $page_title ?>
 

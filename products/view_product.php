@@ -334,9 +334,20 @@ if (!function_exists('format_price_custom')) {
 									<div class=" mt-4">
 										<div class="border rounded p-3 bg-light shadow-sm">
 											<h6 class="fw-bold">ติดต่อสอบถาม</h6>
-											<p class="mb-1"><i class="fab fa-line text-success"></i><a href="<?php echo $_settings->info('Line') ?>" target="_blank"> Line </a></p>
-											<p class="mb-0"><i class="fab fa-facebook text-primary"></i><a href="<?php echo $_settings->info('Facebook') ?>" target="_blank"> Facebook </a></p>
-											<p class="mb-0"><i class="fa fa-phone text-primary"></i> โทร: <?php echo $_settings->info('mobile') ?></p>
+
+											<p class="mb-1">
+												<i class="fa fa-phone text-primary"></i>
+												โทร: <?php echo htmlspecialchars($_settings->info('mobile')); ?>
+											</p>
+											<p class="mb-0">
+												<i class="fab fa-line text-success"></i>
+												<a href="https://line.me/ti/p/~<?php echo htmlspecialchars($_settings->info('Line')); ?>" target="_blank"> Line </a>
+											</p>
+
+											<p class="mb-0">
+												<i class="fab fa-facebook text-primary"></i>
+												<a href="<?php echo htmlspecialchars($_settings->info('Facebook')); ?>" target="_blank"> Facebook </a>
+											</p>
 										</div>
 									</div>
 
