@@ -505,6 +505,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                 container.innerHTML = html;
                 container.style.display = 'block';
                 calculateSelectedTotal();
+                syncSelectAll();
             })
             .catch(error => {
                 console.error('เกิดข้อผิดพลาดในการดึงข้อมูลสต็อกสินค้า:', error);
@@ -569,14 +570,16 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
             // มาจาก 'input' หรือ 'change' (value คือ string)
             newQtyNum = parseInt(value);
         } else {
-            // มาจาก '+' หรือ '-' (value คือ 1 หรือ -1)
-            newQtyNum = (itemData.qty || 1) + value;
+            // ✨ แก้ไข 1: อ่านค่าปัจจุบันจากช่อง input (qtyInput.value)
+            // ไม่ใช่จาก localStorage (itemData.qty)
+            let currentQtyInBox = parseInt(qtyInput.value) || 1;
+            newQtyNum = currentQtyInBox + value;
         }
 
         // --- Validation ---
         if (!isNaN(newQtyNum) && newQtyNum > max) {
             newQtyNum = max;
-            qtyInput.value = newQtyNum;
+            qtyInput.value = newQtyNum; // อัปเดตช่อง input
             Swal.fire({
                 icon: 'warning',
                 title: 'สินค้าในคลังมีไม่พอ',
@@ -588,8 +591,10 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         if (saveToStorage) {
             if (isNaN(newQtyNum) || newQtyNum < 1) {
                 newQtyNum = 1;
-                qtyInput.value = newQtyNum; // อัปเดตช่อง input
             }
+            // ✨ แก้ไข 2: อัปเดตค่าในช่อง input เสมอ
+            // เมื่อเป็น_การกด +/- หรือ change
+            qtyInput.value = newQtyNum;
         }
         // ถ้าไม่บันทึก (input) อนุญาตให้ 0 หรือ NaN ชั่วคราว (ไม่แก้ qtyInput.value)
 
@@ -622,6 +627,8 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 
         // (ส่วนบันทึก - ทำเมื่อ saveToStorage = true)
         if (saveToStorage) {
+            // ✨ แก้ไข 3: อัปเดต itemData.qty *ก่อน* บันทึก
+            // (เพื่อให้แน่ใจว่าค่าใน localStorage ตรงกับที่คำนวณได้)
             if (itemData.qty !== newQtyNum) {
                 itemData.qty = newQtyNum;
                 localStorage.setItem('guest_cart', JSON.stringify(cart));
