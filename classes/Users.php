@@ -483,22 +483,55 @@
 		public function delete_customer()
 		{
 			extract($_POST);
-			$avatar = $this->conn->query("SELECT avatar FROM customer_list where id = $id");
-			$qry = $this->conn->query("DELETE FROM customer_list where id = $id");
-			if ($qry) {
-				$this->settings->set_flashdata('success', 'ลบบัญชีผู้ใช้เรียบร้อย');
+
+			// 1. ดึงข้อมูล avatar ก่อน (ย้ายมาทำก่อน transaction)
+			$avatar_result = $this->conn->query("SELECT avatar FROM customer_list WHERE id = $id");
+
+			// 2. เริ่ม Transaction
+			$this->conn->begin_transaction();
+
+			try {
+				// 3. ลบข้อมูลจากตารางลูก (customer_addresses) ก่อน
+				// (ไฟล์ SQL ของคุณยืนยันว่าตารางชื่อ customer_addresses และคอลัมน์ชื่อ customer_id)
+				$qry_address = $this->conn->query("DELETE FROM customer_addresses WHERE customer_id = $id");
+
+				if (!$qry_address) {
+					// ถ้าลบ address ไม่สำเร็จ
+					throw new Exception("ลบที่อยู่ไม่สำเร็จ: " . $this->conn->error);
+				}
+
+				// 4. ลบข้อมูลจากตารางหลัก (customer_list)
+				$qry_customer = $this->conn->query("DELETE FROM customer_list WHERE id = $id");
+
+				if (!$qry_customer) {
+					// ถ้าลบ customer ไม่สำเร็จ
+					throw new Exception("ลบลูกค้าไม่สำเร็จ: " . $this->conn->error);
+				}
+
+				// 5. ถ้าทุกอย่างสำเร็จ (ลบได้ทั้ง 2 ตาราง) ให้ Commit
+				$this->conn->commit();
+
+				// 6. ตั้งค่าสถานะสำเร็จ
+				$this->settings->set_flashdata('success', 'ลบบัญชีผู้ใช้และที่อยู่เรียบร้อย');
 				$resp['status'] = 'success';
-				if ($avatar->num_rows > 0) {
-					$avatar = explode("?", $avatar->fetch_array()[0])[0];
-					if (is_file(base_app . $avatar)) {
-						unlink(base_app . $avatar);
+
+				// 7. ลบไฟล์ avatar (หลังจาก commit สำเร็จแล้วเท่านั้น)
+				if ($avatar_result && $avatar_result->num_rows > 0) {
+					$avatar_path = explode("?", $avatar_result->fetch_array()[0])[0];
+					if (!empty($avatar_path) && is_file(base_app . $avatar_path)) {
+						unlink(base_app . $avatar_path);
 					}
 				}
-			} else {
+			} catch (Exception $e) {
+				// 8. หากมีข้อผิดพลาดเกิดขึ้น ให้ Rollback
+				$this->conn->rollback();
+
+				// 9. ตั้งค่าสถานะล้มเหลว
 				$resp['status'] = 'failed';
-				$resp['msg'] = $this->conn->error;
+				$resp['msg'] = $e->getMessage(); // ส่งข้อความ Error ที่เกิดขึ้นจริง
 			}
 
+			// 10. คืนค่า JSON
 			return json_encode($resp);
 		}
 		public function update_profile()
