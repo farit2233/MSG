@@ -1061,7 +1061,7 @@ class Master extends DBConnection
 
 			$name = trim("{$customer_addresses['name']}");
 			$contact = trim("{$customer_addresses['contact']}");
-			$delivery_address = trim("{$customer_addresses['address']} {$customer_addresses['sub_district']} {$customer_addresses['district']} {$customer_addresses['province']} {$customer_addresses['postal_code']}");
+			$delivery_address = trim("{$customer_addresses['address']} ต.{$customer_addresses['sub_district']} อ.{$customer_addresses['district']} จ.{$customer_addresses['province']} {$customer_addresses['postal_code']}");
 
 
 			$shipping_methods_name = 'ไม่ระบุ';
