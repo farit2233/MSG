@@ -177,7 +177,10 @@ function formatDateThai($date)
                                     </div>
                                 <?php endwhile;
                             else: ?>
-                                <div class="alert" style="background-color: #f57421;color:white;">ไม่พบคำสั่งซื้อในระบบ</div>
+                                <div class="col-12 text-center text-muted">
+                                    <p>ยังไม่มีคำสั่งซื้อในระบบ</p>
+                                    <p>ช็อปเลย!</p>
+                                </div>
                             <?php endif; ?>
                             <?php
                             if ($total_pages > 1):
