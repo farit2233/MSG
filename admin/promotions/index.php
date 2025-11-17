@@ -216,6 +216,11 @@ function formatDateThai($date)
 
 <script>
     $(document).ready(function() {
+
+        $('.delete_data').click(function() {
+            _conf("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้?", "delete_promotion", [$(this).attr('data-id')])
+        })
+
         $('#list').dataTable({
             columnDefs: [{
                 orderable: false,
@@ -240,19 +245,15 @@ function formatDateThai($date)
             }
         });
 
-        $('.delete_data').click(function() {
-            const id = $(this).data('id');
-            _conf("คุณแน่ใจหรือไม่ว่าต้องการลบโปรโมชันนี้?", "delete_promotion", [id]);
-        });
     });
 
-    function delete_promotion(id) {
+    function delete_promotion($id) {
         start_loader();
         $.ajax({
             url: _base_url_ + "classes/Master.php?f=delete_promotion",
             method: "POST",
             data: {
-                id: id
+                id: $id
             },
             dataType: "json",
             error: err => {
