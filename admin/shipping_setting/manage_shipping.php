@@ -261,7 +261,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
         <div class="row weight-price-row mb-2">
             <div class="col-md-3">
                 <label>ราคา</label>
-                <input type="number" step="0.01" name="price[]" class="form-control" placeholder="เช่น 50" required>
+                <input type="number" step="0.01" name="price[]" class="form-control" placeholder="เช่น 40" required>
             </div>
             <div class="col-md-3">
                 <label>น้ำหนักเริ่มต้น (กรัม.)</label>
