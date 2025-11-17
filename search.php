@@ -54,10 +54,14 @@ if (isset($_GET['search'])) {
         color: white;
     }
 </style>
+
 <section class="py-3">
     <div class="container">
-        <div class="content py-5 px-3" align="center">
-            <h1 class="">ผลการค้นหา: <?= htmlspecialchars($search) ?></h1>
+        <div class="content py-5 px-3">
+            <h1 class="">
+                ผลการค้นหา: <?= htmlspecialchars($search) ?>
+            </h1>
+            <hr>
         </div>
 
         <!-- Breadcrumb -->
