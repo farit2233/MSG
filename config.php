@@ -11,8 +11,10 @@ $db = new DBConnection;
 $conn = $db->conn;
 function redirect($url = '')
 {
-    if (!empty($url))
+    if (!empty($url)) {
         echo '<script>location.href="' . base_url . $url . '"</script>';
+        exit; // <--- เพิ่มบรรทัดนี้เข้าไป
+    }
 }
 function validate_image($file)
 {

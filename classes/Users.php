@@ -517,10 +517,22 @@
 
 				// 7. ลบไฟล์ avatar (หลังจาก commit สำเร็จแล้วเท่านั้น)
 				if ($avatar_result && $avatar_result->num_rows > 0) {
-					$avatar_path = explode("?", $avatar_result->fetch_array()[0])[0];
-					if (!empty($avatar_path) && is_file(base_app . $avatar_path)) {
-						unlink(base_app . $avatar_path);
+
+					// 1. ดึงค่า avatar path ออกมาก่อน
+					$avatar_db_value = $avatar_result->fetch_array()[0];
+
+					// 2. ตรวจสอบว่าค่าที่ได้ ไม่ใช่ NULL และไม่เป็นค่าว่าง
+					if (!empty($avatar_db_value) && is_string($avatar_db_value)) {
+
+						// 3. ถ้าปลอดภัย ค่อย explode
+						$avatar_path = explode("?", $avatar_db_value)[0];
+
+						// 4. ตรวจสอบไฟล์และลบ
+						if (is_file(base_app . $avatar_path)) {
+							unlink(base_app . $avatar_path);
+						}
 					}
+					// ถ้า $avatar_db_value เป็น NULL หรือว่างเปล่า โค้ดก็จะข้ามไปเลย (ซึ่งถูกต้องแล้ว)
 				}
 			} catch (Exception $e) {
 				// 8. หากมีข้อผิดพลาดเกิดขึ้น ให้ Rollback
