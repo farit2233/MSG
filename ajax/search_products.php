@@ -185,7 +185,7 @@ ob_start();
                         if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $row['vat_price']) {
                             $discount_percentage = round((($row['vat_price'] - $row['discounted_price']) / $row['vat_price']) * 100);
                             echo '<span class="banner-price fw-bold me-2">' . format_price_custom($row['discounted_price']) . ' ฿</span>';
-                            echo '<span class="badge prdouct-badge text-white">- ' . $discount_percentage . '%</span>';
+                            echo '<span class="badge badge-sm prdouct-badge text-white">- ' . $discount_percentage . '%</span>';
                         } elseif (!is_null($row['vat_price']) && $row['vat_price'] > 0) {
                             echo '<span class="banner-price">' . format_price_custom($row['vat_price']) . ' ฿</span>';
                         } else {
