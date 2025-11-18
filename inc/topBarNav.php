@@ -466,7 +466,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
           <?php endforeach; ?>
 
           <div class="dropdown-divider"></div>
-          <a class="nav-link" href="./?p=help"><i class="fa fa-question-circle"></i> ช่วยเหลือ</a>
+          <a class="nav-link" href="./?p=promotions"><i class="fa-solid fa-ticket"></i> โปรโมชัน</a>
           <a class="nav-link" href="./?p=about"><i class="fa fa-info-circle"></i> เกี่ยวกับเรา</a>
           <a class="nav-link" href="./?p=contact"><i class="fa fa-envelope"></i> ติดต่อเรา</a>
           <div class="dropdown-divider"></div>

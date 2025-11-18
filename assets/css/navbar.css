@@ -834,14 +834,7 @@ body.body-no-scroll {
     position: relative;
 }
 
-.search-icon {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #f57421;
-    pointer-events: none;
-}
+
 
 .search-input-minimal {
     color: black;
@@ -871,12 +864,12 @@ body.body-no-scroll {
     position: absolute;
     top: 0;
     right: 0;
-    width: 42px;
-    height: 100%;
+    width: 80px;
+    height: 60px;
     border: none;
     background: transparent;
     color: #f57421;
-    font-size: 16px;
+    font-size: 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
