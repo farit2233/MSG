@@ -704,9 +704,7 @@ class Master extends DBConnection
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
 		}
-		if ($resp['status'] == 'success') {
-			$this->settings->set_flashdata('success', 'ปรับจำนวนสินค้าในตะกร้าแล้ว');
-		}
+
 		return json_encode($resp);
 	}
 	function delete_cart()

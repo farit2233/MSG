@@ -30,143 +30,148 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                                     <a href="javascript:void(0)" id="deselect-all-link" class="text-danger" style="text-decoration: none; display: none;">ยกเลิกทั้งหมด</a>
                                 </div>
                             </div>
+
                             <div id="item_list" class="list-group">
                                 <?php
-                                // ... (โค้ด PHP ที่เหลือ)
-                                ?>
-                                <div id="item_list" class="list-group">
-                                    <?php
-                                    $gt = 0;
-                                    $cart = $conn->query("SELECT 
+                                $gt = 0;
+                                $cart = $conn->query("SELECT 
                                     c.*, 
                                     p.name as product, 
                                     p.brand as brand, 
-                                    p.price, 
+                                    p.vat_price, 
                                     p.discounted_price, 
                                     p.discount_type,
                                     cc.name as category, 
                                     p.image_path,
                                     (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
-                                    - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
-                                FROM `cart_list` c 
-                                INNER JOIN product_list p ON c.product_id = p.id 
-                                INNER JOIN category_list cc ON p.category_id = cc.id 
-                                WHERE customer_id = '{$_settings->userdata('id')}'");
+                                        - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
+                                    FROM `cart_list` c 
+                                    INNER JOIN product_list p ON c.product_id = p.id 
+                                    INNER JOIN category_list cc ON p.category_id = cc.id 
+                                    WHERE customer_id = '{$_settings->userdata('id')}'");
 
-                                    while ($row = $cart->fetch_assoc()):
-                                        $available = $row['available'];
+                                while ($row = $cart->fetch_assoc()):
+                                    $available = $row['available'];
 
-                                        if ($available >= 100) {
-                                            $max_order_qty = floor($available / 3);
-                                        } elseif ($available >= 50) {
-                                            $max_order_qty = floor($available / 2);
-                                        } elseif ($available >= 30) {
-                                            $max_order_qty = floor($available / 1.5);
-                                        } else {
-                                            $max_order_qty = max(1, floor($available / 1));
-                                        }
+                                    if ($available >= 100) {
+                                        $max_order_qty = floor($available / 3);
+                                    } elseif ($available >= 50) {
+                                        $max_order_qty = floor($available / 2);
+                                    } elseif ($available >= 30) {
+                                        $max_order_qty = floor($available / 1.5);
+                                    } else {
+                                        $max_order_qty = max(1, floor($available / 1));
+                                    }
 
-                                        // ✨ ตรวจสอบและปรับปรุงจำนวนสินค้าในตะกร้า หากเกินจำนวนที่สั่งได้
-                                        if ($row['quantity'] > $max_order_qty && $max_order_qty > 0) {
-                                            $row['quantity'] = $max_order_qty;
-                                            // อัปเดตฐานข้อมูลเบื้องหลังเพื่อความถูกต้อง
-                                            $conn->query("UPDATE `cart_list` SET quantity = '{$max_order_qty}' WHERE id = '{$row['id']}'");
-                                        }
+                                    // ✨ ตรวจสอบและปรับปรุงจำนวนสินค้าในตะกร้า หากเกินจำนวนที่สั่งได้
+                                    if ($row['quantity'] > $max_order_qty && $max_order_qty > 0) {
+                                        $row['quantity'] = $max_order_qty;
+                                        // อัปเดตฐานข้อมูลเบื้องหลังเพื่อความถูกต้อง
+                                        $conn->query("UPDATE `cart_list` SET quantity = '{$max_order_qty}' WHERE id = '{$row['id']}'");
+                                    }
 
-                                        $show_discount = !empty($row['discounted_price']) && $row['discounted_price'] < $row['price'];
-                                        $price_to_use = $show_discount ? $row['discounted_price'] : $row['price'];
-                                        $gt += $price_to_use * $row['quantity'];
-                                    ?>
+                                    $show_discount = !empty($row['discounted_price']) && $row['discounted_price'] < $row['vat_price'];
+                                    $price_to_use = $show_discount ? $row['discounted_price'] : $row['vat_price'];
+                                    $gt += $price_to_use * $row['quantity'];
+                                ?>
 
-                                        <div class="list-group-item cart-list-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
-                                            data-id='<?= $row['id'] ?>'
-                                            data-max='<?= $max_order_qty ?>'
-                                            data-unit-price='<?= $price_to_use ?>'
-                                            data-original-price='<?= $row['price'] ?>'>
+                                    <div class="list-group-item cart-list-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
+                                        data-id='<?= $row['id'] ?>'
+                                        data-max='<?= $max_order_qty ?>'
+                                        data-unit-price='<?= $price_to_use ?>'
+                                        data-original-price='<?= $row['vat_price'] ?>'>
 
-                                            <div class="col-auto pr-2">
-                                                <input type="checkbox"
-                                                    class="form-check-input cart-check"
-                                                    name="selected_cart[]"
-                                                    value="<?= $row['id'] ?>"
-                                                    id="cart_check_<?= $row['id'] ?>"
-                                                    data-price="<?= $price_to_use * $row['quantity'] ?>"
-                                                    <?= $row['available'] <= 0 ? 'disabled' : '' ?>>
+                                        <div class="col-auto pr-2">
+                                            <input type="checkbox"
+                                                class="form-check-input cart-check"
+                                                name="selected_cart[]"
+                                                value="<?= $row['id'] ?>"
+                                                id="cart_check_<?= $row['id'] ?>"
+                                                data-price="<?= $price_to_use * $row['quantity'] ?>"
+                                                <?= $row['available'] <= 0 ? 'disabled' : '' ?>>
+                                        </div>
+
+                                        <div class="cart-list-item-content d-flex w-100 align-items-start">
+                                            <div class="col-3 text-center">
+                                                <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>">
+
+                                                    <?php
+                                                    // 1. ดึง Path หลัก
+                                                    $cart_main_path = $row['image_path'];
+                                                    // 2. แปลงเป็น Path ขนาดกลาง (Medium)
+                                                    $cart_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $cart_main_path);
+                                                    ?>
+                                                    <img src="<?= validate_image($cart_medium_path) ?>" class="cart-product-logo" alt="" style="cursor: pointer;">
+                                                </a>
                                             </div>
 
-                                            <div class="cart-list-item-content d-flex w-100 align-items-start">
-                                                <div class="col-3 text-center">
-                                                    <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>">
+                                            <div class="col-auto flex-shrink-1 flex-grow-1">
+                                                <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>" style="text-decoration: none; color: inherit;">
+                                                    <h4 class="cart-product-title" style="cursor: pointer;"><?= $row['product'] ?></h4>
+                                                </a>
 
-                                                        <?php
-                                                        // 1. ดึง Path หลัก
-                                                        $cart_main_path = $row['image_path'];
-                                                        // 2. แปลงเป็น Path ขนาดกลาง (Medium)
-                                                        $cart_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $cart_main_path);
-                                                        ?>
-                                                        <img src="<?= validate_image($cart_medium_path) ?>" class="cart-product-logo" alt="" style="cursor: pointer;">
-                                                    </a>
-                                                </div>
-
-                                                <div class="col-auto flex-shrink-1 flex-grow-1">
-                                                    <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>" style="text-decoration: none; color: inherit;">
-                                                        <h4 class="cart-product-title" style="cursor: pointer;"><?= $row['product'] ?></h4>
-                                                    </a>
-
-                                                    <div class="text-muted d-flex w-100">
-                                                        <div class="input-group" style="width: 20rem;">
-                                                            <button class="btn addcart-plus minus-qty" type="button">-</button>
-                                                            <input type="number" class="form-control text-center qty" value="<?= $row['quantity'] ?>" min="1" max="<?= $row['available'] ?>" required>
-                                                            <button class="btn addcart-plus add-qty" type="button">+</button>
-                                                            <button class="btn btn-danger ms-2 del-item" type="button">
-                                                                <i class="fa-solid fa-trash-can"></i>
-                                                            </button>
-                                                        </div>
+                                                <div class="text-muted d-flex w-100">
+                                                    <div class="input-group" style="width: 20rem;">
+                                                        <button class="btn cart-minus minus-qty" type="button">-</button>
+                                                        <input type="number" class="form-control text-center qty" value="<?= $row['quantity'] ?>" min="1" max="<?= $row['available'] ?>" required>
+                                                        <button class="btn cart-plus add-qty" type="button">+</button>
+                                                        <button class="btn btn-danger del-item" type="button">
+                                                            <i class="fa-solid fa-trash-can"></i>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <div class="col-auto text-right">
-                                                <?php if ($show_discount): ?>
-                                                    <h5 class="text-muted mb-0">
-                                                        <del><?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</del>
-                                                    </h5>
-                                                    <h4><b class="text-danger">ลดเหลือ: <?= format_num($row['discounted_price'] * $row['quantity'], 2) ?> บาท</b></h4>
-                                                <?php else: ?>
-                                                    <h4><b>ราคา: <?= format_num($row['price'] * $row['quantity'], 2) ?> บาท</b></h4>
-                                                <?php endif; ?>
-                                            </div>
-
                                         </div>
-                                    <?php endwhile; ?>
 
-                                </div>
-                                <div id="guest_cart_container" style="display: none;"></div>
-                                <?php if ($cart->num_rows <= 0 && $_settings->userdata('id') != ''): ?>
-                                    <h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>
-                                <?php endif; ?>
-                                <div class="d-flex justify-content-end py-3">
-                                    <div class="col-auto">
-                                        <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0.00</span></b> บาท</h3>
+                                        <div class="col-auto product-price">
+                                            <?php
+                                            if ($show_discount):
+                                                // คำนวณยอด
+                                                $total_orig = $row['vat_price'] * $row['quantity'];
+                                                $total_disc = $row['discounted_price'] * $row['quantity'];
+                                            ?>
+                                                <h5 class="text-muted mb-0">
+                                                    <del><?= ($total_orig == (int)$total_orig ? format_num($total_orig, 0) : format_num($total_orig, 2)) ?> บาท</del>
+                                                </h5>
+                                                <h4 class="text-danger">ลดเหลือ: <?= ($total_disc == (int)$total_disc ? format_num($total_disc, 0) : format_num($total_disc, 2)) ?> บาท</h4>
+                                            <?php
+                                            else:
+                                                // คำนวณยอด
+                                                $total_orig = $row['vat_price'] * $row['quantity'];
+                                            ?>
+                                                <h4>ราคา: <?= ($total_orig == (int)$total_orig ? format_num($total_orig, 0) : format_num($total_orig, 2)) ?> บาท</h4>
+                                            <?php endif; ?>
+                                        </div>
+
                                     </div>
-                                </div>
-                                <?php if ($gt > 0): ?>
-                                    <div class="py-1 text-center">
-                                        <form id="checkout-form" method="post" action="./?p=checkout">
-                                            <input type="hidden" name="selected_items" id="selected_items">
-                                            <button type="submit" class="btn addcart rounded-pill">
-                                                ชำระรายการที่เลือก
-                                            </button>
-                                        </form>
-                                    </div>
-                                <?php endif; ?>
+                                <?php endwhile; ?>
+
                             </div>
+                            <div id="guest_cart_container" style="display: none;"></div>
+                            <?php if ($cart->num_rows <= 0 && $_settings->userdata('id') != ''): ?>
+                                <h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>
+                            <?php endif; ?>
+                            <div class="d-flex justify-content-end py-3">
+                                <div class="col-auto">
+                                    <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0.00</span></b> บาท</h3>
+                                </div>
+                            </div>
+                            <?php if ($gt > 0): ?>
+                                <div class="py-1 text-center">
+                                    <form id="checkout-form" method="post" action="./?p=checkout">
+                                        <input type="hidden" name="selected_items" id="selected_items">
+                                        <button type="submit" class="btn addcart rounded-pill">
+                                            ชำระรายการที่เลือก
+                                        </button>
+                                    </form>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
+    </div>
 </section>
 <script>
     // ===================================
@@ -178,7 +183,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
      */
     function formatPriceForJS(value) {
         return value.toLocaleString('th-TH', {
-            minimumFractionDigits: 2,
+            minimumFractionDigits: 0,
             maximumFractionDigits: 2
         });
     }
@@ -207,6 +212,11 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                     // อัปเดต DOM (เพื่อให้แน่ใจว่าราคาสุดท้ายถูกต้อง)
                     update_visual_price(itemElement);
                     end_loader();
+
+                    // --- ✨ เพิ่มบรรทัดนี้เข้ามาครับ ---
+                    alert_toast("อัปเดตจำนวนสินค้าแล้ว", 'success');
+                    // -----------------------------------
+
                 } else {
                     alert_toast("An error occurred.", 'error');
                     end_loader();
@@ -250,18 +260,18 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         var showDiscount = (unitPrice < originalPrice);
 
         // 4. สร้าง HTML ราคาใหม่
-        var priceContainer = itemElement.find('.col-auto.text-right');
+        var priceContainer = itemElement.find('.col-auto.product-price');
         var priceHTML = '';
         if (showDiscount) {
             priceHTML = `<h5 class="text-muted mb-0"><del>${formatPriceForJS(newOriginalSubtotal)} บาท</del></h5>
-                         <h4><b class="text-danger">ลดเหลือ: ${formatPriceForJS(newSubtotal)} บาท</b></h4>`;
+                        <h4 class="text-danger">ลดเหลือ: ${formatPriceForJS(newSubtotal)} บาท</h4>`;
         } else {
-            priceHTML = `<h4><b>ราคา: ${formatPriceForJS(newSubtotal)} บาท</b></h4>`;
+            priceHTML = `<h4>ราคา: ${formatPriceForJS(newSubtotal)} บาท</h4>`;
         }
         priceContainer.html(priceHTML);
 
         // 5. อัปเดต data-price ของ checkbox
-        itemElement.find('.cart-check').data('price', newSubtotal);
+        itemElement.find('.cart-check').attr('data-price', newSubtotal);
 
         // 6. คำนวณยอดรวมใหม่
         calculateSelectedTotal();
@@ -484,19 +494,20 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                         
                         <div class="text-muted d-flex w-100">
                             <div class="input-group" style="width: 20rem;">
-                                <button class="btn addcart-plus minus-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>−</button>
+                                <button class="btn cart-minus minus-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>−</button>
                                 <input type="number" class="form-control text-center qty guest" value="${currentQty}" min="1" max="${max_order_qty}" ${isOutOfStock ? 'disabled' : ''}>
-                                <button class="btn addcart-plus add-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>+</button>
-                                <button class="btn btn-danger ms-2 del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
+                                <button class="btn cart-plus add-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>+</button>
+                                <button class="btn btn-danger del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-auto text-right">
-                    ${show_discount
-                        ? `<h5 class="text-muted mb-0"><del>${formatPriceForJS(item.vat_price * currentQty)} บาท</del></h5><h4><b class="text-danger">ลดเหลือ: ${formatPriceForJS(subtotal)} บาท</b></h4>`
-                        : `<h4><b>ราคา: ${formatPriceForJS(subtotal)} บาท</b></h4>`
+                <div class="col-auto product-price">
+                   ${show_discount
+                        ? `<h5 class="text-muted mb-0"><del>${formatPriceForJS(item.vat_price * currentQty)} บาท</del></h5>
+                        <h4 class="text-danger">ลดเหลือ: ${formatPriceForJS(subtotal)} บาท</h4>`
+                        : `<h4>ราคา: ${formatPriceForJS(subtotal)} บาท</h4>`
                     }
                 </div>
             </div>`;
@@ -611,12 +622,13 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         const price_to_use = show_discount ? itemData.discounted_price : itemData.vat_price;
         const newSubtotal = price_to_use * calcQty;
 
-        const priceContainer = itemEl.querySelector('.col-auto.text-right');
+        const priceContainer = itemEl.querySelector('.col-auto.product-price');
         let priceHTML = '';
         if (show_discount) {
-            priceHTML = `<h5 class="text-muted mb-0"><del>${formatPriceForJS(itemData.vat_price * calcQty)} บาท</del></h5><h4><b class="text-danger">ลดเหลือ: ${formatPriceForJS(newSubtotal)} บาท</b></h4>`;
+            priceHTML = `<h5 class="text-muted mb-0"><del>${formatPriceForJS(itemData.vat_price * calcQty)} บาท</del></h5>
+            <h4 class="text-danger">ลดเหลือ: ${formatPriceForJS(newSubtotal)} บาท</h4>`;
         } else {
-            priceHTML = `<h4><b>ราคา: ${formatPriceForJS(newSubtotal)} บาท</b></h4>`;
+            priceHTML = `<h4>ราคา: ${formatPriceForJS(newSubtotal)} บาท</h4>`;
         }
         priceContainer.innerHTML = priceHTML;
 
@@ -760,10 +772,10 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
     function calculateSelectedTotal() {
         let total = 0;
         $('.cart-check:checked').each(function() {
-            total += parseFloat($(this).data('price'));
+            total += parseFloat($(this).attr('data-price'));
         });
         let formattedTotal = total.toLocaleString('th-TH', {
-            minimumFractionDigits: 2,
+            minimumFractionDigits: 0,
             maximumFractionDigits: 2
         });
         $('#selected-total').text(formattedTotal);
