@@ -266,16 +266,31 @@
                                             </div>
                                             <div class="d-flex justify-content-end align-items-center mt-auto">
                                                 <?php
-                                                $display_price = isset($row['price']) && $row['price'] > 0 ? $row['price'] : 0;
-                                                if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $row['price']) {
+                                                // 1. กำหนดราคาปกติ (Original Price) ที่รวม VAT แล้ว
+                                                $original_price = 0;
+                                                if (!is_null($row['vat_price']) && $row['vat_price'] > 0) {
+                                                    $original_price = $row['vat_price'];
+                                                } elseif (isset($row['price']) && $row['price'] > 0) {
+                                                    $original_price = $row['price']; // ใช้ price ธรรมดาถ้าไม่มี vat_price
+                                                }
+
+                                                // 2. ตรวจสอบส่วนลด (*** แก้ไขตรรกะตรงนี้ ***)
+                                                //    เช็กว่า discounted_price มีค่า และ "น้อยกว่า" ราคาปกติ ($original_price) หรือไม่
+                                                if (!is_null($row['discounted_price']) && $row['discounted_price'] > 0 && $row['discounted_price'] < $original_price) {
+                                                    // --- ใช่, มีส่วนลด ---
                                                     $display_price = $row['discounted_price'];
-                                                    $discount_percentage = round((($row['vat_price'] - $row['discounted_price']) / $row['vat_price']) * 100);
+                                                    $discount_percentage = round((($original_price - $display_price) / $original_price) * 100);
+
+                                                    // *** ใช้รูปแบบการแสดงผลเดิมของคุณ (ไม่ขีดฆ่า) ***
                                                     echo '<span class="banner-price fw-bold me-2">' . format_price_custom($display_price) . ' ฿</span>';
-                                                    echo '<span class="badge badge-sm prdouct-badge text-white">- ' . $discount_percentage . '%</span>';
-                                                } elseif (!is_null($row['vat_price']) && $row['vat_price'] > 0) {
-                                                    $display_price = $row['vat_price'];
-                                                    echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
+
+                                                    if ($discount_percentage > 0) {
+                                                        echo '<span class="badge badge-sm prdouct-badge text-white">- ' . $discount_percentage . '%</span>';
+                                                    }
                                                 } else {
+                                                    // --- ไม่, ไม่มีส่วนลด ---
+                                                    // แสดงราคาปกติ
+                                                    $display_price = $original_price;
                                                     echo '<span class="banner-price">' . format_price_custom($display_price) . ' ฿</span>';
                                                 }
                                                 ?>
