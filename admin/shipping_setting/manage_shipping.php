@@ -86,21 +86,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                 </div>
                 <div class="card-body">
                     <div class="form-group row">
-                        <label class="col-sm-3 col-form-label">บริษัทขนส่ง <span class="text-danger">*</span></label>
-                        <div class="col-sm-9">
-                            <select name="provider_id" id="provider_id" class="form-control select2" required>
-                                <option value="">-- เลือกบริษัทขนส่ง --</option>
-                                <?php
-                                $prov_q = $conn->query("SELECT * FROM shipping_providers WHERE status = 1 ORDER BY name ASC");
-                                while ($prow = $prov_q->fetch_assoc()): ?>
-                                    <option value="<?= $prow['id'] ?>" <?= $provider_id == $prow['id'] ? 'selected' : '' ?>>
-                                        <?= $prow['name'] ?>
-                                    </option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group row">
                         <label class="col-sm-3 col-form-label">ชื่อการจัดส่งสำหรับลูกค้า <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <input type="text" name="display_name" class="form-control" placeholder="ชื่อแสดงในหน้าสั่งซื้อสินค้าของลูกค้า" value="<?= isset($display_name) ? htmlspecialchars($display_name) : '' ?>" required>

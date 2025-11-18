@@ -1799,12 +1799,12 @@ class Master extends DBConnection
 		}
 	}
 
-
 	function update_tracking_id()
 	{
-		// 1. รับค่าจาก POST โดยตรง (ปลอดภัยกว่า extract)
-		//    และตรวจสอบว่ามีค่าส่งมาหรือไม่
+		// 1. รับค่าจาก POST
+		// (เพิ่มการรับ $provider_id)
 		$tracking_id = $_POST['tracking_id'] ?? null;
+		$provider_id = $_POST['provider_id'] ?? null; // <-- เพิ่ม
 		$id = $_POST['id'] ?? null;
 
 		// 2. ตรวจสอบว่ามี ID ของออเดอร์ส่งมาหรือไม่
@@ -1814,40 +1814,47 @@ class Master extends DBConnection
 			return json_encode($resp);
 		}
 
-		// 3. เตรียมคำสั่ง SQL (แก้ไข Syntax ที่ผิด และใช้ ? แทนค่า)
-		//    (ลบ , หน้า WHERE ออกแล้ว)
-		$sql = "UPDATE `order_list` 
-            SET `tracking_id` = ? 
-            WHERE `id` = ?";
+		// --- [NEW] 3. ตรวจสอบว่าเลือก Provider หรือยัง ---
+		if (empty($provider_id)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'กรุณาเลือกผู้ให้บริการขนส่ง';
+			return json_encode($resp);
+		}
+		// ------------------------------------
 
-		// 4. ใช้ Prepared Statement เพื่อป้องกัน SQL Injection
+		// 4. เตรียมคำสั่ง SQL (เพิ่ม provider_id)
+		$sql = "UPDATE `order_list` 
+                SET `tracking_id` = ?, 
+                    `provider_id` = ?  -- <-- เพิ่ม
+                WHERE `id` = ?";
+
+		// 5. ใช้ Prepared Statement
 		$stmt = $this->conn->prepare($sql);
 
-		// 5. ผูกตัวแปรเข้ากับ ?
-		// "s" = string (สำหรับ tracking_id)
-		// "i" = integer (สำหรับ id) 
-		// (ถ้า id ของคุณเป็นตัวอักษร ให้ใช้ "s" แทน "i" -> "ss")
-		$stmt->bind_param("si", $tracking_id, $id);
+		// 6. ผูกตัวแปรเข้ากับ ?
+		// "s" = string (tracking_id)
+		// "i" = integer (provider_id)
+		// "i" = integer (id)
+		// (กลายเป็น "sii")
+		$stmt->bind_param("sii", $tracking_id, $provider_id, $id); // <-- แก้ไข
 
-		// 6. สั่งทำงาน
+		// 7. สั่งทำงาน
 		$update = $stmt->execute();
 
-		// 7. ส่วนการแจ้งเตือน (คงไว้เหมือนเดิม)
+		// 8. ส่วนการแจ้งเตือน
 		if ($update) {
 			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success', "อัปเดตเลขขนส่งเรียบร้อยแล้ว");
+			$this->settings->set_flashdata('success', "อัปเดตเลขขนส่งและผู้ให้บริการเรียบร้อยแล้ว"); // <-- แก้ไขข้อความ
 		} else {
 			$resp['status'] = 'failed';
-			// ใช้ $stmt->error แทน $this->conn->error จะให้ข้อมูลที่ดีกว่า
 			$resp['msg'] = $stmt->error;
 		}
 
-		// 8. ปิด statement
+		// 9. ปิด statement
 		$stmt->close();
 
 		return json_encode($resp);
 	}
-
 
 	function update_order_status()
 	{
@@ -2114,35 +2121,43 @@ class Master extends DBConnection
 
 		$id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
-		$provider_id = intval($_POST['provider_id'] ?? 0);
+		// --- [REMOVED] ---
+		// $provider_id = intval($_POST['provider_id'] ?? 0); 
+		// -----------------
+
 		$name = $this->conn->real_escape_string($_POST['display_name'] ?? '');
 		$description = $this->conn->real_escape_string($_POST['description'] ?? '');
 		$cost = floatval($_POST['cost'] ?? 0);
 		$cod_enabled = ($_POST['cod_enabled'] == '1') ? 1 : 0;
 		$status = ($_POST['status'] == '1') ? 1 : 0;
 
-		if (!$provider_id || !$name) {
+		// --- [MODIFIED] ลบการตรวจสอบ provider_id ---
+		if (!$name) {
 			echo json_encode(['status' => 'failed', 'msg' => 'กรุณากรอกข้อมูลให้ครบ']);
 			exit;
 		}
+		// ------------------------------------
 
 		$this->conn->begin_transaction();
 		try {
 			// ส่วนนี้เหมือนเดิม: บันทึกข้อมูลหลักของ shipping_methods
 			if ($id > 0) {
+				// --- [MODIFIED] ลบ provider_id ออกจาก UPDATE ---
 				$sql = "UPDATE `shipping_methods` SET 
-                provider_id = '{$provider_id}',
                 name = '{$name}', 
                 description = '{$description}',
                 cost = '{$cost}',
                 cod_enabled = '{$cod_enabled}',
                 status = '{$status}'
                 WHERE id = {$id}";
+				// ------------------------------------------
 			} else {
+				// --- [MODIFIED] ลบ provider_id ออกจาก INSERT ---
 				$sql = "INSERT INTO `shipping_methods` 
-                (provider_id, name, description, cost, cod_enabled, status)
+                (name, description, cost, cod_enabled, status)
                 VALUES 
-                ('{$provider_id}', '{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$status}')";
+                ('{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$status}')";
+				// ------------------------------------------
 			}
 
 			if (!$this->conn->query($sql)) {
@@ -2152,28 +2167,18 @@ class Master extends DBConnection
 			$shipping_methods_id = ($id > 0) ? $id : $this->conn->insert_id;
 
 			// --- [START] แก้ไขส่วนการบันทึกราคาตามน้ำหนัก (UPSERT Logic) ---
-			// ข้อควรระวัง: โค้ดนี้ต้องการคอลัมน์ `status` ในตาราง `shipping_prices`
+			// (ส่วนนี้ไม่จำเป็นต้องแก้ไข เพราะใช้ shipping_methods_id อยู่แล้ว)
 
 			if ($id > 0) {
-				// 1. ถ้าเป็นการแก้ไข (id > 0) ให้ตั้งค่าราคาทั้งหมดเป็น 'inactive' (status = 0) ก่อน
-				// เราจะทำการอัปเดต/เปิดใช้งาน (status = 1) เฉพาะรายการที่ส่งมาในฟอร์ม
 				$this->conn->query("UPDATE `shipping_prices` SET status = 0 WHERE shipping_methods_id = {$shipping_methods_id}");
 			}
 
-			// 2. เตรียม Prepared Statements สำหรับการ UPSERT
-			// ใช้เพื่อตรวจสอบว่ามีแถว (ตามช่วงน้ำหนัก) นี้อยู่แล้วหรือไม่
 			$stmt_check = $this->conn->prepare("SELECT id FROM shipping_prices WHERE shipping_methods_id = ? AND min_weight = ? AND max_weight = ?");
-
-			// ใช้เพื่ออัปเดตแถวที่มีอยู่ (เปลี่ยนราคา และตั้ง status = 1)
 			$stmt_update = $this->conn->prepare("UPDATE shipping_prices SET price = ?, status = 1 WHERE id = ?");
-
-			// ใช้เพื่อเพิ่มแถวใหม่ (พร้อม status = 1)
-			// (ต้องเพิ่มคอลัมน์ status ในคำสั่ง INSERT)
 			$stmt_insert = $this->conn->prepare("INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price, status)
-                                                VALUES (?, ?, ?, ?, 1)");
+                                                 VALUES (?, ?, ?, ?, 1)");
 
 
-			// 3. วนลูปข้อมูลที่ส่งมา
 			if (!empty($_POST['weight_from']) && !empty($_POST['weight_to']) && !empty($_POST['price'])) {
 				$weight_from = $_POST['weight_from'];
 				$weight_to = $_POST['weight_to'];
@@ -2184,7 +2189,6 @@ class Master extends DBConnection
 					$w_to = intval($weight_to[$i]);
 					$p = floatval($price[$i]);
 
-					// Validation (เหมือนเดิม)
 					if ($w_from >= $w_to) {
 						throw new Exception('น้ำหนักเริ่มต้นต้องน้อยกว่าน้ำหนักสูงสุด');
 					}
@@ -2192,7 +2196,6 @@ class Master extends DBConnection
 						throw new Exception('ราคาต้องไม่ติดลบ');
 					}
 
-					// 4. ตรวจสอบว่ามีแถวนี้อยู่แล้วหรือไม่ (เฉพาะกรณีแก้ไข)
 					$existing_id = null;
 					if ($id > 0) {
 						$stmt_check->bind_param('iii', $shipping_methods_id, $w_from, $w_to);
@@ -2204,13 +2207,11 @@ class Master extends DBConnection
 					}
 
 					if ($existing_id) {
-						// 5a. ถ้ามี: อัปเดตราคา และตั้ง status = 1 (เปิดใช้งาน)
 						$stmt_update->bind_param('di', $p, $existing_id);
 						if (!$stmt_update->execute()) {
 							throw new Exception('ไม่สามารถอัปเดตข้อมูลราคาจัดส่งเดิม: ' . $stmt_update->error);
 						}
 					} else {
-						// 5b. ถ้าไม่มี (หรือเป็นการสร้างใหม่): เพิ่มแถวใหม่ด้วย status = 1
 						$stmt_insert->bind_param('iiid', $shipping_methods_id, $w_from, $w_to, $p);
 						if (!$stmt_insert->execute()) {
 							throw new Exception('ไม่สามารถบันทึกข้อมูลราคาจัดส่งใหม่: ' . $stmt_insert->error);
@@ -2218,15 +2219,12 @@ class Master extends DBConnection
 					}
 				}
 			}
-			// (ถ้า $id > 0 และไม่มีการส่ง 'weight_from' มาเลย หมายถึงผู้ใช้ลบออกทั้งหมด
-			// รายการทั้งหมดจะถูกตั้งค่าเป็น status = 0 จากขั้นตอนที่ 1 โดยอัตโนมัติ)
 
-			// 6. ปิด statements
 			$stmt_check->close();
 			$stmt_update->close();
 			$stmt_insert->close();
 
-			// --- [END] แก้ไขส่วนการบันทึกราคาตามน้ำหนัก ---
+			// --- [END] แก้ลขส่วนการบันทึกราคาตามน้ำหนัก ---
 
 
 			$this->conn->commit();
@@ -2236,6 +2234,7 @@ class Master extends DBConnection
 			echo json_encode(['status' => 'failed', 'msg' => $e->getMessage()]);
 		}
 	}
+
 	function delete_shipping()
 	{
 		extract($_POST);
