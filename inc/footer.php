@@ -356,8 +356,10 @@
           <div class="col-md-3 mb-4">
             <h6>ติดต่อเรา</h6>
             <p class="mb-1"><i class="fas fa-location-dot text-white"></i> <?php echo $_settings->info('address') ?> </p>
-            <p class="mb-1"><i class="fas fa-phone text-white"></i> <?php echo $_settings->info('mobile') ?></p>
-            <p class="mb-1"><i class="fab fa-line text-white"></i> <?php echo $_settings->info('Line') ?></p>
+            <p class="mb-1"><i class="fas fa-phone text-white"></i><a href="./?p=contact"
+                title="ดูข้อมูลติดต่อ"
+                data-tel="tel:<?php echo str_replace(['-', ' '], '', $_settings->info('mobile')) ?>" target="blank" target="_blank" class="text-white"> <?php echo $_settings->info('mobile') ?></a></p>
+            <p class="mb-1"><i class="fab fa-line text-white"></i><a href="https://line.me/ti/p/~<?php echo $_settings->info('Line') ?>" target="blank" target="_blank" class="text-white"> <?php echo $_settings->info('Line') ?> </a></p>
             <p class="mb-0"><i class="fab fa-facebook text-white"></i><a href="<?php echo $_settings->info('Facebook') ?>" target="_blank" class="text-white"> Facebook </a></p>
             <p class="mb-0"><i class="fas fa-envelope text-white"></i><a href="mailto:<?php echo $_settings->info('email') ?>" target="blank" target="_blank" class="text-white"> <?php echo $_settings->info('email') ?> </a></p>
           </div>
