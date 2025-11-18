@@ -321,263 +321,196 @@ if (!function_exists('format_price_custom')) {
     var initialVatTotal = <?= $vat_total; ?>;
     var shippingCost = <?= $final_shipping_cost; ?>;
 </script>
-<section class="py-3">
-    <div class="container">
-        <div class="row mt-n4 justify-content-center align-items-center flex-column">
-            <div class="col-lg-10 col-md-11 col-sm-12 col-xs-12">
-                <div class="card rounded-0 shadow" style="margin-top: 3rem;">
-                    <div class="card-body">
-                        <div class="container-fluid">
-                            <div class="cart-header-bar d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-square-check mr-2 text-success" style="font-size: 30px;"></i>
-                                <h3 class="d-inline mb-0">ยืนยันคำสั่งซื้อ</h3>
-                            </div>
 
-                            <?php if (!empty($cart_items)): ?>
-                                <?php if (!$is_address_complete): ?>
-                                    <div class="alert alert-warning text-center">
-                                        <strong>ที่อยู่จัดส่งไม่สมบูรณ์!</strong><br>
-                                        กรุณาไปที่หน้า <a href="./?p=user" class="alert-link">บัญชีของฉัน</a> เพื่อกรอกข้อมูลที่อยู่ให้ครบถ้วนก่อนทำการสั่งซื้อ
+<section class="py-5 container">
+    <div class="checkout-header-bar d-flex align-items-center gap-2">
+        <i class="fa-solid fa-square-check mr-2 text-success" style="font-size: 30px;"></i>
+        <h3 class="d-inline mb-0">ยืนยันคำสั่งซื้อ</h3>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+
+            <div class="checkout-card">
+                <div class="checkout-card-header">
+                    <i class="fa-solid fa-location-dot text-danger"></i>
+                    <div class="checkout-card-title flex-grow-1">ที่อยู่สำหรับจัดส่ง</div>
+                    <a href="javascript:void(0);" id="address_option_modal" class="clickable-text-btn text-primary" style="font-size: 0.9rem;">เปลี่ยน</a>
+                </div>
+                <div class="checkout-card-body">
+                    <?php if (!$is_address_complete): ?>
+                        <div class="alert alert-warning mb-0">
+                            <i class="fa fa-exclamation-triangle"></i> <strong>ข้อมูลไม่ครบ!</strong>
+                            กรุณา <a href="./?p=user" class="alert-link">เพิ่มที่อยู่</a> ให้ครบถ้วน
+                        </div>
+                    <?php else: ?>
+                        <h6 class="font-weight-bold mb-1">
+                            <?= !empty($address['name']) ? htmlentities($address['name']) : '' ?>
+                            <span class="text-muted font-weight-normal ml-2"><?= !empty($address['contact']) ? htmlentities($address['contact']) : '' ?></span>
+                        </h6>
+                        <p class="text-muted mb-0" style="line-height: 1.6;">
+                            <?php
+                            // ใช้ Logic ตัดคำจังหวัดขึ้นบรรทัดใหม่ตามที่คุณต้องการ
+                            if (!empty($address)) {
+                                $addr_str = "";
+                                if (!empty($address['address'])) $addr_str .= htmlentities($address['address']) . " ";
+                                if (!empty($address['sub_district'])) $addr_str .= "ต." . htmlentities($address['sub_district']) . " ";
+                                if (!empty($address['district'])) $addr_str .= "อ." . htmlentities($address['district']) . " ";
+                                if (!empty($address['province'])) $addr_str .= " จ." . htmlentities($address['province']); // เว้นวรรคหน้า จ.
+                                if (!empty($address['postal_code'])) $addr_str .= " " . htmlentities($address['postal_code']);
+
+                                echo nl2br(str_replace([" จ.", " จังหวัด"], ["\nจ.", "\nจังหวัด"], $addr_str));
+                            } else {
+                                echo "ไม่พบข้อมูลที่อยู่";
+                            }
+                            ?>
+                        </p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="checkout-card">
+                <div class="checkout-card-header">
+                    <i class="fa-solid fa-box text-warning"></i>
+                    <span class="checkout-card-title">รายการสินค้า</span>
+                    <span class="ml-auto text-muted small"><?= count($cart_items) ?> รายการ</span>
+                </div>
+                <div class="checkout-card-body">
+                    <?php if (!empty($cart_items)): ?>
+                        <?php foreach ($cart_items as $item):
+                            $is_discounted = $item['final_price'] < $item['vat_price'];
+                        ?>
+                            <div class="item-row">
+                                <div class="item-image-container">
+                                    <img src="<?= validate_image($item['image_path']) ?>" class="item-image img-fluid" alt="<?= htmlspecialchars($item['product']) ?>">
+                                </div>
+                                <div class="item-details">
+                                    <div class="item-name"><?= $item['product'] ?></div>
+                                    <div class="item-meta mt-1">
                                     </div>
-                                <?php endif; ?>
-
-                                <div class="table-responsive">
-                                    <table class="table table-bordered mb-4 small-table">
-                                        <thead>
-                                            <tr>
-                                                <th colspan="2">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <h5 class="text-bold mb-0">ที่อยู่จัดส่ง</h5>
-                                                        <a href="javascript:void(0);" id="address_option_modal" class="clickable-text-btn">เปลี่ยน</a>
-                                                    </div>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <th>ชื่อ</th>
-                                                <td><?= !empty($address['name']) ? htmlentities($address['name']) . ' ' : 'ไม่พบชื่อ' ?></td>
-                                            </tr>
-                                            <tr>
-                                                <th>เบอร์โทร</th>
-                                                <td><?= !empty($address['contact']) ? htmlentities($address['contact']) . ' ' : 'ไม่พบเบอร์โทรศัพท์' ?></td>
-                                            </tr>
-                                            <tr>
-                                                <th>ที่อยู่</th>
-                                                <td>
-                                                    <?= !empty($address['address']) ? htmlentities($address['address']) . ' ' : 'ไม่พบที่อยู่' ?><br>
-                                                    <?= !empty($address['sub_district']) ? 'ต.' . htmlentities($address['sub_district']) . ' ' : '' ?>
-                                                    <?= !empty($address['district']) ? 'อ.' . htmlentities($address['district']) . ' ' : '' ?>
-                                                    <?= !empty($address['province']) ? 'จ.' . htmlentities($address['province']) : '' ?><br>
-                                                    <?= !empty($address['postal_code']) ? htmlentities($address['postal_code']) . ' ' : '' ?>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <table class="table table-bordered mb-4 small-table">
-                                        <thead>
-                                            <tr>
-                                                <th>สั่งซื้อสินค้าแล้ว</th>
-                                                <th class="text-muted text-right" colspan="2">ราคาต่อหน่วย</th>
-                                                <th class="text-muted text-right">จำนวน</th>
-                                                <th class="text-muted text-right">รายการย่อย</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($cart_items as $item):
-                                                $is_discounted = $item['final_price'] < $item['vat_price'];
-                                            ?>
-                                                <tr class="no-border">
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="col-3 text-center">
-                                                                <img src="<?= validate_image($item['image_path']) ?>" class="product-logo" alt="">
-                                                            </div>
-                                                            <h6 class="my-0 product-name"><?= $item['product'] ?></h6>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-right" colspan="2">
-                                                        <?php if ($is_discounted): ?>
-                                                            <span><?= format_price_custom($item['final_price'], 2) ?></span>
-                                                        <?php else: ?>
-                                                            <?= format_price_custom($item['vat_price'], 2) ?>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td class="text-right"><?= $item['quantity'] ?></td>
-                                                    <td class="text-right"><span><?= format_price_custom($item['final_price'] * $item['quantity'], 2) ?></span></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-
-                                            <tr class="no-border">
-                                                <th></th>
-                                            </tr>
-                                            <tr class="no-border">
-                                                <th></th>
-                                            </tr>
-                                            <tr class="no-border">
-                                                <th></th>
-                                            </tr>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr class="no-border">
-                                                <th>
-                                                    บริการขนส่ง
-                                                    <span class="text-danger" style="font-size: 0.8em;">* อิงราคาจากน้ำหนักที่ใหญ่ที่สุดในตระกร้า</span>
-                                                </th>
-                                                <td class="text-right" colspan="2">
-                                                    <span id="shipping_methods_name_display" style="margin-left: 10px;"><?= $default_shipping_name ?></span>
-                                                </td>
-                                                <td class="text-right">
-                                                    <a href="javascript:void(0);" onclick="openShippingModal()">เปลี่ยน</a>
-                                                </td>
-                                                <td class="text-right">
-                                                    <label id="shipping-cost"><?= format_price_custom($default_shipping_cost, 2) ?> บาท</label>
-                                                </td>
-                                            </tr>
-
-                                            <?php
-                                            if (!empty($cart_promotions)) :
-                                                $promo_class = ($is_promo_applicable && $is_discount_applied) ? 'promo-active' : 'promo-inactive';
-                                                foreach ($cart_promotions as $promo) :
-                                            ?>
-                                                    <tr class="no-border <?= $promo_class ?>">
-                                                        <th>
-                                                            สินค้ามีโปรโมชัน
-                                                            <!--span class="text-danger" style="font-size: 0.9em; display: block; font-weight: normal;">
-                                                                <?= htmlspecialchars($promo['name']) ?>
-                                                            </span-->
-                                                        </th>
-                                                        <td class="text-right">
-                                                            <p><?= htmlspecialchars($promo['name']) ?></p>
-                                                        </td>
-
-                                                        <td colspan="3" class="text-right">
-                                                            <strong class="text-danger">
-                                                                <?php
-                                                                if ($is_discount_applied && isset($applied_promo)) {
-                                                                    if ($applied_promo['type'] == 'fixed') {
-                                                                        echo "- " . format_price_custom($promotion_discount, 2) . " บาท";
-                                                                    } elseif ($applied_promo['type'] == 'percent') {
-                                                                        echo "- " . format_price_custom($promotion_discount, 2) . " บาท";
-                                                                    } elseif ($applied_promo['type'] == 'free_shipping') {
-                                                                        echo "ส่งฟรี";
-                                                                    }
-                                                                } else {
-                                                                    echo "ไม่ได้ใช้โปรโมชัน";
-                                                                }
-                                                                ?>
-
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                                <?php
-                                                endforeach;
-
-                                                // --- แสดงหมายเหตุ ถ้าโปรโมชันใช้ไม่ได้ (เพราะเลือกของไม่ครบ) ---
-                                                if (!$is_promo_applicable && !empty($cart_promotions)) :
-                                                ?>
-                                                    <tr class="promo-note">
-                                                        <td colspan="5" class="text-danger text-center">
-                                                            * กรุณาเลือกสินค้าทั้งหมดที่อยู่ในโปรโมชันเดียวกันเพื่อรับส่วนลด
-                                                        </td>
-                                                    </tr>
-                                                <?php
-                                                endif;
-
-                                                // แสดงข้อความแนะนำให้ซื้อเพิ่ม
-                                                if (isset($promo_suggestion_message)):
-                                                ?>
-                                                    <tr class="promo-note">
-                                                        <td colspan="5" class="text-info text-center">
-                                                            <i class="fa fa-info-circle"></i> <strong><?= $promo_suggestion_message ?></strong>
-                                                        </td>
-                                                    </tr>
-                                            <?php
-                                                endif;
-                                            endif;
-                                            ?>
-                                            <tr class="no-border">
-                                                <th>
-                                                    <div class="input-group input-code" style="display: flex; align-items: center;">
-                                                        คูปองส่วนลด
-                                                        <input type="text" id="coupon_code_input" placeholder="กรอกรหัสคูปองส่วนลด" class=" ml-3 col-5">
-                                                        <button type="button" id="apply_coupon_button" class="btn">ใช้</button>
-                                                    </div>
-
-
-                                                    <small id="coupon_error_message" class="text-danger" style="display: inline-block;"></small>
-                                                    <small id="quantity_warning_message" class="text-danger" style="display: inline-block;"></small>
-                                                </th>
-                                                <td class="text-right">
-                                                    <p id="discount_type"></p>
-                                                    <p id="quantity_warning_message"></p>
-                                                </td>
-                                                <td colspan="3" class="text-right">
-                                                    <strong id="discount_value"></strong>
-                                                </td>
-                                            </tr>
-                                            <tr class="no-border">
-                                                <th>
-                                                    ยอดสั่งซื้อ<small> รวม VAT</small>
-                                                </th>
-                                                <td colspan=" 5">
-                                                    <p class="text-bold text-right">
-                                                        <span id="order-vat-total"><?= format_price_custom($vat_total, 2) ?></span> บาท
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th><strong>รวม</strong></th>
-                                                <td colspan=" 5">
-                                                    <h5 class="text-bold text-right">
-                                                        <span id="order-total-text"><?= format_price_custom($grand_total, 2) ?></span> บาท
-                                                    </h5>
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-
-                                    </table>
-
-
                                 </div>
-
-                            <?php else: ?>
-                                <h5 class="text-center text-muted">ไม่มีรายการที่เลือกสำหรับการชำระเงิน</h5>
-                            <?php endif; ?>
-
-                        </div>
-
-                        <div class="container-fluid">
-                            <div class="cart-header-bar d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-money-bill-wave mr-2 text-success" style="font-size: 30px;"></i>
-                                <h3 class="d-inline mb-0">รูปแบบการชำระเงิน</h3>
+                                <div class="item-price-qty">
+                                    <?php if ($is_discounted): ?>
+                                        <span class="old-price"><?= format_price_custom($item['vat_price'], 2) ?></span>
+                                        <span class="current-price text-danger"><?= format_price_custom($item['final_price'], 2) ?></span>
+                                    <?php else: ?>
+                                        <span class="current-price"><?= format_price_custom($item['vat_price'], 2) ?></span>
+                                    <?php endif; ?>
+                                    <div class="text-muted small mt-1">x <?= $item['quantity'] ?></div>
+                                </div>
                             </div>
-                            <form action="" id="order-form">
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p class="text-center text-muted my-4">ไม่มีสินค้าในรายการ</p>
+                    <?php endif; ?>
+                </div>
+            </div>
 
-                                <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
-                                <input type="hidden" name="shipping_methods_id" id="shipping_methods_id" value="<?= $default_shipping_id ?>">
-                                <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
-                                <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
-                                <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
-                                <input type="hidden" name="coupon_code_id" id="applied_coupon_id" value="0">
-
-                                <div class="py-1 text-center">
-                                    <button class="btn addcart rounded-pill" <?= !$is_address_complete ? 'disabled' : '' ?>>
-                                        ยืนยันคำสั่งซื้อ
-                                    </button>
-                                </div>
-                            </form>
+            <div class="checkout-card">
+                <div class="checkout-card-header">
+                    <i class="fa-solid fa-truck-fast text-info"></i>
+                    <div class="checkout-card-title flex-grow-1">ตัวเลือกการจัดส่ง</div>
+                    <a href="javascript:void(0);" onclick="openShippingModal()" class="clickable-text-btn text-primary" style="font-size: 0.9rem;">เปลี่ยน</a>
+                </div>
+                <div class="checkout-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 font-weight-bold" id="shipping_methods_name_display"><?= $default_shipping_name ?></h6>
+                            <small class="text-muted">อิงตามน้ำหนักสินค้ารวม</small>
                         </div>
-
+                        <div class="font-weight-bold" id="shipping-cost-display-card">
+                            <span id="shipping-cost"><?= format_price_custom($default_shipping_cost, 2) ?> บาท</span>
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
+        <div class="col-lg-4">
+            <div class="sticky-sidebar">
+
+                <div class="checkout-payment">
+                    <div class="checkout-card-header">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span class="checkout-card-title">สรุปคำสั่งซื้อ</span>
+                    </div>
+                    <div class="checkout-card-body">
+
+                        <div class="mb-4">
+                            <label class="small text-muted mb-1">โค้ดส่วนลด / คูปอง</label>
+                            <div class="coupon-box">
+                                <input type="text" id="coupon_code_input" placeholder="กรอกโค้ดที่นี่">
+                                <button type="button" id="apply_coupon_button">ใช้</button>
+                            </div>
+                            <small id="coupon_error_message" class="text-danger"></small>
+                            <small id="discount_type" class="text-success d-block"></small>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>ยอดรวมสินค้า (<?= count($cart_items) ?> ชิ้น)</span>
+                            <span><?= format_price_custom($cart_total, 2) ?></span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>ค่าจัดส่ง</span>
+                            <span id="shipping-cost-summary"><?= format_price_custom($default_shipping_cost, 2) ?></span>
+                        </div>
+
+                        <?php if ($is_promo_applicable && $is_discount_applied): ?>
+                            <div class="summary-row text-danger">
+                                <span>โปรโมชัน (<?= htmlspecialchars($applied_promo['name']) ?>)</span>
+                                <span>
+                                    <?php
+                                    if ($applied_promo['type'] == 'free_shipping') echo "ส่งฟรี";
+                                    else echo "- " . format_price_custom($promotion_discount, 2);
+                                    ?>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="summary-row text-danger" id="coupon-row" style="display:none;">
+                            <span>ส่วนลดคูปอง</span>
+                            <span id="discount_value"></span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>ราคารวม <small class="text-muted">รวม VAT</small></span>
+                            <span id="order-vat-total"><?= format_price_custom($vat_total, 2) ?></span>
+                        </div>
+
+                        <div class="summary-row total">
+                            <span>ยอดรวมทั้งสิ้น</span>
+                            <span><span id="order-total-text"><?= format_price_custom($grand_total, 2) ?></span> บาท</span>
+                        </div>
+
+                        <form action="" id="order-form" class="mt-4">
+                            <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
+                            <input type="hidden" name="shipping_methods_id" id="shipping_methods_id" value="<?= $default_shipping_id ?>">
+                            <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
+                            <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
+                            <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
+                            <input type="hidden" name="coupon_code_id" id="applied_coupon_id" value="0">
+
+                            <button type="submit" class="btn btn-primary btn-block btn-lg w-100 shadow-sm" style="background-color: #f57421; border-color: #f57421;" <?= !$is_address_complete ? 'disabled' : '' ?>>
+                                สั่งซื้อสินค้า
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+
+                <div class="text-center text-muted small mt-2">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> ข้อมูลปลอดภัยด้วยการเข้ารหัส SSL
+                </div>
+
+            </div>
+        </div>
+    </div>
     </div>
 
     <div id="shippingModal" class="modal-backdrop-custom" style="display:none;">
         <div class="shipping-modal-content">
-            <div class="shipping-modal-header">เลือก ตัวเลือกการจัดส่ง</div>
+            <div class="shipping-modal-header">เลือกรูปแบบการจัดส่ง</div>
             <div class="shipping-modal-body">
                 <?php if ($shipping_qry_all && $shipping_qry_all->num_rows > 0): ?>
                     <?php while ($row = $shipping_qry_all->fetch_assoc()):
@@ -589,16 +522,16 @@ if (!function_exists('format_price_custom')) {
                             data-cost="<?= $cost ?>"
                             onclick="selectShipping(this)">
 
-                            <div>
+                            <div class="d-flex justify-content-between align-items-center">
                                 <strong><?= $row['name'] ?></strong>
-                                <span style="float:right;"><?= format_price_custom($cost, 2) ?> บาท</span>
-                                <span class="checkmark">&#10003;</span>
+                                <span class="text-primary font-weight-bold"><?= format_price_custom($cost, 2) ?> บาท</span>
                             </div>
-                            <div class="desc text-muted" style="font-size: 0.9em;"><?= htmlspecialchars($row['description']) ?></div>
+                            <div class="desc text-muted small mt-1"><?= htmlspecialchars($row['description']) ?></div>
+                            <span class="checkmark">&#10003;</span>
                         </div>
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <p>ไม่มีข้อมูลขนส่ง</p>
+                    <p class="text-center text-muted py-3">ไม่มีขนส่งที่รองรับน้ำหนักสินค้านี้</p>
                 <?php endif; ?>
             </div>
             <div class="shipping-modal-footer">
@@ -607,8 +540,8 @@ if (!function_exists('format_price_custom')) {
             </div>
         </div>
     </div>
-</section>
 
+</section>
 <script>
     let appliedCoupon = {
         id: 0,
@@ -649,9 +582,6 @@ if (!function_exists('format_price_custom')) {
         });
     });
 
-    // ============================
-    // JS: จัดการ Modal
-    // ============================
     function openShippingModal() {
         document.getElementById('shippingModal').style.display = 'flex';
     }
@@ -665,11 +595,12 @@ if (!function_exists('format_price_custom')) {
 
         document.getElementById('shipping_methods_id').value = selectedShipping.id;
         document.getElementById('shipping_methods_name_display').innerText = selectedShipping.name;
+
+        // Update 2 จุด (ใน Card ซ้าย และ Summary ขวา)
         document.getElementById('shipping-cost').innerText = formatPrice(selectedShipping.cost) + ' บาท';
+        document.getElementById('shipping-cost-summary').innerText = formatPrice(selectedShipping.cost); // Summary ขวา
 
-        // --- ⬇️ 2. อัปเดตค่าขนส่งล่าสุด ⬇️ ---
-        currentShippingCost = selectedShipping.cost; // เก็บค่าที่เลือกใหม่
-
+        currentShippingCost = selectedShipping.cost;
         updateGrandTotal(selectedShipping.cost);
         closeShippingModal();
     }
@@ -691,9 +622,6 @@ if (!function_exists('format_price_custom')) {
         }
     }
 
-    // ============================
-    // ฟังก์ชันกลางสำหรับคำนวณยอดรวมสุทธิ
-    // ============================
     function updateGrandTotal(shippingCost) {
         let promoDiscount = 0;
         let finalShippingCost = parseFloat(shippingCost) || 0;
@@ -739,9 +667,6 @@ if (!function_exists('format_price_custom')) {
         updateOrderTotal(grandTotal);
     }
 
-    // ============================
-    // ฟังก์ชันเลือกขนส่ง
-    // ============================
     function selectShipping(element) {
         if (!element) return;
         document.querySelectorAll('.shipping-option').forEach(el => el.classList.remove('selected'));
@@ -754,25 +679,20 @@ if (!function_exists('format_price_custom')) {
     }
 
     $(document).ready(function() {
-        // --- ส่วนนี้คือโค้ดเดิมของคุณ ไม่มีการแก้ไข ---
         const initialCost = parseFloat(<?= json_encode($default_shipping_cost) ?>) || 0;
         updateGrandTotal(initialCost);
-        let timeout;
         end_loader();
+
         $('#address_option_modal').click(function() {
             modal_confirm('สมุดที่อยู่ <i class="fa fa-pencil"></i>', 'checkout/address.php?pid=<?= isset($id) ? $id : '' ?>')
-        })
-        $('#shipping_option_modal').click(function() {
-            modal_confirm('เลือกขนส่ง <i class="fa fa-truck"></i>', 'checkout/shipping.php?pid=<?= isset($id) ? $id : '' ?>')
-        })
+        });
 
-        // --- ส่วนจัดการปุ่มใช้คูปอง (มีการแก้ไข 1 บรรทัด) ---
         $('#apply_coupon_button').on('click', function() {
             var coupon_code = $('#coupon_code_input').val().trim();
             var error_el = $('#coupon_error_message');
             var discount_val_el = $('#discount_value');
             var discount_type_el = $('#discount_type');
-            var quantity_warning_message_el = $('#quantity_warning_message');
+            var coupon_row = $('#coupon-row'); // แถวแสดงส่วนลดคูปองใน summary
 
             if (coupon_code === '') {
                 error_el.text('กรุณากรอกรหัสคูปอง');
@@ -792,7 +712,7 @@ if (!function_exists('format_price_custom')) {
                 dataType: 'json',
                 error: function(err) {
                     console.error(err);
-                    alert_toast("เกิดข้อผิดพลาดในการตรวจสอบคูปอง", "error");
+                    alert_toast("เกิดข้อผิดพลาด", "error");
                     end_loader();
                 },
                 success: function(resp) {
@@ -801,16 +721,12 @@ if (!function_exists('format_price_custom')) {
                         appliedCoupon.id = resp.coupon_code_id;
                         appliedCoupon.amount = resp.discount_amount;
                         appliedCoupon.type = resp.type;
-                        discount_type_el.text(resp.message);
 
-                        if (resp.quantity_warning_message) {
-                            quantity_warning_message_el.text(resp.quantity_warning_message).show();
-                        } else {
-                            quantity_warning_message_el.hide();
-                        }
+                        discount_type_el.text(resp.message);
+                        coupon_row.show(); // แสดงแถวคูปอง
 
                         if (resp.type === 'free_shipping') {
-                            discount_val_el.html('<strong class="text-danger">ส่งฟรี</strong>');
+                            discount_val_el.html('<strong class="text-success">ส่งฟรี</strong>');
                         } else {
                             discount_val_el.html('<strong class="text-danger">- ' + formatPrice(resp.discount_amount) + ' บาท</strong>');
                         }
@@ -821,16 +737,13 @@ if (!function_exists('format_price_custom')) {
                         appliedCoupon.id = 0;
                         appliedCoupon.amount = 0;
                         appliedCoupon.type = null;
+
                         error_el.text(resp.error);
                         discount_type_el.text('');
-                        discount_val_el.text('');
-                        quantity_warning_message_el.hide();
+                        coupon_row.hide(); // ซ่อนแถวคูปอง
                         alert_toast(resp.error, "error");
                     }
-
-                    // --- ⬇️ 3. แก้ไขบรรทัดนี้ ⬇️ ---
-                    updateGrandTotal(currentShippingCost); // << ใช้ค่าส่งล่าสุดที่เก็บไว้
-
+                    updateGrandTotal(currentShippingCost);
                     end_loader();
                 }
             });
