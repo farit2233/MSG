@@ -346,10 +346,9 @@ if (!function_exists('format_price_custom')) {
                                         <thead>
                                             <tr>
                                                 <th colspan="2">
-                                                    <div class="d-flex justify-content-between">
+                                                    <div class="d-flex justify-content-between align-items-center">
                                                         <h5 class="text-bold mb-0">ที่อยู่จัดส่ง</h5>
-                                                        <a href="javascript:void(0);" id="address_option_modal">เปลี่ยน</a>
-                                                        <!--a href="?p=user/address">เปลี่ยน</a-->
+                                                        <a href="javascript:void(0);" id="address_option_modal" class="clickable-text-btn">เปลี่ยน</a>
                                                     </div>
                                                 </th>
                                             </tr>

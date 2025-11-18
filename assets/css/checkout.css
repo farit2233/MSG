@@ -204,30 +204,30 @@
         text-decoration: none !important;
     }
     /* ชื่อคลาสใหม่สำหรับจัดการคูปอง */
-/* จัดการคอนเทนเนอร์หลัก */
-.coupon-container {
-    display: flex;
-    align-items: center;
-}
+    /* จัดการคอนเทนเนอร์หลัก */
+    .coupon-container {
+        display: flex;
+        align-items: center;
+    }
 
-/* จัดการ input-group */
-.coupon-input-group {
-    display: inline-flex;
-    align-items: center;
-}
+    /* จัดการ input-group */
+    .coupon-input-group {
+        display: inline-flex;
+        align-items: center;
+    }
 
-/* จัดการ input */
-.coupon-input {
-    margin-left: 8px;
-    padding: 5px 10px;
-}
+    /* จัดการ input */
+    .coupon-input {
+        margin-left: 8px;
+        padding: 5px 10px;
+    }
 
-/* ข้อความ error */
-.coupon-error-message {
-    display: block;
-    color: red;
-    margin-top: 5px;
-}
+    /* ข้อความ error */
+    .coupon-error-message {
+        display: block;
+        color: red;
+        margin-top: 5px;
+    }
     /* สไตล์สำหรับโปรโมชันที่ใช้ไม่ได้ (ตัวจาง) */
     .promo-inactive {
         opacity: 0.5;
@@ -263,6 +263,35 @@
         filter: brightness(90%);
 	}
 
+   .clickable-text-btn {
+    /* 1. ทำให้เป็นปุ่มใส */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    /* 2. ทำให้คลิกง่าย (หัวใจสำคัญ) */
+    display: inline-block;  /* ‼️ สำคัญ: เพื่อให้ padding ทำงาน */
+    padding: 12px 16px;   /* 💡 ขยายพื้นที่คลิกให้ใหญ่ขึ้น (ปรับค่าได้) */
+
+    /* 3. สำหรับใช้กับ <a> (ลิงก์) */
+    text-decoration: none; /* ลบเส้นใต้ */
+
+    /* 4. (Optional) เอฟเฟกต์ตอนชี้ */
+    transition: opacity 0.2s ease;
+    }
+
+    /* (Optional) เอฟเฟกต์เมื่อเมาส์ชี้ */
+    .clickable-text-btn:hover {
+        opacity: 0.7;
+        /* หรือใช้: text-decoration: underline; */
+    }
+
+    .card-text strong {
+    /* สำหรับจอเดสก์ท็อป (ค่าปกติ) 
+      ให้มันเป็น inline-block (หรือ inline)
+    */
+    display: inline-block;
+    }
 
     @media only screen and (max-width: 768px) {
         .product-name {
