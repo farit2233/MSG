@@ -112,7 +112,18 @@ if (!function_exists('format_price_custom')) {
             </div>
             <div class="mb-3">
                 <label for="" class="control-label">ที่อยู่จัดส่ง:</label>
-                <div class="pl-4"><?= !empty($delivery_address) ? nl2br(htmlentities($delivery_address)) : 'ไม่พบที่อยู่' ?></div>
+                <div class="pl-4">
+                    <?= !empty($delivery_address) ?
+                        nl2br(htmlentities(
+                            str_replace(
+                                [" จ.", " จังหวัด"],
+                                ["\nจ.", "\nจังหวัด"],
+                                $delivery_address
+                            )
+                        ))
+                        : 'ไม่พบที่อยู่'
+                    ?>
+                </div>
             </div>
         </div>
         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
@@ -241,7 +252,7 @@ if (!function_exists('format_price_custom')) {
                     <div class="d-flex w-100 align-items-center">
                         <div class="col-2 text-center">
                             <a href=".?p=products/view_product&id=<?= $row['product_id'] ?>" class=" product-link">
-                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail border p-0 product-logo">
+                                <img src="<?= validate_image($row['image_path']) ?>" alt="" class="img-thumbnail border p-0 product-order img-fluid">
                             </a>
                         </div>
                         <div class="col-auto flex-shrink-1 flex-grow-1">
@@ -268,15 +279,13 @@ if (!function_exists('format_price_custom')) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-auto text-right">
-                            <div class="col-auto text-right">
-                                <span class="text-dark mb-0 order-price">
-                                    <b><?= format_price_custom($row['price'] * $row['quantity'], 2) ?> บาท</b>
-                                </span>
-                                <a href=".?p=products/view_product&id=<?= $row['product_id'] ?>" class="btn btn-orders mt-2 d-block">
-                                    <i class="fa fa-basket-shopping me-1"></i> ซื้ออีกครั้ง
-                                </a>
-                            </div>
+                        <div class="col-auto text-right order-item-actions">
+                            <span class="text-dark mb-0 order-price">
+                                <b><?= format_price_custom($row['price'] * $row['quantity'], 2) ?> บาท</b>
+                            </span>
+                            <a href=".?p=products/view_product&id=<?= $row['product_id'] ?>" class="btn btn-orders mt-2">
+                                <i class="fa fa-basket-shopping me-1"></i> ซื้ออีกครั้ง
+                            </a>
                         </div>
 
                     </div>

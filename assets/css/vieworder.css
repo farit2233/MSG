@@ -71,4 +71,8 @@
             color: white;
             transition: all 0.2s ease-in-out;
         }
+        .product-order {
+
+            max-width: 53px; /* เช่น จำกัดให้ใหญ่สุดไม่เกิน 100px */
+        }
     }
