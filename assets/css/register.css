@@ -165,3 +165,50 @@
   .err-msg {
     font-size: 0.85rem;
   }
+
+  /* ------------------------------------------- */
+/* --- โค้ดสำหรับแก้แถบเลื่อนบนมือถือ --- */
+/* ------------------------------------------- */
+
+  /* 1. สั่งล้างสไตล์มาตรฐานของมือถือออก (สำคัญที่สุด) */
+  input[type=range].form-control-range {
+    -webkit-appearance: none; /* บังคับล้างสไตล์บน Chrome/Safari/Mobile */
+    appearance: none;
+    background: transparent; /* ล้างพื้นหลังเดิม */
+    width: 100%; /* จัดการความกว้างเอง */
+    cursor: pointer;
+  }
+
+  /* 2. สไตล์สำหรับ "หัวเลื่อน" (Thumb) ให้เป็นสีส้ม */
+  input[type=range].form-control-range::-webkit-slider-thumb {
+    -webkit-appearance: none; /* ล้างสไตล์หัวเลื่อน */
+    height: 18px;            /* ขนาดหัวเลื่อน */
+    width: 18px;
+    border-radius: 50%;      /* ทำให้เป็นวงกลม */
+    background: #f57421;    /* สีส้มของคุณ! */
+    margin-top: -6px;        /* จัดให้อยู่กึ่งกลางราง (อาจต้องปรับเลข) */
+  }
+
+  /* 3. สไตล์สำหรับ "รางเลื่อน" (Track) */
+  input[type=range].form-control-range::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    background: #ddd; /* สีของราง */
+    border-radius: 3px;
+  }
+
+  /* --- (เผื่อไว้สำหรับ Firefox) --- */
+  input[type=range].form-control-range::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #f57421;
+    border: none; /* ลบขอบ */
+  }
+
+  input[type=range].form-control-range::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+  }

@@ -2,10 +2,7 @@
 <!DOCTYPE html>
 <html lang="en" class="" style="height: auto;">
 
-<head>
-  <?php require_once('inc/header.php') ?>
-</head>
-
+<?php require_once('inc/header.php') ?>
 <script>
   start_loader()
 </script>
@@ -35,7 +32,7 @@
                   <div class="row justify-content-center">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                       <div class="form-group d-flex justify-content-center mt-2">
-                        <img src="uploads/customers/default_user.png" alt="Avatar Preview" id="cimg" class="img-fluid">
+                        <img src="<?= base_url ?>uploads/customers/default_user.png" alt="Avatar Preview" id="cimg" class="img-fluid">
                       </div>
                       <div class="custom-file">
                         <input type="file" class="custom-file-input" id="customFile" name="img" accept="image/png, image/jpeg">
@@ -165,9 +162,9 @@
     </div>
   </section>
 
-  <script src="<?= base_url ?>plugins/jquery/jquery.min.js"></script>
-  <script src="<?= base_url ?>plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="<?= base_url ?>dist/js/adminlte.min.js"></script>
+  <script src="<?php echo base_url ?>plugins/jquery/jquery.min.js"></script>
+  <script src="<?php echo base_url ?>plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="<?php echo base_url ?>dist/js/adminlte.min.js"></script>
   <script src="<?php echo base_url ?>plugins/cropper.js/cropper.min.js"></script>
 
   <script>
