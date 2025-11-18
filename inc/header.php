@@ -50,20 +50,20 @@
   <script src="<?= base_url ?>plugins/jquery/jquery.min.js"></script>
 
   <!--Custom css-->
-  <link rel="stylesheet" href="assets/css/address_option.css">
-  <link rel="stylesheet" href="assets/css/checkout.css">
-  <link rel="stylesheet" href="assets/css/cart_list.css">
-  <link rel="stylesheet" href="assets/css/fetch_product.css">
-  <link rel="stylesheet" href="assets/css/footer.css">
-  <link rel="stylesheet" href="assets/css/home.css">
-  <link rel="stylesheet" href="assets/css/navbar.css">
-  <link rel="stylesheet" href="assets/css/order.css">
-  <link rel="stylesheet" href="assets/css/product.css">
-  <link rel="stylesheet" href="assets/css/promotions.css">
-  <link rel="stylesheet" href="assets/css/register.css">
-  <link rel="stylesheet" href="assets/css/search.css">
-  <link rel="stylesheet" href="assets/css/user.css">
-  <link rel="stylesheet" href="assets/css/vieworder.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/address_option.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/checkout.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/cart_list.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/fetch_product.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/footer.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/home.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/navbar.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/order.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/product.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/promotions.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/register.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/search.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/user.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/vieworder.css">
 
 
   <style type="text/css">
