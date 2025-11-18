@@ -70,7 +70,7 @@ if ($_settings->userdata('id') != '') {
                                     <p>จัดการ และเพิ่มที่อยู่สำหรับจัดส่ง</p>
                                 </div>
                                 <div class="d-flex">
-                                    <a href="#" class="ml-auto " id="address_option">
+                                    <a href="#" class="ml-auto clickable-text-btn" id="address_option">
                                         <i class="fa-solid fa-plus"></i> เพิ่มที่อยู่ใหม่
                                     </a>
                                 </div>
@@ -99,7 +99,7 @@ if ($_settings->userdata('id') != '') {
                                                             </p>
                                                         </div>
                                                         <div class="ms-3 d-flex flex-column align-items-end">
-                                                            <a href="#" class="edit-address mb-1 text-sm"
+                                                            <a href="#" class="edit-address mb-1 text-sm clickable-text-btn"
                                                                 data-id="<?= $row['id'] ?>"
                                                                 data-name="<?= htmlspecialchars($row['name']) ?>"
                                                                 data-contact="<?= htmlspecialchars($row['contact']) ?>"
@@ -112,13 +112,13 @@ if ($_settings->userdata('id') != '') {
                                                                 <i class="fa-solid fa-pencil-alt"></i> แก้ไข
                                                             </a>
 
-                                                            <a href="#" class="set-primary mb-1 text-sm" data-id="<?= $row['id'] ?>"
+                                                            <a href="#" class="set-primary mb-1 text-sm clickable-text-btn" data-id="<?= $row['id'] ?>"
                                                                 <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
                                                                 style="text-decoration: none;">
                                                                 <i class="<?= ($row['is_primary'] == 1) ? 'fa-solid' : 'fa-regular' ?> fa-star"></i> ที่อยู่หลัก
                                                             </a>
 
-                                                            <a href="#" class="delete-address mb-1 text-sm" data-id="<?= $row['id'] ?>"
+                                                            <a href="#" class="delete-address mb-1 text-sm clickable-text-btn" data-id="<?= $row['id'] ?>"
                                                                 <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
                                                                 style="text-decoration: none;">
                                                                 <i class="fa-solid fa-trash"></i> ลบ
@@ -146,7 +146,7 @@ if ($_settings->userdata('id') != '') {
                                 <input type="hidden" name="address_id" id="address_id">
                                 <input type="hidden" name="customer_id" value="<?= isset($id) ? $id : '' ?>">
                                 <div class="d-flex">
-                                    <a href="#" class="ml-auto" id="cancel-edit">
+                                    <a href="#" class="ml-auto clickable-text-btn" id="cancel-edit">
                                         <i class="fa-solid fa-xmark"></i> กลับ
                                     </a>
                                 </div>
