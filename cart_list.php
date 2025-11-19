@@ -1,199 +1,394 @@
 <?php
-
 if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) {
 } else {
 }
 ?>
 
-<section class="py-3">
+<section class="py-5">
     <div class="container">
-        <div class="row mt-n4  justify-content-center align-items-center flex-column">
-            <div class="col-lg-10 col-md-11 col-sm-12 col-xs-12">
-                <div class="card rounded-0 shadow" style="margin-top: 3rem;">
-                    <div class="card-body">
-                        <div class=" container-fluid">
-                            <div class="cart-header-bar">
-                                <i class="fa fa-basket-shopping mr-2" style="font-size: 30px;"></i>
-                                <h3 class="d-inline mb-0">ตะกร้าของฉัน</h3>
+
+        <div class="cart-header-bar">
+            <i class="fa fa-basket-shopping mr-2 cart-icon"></i>
+            <h3 class="d-inline mb-0 font-weight-bold">ตะกร้าของฉัน</h3>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+
+                <div class="cart-card mb-3">
+                    <div class="cart-card-body p-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="cart-checkbox-area" style="padding-right: 10px;">
+                                <input type="checkbox" class="check-all" id="check-all-box">
                             </div>
-
-                            <div class="list-group-item d-flex w-100 align-items-center" style="border-bottom: 2px solid #eee; padding-top: 0.75rem; padding-bottom: 0.75rem;">
-
-                                <div class="col-auto flex-grow-1 d-flex align-items-center">
-
-                                    <input type="checkbox" class="form-check-input check-all" id="check-all-box" title="เลือกทั้งหมด">
-
-                                    <label for="check-all-box" class="title-all">เลือกทั้งหมด</label>
-                                </div>
-
-                                <div class="col-auto">
-                                    <a href="javascript:void(0)" id="deselect-all-link" class="text-danger" style="text-decoration: none; display: none;">ยกเลิกทั้งหมด</a>
-                                </div>
-                            </div>
-
-                            <div id="item_list" class="list-group">
-                                <?php
-                                $gt = 0;
-                                $cart = $conn->query("SELECT 
-                                    c.*, 
-                                    p.name as product, 
-                                    p.brand as brand, 
-                                    p.vat_price, 
-                                    p.discounted_price, 
-                                    p.discount_type,
-                                    cc.name as category, 
-                                    p.image_path,
-                                    (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
-                                        - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
-                                    FROM `cart_list` c 
-                                    INNER JOIN product_list p ON c.product_id = p.id 
-                                    INNER JOIN category_list cc ON p.category_id = cc.id 
-                                    WHERE customer_id = '{$_settings->userdata('id')}'");
-
-                                while ($row = $cart->fetch_assoc()):
-                                    $available = $row['available'];
-
-                                    if ($available >= 100) {
-                                        $max_order_qty = floor($available / 3);
-                                    } elseif ($available >= 50) {
-                                        $max_order_qty = floor($available / 2);
-                                    } elseif ($available >= 30) {
-                                        $max_order_qty = floor($available / 1.5);
-                                    } else {
-                                        $max_order_qty = max(1, floor($available / 1));
-                                    }
-
-                                    // ✨ ตรวจสอบและปรับปรุงจำนวนสินค้าในตะกร้า หากเกินจำนวนที่สั่งได้
-                                    if ($row['quantity'] > $max_order_qty && $max_order_qty > 0) {
-                                        $row['quantity'] = $max_order_qty;
-                                        // อัปเดตฐานข้อมูลเบื้องหลังเพื่อความถูกต้อง
-                                        $conn->query("UPDATE `cart_list` SET quantity = '{$max_order_qty}' WHERE id = '{$row['id']}'");
-                                    }
-
-                                    $show_discount = !empty($row['discounted_price']) && $row['discounted_price'] < $row['vat_price'];
-                                    $price_to_use = $show_discount ? $row['discounted_price'] : $row['vat_price'];
-                                    $gt += $price_to_use * $row['quantity'];
-                                ?>
-
-                                    <div class="list-group-item cart-list-item d-flex w-100 <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
-                                        data-id='<?= $row['id'] ?>'
-                                        data-max='<?= $max_order_qty ?>'
-                                        data-unit-price='<?= $price_to_use ?>'
-                                        data-original-price='<?= $row['vat_price'] ?>'>
-
-                                        <div class="col-auto pr-2">
-                                            <input type="checkbox"
-                                                class="form-check-input cart-check"
-                                                name="selected_cart[]"
-                                                value="<?= $row['id'] ?>"
-                                                id="cart_check_<?= $row['id'] ?>"
-                                                data-price="<?= $price_to_use * $row['quantity'] ?>"
-                                                <?= $row['available'] <= 0 ? 'disabled' : '' ?>>
-                                        </div>
-
-                                        <div class="cart-list-item-content d-flex w-100 align-items-start">
-                                            <div class="col-3 text-center">
-                                                <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>">
-
-                                                    <?php
-                                                    // 1. ดึง Path หลัก
-                                                    $cart_main_path = $row['image_path'];
-                                                    // 2. แปลงเป็น Path ขนาดกลาง (Medium)
-                                                    $cart_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $cart_main_path);
-                                                    ?>
-                                                    <img src="<?= validate_image($cart_medium_path) ?>" class="cart-product-logo" alt="" style="cursor: pointer;">
-                                                </a>
-                                            </div>
-
-                                            <div class="col-auto flex-shrink-1 flex-grow-1">
-                                                <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>" style="text-decoration: none; color: inherit;">
-                                                    <h4 class="cart-product-title" style="cursor: pointer;"><?= $row['product'] ?></h4>
-                                                </a>
-
-                                                <div class="text-muted d-flex w-100">
-                                                    <div class="input-group" style="width: 20rem;">
-                                                        <button class="btn cart-minus minus-qty" type="button">-</button>
-                                                        <input type="number" class="form-control text-center qty" value="<?= $row['quantity'] ?>" min="1" max="<?= $row['available'] ?>" required>
-                                                        <button class="btn cart-plus add-qty" type="button">+</button>
-                                                        <button class="btn btn-danger del-item" type="button">
-                                                            <i class="fa-solid fa-trash-can"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-auto product-price">
-                                            <?php
-                                            if ($show_discount):
-                                                // คำนวณยอด
-                                                $total_orig = $row['vat_price'] * $row['quantity'];
-                                                $total_disc = $row['discounted_price'] * $row['quantity'];
-                                            ?>
-                                                <h5 class="text-muted mb-0">
-                                                    <del><?= ($total_orig == (int)$total_orig ? format_num($total_orig, 0) : format_num($total_orig, 2)) ?> บาท</del>
-                                                </h5>
-                                                <h4 class="text-danger">ลดเหลือ: <?= ($total_disc == (int)$total_disc ? format_num($total_disc, 0) : format_num($total_disc, 2)) ?> บาท</h4>
-                                            <?php
-                                            else:
-                                                // คำนวณยอด
-                                                $total_orig = $row['vat_price'] * $row['quantity'];
-                                            ?>
-                                                <h4>ราคา: <?= ($total_orig == (int)$total_orig ? format_num($total_orig, 0) : format_num($total_orig, 2)) ?> บาท</h4>
-                                            <?php endif; ?>
-                                        </div>
-
-                                    </div>
-                                <?php endwhile; ?>
-
-                            </div>
-                            <div id="guest_cart_container" style="display: none;"></div>
-                            <?php if ($cart->num_rows <= 0 && $_settings->userdata('id') != ''): ?>
-                                <h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>
-                            <?php endif; ?>
-                            <div class="d-flex justify-content-end py-3">
-                                <div class="col-auto">
-                                    <h3 class="selected-total"><b>รวมรายการที่เลือก: <span id="selected-total">0.00</span></b> บาท</h3>
-                                </div>
-                            </div>
-                            <?php if ($gt > 0): ?>
-                                <div class="py-1 text-center">
-                                    <form id="checkout-form" method="post" action="./?p=checkout">
-                                        <input type="hidden" name="selected_items" id="selected_items">
-                                        <button type="submit" class="btn addcart rounded-pill">
-                                            ชำระรายการที่เลือก
-                                        </button>
-                                    </form>
-                                </div>
-                            <?php endif; ?>
+                            <label for="check-all-box" class="mb-0 cursor-pointer font-weight-bold">เลือกทั้งหมด</label>
                         </div>
+                        <a href="javascript:void(0)" id="deselect-all-link" class="text-muted small text-decoration-none cancel-all" style="display:none;">ล้างการเลือก</a>
                     </div>
+                </div>
+
+                <div class="cart-card">
+                    <div class="cart-card-body" id="item_list">
+                        <?php
+                        $gt = 0;
+                        $cart = $conn->query("SELECT 
+                        c.*, 
+                        p.name as product, 
+                        p.brand as brand, 
+                        p.vat_price, 
+                        p.discounted_price, 
+                        p.discount_type,
+                        cc.name as category, 
+                        p.image_path,
+                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
+                            - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
+                        FROM `cart_list` c 
+                        INNER JOIN product_list p ON c.product_id = p.id 
+                        INNER JOIN category_list cc ON p.category_id = cc.id 
+                        WHERE customer_id = '{$_settings->userdata('id')}'");
+
+                        // ✅ แก้ไข: ประกาศฟังก์ชันตรงนี้ (นอกลูป)
+                        if (!function_exists('fmt_smart')) {
+                            function fmt_smart($v)
+                            {
+                                return (floor($v) == $v) ? number_format($v, 0) : number_format($v, 2);
+                            }
+                        }
+
+                        // เริ่มวนลูปแสดงสินค้า
+                        while ($row = $cart->fetch_assoc()):
+                            $available = $row['available'];
+
+                            // Logic Stock
+                            if ($available >= 100) {
+                                $max_order_qty = floor($available / 3);
+                            } elseif ($available >= 50) {
+                                $max_order_qty = floor($available / 2);
+                            } elseif ($available >= 30) {
+                                $max_order_qty = floor($available / 1.5);
+                            } else {
+                                $max_order_qty = max(1, floor($available / 1));
+                            }
+
+                            if ($row['quantity'] > $max_order_qty && $max_order_qty > 0) {
+                                $row['quantity'] = $max_order_qty;
+                                $conn->query("UPDATE `cart_list` SET quantity = '{$max_order_qty}' WHERE id = '{$row['id']}'");
+                            }
+
+                            $show_discount = !empty($row['discounted_price']) && $row['discounted_price'] < $row['vat_price'];
+                            $price_to_use = $show_discount ? $row['discounted_price'] : $row['vat_price'];
+                            $gt += $price_to_use * $row['quantity'];
+
+                            $cart_main_path = $row['image_path'];
+                            $cart_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $cart_main_path);
+                        ?>
+
+                            <div class="cart-item-row <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
+                                data-id='<?= $row['id'] ?>'
+                                data-max='<?= $max_order_qty ?>'
+                                data-unit-price='<?= $price_to_use ?>'
+                                data-original-price='<?= $row['vat_price'] ?>'>
+
+                                <div class="cart-checkbox-area">
+                                    <input type="checkbox"
+                                        class="cart-check"
+                                        name="selected_cart[]"
+                                        value="<?= $row['id'] ?>"
+                                        id="cart_check_<?= $row['id'] ?>"
+                                        data-price="<?= $price_to_use * $row['quantity'] ?>"
+                                        <?= $row['available'] <= 0 ? 'disabled' : '' ?>>
+                                </div>
+
+                                <div class="cart-item-image">
+                                    <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>">
+                                        <img src="<?= validate_image($cart_medium_path) ?>" alt="<?= $row['product'] ?>">
+                                    </a>
+                                </div>
+
+                                <div class="cart-item-details">
+                                    <a href="./?p=products/view_product&id=<?= $row['product_id'] ?>" class="cart-item-title">
+                                        <?= $row['product'] ?>
+                                    </a>
+                                    <?php if ($row['available'] <= 0): ?>
+                                        <div class="text-danger small font-weight-bold mt-1">สินค้าหมดชั่วคราว</div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="cart-item-actions">
+                                    <div class="product-price">
+                                        <?php
+                                        $total_orig = $row['vat_price'] * $row['quantity'];
+                                        $total_now = $price_to_use * $row['quantity'];
+
+                                        // เรียกใช้ฟังก์ชัน fmt_smart ได้ปกติ
+                                        if ($show_discount): ?>
+                                            <div class="cart-price-del"><?= fmt_smart($total_orig) ?></div>
+                                            <div class="cart-price-text discount"><?= fmt_smart($total_now) ?> ฿</div>
+                                        <?php else: ?>
+                                            <div class="cart-price-text"><?= fmt_smart($total_now) ?> ฿</div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="qty-group">
+                                        <button class="qty-btn minus-qty" type="button">-</button>
+                                        <input type="number" class="qty-input qty" value="<?= $row['quantity'] ?>" min="1" max="<?= $row['available'] ?>">
+                                        <button class="qty-btn add-qty" type="button">+</button>
+                                    </div>
+
+                                    <button class="btn-delete del-item" type="button" title="ลบสินค้า">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endwhile; ?>
+
+                        <div id="guest_cart_container" style="display: none;"></div>
+
+                        <?php if ($cart->num_rows <= 0 && $_settings->userdata('id') != ''): ?>
+                            <div class="text-center py-5">
+                                <i class="fa fa-shopping-cart text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
+                                <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
+                                <a href="./" class="btn btn-outline-primary rounded-pill mt-3 px-4">ไปช็อปเลย</a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 d-none d-lg-block">
+                <div class="cart-summary-box">
+                    <h5 class="mb-3 font-weight-bold">สรุปคำสั่งซื้อ</h5>
+                    <div class="summary-row">
+                        <span>ยอดรวมสินค้า</span>
+                        <span id="summary-subtotal">0.00 ฿</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>ยอดสุทธิ</span>
+                        <span><span id="selected-total-desktop">0.00</span> บาท</span>
+                    </div>
+                    <form id="checkout-form-desktop" method="post" action="./?p=checkout">
+                        <input type="hidden" name="selected_items" class="selected_items_input">
+                        <button type="submit" class="btn-checkout mt-3">ดำเนินการชำระเงิน</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-</section>
-<script>
-    // ===================================
-    // ✨ SECTION: Utility Functions (Global)
-    // ===================================
 
-    /**
-     * ฟังก์ชันจัดรูปแบบราคาสำหรับ JS
-     */
-    function formatPriceForJS(value) {
-        return value.toLocaleString('th-TH', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2
-        });
+    <div class="mobile-checkout-bar d-lg-none">
+        <div class="d-flex flex-column">
+            <span class="text-muted small">ยอดรวมทั้งหมด:</span>
+            <span class="text-primary font-weight-bold" style="font-size: 1.2rem;">
+                <span id="selected-total-mobile">0.00</span> ฿
+            </span>
+        </div>
+        <form id="checkout-form-mobile" method="post" action="./?p=checkout" class="m-0">
+            <input type="hidden" name="selected_items" class="selected_items_input">
+            <button type="submit" class="btn btn-primary rounded px-4 font-weight-bold" style="background-color: var(--primary-color); border:none;">
+                ชำระเงิน
+            </button>
+        </form>
+    </div>
+
+</section>
+
+<script>
+    // ==========================================
+    // Helper Functions
+    // ==========================================
+    function formatPriceForJS(price) {
+        let val = parseFloat(price);
+
+        // เช็คว่าเป็นจำนวนเต็มหรือไม่ (ไม่มีเศษ)
+        if (val % 1 === 0) {
+            // ถ้าเป็นจำนวนเต็ม ให้แสดง 0 ตำแหน่ง (ตัด .00 ทิ้ง)
+            return val.toLocaleString('th-TH', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        } else {
+            // ถ้ามีเศษ ให้แสดง 2 ตำแหน่งตามปกติ
+            return val.toLocaleString('th-TH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
     }
 
-    /**
-     * ฟังก์ชันอัปเดตตะกร้า (สำหรับคนล็อกอิน)
-     * (คงเดิม) - ยังคงถูกเรียกใช้โดยปุ่ม +/- และ 'change' event
-     */
+    // ==========================================
+    // Main Logic
+    // ==========================================
+    $(document).ready(function() {
+
+        // Load Logic
+        if ('<?= $_settings->userdata('id') ?>' == '') {
+            renderGuestCart();
+        } else {
+            calculateSelectedTotal();
+            syncSelectAllState();
+        }
+
+        // ---------------------------------------------------------
+        // 1. Event: พิมพ์ตัวเลขเอง (Change) ** สำคัญ **
+        // ---------------------------------------------------------
+        $(document).on('change', '.qty-input', function() {
+            var input = $(this);
+            var row = input.closest('.cart-item-row');
+            var id = row.attr('data-id');
+            var max = parseInt(row.attr('data-max'));
+            var val = parseInt(input.val()); // อ่านค่าที่พิมพ์
+            var isGuest = input.hasClass('guest');
+
+            // ตรวจสอบค่าที่พิมพ์ (Validation)
+            if (isNaN(val) || val < 1) {
+                val = 1; // ถ้าลบหมดหรือพิมพ์ 0 ให้เด้งกลับเป็น 1
+            }
+            if (val > max) {
+                val = max; // ถ้าพิมพ์เกิน Stock ให้เด้งกลับเป็น Max
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'สินค้ามีจำกัด',
+                    text: 'มีสินค้าสูงสุด ' + max + ' ชิ้น'
+                });
+            }
+
+            input.val(val); // อัปเดตค่าในกล่องให้ถูกต้อง
+
+            // บันทึกข้อมูล
+            if (isGuest) {
+                updateGuestCart(id, val);
+                update_visual_price(row);
+            } else {
+                update_item(id, val, row);
+            }
+        });
+
+        // ---------------------------------------------------------
+        // 2. Event: กดปุ่ม +/- (Click)
+        // ---------------------------------------------------------
+        $(document).on('click', '.add-qty, .minus-qty', function() {
+            var btn = $(this);
+            var row = btn.closest('.cart-item-row');
+            var input = row.find('.qty-input');
+            var id = row.attr('data-id');
+            var max = parseInt(row.attr('data-max'));
+            var current = parseInt(input.val()) || 0;
+            var isGuest = input.hasClass('guest');
+
+            var step = btn.hasClass('add-qty') ? 1 : -1;
+            var newVal = current + step;
+
+            if (newVal < 1) newVal = 1;
+            if (newVal > max) {
+                newVal = max;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'สินค้ามีจำกัด',
+                    text: 'สูงสุด ' + max + ' ชิ้น'
+                });
+            }
+
+            input.val(newVal);
+
+            if (isGuest) {
+                updateGuestCart(id, newVal);
+                update_visual_price(row);
+            } else {
+                update_item(id, newVal, row);
+            }
+        });
+
+        // ---------------------------------------------------------
+        // 3. Event อื่นๆ (Delete, Checkbox)
+        // ---------------------------------------------------------
+        $(document).on('click', '.del-item', function() {
+            var row = $(this).closest('.cart-item-row');
+            var id = row.attr('data-id');
+            var isGuest = $(this).hasClass('guest');
+
+            Swal.fire({
+                title: 'ยืนยันการลบ?',
+                text: "ต้องการลบสินค้านี้หรือไม่",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#ccc',
+                confirmButtonText: 'ใช่ ลบเลย',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (isGuest) deleteGuestCartItem(id);
+                    else delete_cart(id);
+                }
+            })
+        });
+
+        $(document).on('change', '.cart-check', function() {
+            calculateSelectedTotal();
+            syncSelectAllState();
+        });
+
+        $('.check-all').change(function() {
+            var isChecked = $(this).is(':checked');
+            $('.cart-check:not(:disabled)').prop('checked', isChecked);
+            calculateSelectedTotal();
+            if (isChecked) $('#deselect-all-link').show();
+            else $('#deselect-all-link').hide();
+        });
+
+        $('#deselect-all-link').click(function() {
+            $('.check-all').prop('checked', false);
+            $('.cart-check').prop('checked', false);
+            $(this).hide();
+            calculateSelectedTotal();
+        });
+
+        $('#checkout-form-desktop, #checkout-form-mobile').submit(function(e) {
+            var selected = [];
+            var valid = true;
+            var errorMsg = '';
+
+            $('.cart-check:checked').each(function() {
+                var row = $(this).closest('.cart-item-row');
+                var id = $(this).hasClass('guest') ? row.attr('data-id') : $(this).val();
+                var qty = parseInt(row.find('.qty-input').val());
+                var max = parseInt(row.attr('data-max'));
+                var name = row.find('.cart-item-title').text().trim();
+
+                if (qty > max) {
+                    valid = false;
+                    errorMsg += `• <b>${name}</b> เหลือเพียง ${max} ชิ้น<br>`;
+                }
+                selected.push(id);
+            });
+
+            if (selected.length === 0) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'เตือน',
+                    text: 'กรุณาเลือกสินค้าก่อนชำระเงิน'
+                });
+                return false;
+            }
+            if (!valid) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'สินค้าไม่พอ',
+                    html: errorMsg
+                });
+                return false;
+            }
+            $('.selected_items_input').val(selected.join(','));
+        });
+    });
+
+    // ==========================================
+    // Functions
+    // ==========================================
     function update_item(cart_id, qty, itemElement) {
-        start_loader()
+        // start_loader(); // Optional
         $.ajax({
             url: _base_url_ + 'classes/Master.php?f=update_cart',
             method: 'POST',
@@ -202,85 +397,19 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                 qty: qty
             },
             dataType: 'json',
-            error: err => {
-                console.log(err);
-                alert_toast("An error occurred.", 'error');
-                end_loader();
-            },
             success: function(resp) {
                 if (resp.status == 'success') {
-                    // อัปเดต DOM (เพื่อให้แน่ใจว่าราคาสุดท้ายถูกต้อง)
                     update_visual_price(itemElement);
-                    end_loader();
-
-                    // --- ✨ เพิ่มบรรทัดนี้เข้ามาครับ ---
-                    alert_toast("อัปเดตจำนวนสินค้าแล้ว", 'success');
-                    // -----------------------------------
-
                 } else {
-                    alert_toast("An error occurred.", 'error');
-                    end_loader();
+                    console.log(resp);
                 }
+            },
+            error: function(err) {
+                console.log(err);
             }
         });
     }
 
-    /**
-     * ✨ ใหม่: ฟังก์ชันอัปเดตราคาที่แสดงผล (Client-side)
-     * ไม่มีการเรียก AJAX (ไม่ทำให้หมุน)
-     */
-    function update_visual_price(itemElement) {
-        var qtyInput = itemElement.find('.qty');
-        var qtyStr = qtyInput.val();
-        var qtyNum = parseInt(qtyStr);
-        var max = parseInt(itemElement.attr('data-max'));
-
-        // 1. ตรวจสอบ Max (ขณะพิมพ์)
-        if (!isNaN(qtyNum) && qtyNum > max) {
-            qtyNum = max;
-            qtyInput.val(qtyNum); // แก้ไขค่าในช่อง
-            Swal.fire({
-                icon: 'warning',
-                title: 'สินค้าในคลังมีไม่พอ',
-                text: 'คุณสามารถสั่งซื้อได้สูงสุด ' + max + ' ชิ้น'
-            });
-        }
-
-        // 2. กำหนดจำนวนที่จะใช้คำนวณ (อนุญาตให้ 0 หรือ ว่างเปล่าชั่วคราว)
-        var calcQty = qtyNum;
-        if (isNaN(calcQty) || calcQty < 1) {
-            calcQty = 1; // ใช้ 1 ในการคำนวณ แม้ในช่องจะว่าง
-        }
-
-        // 3. อ่านค่าราคา
-        var unitPrice = parseFloat(itemElement.attr('data-unit-price'));
-        var originalPrice = parseFloat(itemElement.attr('data-original-price'));
-        var newSubtotal = unitPrice * calcQty;
-        var newOriginalSubtotal = originalPrice * calcQty;
-        var showDiscount = (unitPrice < originalPrice);
-
-        // 4. สร้าง HTML ราคาใหม่
-        var priceContainer = itemElement.find('.col-auto.product-price');
-        var priceHTML = '';
-        if (showDiscount) {
-            priceHTML = `<h5 class="text-muted mb-0"><del>${formatPriceForJS(newOriginalSubtotal)} บาท</del></h5>
-                        <h4 class="text-danger">ลดเหลือ: ${formatPriceForJS(newSubtotal)} บาท</h4>`;
-        } else {
-            priceHTML = `<h4>ราคา: ${formatPriceForJS(newSubtotal)} บาท</h4>`;
-        }
-        priceContainer.html(priceHTML);
-
-        // 5. อัปเดต data-price ของ checkbox
-        itemElement.find('.cart-check').attr('data-price', newSubtotal);
-
-        // 6. คำนวณยอดรวมใหม่
-        calculateSelectedTotal();
-    }
-
-
-    /**
-     * ฟังก์ชันลบสินค้า (สำหรับคนล็อกอิน)
-     */
     function delete_cart(id) {
         start_loader();
         $.ajax({
@@ -290,494 +419,173 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                 id: id
             },
             dataType: "json",
-            error: err => {
-                console.log(err);
-                alert_toast("An error occured.", 'error');
-                end_loader();
-            },
             success: function(resp) {
                 if (resp.status == 'success') {
                     location.reload();
                 } else {
-                    alert_toast("An error occured.", 'error');
+                    alert_toast("Error deleting item", 'error');
                     end_loader();
                 }
             }
         });
     }
 
-    // ===================================
-    // ✨ SECTION: For Logged-in Users (jQuery)
-    // ===================================
-    $(function() {
+    function update_visual_price(itemElement) {
+        var qtyInput = itemElement.find('.qty-input');
+        var qty = parseInt(qtyInput.val()) || 1;
+        var unitPrice = parseFloat(itemElement.attr('data-unit-price'));
+        var origPrice = parseFloat(itemElement.attr('data-original-price'));
 
-        // ✨ (แก้ไข) Event 'input': ทำงานทุกครั้งที่พิมพ์ อัปเดตราคาที่แสดงผล (No AJAX)
-        $('.qty:not(.guest)').on('input', function() {
-            var item = $(this).closest('.cart-list-item');
-            // เรียกฟังก์ชันอัปเดตราคา (Visual only)
-            update_visual_price(item);
-        });
+        var subtotal = unitPrice * qty;
+        var origSubtotal = origPrice * qty;
+        var showDiscount = unitPrice < origPrice;
 
-        // ✨ (ใหม่) Event 'change': ทำงานเมื่อคลิกออก/พิมพ์เสร็จ บันทึกลง DB (AJAX)
-        $('.qty:not(.guest)').on('change', function() {
-            var item = $(this).closest('.cart-list-item');
-            var qtyInput = $(this);
-            var qtyNum = parseInt(qtyInput.val());
-            var max = parseInt(item.attr('data-max'));
-            var id = item.attr('data-id');
+        itemElement.find('.cart-check').attr('data-price', subtotal);
 
-            // --- Final Validation (บัคข้อ 2, 3) ---
-            if (isNaN(qtyNum) || qtyNum < 1) {
-                qtyNum = 1;
-            }
-            if (qtyNum > max) {
-                qtyNum = max;
-            }
-            qtyInput.val(qtyNum); // ตั้งค่าที่ถูกต้องลงในช่อง
-            // --- End Final Validation ---
-
-            // เรียกฟังก์ชัน update_item (ตัวเดิมที่ส่ง AJAX)
-            update_item(id, qtyNum, item);
-        });
-
-        // (คงเดิม) Event ปุ่มบวก
-        $('.add-qty:not(.guest)').click(function() {
-            var item = $(this).closest('.cart-list-item');
-            var qtyInput = item.find('.qty');
-            var qty = parseInt(qtyInput.val()) || 1;
-            var max = parseInt(item.attr('data-max'));
-            if (qty < max) {
-                qty++;
-                qtyInput.val(qty);
-                update_item(item.attr('data-id'), qty, item);
-            } else {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'สินค้าในคลังมีไม่พอ',
-                    text: 'คุณสามารถสั่งซื้อได้สูงสุด ' + max + ' ชิ้น'
-                });
-            }
-        });
-
-        // (คงเดิม) Event ปุ่มลบ
-        $('.minus-qty:not(.guest)').click(function() {
-            var item = $(this).closest('.cart-list-item');
-            var qtyInput = item.find('.qty');
-            var qty = parseInt(qtyInput.val()) || 1;
-            if (qty > 1) {
-                qty--;
-                qtyInput.val(qty);
-                update_item(item.attr('data-id'), qty, item);
-            }
-        });
-
-        // (คงเดิม) Event ปุ่มลบสินค้า
-        $('.del-item:not(.guest)').click(function() {
-            var id = $(this).closest('.cart-list-item').attr('data-id');
-            Swal.fire({
-                icon: 'warning',
-                title: 'คุณแน่ใจไหม?',
-                text: "ลบสินค้าออกจากตะกร้า?",
-                showCancelButton: true,
-                confirmButtonColor: '#e74c3c',
-                cancelButtonColor: '#95a5a6',
-                confirmButtonText: 'ใช่ ลบเลย!',
-                cancelButtonText: 'ยกเลิก',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    delete_cart(id);
-                }
-            });
-        });
-    });
-
-
-    // ===================================
-    // ✨ SECTION: For Guest Users (Vanilla JS)
-    // ===================================
-
-    // ✨ (ใหม่) Event 'input' (สำหรับ Guest) - Visual only
-    document.addEventListener('input', function(e) {
-        if (!e.target.matches('.qty.guest')) return;
-        const itemEl = e.target.closest('.cart-list-item');
-        const index = parseInt(itemEl.dataset.id);
-        const newQty = e.target.value; // ส่งค่า string
-        // (index, value, isDirectSet, saveToStorage)
-        updateGuestCartQty(index, newQty, true, false); // false = ไม่บันทึก
-    });
-
-    // ✨ (ใหม่) Event 'change' (สำหรับ Guest) - Save to localStorage
-    document.addEventListener('change', function(e) {
-        if (!e.target.matches('.qty.guest')) return;
-        const itemEl = e.target.closest('.cart-list-item');
-        const index = parseInt(itemEl.dataset.id);
-        const newQty = e.target.value; // ส่งค่า string
-        // (index, value, isDirectSet, saveToStorage)
-        updateGuestCartQty(index, newQty, true, true); // true = บันทึก
-    });
-
-
-    /**
-     * (คงเดิม) ฟังก์ชันวาดตะกร้า (สำหรับ Guest)
-     */
-    function renderGuestCart() {
-        const container = document.getElementById('guest_cart_container');
-        if (!container) return;
-
-        let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-        if (cart.length === 0) {
-            container.innerHTML = '<h5 class="text-center text-muted">ตะกร้าว่างเปล่า ช็อปเลย!</h5>';
-            container.style.display = 'block';
-            const checkoutForm = document.getElementById('checkout-form');
-            if (checkoutForm) checkoutForm.style.display = 'none';
-            calculateSelectedTotal();
-            return;
+        var priceHtml = '';
+        if (showDiscount) {
+            priceHtml = `<div class="cart-price-del">${formatPriceForJS(origSubtotal)}</div>
+                         <div class="cart-price-text discount">${formatPriceForJS(subtotal)} ฿</div>`;
         } else {
-            const checkoutForm = document.getElementById('checkout-form');
-            if (checkoutForm) checkoutForm.style.display = 'block';
+            priceHtml = `<div class="cart-price-text">${formatPriceForJS(subtotal)} ฿</div>`;
         }
+        itemElement.find('.product-price').html(priceHtml);
 
-        const productIds = cart.map(item => item.id).join(',');
-
-        fetch(_base_url_ + 'classes/get_product_stock.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'product_ids=' + productIds
-            })
-            .then(response => response.json())
-            .then(stockData => {
-                let html = '';
-                cart.forEach((item, index) => {
-                    const available = stockData[item.id] || 0;
-                    let max_order_qty = 0;
-                    if (available > 0) {
-                        if (available >= 100) max_order_qty = Math.floor(available / 3);
-                        else if (available >= 50) max_order_qty = Math.floor(available / 2);
-                        else if (available >= 30) max_order_qty = Math.floor(available / 1.5);
-                        else max_order_qty = Math.max(1, Math.floor(available / 1));
-                    }
-
-                    const isOutOfStock = available <= 0;
-                    const currentQty = Math.min(item.qty, max_order_qty);
-
-                    const show_discount = item.discounted_price && item.discounted_price < item.vat_price;
-                    const price_to_use = show_discount ? item.discounted_price : item.vat_price;
-                    const subtotal = price_to_use * currentQty;
-
-                    let image_path = item.image || 'assets/img/default.png';
-
-                    // ใช้รูปขนาด medium สำหรับทุกรูปภาพ
-                    if (image_path && image_path.includes('.webp')) {
-                        image_path = image_path.replace(/(\.webp)(\?.*)?$/, '_medium.webp$2');
-                    }
-
-                    html += `
-            <div class="list-group-item cart-list-item d-flex w-100 ${isOutOfStock ? 'out-of-stock' : ''}" data-id="${index}" data-product-id="${item.id}" data-max="${max_order_qty}">
-                <div class="col-auto pr-2">
-                    <input type="checkbox" class="form-check-input cart-check guest" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''} />
-                </div>
-
-                <div class="cart-list-item-content d-flex w-100 align-items-start">
-                    <div class="col-3 text-center">
-                        <a href="./?p=products/view_product&id=${item.id}">
-                            <img src="${image_path}" class="cart-product-logo" alt="" style="cursor: pointer;"> 
-                        </a>
-                    </div>
-
-                    <div class="col-auto flex-shrink-1 flex-grow-1">
-                        <a href="./?p=products/view_product&id=${item.id}" style="text-decoration: none; color: inherit;">
-                            <h4 class="cart-product-title" style="cursor: pointer;">${item.name}</h4>
-                        </a>
-                        
-                        <div class="text-muted d-flex w-100">
-                            <div class="input-group" style="width: 20rem;">
-                                <button class="btn cart-minus minus-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>−</button>
-                                <input type="number" class="form-control text-center qty guest" value="${currentQty}" min="1" max="${max_order_qty}" ${isOutOfStock ? 'disabled' : ''}>
-                                <button class="btn cart-plus add-qty guest" type="button" ${isOutOfStock ? 'disabled' : ''}>+</button>
-                                <button class="btn btn-danger del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-auto product-price">
-                   ${show_discount
-                        ? `<h5 class="text-muted mb-0"><del>${formatPriceForJS(item.vat_price * currentQty)} บาท</del></h5>
-                        <h4 class="text-danger">ลดเหลือ: ${formatPriceForJS(subtotal)} บาท</h4>`
-                        : `<h4>ราคา: ${formatPriceForJS(subtotal)} บาท</h4>`
-                    }
-                </div>
-            </div>`;
-                });
-
-                container.innerHTML = html;
-                container.style.display = 'block';
-                calculateSelectedTotal();
-                syncSelectAll();
-            })
-            .catch(error => {
-                console.error('เกิดข้อผิดพลาดในการดึงข้อมูลสต็อกสินค้า:', error);
-            });
-    }
-
-    // (คงเดิม) Event เมื่อโหลดหน้า (สำหรับ Guest)
-    document.addEventListener('DOMContentLoaded', function() {
-        const userLoggedIn = <?= ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) ? 'true' : 'false' ?>;
-        if (userLoggedIn) return;
-        renderGuestCart();
-    });
-
-    // ✨ (แก้ไข) Event คลิกปุ่ม (สำหรับ Guest) - เรียก updateGuestCartQty แบบบังคับบันทึก
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.guest')) return;
-
-        const itemEl = e.target.closest('.cart-list-item');
-        if (!itemEl) return;
-        const index = parseInt(itemEl.dataset.id);
-
-        if (e.target.matches('.add-qty.guest')) {
-            // (index, value, isDirectSet, saveToStorage)
-            updateGuestCartQty(index, 1, false, true);
-        }
-        if (e.target.matches('.minus-qty.guest')) {
-            // (index, value, isDirectSet, saveToStorage)
-            updateGuestCartQty(index, -1, false, true);
-        }
-        if (e.target.matches('.del-item.guest, .del-item.guest *')) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'คุณแน่ใจไหม?',
-                text: "ลบสินค้าออกจากตะกร้า?",
-                showCancelButton: true,
-                confirmButtonColor: '#e74c3c',
-                cancelButtonColor: '#95a5a6',
-                confirmButtonText: 'ใช่ ลบเลย!',
-                cancelButtonText: 'ยกเลิก',
-                reverseButtons: true
-            }).then(result => result.isConfirmed && deleteGuestCartItem(index));
-        }
-    });
-
-    /**
-     * ✨ (แก้ไข) ฟังก์ชันอัปเดตจำนวน (สำหรับ Guest)
-     * เพิ่ม parameter: saveToStorage
-     */
-    function updateGuestCartQty(index, value, isDirectSet = false, saveToStorage = true) {
-        let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-        if (!cart[index]) return;
-
-        const itemData = cart[index];
-        const itemEl = document.querySelector(`.cart-list-item[data-id="${index}"]`);
-        if (!itemEl) return;
-
-        const qtyInput = itemEl.querySelector('.qty.guest');
-        const max = parseInt(itemEl.dataset.max);
-        let newQtyNum;
-
-        if (isDirectSet) {
-            // มาจาก 'input' หรือ 'change' (value คือ string)
-            newQtyNum = parseInt(value);
-        } else {
-            // ✨ แก้ไข 1: อ่านค่าปัจจุบันจากช่อง input (qtyInput.value)
-            // ไม่ใช่จาก localStorage (itemData.qty)
-            let currentQtyInBox = parseInt(qtyInput.value) || 1;
-            newQtyNum = currentQtyInBox + value;
-        }
-
-        // --- Validation ---
-        if (!isNaN(newQtyNum) && newQtyNum > max) {
-            newQtyNum = max;
-            qtyInput.value = newQtyNum; // อัปเดตช่อง input
-            Swal.fire({
-                icon: 'warning',
-                title: 'สินค้าในคลังมีไม่พอ',
-                text: 'คุณสามารถสั่งซื้อได้สูงสุด ' + max + ' ชิ้น'
-            });
-        }
-
-        // ถ้าบังคับบันทึก (change, +/-,) ให้บังคับ 1
-        if (saveToStorage) {
-            if (isNaN(newQtyNum) || newQtyNum < 1) {
-                newQtyNum = 1;
-            }
-            // ✨ แก้ไข 2: อัปเดตค่าในช่อง input เสมอ
-            // เมื่อเป็น_การกด +/- หรือ change
-            qtyInput.value = newQtyNum;
-        }
-        // ถ้าไม่บันทึก (input) อนุญาตให้ 0 หรือ NaN ชั่วคราว (ไม่แก้ qtyInput.value)
-
-        // --- End Validation ---
-
-        // คำนวณราคาที่จะแสดง
-        let calcQty = newQtyNum;
-        if (isNaN(calcQty) || calcQty < 1) {
-            calcQty = 1; // ใช้ 1 คำนวณ แม้ในช่องจะว่าง
-        }
-
-        // --- อัปเดต DOM ---
-        const show_discount = itemData.discounted_price && itemData.discounted_price < itemData.vat_price;
-        const price_to_use = show_discount ? itemData.discounted_price : itemData.vat_price;
-        const newSubtotal = price_to_use * calcQty;
-
-        const priceContainer = itemEl.querySelector('.col-auto.product-price');
-        let priceHTML = '';
-        if (show_discount) {
-            priceHTML = `<h5 class="text-muted mb-0"><del>${formatPriceForJS(itemData.vat_price * calcQty)} บาท</del></h5>
-            <h4 class="text-danger">ลดเหลือ: ${formatPriceForJS(newSubtotal)} บาท</h4>`;
-        } else {
-            priceHTML = `<h4>ราคา: ${formatPriceForJS(newSubtotal)} บาท</h4>`;
-        }
-        priceContainer.innerHTML = priceHTML;
-
-        const checkbox = itemEl.querySelector('.cart-check.guest');
-        checkbox.dataset.price = newSubtotal;
         calculateSelectedTotal();
-        // --- จบส่วนอัปเดต DOM ---
+    }
 
-        // (ส่วนบันทึก - ทำเมื่อ saveToStorage = true)
-        if (saveToStorage) {
-            // ✨ แก้ไข 3: อัปเดต itemData.qty *ก่อน* บันทึก
-            // (เพื่อให้แน่ใจว่าค่าใน localStorage ตรงกับที่คำนวณได้)
-            if (itemData.qty !== newQtyNum) {
-                itemData.qty = newQtyNum;
-                localStorage.setItem('guest_cart', JSON.stringify(cart));
-            }
+    function calculateSelectedTotal() {
+        var total = 0;
+        $('.cart-check:checked').each(function() {
+            total += parseFloat($(this).attr('data-price'));
+        });
+
+        var totalText = formatPriceForJS(total);
+        $('#selected-total-desktop').text(totalText);
+        $('#selected-total-mobile').text(totalText);
+        $('#summary-subtotal').text(totalText + ' ฿');
+
+        var hasChecked = $('.cart-check:checked').length > 0;
+        $('.btn-checkout, #checkout-form-mobile button').prop('disabled', !hasChecked);
+    }
+
+    function syncSelectAllState() {
+        var all = $('.cart-check:not(:disabled)').length;
+        var checked = $('.cart-check:checked').length;
+
+        if (all > 0 && all === checked) {
+            $('.check-all').prop('checked', true);
+            $('#deselect-all-link').show();
+        } else {
+            $('.check-all').prop('checked', false);
+            if (checked > 0) $('#deselect-all-link').show();
+            else $('#deselect-all-link').hide();
         }
     }
 
+    // ---------------------------------------------------------
+    // Guest Cart Logic (Render ไม่มี readonly)
+    // ---------------------------------------------------------
+    function renderGuestCart() {
+        var container = $('#guest_cart_container');
+        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
 
-    /**
-     * (คงเดิม) ฟังก์ชันลบสินค้า (สำหรับ Guest)
-     */
+        if (cart.length == 0) {
+            container.html(`
+                <div class="text-center py-5">
+                    <i class="fa fa-shopping-cart text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
+                    <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
+                    <a href="./" class="btn btn-outline-primary rounded-pill mt-3 px-4">ไปช็อปเลย</a>
+                </div>`);
+            container.show();
+            return;
+        }
+
+        var productIds = cart.map(i => i.id).join(',');
+        $.ajax({
+            url: _base_url_ + 'classes/get_product_stock.php',
+            method: 'POST',
+            data: {
+                product_ids: productIds
+            },
+            dataType: 'json',
+            success: function(stockData) {
+                var html = '';
+                cart.forEach((item, index) => {
+                    var available = (stockData && stockData[item.id]) ? parseInt(stockData[item.id]) : 0;
+                    var max_qty = available;
+
+                    // Logic Stock display
+                    if (available >= 100) max_qty = Math.floor(available / 3);
+                    else if (available >= 50) max_qty = Math.floor(available / 2);
+                    else if (available >= 30) max_qty = Math.floor(available / 1.5);
+                    else max_qty = Math.max(1, Math.floor(available / 1));
+
+                    var isOutOfStock = available <= 0;
+                    var qty = Math.min(item.qty, max_qty > 0 ? max_qty : 1);
+
+                    var showDiscount = item.discounted_price && item.discounted_price < item.vat_price;
+                    var price = showDiscount ? item.discounted_price : item.vat_price;
+                    var subtotal = price * qty;
+                    var origSubtotal = item.vat_price * qty;
+
+                    var img = item.image || 'assets/img/default.png';
+                    if (img.includes('.webp')) img = img.replace(/(\.webp)(\?.*)?$/, '_medium.webp$2');
+
+                    // ⚠️ ตรงนี้สำคัญ: เอา readonly ออกจาก input
+                    html += `
+                    <div class="cart-item-row ${isOutOfStock ? 'out-of-stock' : ''}" 
+                         data-id="${index}" data-product-id="${item.id}" 
+                         data-max="${max_qty}" data-unit-price="${price}" data-original-price="${item.vat_price}">
+                        
+                        <div class="cart-checkbox-area">
+                            <input type="checkbox" class="cart-check guest" value="${index}" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''}>
+                        </div>
+                        <div class="cart-item-image">
+                            <a href="./?p=products/view_product&id=${item.id}"><img src="${img}" alt="${item.name}"></a>
+                        </div>
+                        <div class="cart-item-details">
+                            <a href="./?p=products/view_product&id=${item.id}" class="cart-item-title">${item.name}</a>
+                            ${isOutOfStock ? '<div class="text-danger small mt-1">สินค้าหมด</div>' : ''}
+                        </div>
+                        <div class="cart-item-actions">
+                            <div class="product-price text-right mb-2">
+                                ${showDiscount 
+                                    ? `<div class="cart-price-del">${formatPriceForJS(origSubtotal)}</div><div class="cart-price-text discount">${formatPriceForJS(subtotal)} ฿</div>` 
+                                    : `<div class="cart-price-text">${formatPriceForJS(subtotal)} ฿</div>`
+                                }
+                            </div>
+                            <div class="qty-group">
+                                <button class="qty-btn minus-qty guest" type="button" ${isOutOfStock?'disabled':''}>-</button>
+                                <input type="number" class="qty-input qty guest" value="${qty}" min="1" max="${max_qty}" ${isOutOfStock?'disabled':''}>
+                                <button class="qty-btn add-qty guest" type="button" ${isOutOfStock?'disabled':''}>+</button>
+                            </div>
+                            <button class="btn-delete del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>`;
+                });
+                container.html(html);
+                container.show();
+                calculateSelectedTotal();
+                syncSelectAllState();
+            }
+        });
+    }
+
+    function updateGuestCart(index, qty) {
+        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        if (cart[index]) {
+            cart[index].qty = qty;
+            localStorage.setItem('guest_cart', JSON.stringify(cart));
+        }
+    }
+
     function deleteGuestCartItem(index) {
-        let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
         cart.splice(index, 1);
         localStorage.setItem('guest_cart', JSON.stringify(cart));
         if (typeof updateCartCounter === 'function') updateCartCounter();
         renderGuestCart();
-    }
-
-
-    // ===================================
-    // SECTION: Common Functions (คำนวณราคารวม, ตรวจสอบก่อนชำระเงิน)
-    // ===================================
-
-    function syncSelectAll() {
-        var $totalCheckboxes = $('.cart-check:not(:disabled)');
-        var $totalChecked = $('.cart-check:not(:disabled):checked');
-        var $selectAllBox = $('#check-all-box');
-        var $deselectLink = $('#deselect-all-link');
-
-        if ($totalCheckboxes.length === 0) {
-            // ไม่มีสินค้าที่เลือกได้
-            $selectAllBox.prop('checked', false);
-            $selectAllBox.prop('disabled', true);
-            $deselectLink.hide();
-        } else {
-            // มีสินค้า
-            $selectAllBox.prop('disabled', false);
-            // ตรวจสอบว่า 'เลือกทั้งหมด' ควรถูกติ๊กหรือไม่
-            $selectAllBox.prop('checked', $totalCheckboxes.length === $totalChecked.length);
-
-            // แสดง/ซ่อน ลิงก์ 'ยกเลิกทั้งหมด'
-            if ($totalChecked.length > 0) {
-                $deselectLink.show();
-            } else {
-                $deselectLink.hide();
-            }
-        }
-    }
-
-    $(function() {
-
-        // ✨ (แก้ไข) Event เมื่อติ๊ก checkbox ของสินค้า
-        $(document).on('change', '.cart-check', function() {
-            calculateSelectedTotal(); // 1. คำนวณราคารวม (ตัวเดิม)
-            syncSelectAll(); // 2. ซิงค์ปุ่ม 'เลือกทั้งหมด'
-        });
-
-        // ✨ (ใหม่) Event เมื่อติ๊ก 'เลือกทั้งหมด'
-        $('#check-all-box').on('change', function() {
-            var isChecked = $(this).is(':checked');
-            // เลือก/ไม่เลือก รายการทั้งหมดที่ *ไม่พิการ*
-            // และสั่ง .trigger('change') เพื่อให้ listener ด้านบนทำงาน (คำนวณราคา + ซิงค์)
-            $('.cart-check:not(:disabled)').prop('checked', isChecked).trigger('change');
-        });
-
-        // ✨ (ใหม่) Event เมื่อคลิก 'ยกเลิกทั้งหมด'
-        $('#deselect-all-link').on('click', function(e) {
-            e.preventDefault();
-            // ยกเลิกการเลือก รายการที่ถูกติ๊กไว้
-            // และสั่ง .trigger('change') เพื่อให้ listener ด้านบนทำงาน (คำนวณราคา + ซิงค์)
-            $('.cart-check:checked').prop('checked', false).trigger('change');
-        });
-
-
-        $('#checkout-form').submit(function(e) {
-            var selected = [];
-            var valid = true;
-            var errorMessage = '';
-
-            $('.cart-check:checked').each(function() {
-                var item = $(this).closest('.cart-list-item');
-                if ($(this).hasClass('guest')) {
-                    selected.push(item.data('id'));
-                } else {
-                    selected.push($(this).val());
-                }
-
-                // (คงเดิม) อ่านค่า qty ล่าสุด
-                var qty = parseInt(item.find('.qty').val());
-                if (isNaN(qty) || qty < 1) {
-                    qty = 1;
-                }
-                var max = parseInt(item.attr('data-max'));
-                if (qty > max) {
-                    valid = false;
-                    var productName = item.find('h4').text();
-                    errorMessage += `• ${productName} มีในสต๊อกแค่ ${max} ชิ้น<br>`;
-                }
-            });
-
-            if (selected.length === 0) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'ยังไม่ได้เลือกสินค้า',
-                    text: 'กรุณาเลือกสินค้าที่ต้องการชำระก่อน'
-                });
-                return false;
-            }
-            if (!valid) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'สินค้าไม่เพียงพอ',
-                    html: errorMessage
-                });
-                return false;
-            }
-            $('#selected_items').val(selected.join(','));
-        });
-
-        // ✨ (ใหม่) เรียกซิงค์สถานะครั้งแรกเมื่อโหลดหน้า
-        syncSelectAll();
-        calculateSelectedTotal(); // เรียกคำนวณราคาครั้งแรก
-    });
-
-
-    function calculateSelectedTotal() {
-        let total = 0;
-        $('.cart-check:checked').each(function() {
-            total += parseFloat($(this).attr('data-price'));
-        });
-        let formattedTotal = total.toLocaleString('th-TH', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2
-        });
-        $('#selected-total').text(formattedTotal);
+        setTimeout(calculateSelectedTotal, 100);
     }
 </script>

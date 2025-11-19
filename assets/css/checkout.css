@@ -295,8 +295,8 @@
     }
 
     .checkout-payment{
-        border: 1px solid #f57421;
-        border-top-width: 4px;
+        border: 1px solid #eaeaea;
+        border-top: 4px solid #f57421;
         background: #fff;
         border-radius: 8px;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -320,7 +320,6 @@
         align-items: center;
         gap: 10px;
         background-color: #fff;
-
     }
 
     .checkout-card-title {
