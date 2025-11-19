@@ -1,146 +1,175 @@
-  footer a {
-    text-decoration: none;
-    /* ซ่อนเส้นใต้โดยค่าเริ่มต้น */
-  }
+/* =========================================
+   Footer Links & General
+   ========================================= */
+footer a {
+  text-decoration: none;
+  /* ซ่อนเส้นใต้โดยค่าเริ่มต้น */
+}
 
-  footer a:hover {
-    text-decoration: underline;
-    /* แสดงเส้นใต้เมื่อเมาส์ชี้ */
-  }
+footer a:hover {
+  text-decoration: underline;
+  /* แสดงเส้นใต้เมื่อเมาส์ชี้ */
+}
 
-  .btn-not-login {
-    background: #f57421;
-    color: white;
-    padding: 5px 85px;
-    transition: all 0.2s ease-in-out;
-  }
+.btn-not-login {
+  background: #f57421;
+  color: white;
+  padding: 5px 85px;
+  transition: all 0.2s ease-in-out;
+}
 
-  .btn-not-login:hover {
-    color: white;
-    filter: brightness(90%);
-  }
+.btn-not-login:hover {
+  color: white;
+  filter: brightness(90%);
+}
+
+/* =========================================
+   FAB Menu (ปุ่มเมนูลอย) - แก้ไขแล้ว
+   ========================================= */
+
 /* 1. ตัวครอบทั้งหมด (Container) */
+.fab-container {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column-reverse; /* ทำให้ปุ่มย่อยอยู่ "เหนือ" ปุ่มหลัก */
+  align-items: center;
+  pointer-events: none;
+}
+@media (max-width: 991px) {
   .fab-container {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    z-index: 1050;
-    display: flex;
-    flex-direction: column-reverse; /* ทำให้ปุ่มย่อยอยู่ "เหนือ" ปุ่มหลัก */
-    align-items: center;
+    bottom: 80px;
   }
+}
 
-  /* 2. ปุ่มย่อย (ตัวเลือก) */
-  .fab-option {
-    width: 48px;
-    height: 48px;
+/* 2. ปุ่มย่อย (ตัวเลือก) */
+.fab-option {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-bottom: 12px;
+  background-color: #f57421; 
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 26px;
+
+  /* --- ส่วนอนิเมชัน (ต้องใช้ visibility แทน display เพื่อให้มี effect) --- */
+  opacity: 0;
+  visibility: hidden;       /* ซ่อนไม่ให้เห็น */
+  transform: translateY(20px); /* เริ่มจากต่ำกว่าปกติเล็กน้อย */
+  transition: all 0.3s ease-out;
+
+  /* +++ หัวใจสำคัญของการแก้ปัญหา +++ */
+  pointer-events: none;     /* เมื่อซ่อนอยู่ "ห้ามรับการคลิก" (ให้คลิกทะลุไปหาปุ่มบวกได้) */
+  position: relative;       /* เพื่อให้ z-index ทำงาน */
+  z-index: 1;               /* อยู่ชั้นล่างสุด */
+}
+
+/* 3. ปุ่มหลัก (ที่กดเพื่อเปิด/ปิด) */
+.fab-main {
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
-    margin-bottom: 12px;
-    background-color: #f57421; /* สีพื้นฐาน (เดี๋ยวเราจะเปลี่ยนสีแต่ละอัน) */
+    background-color: #f57421;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    text-decoration: none;
+    
+    /* +++ ยกปุ่มบวกให้ลอยเหนือปุ่มลูกเสมอ +++ */
+    position: relative; 
+    z-index: 20; /* ค่าสูงกว่า fab-option (ที่เป็น 1) */
+    
+    transition: transform 0.3s ease, filter 0.2s ease;
+    margin-bottom: 12px;
+    font-size: 22px;
 
-    /* --- ส่วนอนิเมชัน (ซ่อนไว้ก่อน) --- */
+    pointer-events: auto;
+}
+
+/* 4. เมื่อ .fab-container ถูกคลิก (เพิ่มคลาส 'active') */
+.fab-container.active .fab-main {
+  transform: rotate(135deg); /* หมุนปุ่มหลักเป็นกากบาท */
+}
+
+.fab-container.active .fab-option {
+  opacity: 1;
+  transform: translateY(0); /* สไลด์กลับมาที่ตำแหน่ง 0 */
+  visibility: visible;      /* แสดงผล */
+  
+  /* +++ เมื่อเปิดเมนูแล้ว ต้องกลับมารับการคลิกได้ +++ */
+  pointer-events: auto; 
+}
+
+/* 5. ทำให้สไลด์ "เหลื่อมกัน" (Transition Delay) */
+.fab-container.active .fab-option:nth-child(1) { transition-delay: 0.1s; }
+.fab-container.active .fab-option:nth-child(2) { transition-delay: 0.1s; }
+.fab-container.active .fab-option:nth-child(3) { transition-delay: 0.15s; }
+.fab-container.active .fab-option:nth-child(4) { transition-delay: 0.2s; }
+.fab-container.active .fab-option:nth-child(5) { transition-delay: 0.25s; }
+.fab-container.active .fab-option:nth-child(6) { transition-delay: 0.3s; }
+.fab-container.active .fab-option:nth-child(7) { transition-delay: 0.35s; }
+
+/* 6. สีเฉพาะสำหรับแต่ละปุ่ม */
+.fab-option.phone { background-color: #28d230; color: white; }
+.fab-option.line  { background-color: #06C755; color: white; }
+.fab-option.facebook { background-color: #1877F2; color: white; }
+.fab-option.email { background-color: #dc3545; color: white; }
+.fab-option.instagram { 
+  background: 
+      linear-gradient(143.5deg, #8403fc 9%, transparent 38%),
+      linear-gradient(45deg, #ffc300 20%, #ff1233 55%, #fc00d9 80%);
+  color: white;
+}
+.fab-option.youtube { background-color: #FF0000; color: white;}
+
+.fab-option:hover{
+  color: white;
+  filter: brightness(90%);
+}
+
+/* =========================================
+   To Top Button
+   ========================================= */
+#toTopBtn {
+    background-color: #f57421;
+    color: white;
+    border: none;
+    outline: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease-in-out;
+    
     opacity: 0;
-    transform: translateY(20px); /* เริ่มจากต่ำกว่าปกติเล็กน้อย */
-    transition: all 0.3s ease-out;
     visibility: hidden;
+    transform: scale(0.6); 
+    order: -1; /* สั่งให้มันอยู่ล่างสุดของ flex-column-reverse เสมอ */
+    
+    /* เพิ่มป้องกันการกดโดนตอนซ่อน */
+    pointer-events: none; 
+}
 
-    font-size: 26px;
-  }
-  
-  /* 3. ปุ่มหลัก (ที่กดเพื่อเปิด/ปิด) */
-  .fab-main {
-      width: 45px;  /* <-- เปลี่ยนจาก 60px */
-      height: 45px; /* <-- เปลี่ยนจาก 60px */
-      border-radius: 50%;
-      background-color: #f57421;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      z-index: 10; 
-      transition: transform 0.3s ease, filter 0.2s ease;
-      margin-bottom: 12px;
-      font-size: 22px;
-  }
+#toTopBtn.show {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+      pointer-events: auto; /* กลับมากดได้เมื่อโชว์ */
+}
 
-  /* 4. เมื่อ .fab-container ถูกคลิก (เพิ่มคลาส 'active') */
-  .fab-container.active .fab-main {
-    transform: rotate(135deg); /* หมุนปุ่มหลักเป็นกากบาท */
-  }
-
-  .fab-container.active .fab-option {
-    opacity: 1;
-    transform: translateY(0); /* สไลด์กลับมาที่ตำแหน่ง 0 */
-    visibility: visible;
-  }
-
-  /* 5. ทำให้สไลด์ "เหลื่อมกัน" (นี่คืออนิเมชันเบาๆ ที่คุณว่า) */
-  .fab-container.active .fab-option:nth-child(1) { transition-delay: 0.1s; }/* main plus */
-  .fab-container.active .fab-option:nth-child(2) { transition-delay: 0.1s; }/* email */
-  .fab-container.active .fab-option:nth-child(3) { transition-delay: 0.15s; }/* YouTube */
-  .fab-container.active .fab-option:nth-child(4) { transition-delay: 0.2s; }/* Instagram */
-  .fab-container.active .fab-option:nth-child(5) { transition-delay: 0.25s; }/* Facebook */
-  .fab-container.active .fab-option:nth-child(6) { transition-delay: 0.3s; }/* Line */
-  .fab-container.active .fab-option:nth-child(7) { transition-delay: 0.35s; }/* Phone */
-
-  /* 6. (Optional) สีเฉพาะสำหรับแต่ละปุ่ม */
-  .fab-option.phone { background-color: #28d230; color: white; } /* สีโทรศัพท์ (เหมือนปุ่มหลัก) */
-  .fab-option.line  { background-color: #06C755; color: white; } /* สีเขียว Line */
-  .fab-option.facebook { background-color: #1877F2; color: white; } /* สีฟ้า Facebook */
-  .fab-option.email { background-color: #dc3545; color: white; } /* สีแดง (อีเมล) */
-  .fab-option.instagram { 
-    background: 
-        linear-gradient(143.5deg, #8403fc 9%, transparent 38%),
-        linear-gradient(45deg, #ffc300 20%, #ff1233 55%, #fc00d9 80%);
-    color: white;
-  }
-
-  .fab-option.youtube { background-color: #FF0000; color: white;} /* สีแดง YouTube */
-
-  .fab-option:hover{
-    color: white;
+#toTopBtn:hover,
+.fab-main:hover {
     filter: brightness(90%);
-  }
-  
-/* แก้ไขส่วนนี้ */
-  #toTopBtn {
-      background-color: #f57421;
-      color: white;
-      border: none;
-      outline: none;
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      font-size: 22px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease-in-out; /* เปลี่ยนเป็น all เพื่อรองรับการซ่อน */
-      opacity: 0;
-      visibility: hidden;
-      
-      /* สำคัญ: เราต้องเพิ่ม transform
-        เพื่อให้มันซ่อน/โชว์อย่างนุ่มนวลใน flex container
-      */
-      transform: scale(0.6); 
-      order: -1; /* สั่งให้มันอยู่ล่างสุดของ flex-column-reverse เสมอ */
-  }
-
-  #toTopBtn.show {
-        opacity: 1;
-        visibility: visible;
-        transform: scale(1); /* ทำให้มันขยายออกมาเมื่อโชว์ */
-    }
-
-  #toTopBtn:hover,
-  .fab-main:hover {
-      filter: brightness(90%);
-  }
+}

@@ -4,7 +4,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 }
 ?>
 
-<section class="py-5">
+<section class="py-5 cart-body">
     <div class="container">
 
         <div class="cart-header-bar">
@@ -16,14 +16,22 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
             <div class="col-lg-8 mb-4">
 
                 <div class="cart-card mb-3">
-                    <div class="cart-card-body p-3 d-flex align-items-center justify-content-between">
+                    <div class="cart-card-body p-3 d-flex align-items-center position-relative">
+
                         <div class="d-flex align-items-center">
                             <div class="cart-checkbox-area" style="padding-right: 10px;">
                                 <input type="checkbox" class="check-all" id="check-all-box">
                             </div>
                             <label for="check-all-box" class="mb-0 cursor-pointer font-weight-bold">เลือกทั้งหมด</label>
                         </div>
-                        <a href="javascript:void(0)" id="deselect-all-link" class="text-muted small text-decoration-none cancel-all" style="display:none;">ล้างการเลือก</a>
+
+                        <a href="javascript:void(0)"
+                            id="deselect-all-link"
+                            class="text-muted small text-decoration-none cancel-all"
+                            style="display:none; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);">
+                            ล้างการเลือก
+                        </a>
+
                     </div>
                 </div>
 
@@ -178,7 +186,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
     <div class="mobile-checkout-bar d-lg-none">
         <div class="d-flex flex-column">
             <span class="text-muted small">ยอดรวมทั้งหมด:</span>
-            <span class="text-primary font-weight-bold" style="font-size: 1.2rem;">
+            <span class="font-weight-bold" style="font-size: 1.2rem;">
                 <span id="selected-total-mobile">0.00</span> ฿
             </span>
         </div>
@@ -314,7 +322,8 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#ccc',
                 confirmButtonText: 'ใช่ ลบเลย',
-                cancelButtonText: 'ยกเลิก'
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     if (isGuest) deleteGuestCartItem(id);
