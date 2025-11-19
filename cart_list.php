@@ -159,7 +159,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                             <div class="text-center py-5">
                                 <i class="fa fa-basket-shopping text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
                                 <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
-                                <a href="./" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a>
+                                <a href="/?p=products" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -204,6 +204,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 </section>
 
 <script>
+    const isLoggedIn = <?= ($_settings->userdata('id') != '') ? 'true' : 'false' ?>;
     // ==========================================
     // Helper Functions
     // ==========================================
@@ -383,6 +384,28 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                 });
                 return false;
             }
+
+            if (!isLoggedIn) {
+                e.preventDefault(); // หยุดการส่งฟอร์ม
+                Swal.fire({
+                    icon: 'info',
+                    title: 'กรุณาเข้าสู่ระบบ',
+                    text: 'คุณต้องเข้าสู่ระบบก่อนทำการชำระเงิน',
+                    showCancelButton: true,
+                    confirmButtonText: 'ไปหน้าเข้าสู่ระบบ',
+                    cancelButtonText: 'ไว้ทีหลัง',
+                    confirmButtonColor: '#f57421',
+                    cancelButtonColor: '#ccc',
+                    reverseButtons: 'true'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // เปลี่ยน URL เป็นหน้า Login ของคุณ (เช่น ./?p=login)
+                        location.href = './login.php';
+                    }
+                });
+                return false;
+            }
+
             if (!valid) {
                 e.preventDefault();
                 Swal.fire({
@@ -512,7 +535,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
             <div class="text-center py-5">
                 <i class="fa fa-basket-shopping text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
                 <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
-                <a href="./" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a>
+                <a href="/?p=products" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a>
             </div>`);
             container.show();
             return;
