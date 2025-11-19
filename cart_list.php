@@ -1,4 +1,22 @@
 <?php
+// --- ย้ายมาไว้ตรงนี้ ---
+$cart = $conn->query("SELECT 
+    c.*, 
+    p.name as product, 
+    p.brand as brand, 
+    p.vat_price, 
+    p.discounted_price, 
+    p.discount_type,
+    cc.name as category, 
+    p.image_path,
+    (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
+        - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
+    FROM `cart_list` c 
+    INNER JOIN product_list p ON c.product_id = p.id 
+    INNER JOIN category_list cc ON p.category_id = cc.id 
+    WHERE customer_id = '{$_settings->userdata('id')}'");
+// ----------------------
+
 if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2) {
 } else {
 }
@@ -20,7 +38,8 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 
                         <div class="d-flex align-items-center">
                             <div class="cart-checkbox-area" style="padding-right: 10px;">
-                                <input type="checkbox" class="check-all" id="check-all-box">
+                                <input type="checkbox" class="check-all" id="check-all-box"
+                                    <?= (isset($cart) && $cart->num_rows <= 0 && $_settings->userdata('id') != '') ? 'disabled' : '' ?>>
                             </div>
                             <label for="check-all-box" class="mb-0 cursor-pointer font-weight-bold">เลือกทั้งหมด</label>
                         </div>
@@ -39,22 +58,6 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                     <div class="cart-card-body" id="item_list">
                         <?php
                         $gt = 0;
-                        $cart = $conn->query("SELECT 
-                        c.*, 
-                        p.name as product, 
-                        p.brand as brand, 
-                        p.vat_price, 
-                        p.discounted_price, 
-                        p.discount_type,
-                        cc.name as category, 
-                        p.image_path,
-                        (COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) 
-                            - COALESCE((SELECT SUM(quantity) FROM `order_items` where product_id = p.id), 0)) as `available` 
-                        FROM `cart_list` c 
-                        INNER JOIN product_list p ON c.product_id = p.id 
-                        INNER JOIN category_list cc ON p.category_id = cc.id 
-                        WHERE customer_id = '{$_settings->userdata('id')}'");
-
                         // ✅ แก้ไข: ประกาศฟังก์ชันตรงนี้ (นอกลูป)
                         if (!function_exists('fmt_smart')) {
                             function fmt_smart($v)
@@ -154,9 +157,9 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 
                         <?php if ($cart->num_rows <= 0 && $_settings->userdata('id') != ''): ?>
                             <div class="text-center py-5">
-                                <i class="fa fa-shopping-cart text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
+                                <i class="fa fa-basket-shopping text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
                                 <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
-                                <a href="./" class="btn btn-outline-primary rounded-pill mt-3 px-4">ไปช็อปเลย</a>
+                                <a href="./" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -500,14 +503,22 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
 
         if (cart.length == 0) {
+            // ปิดปุ่ม check-all
+            $('.check-all').prop('disabled', true).prop('checked', false);
+            $('#deselect-all-link').hide();
+
+            // แสดงข้อความตะกร้าว่าง
             container.html(`
-                <div class="text-center py-5">
-                    <i class="fa fa-shopping-cart text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
-                    <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
-                    <a href="./" class="btn btn-outline-primary rounded-pill mt-3 px-4">ไปช็อปเลย</a>
-                </div>`);
+            <div class="text-center py-5">
+                <i class="fa fa-basket-shopping text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
+                <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
+                <a href="./" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a>
+            </div>`);
             container.show();
             return;
+        } else {
+            // ถ้ามีของ ให้เปิดปุ่ม
+            $('.check-all').prop('disabled', false);
         }
 
         var productIds = cart.map(i => i.id).join(',');

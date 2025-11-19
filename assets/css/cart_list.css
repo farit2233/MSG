@@ -299,12 +299,52 @@
         margin-top: 15px;
     }
 
-    .btn-checkout:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-        box-shadow: none;
+    .btn-cart-shop {
+    /* การกำหนดขนาดและการจัดวาง (Bootstrap Default Size) */
+    display: inline-block;
+    font-weight: 400; /* น้ำหนักฟอนต์ */
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+
+    /* Padding กำหนดขนาดปุ่ม (ขนาด MD/Default ของ Bootstrap) */
+    padding: 0.375rem 0.75rem; 
+    
+    /* Font Size (ขนาด MD/Default) */
+    font-size: 1rem; 
+    
+    /* ขอบโค้งมน (ถ้าใช้ class rounded-pill จะถูก override) */
+    border-radius: 0.25rem; 
+
+    /* สไตล์ Outline Primary */
+    color: var(--primary-color);
+    background-color: transparent;
+    background-image: none;
+    border: 1px solid var(--primary-color);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     }
 
+    /* 3. Hover State */
+    .btn-cart-shop:hover {
+    color: #fff; /* ข้อความเปลี่ยนเป็นสีขาว */
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    }
+
+    /* 4. Active/Focus State */
+    .btn-cart-shop:active,
+    .btn-cart-shop:focus {
+    /* ทำให้ดูเหมือนถูกกด */
+    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.5); /* Shadow เมื่อ Focus */
+    }
     /* =========================================
     Responsive / Mobile
     ========================================= */
