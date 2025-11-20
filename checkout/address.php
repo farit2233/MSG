@@ -83,7 +83,13 @@ if ($_settings->userdata('id') != '') {
                                 <?= htmlspecialchars($row['address']) ?>,
                                 ต.<?= htmlspecialchars($row['sub_district']) ?>,
                                 อ.<?= htmlspecialchars($row['district']) ?>,
-                                จ.<?= htmlspecialchars($row['province']) ?>,
+                                <?php
+                                // เขียนดักตรงนี้: ถ้ามีข้อมูลจังหวัด ($row['province']) ไม่เป็นค่าว่าง
+                                // ให้ใส่ลูกน้ำ (,) และคำสั่งขึ้นบรรทัดใหม่ (<br>) แล้วค่อยตามด้วย จ.
+                                if (!empty($row['province'])) {
+                                    echo "<br>จ." . htmlspecialchars($row['province']);
+                                }
+                                ?>
                                 <?= htmlspecialchars($row['postal_code']) ?>
                             </p>
                         </div>
@@ -98,7 +104,7 @@ if ($_settings->userdata('id') != '') {
                             data-district="<?= htmlspecialchars($row['district']) ?>"
                             data-province="<?= htmlspecialchars($row['province']) ?>"
                             data-postal_code="<?= htmlspecialchars($row['postal_code']) ?>"
-                            style="text-decoration: none;">
+                            style="color: black; text-decoration: none;">
                             <i class="fa-solid fa-pencil-alt"></i> แก้ไข
                         </a>
                     </div>

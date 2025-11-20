@@ -382,7 +382,30 @@ if (!function_exists('format_price_custom')) {
                         ?>
                             <div class="item-row">
                                 <div class="item-image-container">
-                                    <img src="<?= validate_image($item['image_path']) ?>" class="item-image img-fluid" alt="<?= htmlspecialchars($item['product']) ?>">
+                                    <?php
+                                    // 1. กำหนดค่าเริ่มต้นเป็นรูปจากฐานข้อมูล (เผื่อกรณีไม่มี Thumb)
+                                    $img_src = validate_image($item['image_path']);
+
+                                    // 2. สร้างชื่อไฟล์ Thumb (เปลี่ยนนามสกุลไฟล์เป็น _thumb.webp)
+                                    // เช่น: uploads/product_1.jpg -> uploads/product_1_thumb.webp
+                                    $thumb_path = preg_replace('/(\.[^.]+)$/', '_thumb.webp', $item['image_path']);
+
+                                    // 3. ตรวจสอบว่ามีไฟล์ Thumb อยู่จริงใน Server หรือไม่?
+                                    // ใช้ base_app เพื่อระบุ Path จริงในเครื่อง Server (เช่น C:/xampp/htdocs/...)
+                                    if (is_file(base_app . $thumb_path)) {
+                                        // ถ้าเจอไฟล์ Thumb ให้เปลี่ยนไปใช้ path ของ Thumb แทน
+                                        $img_src = validate_image($thumb_path);
+                                    }
+
+                                    // หมายเหตุ: ถ้าไม่เจอไฟล์ Thumb ตัวแปร $img_src ก็ยังคงเป็นค่าเดิม (รูปจากฐานข้อมูล)
+                                    ?>
+
+
+                                    <img src="<?= $img_src ?>"
+                                        class="item-image img-fluid"
+                                        alt="<?= htmlspecialchars($item['product']) ?>"
+                                        loading="lazy">
+
                                 </div>
                                 <div class="item-details">
                                     <div class="item-name"><?= $item['product'] ?></div>
@@ -524,7 +547,7 @@ if (!function_exists('format_price_custom')) {
 
                             <div class="d-flex justify-content-between align-items-center">
                                 <strong><?= $row['name'] ?></strong>
-                                <span class="text-primary font-weight-bold"><?= format_price_custom($cost, 2) ?> บาท</span>
+                                <span class="font-weight-bold"><?= format_price_custom($cost, 2) ?> บาท</span>
                             </div>
                             <div class="desc text-muted small mt-1"><?= htmlspecialchars($row['description']) ?></div>
                             <span class="checkmark">&#10003;</span>
