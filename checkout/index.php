@@ -8,10 +8,15 @@ if ($_settings->userdata('id') == '' || $_settings->userdata('login_type') != 2)
 
 $selected_items = isset($_POST['selected_items']) ? explode(',', $_POST['selected_items']) : [];
 
+// ตัวแปรเดิมของคุณ
 $cart_total = 0;
-$cart_total_before_vat = 0; // << เพิ่มบรรทัดนี้
+$cart_total_before_vat = 0;
 $cart_items = [];
 $total_weight = 0;
+
+// [เพิ่ม] ตัวแปรสำหรับแสดงสรุป (ราคาเต็ม และ จำนวนชิ้น)
+$total_full_price = 0;
+$total_items_count = 0;
 
 if (!empty($selected_items)) {
     $ids = implode(',', array_map('intval', $selected_items));
@@ -32,8 +37,9 @@ if (!empty($selected_items)) {
     ");
 
     while ($row = $cart_qry->fetch_assoc()) {
-        // คำนวณราคาหลังลด
+        // --- Logic เดิมของคุณ (รักษาไว้ 100%) ---
         $original_price = $row['vat_price'];
+
         if (!is_null($row['discounted_price'])) {
             $final_price = $row['discounted_price'];
         } elseif ($row['discount_type'] === 'amount') {
@@ -47,12 +53,20 @@ if (!empty($selected_items)) {
         $row['final_price'] = $final_price;
         $cart_total += $final_price * $row['quantity'];
         $cart_total_before_vat += $row['price'] * $row['quantity'];
-
-        // น้ำหนักรวม
         $total_weight += ($row['product_weight'] ?? 0) * $row['quantity'];
+
+        // --- [ส่วนที่เพิ่ม] เพื่อใช้แสดงผล ---
+        // คำนวณราคาเต็มรวม (vat_price * จำนวน)
+        $total_full_price += $row['vat_price'] * $row['quantity'];
+        // นับจำนวนชิ้นรวม
+        $total_items_count += $row['quantity'];
+
         $cart_items[] = $row;
     }
 }
+
+// คำนวณส่วนลดรวม (ราคาเต็ม - ราคาขายจริง)
+$total_discount = $total_full_price - $cart_total;
 
 // ============================
 // PHP: ดึงข้อมูลลูกค้า และสร้างที่อยู่
@@ -382,30 +396,7 @@ if (!function_exists('format_price_custom')) {
                         ?>
                             <div class="item-row">
                                 <div class="item-image-container">
-                                    <?php
-                                    // 1. กำหนดค่าเริ่มต้นเป็นรูปจากฐานข้อมูล (เผื่อกรณีไม่มี Thumb)
-                                    $img_src = validate_image($item['image_path']);
-
-                                    // 2. สร้างชื่อไฟล์ Thumb (เปลี่ยนนามสกุลไฟล์เป็น _thumb.webp)
-                                    // เช่น: uploads/product_1.jpg -> uploads/product_1_thumb.webp
-                                    $thumb_path = preg_replace('/(\.[^.]+)$/', '_thumb.webp', $item['image_path']);
-
-                                    // 3. ตรวจสอบว่ามีไฟล์ Thumb อยู่จริงใน Server หรือไม่?
-                                    // ใช้ base_app เพื่อระบุ Path จริงในเครื่อง Server (เช่น C:/xampp/htdocs/...)
-                                    if (is_file(base_app . $thumb_path)) {
-                                        // ถ้าเจอไฟล์ Thumb ให้เปลี่ยนไปใช้ path ของ Thumb แทน
-                                        $img_src = validate_image($thumb_path);
-                                    }
-
-                                    // หมายเหตุ: ถ้าไม่เจอไฟล์ Thumb ตัวแปร $img_src ก็ยังคงเป็นค่าเดิม (รูปจากฐานข้อมูล)
-                                    ?>
-
-
-                                    <img src="<?= $img_src ?>"
-                                        class="item-image img-fluid"
-                                        alt="<?= htmlspecialchars($item['product']) ?>"
-                                        loading="lazy">
-
+                                    <img src="<?= validate_image($item['image_path']) ?>" class="item-image img-fluid" alt="<?= htmlspecialchars($item['product']) ?>">
                                 </div>
                                 <div class="item-details">
                                     <div class="item-name"><?= $item['product'] ?></div>
@@ -470,13 +461,20 @@ if (!function_exists('format_price_custom')) {
                         </div>
 
                         <div class="summary-row">
-                            <span>ยอดรวมสินค้า (<?= count($cart_items) ?> ชิ้น)</span>
-                            <span><?= format_price_custom($cart_total, 2) ?></span>
+                            <span>ยอดรวมสินค้า (<?= number_format($total_items_count) ?> ชิ้น)</span>
+                            <span><?= format_price_custom($total_full_price, 2) ?> บาท</span>
                         </div>
+
+                        <?php if ($total_discount > 0.01): ?>
+                            <div class="summary-row text-danger">
+                                <span>ส่วนลดสินค้า</span>
+                                <span>-<?= format_price_custom($total_discount, 2) ?> บาท</span>
+                            </div>
+                        <?php endif; ?>
 
                         <div class="summary-row">
                             <span>ค่าจัดส่ง</span>
-                            <span id="shipping-cost-summary"><?= format_price_custom($default_shipping_cost, 2) ?></span>
+                            <span id="shipping-cost-summary"><?= format_price_custom($default_shipping_cost, 2) ?> บาท</span>
                         </div>
 
                         <?php if ($is_promo_applicable && $is_discount_applied): ?>
@@ -498,12 +496,14 @@ if (!function_exists('format_price_custom')) {
 
                         <div class="summary-row">
                             <span>ราคารวม <small class="text-muted">รวม VAT</small></span>
-                            <span id="order-vat-total"><?= format_price_custom($vat_total, 2) ?></span>
+                            <span><span id="order-vat-total"><?= format_price_custom($cart_total, 2) ?></span> บาท</span>
                         </div>
+
+                        <hr>
 
                         <div class="summary-row total">
                             <span>ยอดรวมทั้งสิ้น</span>
-                            <span><span id="order-total-text"><?= format_price_custom($grand_total, 2) ?></span> บาท</span>
+                            <span><span id="order-total-text"><?= format_price_custom($cart_total + $default_shipping_cost, 2) ?></span> บาท</span>
                         </div>
 
                         <form action="" id="order-form" class="mt-4">
@@ -547,7 +547,7 @@ if (!function_exists('format_price_custom')) {
 
                             <div class="d-flex justify-content-between align-items-center">
                                 <strong><?= $row['name'] ?></strong>
-                                <span class="font-weight-bold"><?= format_price_custom($cost, 2) ?> บาท</span>
+                                <span class="text-primary font-weight-bold"><?= format_price_custom($cost, 2) ?> บาท</span>
                             </div>
                             <div class="desc text-muted small mt-1"><?= htmlspecialchars($row['description']) ?></div>
                             <span class="checkmark">&#10003;</span>

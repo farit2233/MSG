@@ -134,9 +134,9 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                                         // เรียกใช้ฟังก์ชัน fmt_smart ได้ปกติ
                                         if ($show_discount): ?>
                                             <div class="cart-price-del"><?= fmt_smart($total_orig) ?></div>
-                                            <div class="cart-price-text discount"><?= fmt_smart($total_now) ?> ฿</div>
+                                            <div class="cart-price-text discount"><?= fmt_smart($total_now) ?> บาท</div>
                                         <?php else: ?>
-                                            <div class="cart-price-text"><?= fmt_smart($total_now) ?> ฿</div>
+                                            <div class="cart-price-text"><?= fmt_smart($total_now) ?> บาท</div>
                                         <?php endif; ?>
                                     </div>
 
@@ -169,17 +169,27 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
             <div class="col-lg-4 d-none d-lg-block">
                 <div class="cart-summary-box">
                     <h5 class="mb-3 font-weight-bold">สรุปคำสั่งซื้อ</h5>
-                    <div class="summary-row">
-                        <span>ยอดรวมสินค้า</span>
-                        <span id="summary-subtotal">0.00 ฿</span>
+
+                    <div class="summary-row ...">
+                        <span>รวมสินค้าทั้งหมด (<span id="total-items-count">0</span>)</span>
+                        <span id="summary-original-total">0.00 บาท</span>
                     </div>
-                    <div class="summary-row total">
+
+                    <div class="summary-row ... text-danger" id="summary-discount-row" style="display: none;">
+                        <span>ส่วนลดสินค้า</span>
+                        <span>-<span id="summary-discount-total">0.00</span> บาท</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="summary-row total d-flex justify-content-between font-weight-bold" style="font-size: 1.2rem;">
                         <span>ยอดสุทธิ</span>
                         <span><span id="selected-total-desktop">0.00</span> บาท</span>
                     </div>
+
                     <form id="checkout-form-desktop" method="post" action="./?p=checkout">
                         <input type="hidden" name="selected_items" class="selected_items_input">
-                        <button type="submit" class="btn-checkout mt-3">ดำเนินการชำระเงิน</button>
+                        <button type="submit" class="btn-checkout mt-3 btn btn-dark btn-block">ดำเนินการชำระเงิน</button>
                     </form>
                 </div>
             </div>
@@ -190,7 +200,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         <div class="d-flex flex-column">
             <span class="text-muted small">ยอดรวมทั้งหมด:</span>
             <span class="font-weight-bold" style="font-size: 1.2rem;">
-                <span id="selected-total-mobile">0.00</span> ฿
+                <span id="selected-total-mobile">0.00</span> บาท
             </span>
         </div>
         <form id="checkout-form-mobile" method="post" action="./?p=checkout" class="m-0">
@@ -545,7 +555,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                         <div class="cart-item-image"><a href="./?p=products/view_product&id=${item.id}"><img src="${img}" alt="${item.name}"></a></div>
                         <div class="cart-item-details"><a href="./?p=products/view_product&id=${item.id}" class="cart-item-title">${item.name}</a>${isOutOfStock ? '<div class="text-danger small mt-1">สินค้าหมด</div>' : ''}</div>
                         <div class="cart-item-actions">
-                            <div class="product-price text-right mb-2">${showDiscount ? `<div class="cart-price-del">${formatPriceForJS(origSubtotal)}</div><div class="cart-price-text discount">${formatPriceForJS(subtotal)} ฿</div>` : `<div class="cart-price-text">${formatPriceForJS(subtotal)} ฿</div>`}</div>
+                            <div class="product-price text-right mb-2">${showDiscount ? `<div class="cart-price-del">${formatPriceForJS(origSubtotal)}</div><div class="cart-price-text discount">${formatPriceForJS(subtotal)} บาท</div>` : `<div class="cart-price-text">${formatPriceForJS(subtotal)} บาท</div>`}</div>
                             <div class="qty-group"><button class="qty-btn minus-qty guest" ${isOutOfStock?'disabled':''}>-</button><input type="number" class="qty-input qty guest" value="${item.qty}" min="1" max="${max_qty}" ${isOutOfStock?'disabled':''}><button class="qty-btn add-qty guest" ${isOutOfStock?'disabled':''}>+</button></div>
                             <button class="btn-delete del-item guest"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
@@ -586,19 +596,62 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         var price = parseFloat(itemElement.attr('data-unit-price'));
         var subtotal = price * qty;
         itemElement.find('.cart-check').attr('data-price', subtotal);
-        itemElement.find('.product-price .cart-price-text:last').text(formatPriceForJS(subtotal) + ' ฿');
+        itemElement.find('.product-price .cart-price-text:last').text(formatPriceForJS(subtotal) + ' บาท');
         calculateSelectedTotal();
     }
 
     function calculateSelectedTotal() {
-        var total = 0;
+        // 1. รีเซ็ตค่าเริ่มต้นเป็น 0 ทุกครั้งที่เรียกฟังก์ชัน
+        var totalNet = 0; // ราคาสุทธิ (ที่จะจ่าย)
+        var totalOriginal = 0; // ราคาเต็ม (ก่อนลด)
+        var itemCount = 0; // จำนวนชิ้น
+
+        // 2. วนลูปเฉพาะรายการที่ "ติ๊กถูก" เท่านั้น (:checked)
         $('.cart-check:checked').each(function() {
-            total += parseFloat($(this).attr('data-price'));
+            var row = $(this).closest('.cart-item-row');
+
+            // ดึงค่าจาก data-attribute ที่เราแปะไว้ที่ row
+            var unitPrice = parseFloat(row.attr('data-unit-price')) || 0; // ราคาขายจริง
+            var originalPrice = parseFloat(row.attr('data-original-price')) || 0; // ราคาเต็ม
+            var qty = parseInt(row.find('.qty-input').val()) || 1;
+
+            // คำนวณผลรวม
+            totalNet += unitPrice * qty;
+            totalOriginal += originalPrice * qty;
+            itemCount += qty;
         });
-        var txt = formatPriceForJS(total);
-        $('#selected-total-desktop, #selected-total-mobile').text(txt);
-        $('#summary-subtotal').text(txt + ' ฿');
-        $('.btn-checkout').prop('disabled', $('.cart-check:checked').length === 0);
+
+        // 3. คำนวณส่วนลดรวม
+        var totalDiscount = totalOriginal - totalNet;
+
+        // ป้องกันเศษทศนิยมเพี้ยน (เช่น 0.00000001) ให้ถือว่าเป็น 0
+        if (totalDiscount < 0.01) {
+            totalDiscount = 0;
+        }
+
+        // 4. แปลงตัวเลขเป็นรูปแบบเงิน
+        var txtNet = formatPriceForJS(totalNet);
+        var txtOriginal = formatPriceForJS(totalOriginal);
+        var txtDiscount = formatPriceForJS(totalDiscount);
+
+        // 5. อัปเดต UI
+        $('#total-items-count').text(itemCount);
+        $('#summary-original-total').text(txtOriginal + ' บาท'); // ราคารวม (ตัวบน)
+        $('#selected-total-desktop, #selected-total-mobile').text(txtNet); // ราคาสุทธิ (ตัวล่าง)
+
+        // 6. Logic การแสดง/ซ่อน บรรทัดส่วนลด
+        if (totalDiscount > 0) {
+            // ถ้ามีส่วนลด ให้แสดง และใส่ค่า
+            $('#summary-discount-total').text(txtDiscount);
+            $('#summary-discount-row').show();
+        } else {
+            // ถ้าไม่มีส่วนลด (หรือไม่ได้ติ๊กอะไรเลย) ให้ซ่อนทันที
+            $('#summary-discount-row').hide();
+        }
+
+        // จัดการปุ่ม Checkout
+        var hasChecked = $('.cart-check:checked').length > 0;
+        $('.btn-checkout, #checkout-form-mobile button').prop('disabled', !hasChecked);
     }
 
     function syncSelectAllState() {
