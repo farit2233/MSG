@@ -735,3 +735,36 @@ while ($type_row = $type_qry->fetch_assoc()) {
     });
   });
 </script>
+<script>
+  $(document).ready(function() {
+    // เช็คว่าเป็น Guest หรือไม่ (ถ้าไม่มี id สมาชิก)
+    var isGuest = '<?= !isset($_settings) || empty($_settings->userdata('id')) ? 1 : 0 ?>';
+
+    if (isGuest == '1') {
+      // ถ้าเป็น Guest ให้ดึงยอดจาก LocalStorage มาแสดง
+      update_guest_cart_count();
+    }
+  });
+
+  function update_guest_cart_count() {
+    // ดึงข้อมูลตะกร้าจาก LocalStorage
+    var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+
+    // รวมจำนวนสินค้า (qty) ทั้งหมด
+    var totalQty = cart.reduce((sum, item) => sum + parseInt(item.qty), 0);
+
+    // จุดที่แสดงตัวเลข (รองรับทั้ง Mobile และ PC)
+    // ต้องมั่นใจว่าใน HTML มี id="guest_cart_count_mobile" หรือ class="cart-count" อยู่
+    var cartSelectors = '#guest_cart_count_mobile, #guest_cart_count, .cart-count';
+
+    // อัปเดตตัวเลข
+    $(cartSelectors).text(totalQty);
+
+    // ซ่อน/แสดง Badge
+    if (totalQty > 0) {
+      $(cartSelectors).removeClass('d-none');
+    } else {
+      $(cartSelectors).addClass('d-none');
+    }
+  }
+</script>

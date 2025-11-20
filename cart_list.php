@@ -91,7 +91,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                             $gt += $price_to_use * $row['quantity'];
 
                             $cart_main_path = $row['image_path'];
-                            $cart_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_medium.webp$2', $cart_main_path);
+                            $cart_medium_path = preg_replace('/(\.webp)(\?.*)?$/', '_thumb.webp$2', $cart_main_path);
                         ?>
 
                             <div class="cart-item-row <?= $row['available'] <= 0 ? 'out-of-stock' : '' ?>"
@@ -159,7 +159,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                             <div class="text-center py-5">
                                 <i class="fa fa-basket-shopping text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
                                 <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
-                                <a href="/?p=products" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a>
+                                <a href="/?p=products" class="btn btn-cart-shop rounded-pill mt-3 px-4">ช็อปเลย!</a>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -205,21 +205,18 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 
 <script>
     const isLoggedIn = <?= ($_settings->userdata('id') != '') ? 'true' : 'false' ?>;
+
     // ==========================================
     // Helper Functions
     // ==========================================
     function formatPriceForJS(price) {
         let val = parseFloat(price);
-
-        // เช็คว่าเป็นจำนวนเต็มหรือไม่ (ไม่มีเศษ)
         if (val % 1 === 0) {
-            // ถ้าเป็นจำนวนเต็ม ให้แสดง 0 ตำแหน่ง (ตัด .00 ทิ้ง)
             return val.toLocaleString('th-TH', {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             });
         } else {
-            // ถ้ามีเศษ ให้แสดง 2 ตำแหน่งตามปกติ
             return val.toLocaleString('th-TH', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
@@ -233,50 +230,66 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
     $(document).ready(function() {
 
         // Load Logic
-        if ('<?= $_settings->userdata('id') ?>' == '') {
+        if (!isLoggedIn) {
             renderGuestCart();
+            updateGuestNavbarCount();
         } else {
             calculateSelectedTotal();
             syncSelectAllState();
         }
 
         // ---------------------------------------------------------
-        // 1. Event: พิมพ์ตัวเลขเอง (Change) ** สำคัญ **
+        // 1. Event: พิมพ์ตัวเลขเอง (Change)
         // ---------------------------------------------------------
         $(document).on('change', '.qty-input', function() {
             var input = $(this);
             var row = input.closest('.cart-item-row');
             var id = row.attr('data-id');
             var max = parseInt(row.attr('data-max'));
-            var val = parseInt(input.val()); // อ่านค่าที่พิมพ์
+            var val = parseInt(input.val());
             var isGuest = input.hasClass('guest');
 
-            // ตรวจสอบค่าที่พิมพ์ (Validation)
-            if (isNaN(val) || val < 1) {
-                val = 1; // ถ้าลบหมดหรือพิมพ์ 0 ให้เด้งกลับเป็น 1
-            }
+            // Validation
+            if (isNaN(val) || val < 1) val = 1;
+
+            // กรณีเกิน Max (จุดที่แก้ไข)
             if (val > max) {
-                val = max; // ถ้าพิมพ์เกิน Stock ให้เด้งกลับเป็น Max
+                val = max;
+                input.val(val); // ปรับตัวเลขในกล่องให้ถูกก่อน
+
                 Swal.fire({
                     icon: 'warning',
                     title: 'สินค้ามีจำกัด',
-                    text: 'มีสินค้าสูงสุด ' + max + ' ชิ้น'
+                    text: 'มีสินค้าสูงสุด ' + max + ' ชิ้น',
+                    confirmButtonText: 'ตกลง'
+                }).then((result) => {
+                    // เมื่อกดตกลง ค่อยทำงานต่อ
+                    if (result.isConfirmed || result.isDismissed) {
+                        if (isGuest) {
+                            updateGuestCart(id, val);
+                            update_visual_price(row);
+                        } else {
+                            update_item(id, val); // สมาชิก: รีโหลดหน้าตรงนี้
+                        }
+                    }
                 });
+
+                return; // *** สำคัญ: หยุดการทำงานทันที รอให้กดปุ่มก่อน ***
             }
 
-            input.val(val); // อัปเดตค่าในกล่องให้ถูกต้อง
+            // กรณีปกติ (ไม่เกิน Max)
+            input.val(val);
 
-            // บันทึกข้อมูล
             if (isGuest) {
                 updateGuestCart(id, val);
                 update_visual_price(row);
             } else {
-                update_item(id, val, row);
+                update_item(id, val);
             }
         });
 
         // ---------------------------------------------------------
-        // 2. Event: กดปุ่ม +/- (Click)
+        // 2. Event: ปุ่ม +/- (Click)
         // ---------------------------------------------------------
         $(document).on('click', '.add-qty, .minus-qty', function() {
             var btn = $(this);
@@ -291,27 +304,45 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
             var newVal = current + step;
 
             if (newVal < 1) newVal = 1;
+
+            // กรณีเกิน Max (จุดที่แก้ไข)
             if (newVal > max) {
                 newVal = max;
+                input.val(newVal); // ปรับตัวเลขในกล่องให้ถูกก่อน
+
                 Swal.fire({
                     icon: 'warning',
                     title: 'สินค้ามีจำกัด',
-                    text: 'สูงสุด ' + max + ' ชิ้น'
+                    text: 'สูงสุด ' + max + ' ชิ้น',
+                    confirmButtonText: 'ตกลง'
+                }).then((result) => {
+                    // เมื่อกดตกลง ค่อยทำงานต่อ
+                    if (result.isConfirmed || result.isDismissed) {
+                        if (isGuest) {
+                            updateGuestCart(id, newVal);
+                            update_visual_price(row);
+                        } else {
+                            update_item(id, newVal); // สมาชิก: รีโหลดหน้าตรงนี้
+                        }
+                    }
                 });
+
+                return; // *** สำคัญ: หยุดการทำงานทันที รอให้กดปุ่มก่อน ***
             }
 
+            // กรณีปกติ (ไม่เกิน Max)
             input.val(newVal);
 
             if (isGuest) {
                 updateGuestCart(id, newVal);
                 update_visual_price(row);
             } else {
-                update_item(id, newVal, row);
+                update_item(id, newVal);
             }
         });
 
         // ---------------------------------------------------------
-        // 3. Event อื่นๆ (Delete, Checkbox)
+        // 3. Event: ปุ่มลบ
         // ---------------------------------------------------------
         $(document).on('click', '.del-item', function() {
             var row = $(this).closest('.cart-item-row');
@@ -336,45 +367,37 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
             })
         });
 
+        // Checkbox & Checkout (ส่วนนี้เหมือนเดิม)
         $(document).on('change', '.cart-check', function() {
             calculateSelectedTotal();
             syncSelectAllState();
         });
-
         $('.check-all').change(function() {
-            var isChecked = $(this).is(':checked');
-            $('.cart-check:not(:disabled)').prop('checked', isChecked);
+            $('.cart-check:not(:disabled)').prop('checked', $(this).is(':checked'));
             calculateSelectedTotal();
-            if (isChecked) $('#deselect-all-link').show();
-            else $('#deselect-all-link').hide();
+            $('#deselect-all-link').toggle($(this).is(':checked'));
         });
-
         $('#deselect-all-link').click(function() {
-            $('.check-all').prop('checked', false);
-            $('.cart-check').prop('checked', false);
+            $('.check-all, .cart-check').prop('checked', false);
             $(this).hide();
             calculateSelectedTotal();
         });
-
         $('#checkout-form-desktop, #checkout-form-mobile').submit(function(e) {
             var selected = [];
             var valid = true;
             var errorMsg = '';
-
             $('.cart-check:checked').each(function() {
                 var row = $(this).closest('.cart-item-row');
                 var id = $(this).hasClass('guest') ? row.attr('data-id') : $(this).val();
                 var qty = parseInt(row.find('.qty-input').val());
                 var max = parseInt(row.attr('data-max'));
                 var name = row.find('.cart-item-title').text().trim();
-
                 if (qty > max) {
                     valid = false;
                     errorMsg += `• <b>${name}</b> เหลือเพียง ${max} ชิ้น<br>`;
                 }
                 selected.push(id);
             });
-
             if (selected.length === 0) {
                 e.preventDefault();
                 Swal.fire({
@@ -384,28 +407,19 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                 });
                 return false;
             }
-
             if (!isLoggedIn) {
-                e.preventDefault(); // หยุดการส่งฟอร์ม
+                e.preventDefault();
                 Swal.fire({
                     icon: 'info',
                     title: 'กรุณาเข้าสู่ระบบ',
-                    text: 'คุณต้องเข้าสู่ระบบก่อนทำการชำระเงิน',
                     showCancelButton: true,
                     confirmButtonText: 'ไปหน้าเข้าสู่ระบบ',
-                    cancelButtonText: 'ไว้ทีหลัง',
-                    confirmButtonColor: '#f57421',
-                    cancelButtonColor: '#ccc',
-                    reverseButtons: 'true'
+                    cancelButtonText: 'ไว้ทีหลัง'
                 }).then((result) => {
-                    if (result.isConfirmed) {
-                        // เปลี่ยน URL เป็นหน้า Login ของคุณ (เช่น ./?p=login)
-                        location.href = './login.php';
-                    }
+                    if (result.isConfirmed) location.href = './login.php';
                 });
                 return false;
             }
-
             if (!valid) {
                 e.preventDefault();
                 Swal.fire({
@@ -420,27 +434,29 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
     });
 
     // ==========================================
-    // Functions
+    // Functions (Member)
     // ==========================================
-    function update_item(cart_id, qty, itemElement) {
-        // start_loader(); // Optional
+    function update_item(cart_id, qty) {
+        start_loader();
         $.ajax({
-            url: _base_url_ + 'classes/Master.php?f=update_cart',
+            url: _base_url_ + 'classes/Master.php?f=update_cart_qty',
             method: 'POST',
             data: {
-                cart_id: cart_id,
+                id: cart_id,
                 qty: qty
             },
             dataType: 'json',
             success: function(resp) {
                 if (resp.status == 'success') {
-                    update_visual_price(itemElement);
+                    location.reload();
                 } else {
-                    console.log(resp);
+                    alert_toast("เกิดข้อผิดพลาด", 'error');
+                    end_loader();
                 }
             },
             error: function(err) {
                 console.log(err);
+                end_loader();
             }
         });
     }
@@ -458,34 +474,119 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                 if (resp.status == 'success') {
                     location.reload();
                 } else {
-                    alert_toast("Error deleting item", 'error');
+                    alert_toast("ลบไม่สำเร็จ", 'error');
                     end_loader();
                 }
+            },
+            error: function(err) {
+                console.log(err);
+                end_loader();
             }
         });
     }
 
-    function update_visual_price(itemElement) {
-        var qtyInput = itemElement.find('.qty-input');
-        var qty = parseInt(qtyInput.val()) || 1;
-        var unitPrice = parseFloat(itemElement.attr('data-unit-price'));
-        var origPrice = parseFloat(itemElement.attr('data-original-price'));
+    // ==========================================
+    // Functions (Guest)
+    // ==========================================
+    function updateGuestNavbarCount() {
+        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        var totalQty = cart.reduce((sum, item) => sum + parseInt(item.qty), 0);
+        var selectors = '#guest_cart_count_mobile, #guest_cart_count, .cart-count, .badge-cart';
+        $(selectors).text(totalQty);
+        if (totalQty > 0) $(selectors).removeClass('d-none');
+        else $(selectors).addClass('d-none');
+    }
 
-        var subtotal = unitPrice * qty;
-        var origSubtotal = origPrice * qty;
-        var showDiscount = unitPrice < origPrice;
-
-        itemElement.find('.cart-check').attr('data-price', subtotal);
-
-        var priceHtml = '';
-        if (showDiscount) {
-            priceHtml = `<div class="cart-price-del">${formatPriceForJS(origSubtotal)}</div>
-                         <div class="cart-price-text discount">${formatPriceForJS(subtotal)} ฿</div>`;
+    function renderGuestCart() {
+        var container = $('#guest_cart_container');
+        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        if (cart.length == 0) {
+            $('.check-all').prop('disabled', true).prop('checked', false);
+            $('#deselect-all-link').hide();
+            container.html(`<div class="text-center py-5"><i class="fa fa-basket-shopping text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i><h5 class="text-muted">ตะกร้าว่างเปล่า</h5><a href="/?p=products" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a></div>`);
+            container.show();
+            updateGuestNavbarCount();
+            return;
         } else {
-            priceHtml = `<div class="cart-price-text">${formatPriceForJS(subtotal)} ฿</div>`;
+            $('.check-all').prop('disabled', false);
         }
-        itemElement.find('.product-price').html(priceHtml);
+        var productIds = cart.map(i => i.id);
+        $.ajax({
+            url: _base_url_ + 'classes/Master.php?f=get_guest_stock',
+            method: 'POST',
+            data: {
+                ids: productIds
+            },
+            dataType: 'json',
+            success: function(stockData) {
+                var html = '';
+                cart.forEach((item, index) => {
+                    var available = (stockData && stockData[item.id] !== undefined) ? parseInt(stockData[item.id]) : 999;
+                    var max_qty = available;
+                    if (available >= 100) max_qty = Math.floor(available / 3);
+                    else if (available >= 50) max_qty = Math.floor(available / 2);
+                    else if (available >= 30) max_qty = Math.floor(available / 1.5);
+                    else max_qty = Math.max(1, available);
+                    var isOutOfStock = available <= 0;
+                    if (item.qty > max_qty) {
+                        item.qty = max_qty;
+                        updateGuestCart(index, max_qty, false);
+                    }
 
+                    var showDiscount = item.discounted_price && item.discounted_price < item.vat_price;
+                    var price = showDiscount ? item.discounted_price : item.vat_price;
+                    var subtotal = price * item.qty;
+                    var origSubtotal = item.vat_price * item.qty;
+                    var img = item.image || 'assets/img/default.png';
+                    if (img.includes('.webp')) img = img.replace(/(\.webp)(\?.*)?$/, '_thumb.webp$2');
+
+                    html += `<div class="cart-item-row ${isOutOfStock ? 'out-of-stock' : ''}" data-id="${index}" data-max="${max_qty}" data-unit-price="${price}" data-original-price="${item.vat_price}">
+                        <div class="cart-checkbox-area"><input type="checkbox" class="cart-check guest" value="${index}" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''}></div>
+                        <div class="cart-item-image"><a href="./?p=products/view_product&id=${item.id}"><img src="${img}" alt="${item.name}"></a></div>
+                        <div class="cart-item-details"><a href="./?p=products/view_product&id=${item.id}" class="cart-item-title">${item.name}</a>${isOutOfStock ? '<div class="text-danger small mt-1">สินค้าหมด</div>' : ''}</div>
+                        <div class="cart-item-actions">
+                            <div class="product-price text-right mb-2">${showDiscount ? `<div class="cart-price-del">${formatPriceForJS(origSubtotal)}</div><div class="cart-price-text discount">${formatPriceForJS(subtotal)} ฿</div>` : `<div class="cart-price-text">${formatPriceForJS(subtotal)} ฿</div>`}</div>
+                            <div class="qty-group"><button class="qty-btn minus-qty guest" ${isOutOfStock?'disabled':''}>-</button><input type="number" class="qty-input qty guest" value="${item.qty}" min="1" max="${max_qty}" ${isOutOfStock?'disabled':''}><button class="qty-btn add-qty guest" ${isOutOfStock?'disabled':''}>+</button></div>
+                            <button class="btn-delete del-item guest"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>`;
+                });
+                container.html(html).show();
+                calculateSelectedTotal();
+                syncSelectAllState();
+                updateGuestNavbarCount();
+            }
+        });
+    }
+
+    function updateGuestCart(index, qty, rerender = true) {
+        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        if (cart[index]) {
+            cart[index].qty = qty;
+            localStorage.setItem('guest_cart', JSON.stringify(cart));
+            updateGuestNavbarCount();
+            if (rerender) renderGuestCart();
+        }
+    }
+
+    function deleteGuestCartItem(index) {
+        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        cart.splice(index, 1);
+        localStorage.setItem('guest_cart', JSON.stringify(cart));
+        renderGuestCart();
+        updateGuestNavbarCount();
+        setTimeout(calculateSelectedTotal, 100);
+    }
+
+    // ==========================================
+    // Common UI Functions
+    // ==========================================
+    function update_visual_price(itemElement) {
+        var qty = parseInt(itemElement.find('.qty-input').val()) || 1;
+        var price = parseFloat(itemElement.attr('data-unit-price'));
+        var subtotal = price * qty;
+        itemElement.find('.cart-check').attr('data-price', subtotal);
+        itemElement.find('.product-price .cart-price-text:last').text(formatPriceForJS(subtotal) + ' ฿');
         calculateSelectedTotal();
     }
 
@@ -494,141 +595,16 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         $('.cart-check:checked').each(function() {
             total += parseFloat($(this).attr('data-price'));
         });
-
-        var totalText = formatPriceForJS(total);
-        $('#selected-total-desktop').text(totalText);
-        $('#selected-total-mobile').text(totalText);
-        $('#summary-subtotal').text(totalText + ' ฿');
-
-        var hasChecked = $('.cart-check:checked').length > 0;
-        $('.btn-checkout, #checkout-form-mobile button').prop('disabled', !hasChecked);
+        var txt = formatPriceForJS(total);
+        $('#selected-total-desktop, #selected-total-mobile').text(txt);
+        $('#summary-subtotal').text(txt + ' ฿');
+        $('.btn-checkout').prop('disabled', $('.cart-check:checked').length === 0);
     }
 
     function syncSelectAllState() {
         var all = $('.cart-check:not(:disabled)').length;
         var checked = $('.cart-check:checked').length;
-
-        if (all > 0 && all === checked) {
-            $('.check-all').prop('checked', true);
-            $('#deselect-all-link').show();
-        } else {
-            $('.check-all').prop('checked', false);
-            if (checked > 0) $('#deselect-all-link').show();
-            else $('#deselect-all-link').hide();
-        }
-    }
-
-    // ---------------------------------------------------------
-    // Guest Cart Logic (Render ไม่มี readonly)
-    // ---------------------------------------------------------
-    function renderGuestCart() {
-        var container = $('#guest_cart_container');
-        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-
-        if (cart.length == 0) {
-            // ปิดปุ่ม check-all
-            $('.check-all').prop('disabled', true).prop('checked', false);
-            $('#deselect-all-link').hide();
-
-            // แสดงข้อความตะกร้าว่าง
-            container.html(`
-            <div class="text-center py-5">
-                <i class="fa fa-basket-shopping text-muted mb-3" style="font-size: 4rem; opacity: 0.2;"></i>
-                <h5 class="text-muted">ตะกร้าว่างเปล่า</h5>
-                <a href="/?p=products" class="btn btn-cart-shop rounded-pill mt-3 px-4">ไปช็อปเลย</a>
-            </div>`);
-            container.show();
-            return;
-        } else {
-            // ถ้ามีของ ให้เปิดปุ่ม
-            $('.check-all').prop('disabled', false);
-        }
-
-        var productIds = cart.map(i => i.id).join(',');
-        $.ajax({
-            url: _base_url_ + 'classes/get_product_stock.php',
-            method: 'POST',
-            data: {
-                product_ids: productIds
-            },
-            dataType: 'json',
-            success: function(stockData) {
-                var html = '';
-                cart.forEach((item, index) => {
-                    var available = (stockData && stockData[item.id]) ? parseInt(stockData[item.id]) : 0;
-                    var max_qty = available;
-
-                    // Logic Stock display
-                    if (available >= 100) max_qty = Math.floor(available / 3);
-                    else if (available >= 50) max_qty = Math.floor(available / 2);
-                    else if (available >= 30) max_qty = Math.floor(available / 1.5);
-                    else max_qty = Math.max(1, Math.floor(available / 1));
-
-                    var isOutOfStock = available <= 0;
-                    var qty = Math.min(item.qty, max_qty > 0 ? max_qty : 1);
-
-                    var showDiscount = item.discounted_price && item.discounted_price < item.vat_price;
-                    var price = showDiscount ? item.discounted_price : item.vat_price;
-                    var subtotal = price * qty;
-                    var origSubtotal = item.vat_price * qty;
-
-                    var img = item.image || 'assets/img/default.png';
-                    if (img.includes('.webp')) img = img.replace(/(\.webp)(\?.*)?$/, '_medium.webp$2');
-
-                    // ⚠️ ตรงนี้สำคัญ: เอา readonly ออกจาก input
-                    html += `
-                    <div class="cart-item-row ${isOutOfStock ? 'out-of-stock' : ''}" 
-                         data-id="${index}" data-product-id="${item.id}" 
-                         data-max="${max_qty}" data-unit-price="${price}" data-original-price="${item.vat_price}">
-                        
-                        <div class="cart-checkbox-area">
-                            <input type="checkbox" class="cart-check guest" value="${index}" data-price="${subtotal}" ${isOutOfStock ? 'disabled' : ''}>
-                        </div>
-                        <div class="cart-item-image">
-                            <a href="./?p=products/view_product&id=${item.id}"><img src="${img}" alt="${item.name}"></a>
-                        </div>
-                        <div class="cart-item-details">
-                            <a href="./?p=products/view_product&id=${item.id}" class="cart-item-title">${item.name}</a>
-                            ${isOutOfStock ? '<div class="text-danger small mt-1">สินค้าหมด</div>' : ''}
-                        </div>
-                        <div class="cart-item-actions">
-                            <div class="product-price text-right mb-2">
-                                ${showDiscount 
-                                    ? `<div class="cart-price-del">${formatPriceForJS(origSubtotal)}</div><div class="cart-price-text discount">${formatPriceForJS(subtotal)} ฿</div>` 
-                                    : `<div class="cart-price-text">${formatPriceForJS(subtotal)} ฿</div>`
-                                }
-                            </div>
-                            <div class="qty-group">
-                                <button class="qty-btn minus-qty guest" type="button" ${isOutOfStock?'disabled':''}>-</button>
-                                <input type="number" class="qty-input qty guest" value="${qty}" min="1" max="${max_qty}" ${isOutOfStock?'disabled':''}>
-                                <button class="qty-btn add-qty guest" type="button" ${isOutOfStock?'disabled':''}>+</button>
-                            </div>
-                            <button class="btn-delete del-item guest" type="button"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>`;
-                });
-                container.html(html);
-                container.show();
-                calculateSelectedTotal();
-                syncSelectAllState();
-            }
-        });
-    }
-
-    function updateGuestCart(index, qty) {
-        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-        if (cart[index]) {
-            cart[index].qty = qty;
-            localStorage.setItem('guest_cart', JSON.stringify(cart));
-        }
-    }
-
-    function deleteGuestCartItem(index) {
-        var cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-        cart.splice(index, 1);
-        localStorage.setItem('guest_cart', JSON.stringify(cart));
-        if (typeof updateCartCounter === 'function') updateCartCounter();
-        renderGuestCart();
-        setTimeout(calculateSelectedTotal, 100);
+        $('.check-all').prop('checked', (all > 0 && all === checked));
+        $('#deselect-all-link').toggle(checked > 0);
     }
 </script>

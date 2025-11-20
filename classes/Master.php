@@ -628,97 +628,108 @@ class Master extends DBConnection
 		}
 		return json_encode($resp);
 	}
+	function get_guest_stock()
+	{
+		$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+		if (empty($ids) || !is_array($ids)) {
+			return json_encode([]);
+		}
+
+		$ids_str = implode(",", array_map('intval', $ids));
+		$data = [];
+
+		$qry = $this->conn->query("SELECT id, 
+			(COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = p.id), 0) - 
+			 COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = p.id), 0)) as available
+			FROM product_list p WHERE id IN ({$ids_str})");
+
+		while ($row = $qry->fetch_assoc()) {
+			$data[$row['id']] = $row['available'];
+		}
+		return json_encode($data);
+	}
+
+	function get_cart_count()
+	{
+		if ($this->settings->userdata('id')) {
+			$qry = $this->conn->query("SELECT SUM(quantity) FROM cart_list where customer_id = '{$this->settings->userdata('id')}'");
+			$total = $qry->fetch_array()[0];
+			$total = $total > 0 ? $total : 0;
+		} else {
+			$total = 0;
+		}
+		return json_encode(['status' => 'success', 'count' => number_format($total)]);
+	}
+
 	function add_to_cart()
 	{
 		extract($_POST);
-		$qty = isset($qty) && $qty > 0 ? (int)$qty : 1;
 		$customer_id = $this->settings->userdata('id');
 
-		// คำนวณ stock ที่เหลือจริง
-		$stock_qry = $this->conn->query("SELECT 
-		COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = '{$product_id}'), 0) -
-		COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = '{$product_id}'), 0) 
-		AS available");
+		// 1. เช็ค Stock
+		$qry = $this->conn->query("SELECT p.*, 
+			(COALESCE((SELECT SUM(quantity) FROM stock_list WHERE product_id = p.id), 0) - 
+			 COALESCE((SELECT SUM(quantity) FROM order_items WHERE product_id = p.id), 0)) as available
+			FROM product_list p WHERE p.id = '{$product_id}'");
 
-		$available = 0;
-		if ($stock_qry->num_rows > 0) {
-			$available = (int)$stock_qry->fetch_assoc()['available'];
-		}
+		if ($qry->num_rows > 0) {
+			$res = $qry->fetch_array();
+			$available = $res['available'];
 
-		// คำนวณ max_order_qty ตาม available
-		if ($available >= 100) {
-			$max_order_qty = floor($available / 3);
-		} elseif ($available >= 50) {
-			$max_order_qty = floor($available / 2);
-		} elseif ($available >= 30) {
-			$max_order_qty = floor($available / 1.5);
-		} else {
-			$max_order_qty = $available;
-		}
+			// คำนวณ Limit
+			if ($available >= 100) $max = floor($available / 3);
+			elseif ($available >= 50) $max = floor($available / 2);
+			elseif ($available >= 30) $max = floor($available / 1.5);
+			else $max = max(1, floor($available / 1));
 
-		// ดึงจำนวนที่มีในตะกร้าอยู่แล้ว
-		$cart = $this->conn->query("SELECT quantity FROM cart_list WHERE customer_id = '{$customer_id}' AND product_id = '{$product_id}'");
-		$cart_qty = 0;
-		if ($cart->num_rows > 0) {
-			$cart_qty = (int)$cart->fetch_assoc()['quantity'];
-		}
+			// เช็คตะกร้าเดิม
+			$cart = $this->conn->query("SELECT quantity FROM cart_list WHERE customer_id = '{$customer_id}' AND product_id = '{$product_id}'");
+			$cart_qty = ($cart->num_rows > 0) ? $cart->fetch_array()['quantity'] : 0;
 
-		// ตรวจสอบรวมกับของที่มีในตะกร้าแล้ว
-		$total_qty = $cart_qty + $qty;
-		if ($total_qty > $max_order_qty) {
-			echo json_encode([
-				'status' => 'failed',
-				'msg' => "คุณสามารถสั่งซื้อได้สูงสุด {$max_order_qty} ชิ้น (รวมของในตะกร้าด้วยแล้ว)"
-			]);
-			exit;
-		}
+			if (($cart_qty + $qty) > $max) {
+				return json_encode(['status' => 'failed', 'msg' => "คุณสั่งได้สูงสุด {$max} ชิ้น"]);
+			}
 
-		// ดำเนินการ update หรือ insert
-		if ($cart_qty > 0) {
-			// มีในตะกร้าอยู่แล้ว → อัปเดต
-			$new_qty = $cart_qty + $qty;
-			$update = $this->conn->query("UPDATE cart_list SET quantity = '{$new_qty}' WHERE customer_id = '{$customer_id}' AND product_id = '{$product_id}'");
-			$resp['status'] = $update ? 'success' : 'failed';
-			if (!$update) $resp['error'] = $this->conn->error;
-		} else {
-			// ยังไม่มี → insert
-			$insert = $this->conn->query("INSERT INTO cart_list (customer_id, product_id, quantity) VALUES ('{$customer_id}', '{$product_id}', '{$qty}')");
-			$resp['status'] = $insert ? 'success' : 'failed';
-			if (!$insert) $resp['error'] = $this->conn->error;
-		}
-
-		if ($resp['status'] == 'success') {
-			$this->settings->set_flashdata('success', 'เพิ่มสินค้าในตะกร้าแล้ว');
-		}
-
-		echo json_encode($resp);
-	}
-
-	function update_cart()
-	{
-		extract($_POST);
-		$update = $this->conn->query("UPDATE `cart_list` set quantity = '{$qty}' where id = '{$cart_id}'");
-		if ($update) {
-			$resp['status'] = 'success';
+			if ($cart_qty > 0) {
+				$update = $this->conn->query("UPDATE cart_list SET quantity = quantity + {$qty} WHERE customer_id = '{$customer_id}' AND product_id = '{$product_id}'");
+				$resp['status'] = $update ? 'success' : 'failed';
+			} else {
+				$insert = $this->conn->query("INSERT INTO cart_list (customer_id, product_id, quantity) VALUES ('{$customer_id}', '{$product_id}', '{$qty}')");
+				$resp['status'] = $insert ? 'success' : 'failed';
+			}
+			$resp['msg'] = $resp['status'] == 'success' ? "เพิ่มลงตะกร้าแล้ว" : "เกิดข้อผิดพลาด";
 		} else {
 			$resp['status'] = 'failed';
-			$resp['error'] = $this->conn->error;
+			$resp['msg'] = "ไม่พบสินค้า";
 		}
-
 		return json_encode($resp);
 	}
+
+	function update_cart_qty()
+	{
+		extract($_POST);
+		// ใช้ update_cart_qty หรือ update_cart ก็ได้ (แก้ให้ตรงกับ JS)
+		$update = $this->conn->query("UPDATE cart_list set quantity = '{$qty}' where id = '{$id}'");
+		if ($update) {
+			$resp['status'] = 'success';
+			$resp['msg'] = "อัปเดตจำนวนแล้ว";
+		} else {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "เกิดข้อผิดพลาด";
+		}
+		return json_encode($resp);
+	}
+
 	function delete_cart()
 	{
 		extract($_POST);
-		$delete = $this->conn->query("DELETE FROM `cart_list` where id = '{$id}'");
-		if ($delete) {
+		$del = $this->conn->query("DELETE FROM cart_list where id = '{$id}'");
+		if ($del) {
 			$resp['status'] = 'success';
+			$resp['msg'] = "ลบสินค้าแล้ว";
 		} else {
 			$resp['status'] = 'failed';
-			$resp['error'] = $this->conn->error;
-		}
-		if ($resp['status'] == 'success') {
-			$this->settings->set_flashdata('success', 'ลบสินค้าออกจากตะกร้าสำเร็จ');
+			$resp['msg'] = "เกิดข้อผิดพลาด";
 		}
 		return json_encode($resp);
 	}
@@ -3007,22 +3018,33 @@ switch ($action) {
 	case 'delete_stock':
 		echo $Master->delete_stock();
 		break;
+	case 'get_guest_stock':
+		echo $Master->get_guest_stock();
+		break;
+	case 'get_cart_count':
+		echo $Master->get_cart_count();
+		break;
 	case 'add_to_cart':
 		echo $Master->add_to_cart();
 		break;
-	case 'update_cart':
-		echo $Master->update_cart();
+	case 'update_cart_qty':
+		echo $Master->update_cart_qty();
+		break;
+	case 'update_cart': // เผื่อ JS เรียกชื่อนี้
+		echo $Master->update_cart_qty();
 		break;
 	case 'delete_cart':
 		echo $Master->delete_cart();
 		break;
-
+	case 'get_guest_stock':
+		echo $Master->get_guest_stock();
+		break;
 	case 'get_shipping_cost':
-		$Master->get_shipping_cost();
+		echo $Master->get_shipping_cost();
 		break;
 
 	case 'get_shipping_details':
-		$Master->get_shipping_details();
+		echo $Master->get_shipping_details();
 		break;
 
 	case 'place_order':

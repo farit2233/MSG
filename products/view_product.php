@@ -519,16 +519,13 @@ if (!function_exists('format_price_custom')) {
 	</div>
 </section>
 <script>
+	// ส่วนการย่อ/ขยาย Text (Code เดิมของคุณ)
 	document.addEventListener("DOMContentLoaded", function() {
-		// มือถือ
 		const textMobile = document.getElementById("text-mobile");
 		const buttonMobile = document.getElementById("toggleButton-mobile");
-
-		// PC
 		const textPC = document.getElementById("text-pc");
 		const buttonPC = document.getElementById("toggleButton-pc");
 
-		// ฟังก์ชันเดียวกันสำหรับมือถือและ PC
 		function toggleText(text, button) {
 			if (text && button) {
 				button.addEventListener("click", function() {
@@ -538,19 +535,28 @@ if (!function_exists('format_price_custom')) {
 				});
 			}
 		}
-
-		// ผูกฟังก์ชันให้ทำงานทั้งบนมือถือและพีซี
 		toggleText(textMobile, buttonMobile);
 		toggleText(textPC, buttonPC);
 	});
 
-
+	// --- ส่วนที่แก้ไขหลัก ---
 	$(function() {
 		$('#add_to_cart').click(function() {
-			let qty = $('#qty').val(); // ดึงจำนวนจาก input
-			add_cart(qty); // เรียกฟังก์ชันโดยตรง ไม่ต้องยืนยัน
+			let qty = $('#qty').val();
+
+			// ตรวจสอบว่า Login หรือไม่? (ใช้ PHP ส่งค่ามาให้ JS)
+			var is_user_logged_in = '<?= isset($_settings) && $_settings->userdata('id') > 0 ? 1 : 0 ?>';
+
+			if (is_user_logged_in == '1') {
+				// ถ้า Login แล้ว -> ใช้ระบบเดิม (Database + Reload)
+				add_cart(qty);
+			} else {
+				// ถ้า Guest -> ใช้ระบบ LocalStorage (Realtime ไม่ต้อง Reload)
+				guest_add_to_cart();
+			}
 		});
 	});
+	// -----------------------
 
 	function add_cart(qty) {
 		start_loader();
@@ -580,49 +586,21 @@ if (!function_exists('format_price_custom')) {
 		})
 	}
 
-	function decreaseQty() {
-		const qtyInput = document.getElementById('qty');
-		let current = parseInt(qtyInput.value) || 1;
-		if (current > parseInt(qtyInput.min)) {
-			qtyInput.value = current - 1;
-		}
-	}
-
-	function increaseQty() {
-		const qtyInput = document.getElementById('qty');
-		let current = parseInt(qtyInput.value) || 1;
-		const max = parseInt(qtyInput.max) || 999;
-		if (current < max) {
-			qtyInput.value = current + 1;
-		}
-	}
-	document.addEventListener("DOMContentLoaded", function() {
-		const qtyInput = document.getElementById("qty");
-		const maxQty = parseInt(qtyInput.max);
-
-		qtyInput.addEventListener("input", function() {
-			if (parseInt(qtyInput.value) > maxQty) {
-				Swal.fire({
-					title: 'แจ้งเตือน',
-					text: 'คุณสามารถสั่งซื้อได้สูงสุด ' + maxQty + ' ชิ้นเท่านั้น',
-					icon: 'warning',
-					confirmButtonText: 'ตกลง'
-				});
-				qtyInput.value = maxQty;
-			}
-		});
-	});
-
 	function update_cart_count() {
 		const cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
 		const totalQty = cart.reduce((sum, item) => sum + parseInt(item.qty), 0);
-		const cartCountEl = document.querySelector('.cart-count');
-		if (cartCountEl) {
-			cartCountEl.textContent = totalQty;
-			cartCountEl.classList.toggle('d-none', totalQty === 0);
+
+		// แก้ไข Selector ให้ครอบคลุมทั้ง Mobile (#guest_cart_count_mobile) และ PC
+		const cartSelectors = '#guest_cart_count_mobile, #guest_cart_count, .cart-count';
+
+		$(cartSelectors).text(totalQty);
+
+		if (totalQty > 0) {
+			$(cartSelectors).removeClass('d-none');
+		} else {
+			$(cartSelectors).addClass('d-none');
 		}
 	}
-
 
 	function decreaseQty() {
 		const qtyInput = document.getElementById('qty');
@@ -644,12 +622,14 @@ if (!function_exists('format_price_custom')) {
 	}
 
 	function guest_add_to_cart() {
-		const product_id = "<?= $id ?>";
-		const name = "<?= $name ?>";
-		const vat_price = <?= $vat_price ?>;
-		const discounted_price = <?= ($discounted_price && $discounted_price < $vat_price) ? $discounted_price : 'null' ?>;
+		// เก็บข้อมูลสินค้า
+		const product_id = "<?= isset($id) ? $id : '' ?>";
+		const name = "<?= isset($name) ? $name : '' ?>";
+		const vat_price = <?= isset($vat_price) ? $vat_price : 0 ?>;
+		// ตรวจสอบค่า discounted_price ว่ามีค่าหรือไม่เพื่อป้องกัน Error
+		const discounted_price = <?= (isset($discounted_price) && $discounted_price < $vat_price) ? $discounted_price : 'null' ?>;
 		const qty = parseInt(document.getElementById('qty').value) || 1;
-		const image = "<?= validate_image($image_path) ?>";
+		const image = "<?= isset($image_path) ? validate_image($image_path) : '' ?>";
 
 		let cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
 
@@ -668,64 +648,78 @@ if (!function_exists('format_price_custom')) {
 		}
 
 		localStorage.setItem('guest_cart', JSON.stringify(cart));
-		alert_toast("เพิ่มสินค้าในตะกร้าแล้ว", 'success');
+
+		// อัปเดตตัวเลขบน Navbar ทันที
 		update_cart_count();
+
+		// แสดงข้อความแจ้งเตือน
+		//alert_toast("เพิ่มสินค้าในตะกร้าแล้ว", 'success');
 	}
+
 	$(document).ready(function() {
-		// คำนวณจำนวนภาพทั้งหมด
-		const totalImages = <?= count($product_images) ?>;
+		// เช็ค Login เพื่อโหลดจำนวนสินค้าเริ่มต้นให้ถูกต้อง
+		var is_user_logged_in = '<?= isset($_settings) && $_settings->userdata('id') > 0 ? 1 : 0 ?>';
 
-		let currentIndex = 0; // ใช้ติดตามตำแหน่งปัจจุบันของภาพ
+		// ถ้าเป็น Guest ให้โหลดตัวเลขจาก LocalStorage
+		if (is_user_logged_in == '0') {
+			update_cart_count();
+		}
 
-		// เมื่อคลิก thumbnail เพื่อเปลี่ยนภาพ
+		// ส่วน Gallery (Code เดิมของคุณ)
+		const totalImages = <?= isset($product_images) ? count($product_images) : 0 ?>;
+		let currentIndex = 0;
+
 		$('.gallery-thumbnail').click(function() {
-			// เอา active ออกจากภาพเก่า
 			$('.gallery-thumbnail').removeClass('active');
-			// กำหนดให้ thumbnail ที่คลิกเป็น active
 			$(this).addClass('active');
-
-			// อัพเดต src ของภาพใน modal
 			$('#modal-image').attr('src', $(this).data('full-src'));
-
-			// อัพเดตตำแหน่งปัจจุบัน
 			currentIndex = $(this).data('index');
 		});
 
-		// คลิกปุ่มเลื่อนไปข้างหน้า (next)
 		$('.modal-next').click(function() {
-			currentIndex = (currentIndex + 1) % totalImages; // ทำให้เลื่อนไปเรื่อยๆ (วนลูป)
+			currentIndex = (currentIndex + 1) % totalImages;
 			changeImage(currentIndex);
 		});
 
-		// คลิกปุ่มเลื่อนย้อนกลับ (prev)
 		$('.modal-prev').click(function() {
-			currentIndex = (currentIndex - 1 + totalImages) % totalImages; // เลื่อนไปย้อนกลับ (วนลูป)
+			currentIndex = (currentIndex - 1 + totalImages) % totalImages;
 			changeImage(currentIndex);
 		});
 
 		$('.gallery-next-btn').click(function() {
 			$('.product-gallery').animate({
-				scrollLeft: $('.product-gallery').scrollLeft() + 120 // เลื่อน 120px ขวา
-			}, 300); // ความเร็วในการเลื่อน
+				scrollLeft: $('.product-gallery').scrollLeft() + 120
+			}, 300);
 		});
 
-		// เมื่อกดปุ่มเลื่อนซ้าย
 		$('.gallery-prev-btn').click(function() {
 			$('.product-gallery').animate({
-				scrollLeft: $('.product-gallery').scrollLeft() - 120 // เลื่อน 120px ซ้าย
-			}, 300); // ความเร็วในการเลื่อน
+				scrollLeft: $('.product-gallery').scrollLeft() - 120
+			}, 300);
 		});
-		// ฟังก์ชันในการเปลี่ยนภาพ
-		function changeImage(index) {
-			// เลือก thumbnail ที่ตรงกับ index
-			const selectedThumbnail = $('.gallery-thumbnail').eq(index);
 
-			// อัพเดต active class
+		function changeImage(index) {
+			const selectedThumbnail = $('.gallery-thumbnail').eq(index);
 			$('.gallery-thumbnail').removeClass('active');
 			selectedThumbnail.addClass('active');
-
-			// อัพเดต src ของภาพใน modal
 			$('#modal-image').attr('src', selectedThumbnail.data('full-src'));
+		}
+
+		// ส่วน Input Max Qty check (Code เดิมของคุณที่ซ้ำซ้อน รวมไว้ตรงนี้ได้เลย)
+		const qtyInput = document.getElementById("qty");
+		if (qtyInput) {
+			const maxQty = parseInt(qtyInput.max);
+			qtyInput.addEventListener("input", function() {
+				if (parseInt(qtyInput.value) > maxQty) {
+					Swal.fire({
+						title: 'แจ้งเตือน',
+						text: 'คุณสามารถสั่งซื้อได้สูงสุด ' + maxQty + ' ชิ้นเท่านั้น',
+						icon: 'warning',
+						confirmButtonText: 'ตกลง'
+					});
+					qtyInput.value = maxQty;
+				}
+			});
 		}
 	});
 </script>
