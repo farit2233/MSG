@@ -424,7 +424,7 @@ if (!function_exists('format_price_custom')) {
                 <div class="checkout-card-header">
                     <i class="fa-solid fa-truck-fast text-info"></i>
                     <div class="checkout-card-title flex-grow-1">ตัวเลือกการจัดส่ง</div>
-                    <a href="javascript:void(0);" onclick="openShippingModal()" class="clickable-text-btn text-primary" style="font-size: 0.9rem;">เปลี่ยน</a>
+                    <a href="javascript:void(0);" onclick="openShippingModal()" class="clickable-text-btn" style="font-size: 0.9rem;">เปลี่ยน</a>
                 </div>
                 <div class="checkout-card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -547,7 +547,7 @@ if (!function_exists('format_price_custom')) {
 
                             <div class="d-flex justify-content-between align-items-center">
                                 <strong><?= $row['name'] ?></strong>
-                                <span class="text-primary font-weight-bold"><?= format_price_custom($cost, 2) ?> บาท</span>
+                                <span class="font-weight-bold"><?= format_price_custom($cost, 2) ?> บาท</span>
                             </div>
                             <div class="desc text-muted small mt-1"><?= htmlspecialchars($row['description']) ?></div>
                             <span class="checkmark">&#10003;</span>

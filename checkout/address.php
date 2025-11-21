@@ -1,7 +1,7 @@
 <?php
 require_once('../config.php');
 
-// ตรวจสอบว่าเรามีการส่ง ID มาไหม (สำหรับฟังก์ชันเปลี่ยนรหัสผ่าน)
+// ตรวจสอบว่าเรามีการส่ง ID มาไหม
 if ($_settings->userdata('id') != '') {
     $qry = $conn->query("SELECT * FROM `customer_list` WHERE id = '{$_settings->userdata('id')}'");
     if ($qry->num_rows > 0) {
@@ -16,6 +16,15 @@ if ($_settings->userdata('id') != '') {
 } else {
     echo "<script>alert('You don\\'t have access for this page'); location.replace('./');</script>";
 }
+
+// --- ส่วนที่เพิ่ม: ดึงข้อมูลจังหวัดมาเตรียมไว้ ---
+$province_option = "";
+if (isset($conn)) {
+    $p_qry = $conn->query("SELECT * FROM provinces ORDER BY name_th ASC");
+    while ($row = $p_qry->fetch_assoc()) {
+        $province_option .= '<option value="' . $row['id'] . '">' . $row['name_th'] . '</option>';
+    }
+}
 ?>
 <style>
     .text-size-input {
@@ -26,10 +35,39 @@ if ($_settings->userdata('id') != '') {
         font-size: 16px;
     }
 
-    .password input,
-    .password select {
-        border-radius: 13px;
+    .address {
+        max-height: 60vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 10px;
+    }
+
+    .address::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .address::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 4px;
+    }
+
+    .address::-webkit-scrollbar-track {
+        background-color: #f5f5f5;
+    }
+
+    /* ปรับ CSS ให้รองรับ Select2 */
+    .address input,
+    .address select,
+    .select2-container .select2-selection--single {
+        border-radius: 13px !important;
         font-size: 16px;
+        height: auto !important;
+        padding: 0.3rem 0.5rem;
+    }
+
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
     }
 
     .address-option {
@@ -63,7 +101,8 @@ if ($_settings->userdata('id') != '') {
         display: inline;
     }
 </style>
-<div class="container-fluid password">
+
+<div class="container-fluid address">
     <form id="confirm_form_1">
         <?php
         $addresses = $conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$_settings->userdata('id')}' ORDER BY is_primary DESC, id ASC");
@@ -84,8 +123,6 @@ if ($_settings->userdata('id') != '') {
                                 ต.<?= htmlspecialchars($row['sub_district']) ?>,
                                 อ.<?= htmlspecialchars($row['district']) ?>,
                                 <?php
-                                // เขียนดักตรงนี้: ถ้ามีข้อมูลจังหวัด ($row['province']) ไม่เป็นค่าว่าง
-                                // ให้ใส่ลูกน้ำ (,) และคำสั่งขึ้นบรรทัดใหม่ (<br>) แล้วค่อยตามด้วย จ.
                                 if (!empty($row['province'])) {
                                     echo "<br>จ." . htmlspecialchars($row['province']);
                                 }
@@ -121,34 +158,50 @@ if ($_settings->userdata('id') != '') {
     <form id="confirm_form_2" style="display: none;">
         <input type="hidden" name="address_id" id="address_id">
         <input type="hidden" name="customer_id" value="<?= $_settings->userdata('id') ?>">
+
         <div class="form-group mb-3">
             <label for="name" class="control-label">ชื่อ-นามสกุล<span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="name" id="name" required>
         </div>
+
         <div class="form-group mb-3">
             <label for="contact" class="control-label">เบอร์โทรศัพท์<span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="contact" id="contact" required>
         </div>
         <div class="form-group mb-3">
-            <label for="address" class="control-label">บ้านเลขที่, ถนน<span class="text-danger">*</span></label>
-            <input type="text" class="form-control" name="address" id="address" required>
-        </div>
-        <div class="form-group mb-3">
-            <label for="sub_district" class="control-label">ตำบล/แขวง<span class="text-danger">*</span></label>
-            <input type="text" class="form-control" name="sub_district" id="sub_district" required>
-        </div>
-        <div class="form-group mb-3">
-            <label for="district" class="control-label">อำเภอ/เขต<span class="text-danger">*</span></label>
-            <input type="text" class="form-control" name="district" id="district" required>
+            <label for="address" class="control-label">บ้านเลขที่, อาคาร, ถนน<span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="address" id="address_details" required>
         </div>
         <div class="form-group mb-3">
             <label for="province" class="control-label">จังหวัด<span class="text-danger">*</span></label>
-            <input type="text" class="form-control" name="province" id="province" required>
+            <select class="form-control select2" name="province_id" id="province" required style="width: 100%;">
+                <option value="" selected disabled>กรุณาเลือกจังหวัด</option>
+                <?php echo $province_option; ?>
+            </select>
+            <input type="hidden" name="province" id="province_name">
         </div>
+
+        <div class="form-group mb-3">
+            <label for="amphure" class="control-label">อำเภอ/เขต<span class="text-danger">*</span></label>
+            <select class="form-control select2" name="district_id" id="amphure" required disabled style="width: 100%;">
+                <option value="" selected disabled>กรุณาเลือกอำเภอ / เขต</option>
+            </select>
+            <input type="hidden" name="district" id="district_name">
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="district" class="control-label">ตำบล/แขวง<span class="text-danger">*</span></label>
+            <select class="form-control select2" name="sub_district_id" id="district" required disabled style="width: 100%;">
+                <option value="" selected disabled>กรุณาเลือกตำบล / แขวง</option>
+            </select>
+            <input type="hidden" name="sub_district" id="sub_district_name">
+        </div>
+
         <div class="form-group mb-3">
             <label for="postal_code" class="control-label">รหัสไปรษณีย์<span class="text-danger">*</span></label>
-            <input type="text" class="form-control" name="postal_code" id="postal_code" required>
+            <input type="text" class="form-control" name="postal_code" id="postal_code" readonly style="background-color: #e9ecef;">
         </div>
+
         <div class="text-right">
             <small><a href="javascript:void(0)" id="back_to_address_list">กลับไปหน้ารายการสมุดที่อยู่</a></small>
         </div>
@@ -157,25 +210,127 @@ if ($_settings->userdata('id') != '') {
 
 <script>
     function selectAddress(element) {
-        // Deselect all address options
         const addressOptions = document.querySelectorAll('.address-option');
         addressOptions.forEach(option => {
             option.classList.remove('selected');
             option.querySelector('.address-radio').checked = false;
         });
-
-        // Select the clicked address option
         element.classList.add('selected');
         element.querySelector('.address-radio').checked = true;
     }
 
-
     $(document).ready(function() {
-        // --- ฟังก์ชันสำหรับสลับฟอร์ม ---
+        // Init Select2
+        $('.select2').select2({
+            theme: 'bootstrap4',
+            width: '100%',
+            dropdownParent: $('#modal_confirm'), // ปรับการแสดงผลให้อยู่ใน modal
+            dropdownAutoWidth: true, // ให้ความกว้างของ dropdown ตามเนื้อหาของมัน
+            width: 'auto' // ปรับความกว้างเป็นอัตโนมัติ
+        });
+
+
+        // Helper function to set Select2 by Text
+        function setSelect2ByText(selector, text) {
+            $(selector + ' option').each(function() {
+                // เปรียบเทียบ Text แบบตัดช่องว่าง
+                if ($(this).text().trim() == text.trim()) {
+                    $(selector).val($(this).val()).trigger('change');
+                    return false;
+                }
+            });
+        }
+
+        // --- Step 1: Province Change ---
+        $('#province').change(function() {
+            var id = $(this).val();
+            var name = $(this).find(':selected').text();
+            $('#province_name').val(name);
+
+            // Reset children
+            $('#amphure').empty().append('<option value="" selected disabled>กำลังโหลด...</option>').prop('disabled', true);
+            $('#district').empty().append('<option value="" selected disabled>กรุณาเลือกตำบล / แขวง</option>').prop('disabled', true);
+            $('#postal_code').val('');
+
+            if (id) {
+                $.ajax({
+                    url: _base_url_ + '/inc/get_address_step.php',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        function: 'provinces'
+                    },
+                    success: function(data) {
+                        $('#amphure').html(data).prop('disabled', false);
+                    },
+                    error: function() {
+                        // Fallback path if base url fails
+                        $.ajax({
+                            url: '/inc/get_address_step.php',
+                            method: 'POST',
+                            data: {
+                                id: id,
+                                function: 'provinces'
+                            },
+                            success: function(data) {
+                                $('#amphure').html(data).prop('disabled', false);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        // --- Step 2: Amphure Change ---
+        $('#amphure').change(function() {
+            var id = $(this).val();
+            var name = $(this).find(':selected').text();
+            $('#district_name').val(name);
+
+            // Reset children
+            $('#district').empty().append('<option value="" selected disabled>กำลังโหลด...</option>').prop('disabled', true);
+            $('#postal_code').val('');
+
+            if (id) {
+                $.ajax({
+                    url: _base_url_ + '/inc/get_address_step.php',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        function: 'amphures'
+                    },
+                    success: function(data) {
+                        $('#district').html(data).prop('disabled', false);
+                    },
+                    error: function() {
+                        $.ajax({
+                            url: '/inc/get_address_step.php',
+                            method: 'POST',
+                            data: {
+                                id: id,
+                                function: 'amphures'
+                            },
+                            success: function(data) {
+                                $('#district').html(data).prop('disabled', false);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        // --- Step 3: District (Tambon) Change ---
+        $('#district').change(function() {
+            var name = $(this).find(':selected').text();
+            var zip = $(this).find(':selected').data('zip');
+            $('#sub_district_name').val(name);
+            $('#postal_code').val(zip);
+        });
+
+        // UI Toggles
         function showAddressListForm() {
             $('#confirm_form_1').show();
             $('#confirm_form_2').hide();
-            // อัพเดทปุ่มใน Modal Footer
             $('.modal-footer #btn_confirm_form_1').show();
             $('.modal-footer #btn_confirm_form_2').hide();
             $('#uni_modal .modal-title').text('เลือกที่อยู่');
@@ -184,27 +339,42 @@ if ($_settings->userdata('id') != '') {
         function showEditAddressForm() {
             $('#confirm_form_1').hide();
             $('#confirm_form_2').show();
-            // อัพเดทปุ่มใน Modal Footer
             $('.modal-footer #btn_confirm_form_1').hide();
             $('.modal-footer #btn_confirm_form_2').show();
             $('#uni_modal .modal-title').text('แก้ไขที่อยู่');
         }
 
-        // --- Event Handlers ---
-        // ใช้ class selector '.edit-address' แทน id selector
+        // Edit Click Handler
         $('.edit-address').click(function(e) {
             e.preventDefault();
             showEditAddressForm();
             var _this = $(this);
-            // ดึงข้อมูลจาก data attributes มาใส่ในฟอร์ม
+
+            // Basic Fields
             $('#address_id').val(_this.data('id'));
             $('#name').val(_this.data('name'));
             $('#contact').val(_this.data('contact'));
-            $('#address').val(_this.data('address'));
-            $('#sub_district').val(_this.data('sub_district'));
-            $('#district').val(_this.data('district'));
-            $('#province').val(_this.data('province'));
-            $('#postal_code').val(_this.data('postal_code'));
+            $('#address_details').val(_this.data('address')); // Note: ID changed to address_details
+
+            // Cascading Selects Logic
+            var targetProvince = _this.data('province');
+            var targetAmphoe = _this.data('district'); // In DB logic: district = Amphoe
+            var targetTambon = _this.data('sub_district'); // In DB logic: sub_district = Tambon
+            var targetZip = _this.data('postal_code');
+
+            // 1. Set Province
+            setSelect2ByText('#province', targetProvince);
+
+            // 2. Wait for Amphures to load, then Set Amphure
+            setTimeout(function() {
+                setSelect2ByText('#amphure', targetAmphoe);
+
+                // 3. Wait for Tambons to load, then Set Tambon & Zip
+                setTimeout(function() {
+                    setSelect2ByText('#district', targetTambon);
+                    $('#postal_code').val(targetZip);
+                }, 500); // Delay for Tambon load
+            }, 500); // Delay for Amphure load
         });
 
         $('#back_to_address_list').click(function(e) {
@@ -212,50 +382,30 @@ if ($_settings->userdata('id') != '') {
             showAddressListForm();
         });
 
-        // --- Form Submission ---
-
-        // จัดการการ submit ของ Form 2 (บันทึกการแก้ไขที่อยู่)
-        // ฟังก์ชันสำหรับบันทึกการเลือกที่อยู่หลัก
+        // Save Address Forms
         $('#confirm_form_1').submit(function(e) {
             e.preventDefault();
-            var _this = $(this);
-            var address_id = $('input[name="address_id"]:checked').val(); // ดึงค่า address_id ที่ถูกเลือก
-
-            // ถ้าเลือกที่อยู่หลัก (is_primary = 1) จะส่งค่าไปที่เซิร์ฟเวอร์
+            var address_id = $('input[name="address_id"]:checked').val();
             $.ajax({
                 url: _base_url_ + "classes/Users.php?f=save_address",
                 method: 'POST',
                 data: {
                     address_id: address_id,
-                    is_primary: 1 // ตั้งเป็นที่อยู่หลัก
+                    is_primary: 1
                 },
                 dataType: 'json',
                 success: function(resp) {
-                    if (resp.status == 'success') {
-                        location.reload(); // รีโหลดหน้าเมื่อสำเร็จ
-                    } else {
-                        Swal.fire(
-                            'เกิดข้อผิดพลาด!',
-                            resp.msg || 'เกิดข้อผิดพลาดในการตั้งที่อยู่หลัก.',
-                            'error'
-                        );
-                    }
+                    if (resp.status == 'success') location.reload();
+                    else Swal.fire('Error', resp.msg || 'เกิดข้อผิดพลาด', 'error');
                 },
-                error: function(err) {
-                    console.log(err);
-                    Swal.fire(
-                        'เกิดข้อผิดพลาด!',
-                        'เกิดข้อผิดพลาดในการติดต่อกับเซิร์ฟเวอร์.',
-                        'error'
-                    );
+                error: function() {
+                    Swal.fire('Error', 'Connection Failed', 'error');
                 }
             });
         });
 
-
         $('#confirm_form_2').submit(function(e) {
             e.preventDefault();
-            var _this = $(this);
             start_loader();
             $.ajax({
                 url: _base_url_ + "classes/Users.php?f=save_address",
@@ -265,20 +415,22 @@ if ($_settings->userdata('id') != '') {
                 processData: false,
                 method: 'POST',
                 dataType: 'json',
-                error: err => {
+                success: function(resp) {
+                    if (resp.status == 'success') location.reload();
+                    else alert(resp.msg || "An error occurred");
+                    end_loader();
+                },
+                error: function(err) {
                     console.log(err);
                     alert("An error occurred");
                     end_loader();
-                },
-                success: function(resp) {
-                    if (resp.status == 'success') {
-                        location.reload();
-                    } else {
-                        alert(resp.msg || "An error occurred");
-                    }
-                    end_loader();
                 }
             });
+        });
+
+        // บังคับให้เบอร์โทรพิมพ์ได้แค่ตัวเลข
+        $('#contact').on('input', function() {
+            this.value = this.value.replace(/\D/g, '');
         });
     });
 </script>
