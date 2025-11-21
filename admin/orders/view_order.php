@@ -36,6 +36,19 @@ if (!empty($coupon_code_id)) {
 }
 
 // ข้อมูลขนส่ง
+
+$shipping_providers = 'ไม่ระบุขนส่ง';
+if (!empty($shipping_methods_id)) {
+    $shipping_query = $conn->query("SELECT name FROM shipping_providers WHERE id = '{$provider_id}'");
+    if ($shipping_query->num_rows > 0) {
+        $shipping_data = $shipping_query->fetch_assoc();
+        $shipping_providers = $shipping_data['name'];
+    } else {
+        $shipping_providers = 'ไม่พบข้อมูลขนส่ง';
+    }
+}
+
+
 $shipping_methods_name = 'ไม่ระบุขนส่ง';
 if (!empty($shipping_methods_id)) {
     $shipping_query = $conn->query("SELECT name, cost FROM shipping_methods WHERE id = '{$shipping_methods_id}'");
@@ -225,6 +238,8 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                         <label class="control-label head-detail">บริษัทขนส่ง :</label>
                                         <div class="pl-4 ">
                                             <?= htmlentities($tracking_id ?: 'ไม่พบเลขขนส่ง') ?>
+                                            <br>
+                                            <?= htmlentities($shipping_providers) ?>
                                             <br>
                                             <?= htmlentities($shipping_methods_name) ?>
                                             <br>
