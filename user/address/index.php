@@ -17,49 +17,28 @@ if ($_settings->userdata('id') != '') {
 
 $province_option = "";
 if (isset($conn)) {
-    // ดึงข้อมูลจากตาราง provinces (จังหวัด)
     $p_qry = $conn->query("SELECT * FROM provinces ORDER BY name_th ASC");
     while ($row = $p_qry->fetch_assoc()) {
         $province_option .= '<option value="' . $row['id'] . '">' . $row['name_th'] . '</option>';
     }
 }
+
+// =====================================================
+// กำหนดจำนวนรายการต่อหน้า
+$limit = 5;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
+$offset = ($page - 1) * $limit;
+$customer_id = $_settings->userdata('id');
+
+$count_qry = $conn->query("SELECT COUNT(id) FROM `customer_addresses` WHERE customer_id = '{$customer_id}'");
+$total_rows = $count_qry->fetch_array()[0];
+$total_pages = ceil($total_rows / $limit);
+
+$qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$customer_id}' ORDER BY is_primary DESC, id DESC LIMIT {$limit} OFFSET {$offset}");
 ?>
 
 <style>
-    /* CSS ไม่มีการเปลี่ยนแปลง */
-    #address_option {
-        border: none;
-        background: transparent;
-        padding: 10px 15px;
-        font-size: 16px;
-    }
 
-    #address_option:focus {
-        outline: none;
-        text-decoration: underline !important;
-    }
-
-    .border-msg {
-        border-color: #f57421 !important;
-        border-width: 2px;
-        border-style: solid;
-        box-shadow: none !important;
-        border-radius: 13px;
-    }
-
-    .card-address a {
-        color: black;
-        text-decoration: none;
-    }
-
-    .card-address a:hover {
-        text-decoration: underline;
-        line-height: normal;
-    }
-
-    .card-address {
-        border-radius: 13px;
-    }
 </style>
 
 <section class="py-5 profile-page">
@@ -86,7 +65,16 @@ if (isset($conn)) {
 
                                 <div class="row mt-3">
                                     <?php
-                                    $addresses_qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$id}' ORDER BY is_primary DESC, id ASC");
+                                    $limit = 5;
+                                    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
+                                    $offset = ($page - 1) * $limit;
+
+                                    $count_qry = $conn->query("SELECT COUNT(*) as total FROM `customer_addresses` WHERE customer_id = '{$id}'");
+                                    $total_rows = $count_qry->fetch_assoc()['total'];
+                                    $total_pages = ceil($total_rows / $limit);
+
+                                    $addresses_qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$id}' ORDER BY is_primary DESC, id ASC LIMIT {$limit} OFFSET {$offset}");
+
                                     if ($addresses_qry->num_rows > 0):
                                         while ($row = $addresses_qry->fetch_assoc()):
                                     ?>
@@ -146,7 +134,84 @@ if (isset($conn)) {
                                         </div>
                                     <?php endif; ?>
                                 </div>
+
+                                <?php if ($total_pages > 1):
+                                    $query_params = $_GET;
+                                    $num_fixed_pages = 5;
+                                    $adjacents = 2;
+                                ?>
+                                    <div class="d-flex justify-content-center mt-4">
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination">
+                                                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                                    <?php $query_params['page'] = $page - 1; ?>
+                                                    <a class="page-link" href="?<?= http_build_query($query_params) ?>" aria-label="Previous">
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                </li>
+
+                                                <?php
+                                                if ($total_pages <= ($num_fixed_pages + 1)) {
+                                                    for ($i = 1; $i <= $total_pages; $i++) {
+                                                        $query_params['page'] = $i;
+                                                        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+                                                        echo '<a class="page-link" href="?' . http_build_query($query_params) . '">' . $i . '</a>';
+                                                        echo '</li>';
+                                                    }
+                                                } elseif ($page < $num_fixed_pages) {
+                                                    for ($i = 1; $i <= $num_fixed_pages; $i++) {
+                                                        $query_params['page'] = $i;
+                                                        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+                                                        echo '<a class="page-link" href="?' . http_build_query($query_params) . '">' . $i . '</a>';
+                                                        echo '</li>';
+                                                    }
+                                                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                                    $query_params['page'] = $total_pages;
+                                                    echo '<li class="page-item"><a class="page-link" href="?' . http_build_query($query_params) . '">' . $total_pages . '</a></li>';
+                                                } elseif ($page >= ($total_pages - ($num_fixed_pages - 2))) {
+                                                    $query_params['page'] = 1;
+                                                    echo '<li class="page-item"><a class="page-link" href="?' . http_build_query($query_params) . '">1</a></li>';
+                                                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+
+                                                    $start = $total_pages - ($num_fixed_pages - 1);
+                                                    for ($i = $start; $i <= $total_pages; $i++) {
+                                                        $query_params['page'] = $i;
+                                                        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+                                                        echo '<a class="page-link" href="?' . http_build_query($query_params) . '">' . $i . '</a>';
+                                                        echo '</li>';
+                                                    }
+                                                } else {
+                                                    $query_params['page'] = 1;
+                                                    echo '<li class="page-item"><a class="page-link" href="?' . http_build_query($query_params) . '">1</a></li>';
+                                                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+
+                                                    $start = $page - $adjacents;
+                                                    $end = $page + $adjacents;
+                                                    for ($i = $start; $i <= $end; $i++) {
+                                                        $query_params['page'] = $i;
+                                                        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+                                                        echo '<a class="page-link" href="?' . http_build_query($query_params) . '">' . $i . '</a>';
+                                                        echo '</li>';
+                                                    }
+
+                                                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                                    $query_params['page'] = $total_pages;
+                                                    echo '<li class="page-item"><a class="page-link" href="?' . http_build_query($query_params) . '">' . $total_pages . '</a></li>';
+                                                }
+                                                ?>
+
+                                                <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                                                    <?php $query_params['page'] = $page + 1; ?>
+                                                    <a class="page-link" href="?<?= http_build_query($query_params) ?>" aria-label="Next">
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                <?php endif; ?>
                             </div>
+
                             <form id="address-form" method="post" style="display: none;">
                                 <div class="profile-section-title-with-line ">
                                     <h4 id="form-title">เพิ่มที่อยู่ใหม่</h4>
@@ -234,13 +299,11 @@ if (isset($conn)) {
 
 <script>
     $(document).ready(function() {
-        // ตั้งค่า Select2
         $('.select2').select2({
             theme: 'bootstrap4',
             width: '100%'
         });
 
-        // ฟังก์ชันช่วยค้นหา ID จากชื่อ (ใช้ตอน Edit)
         function setSelect2ByText(selector, text) {
             $(selector + ' option').each(function() {
                 if ($(this).text() == text) {
@@ -249,20 +312,13 @@ if (isset($conn)) {
                 }
             });
         }
-
-        // ============================================
-        // 1. เลือกจังหวัด -> โหลด อำเภอ / เขต
-        // ============================================
         $('#province').change(function() {
             var id = $(this).val();
             var name = $(this).find(':selected').text();
             $('#province_name').val(name);
-
-            // แก้ไขข้อความ Reset ตรงนี้
             $('#amphure').empty().append('<option value="" selected disabled>กำลังโหลด...</option>').prop('disabled', true);
             $('#district').empty().append('<option value="" selected disabled>กรุณาเลือกตำบล / แขวง</option>').prop('disabled', true);
             $('#postal_code').val('');
-
             if (id) {
                 $.ajax({
                     url: _base_url_ + '/inc/get_address_step.php',
@@ -275,7 +331,6 @@ if (isset($conn)) {
                         $('#amphure').html(data).prop('disabled', false);
                     },
                     error: function() {
-                        // Fallback กรณีเรียก base_url ไม่เจอ
                         $.ajax({
                             url: '/inc/get_address_step.php',
                             method: 'POST',
@@ -291,19 +346,12 @@ if (isset($conn)) {
                 });
             }
         });
-
-        // ============================================
-        // 2. เลือก อำเภอ / เขต -> โหลด ตำบล / แขวง
-        // ============================================
         $('#amphure').change(function() {
             var id = $(this).val();
             var name = $(this).find(':selected').text();
             $('#district_name').val(name);
-
-            // แก้ไขข้อความ Reset ตรงนี้
             $('#district').empty().append('<option value="" selected disabled>กำลังโหลด...</option>').prop('disabled', true);
             $('#postal_code').val('');
-
             if (id) {
                 $.ajax({
                     url: _base_url_ + '/inc/get_address_step.php',
@@ -331,22 +379,12 @@ if (isset($conn)) {
                 });
             }
         });
-
-        // ============================================
-        // 3. เลือก ตำบล / แขวง -> ใส่รหัสไปรษณีย์
-        // ============================================
         $('#district').change(function() {
             var name = $(this).find(':selected').text();
             var zip = $(this).find(':selected').data('zip');
-
             $('#sub_district_name').val(name);
             $('#postal_code').val(zip);
         });
-
-        // ============================================
-        // จัดการปุ่มต่างๆ
-        // ============================================
-
         $('#contact').on('input', function() {
             this.value = this.value.replace(/\D/g, '');
         });
@@ -356,49 +394,35 @@ if (isset($conn)) {
             $('#address_id').val('');
             $('#form-title').text('เพิ่มที่อยู่ใหม่');
             $('#province').val('').trigger('change.select2');
-
-            // แก้ไขข้อความ Reset ตรงนี้
             $('#amphure').html('<option value="" selected disabled>กรุณาเลือกอำเภอ / เขต</option>').prop('disabled', true);
             $('#district').html('<option value="" selected disabled>กรุณาเลือกตำบล / แขวง</option>').prop('disabled', true);
         }
-
         $('#address_option').click(function(e) {
             e.preventDefault();
             resetForm();
             $('#address-list').hide();
             $('#address-form').show();
         });
-
         $('#cancel-edit').click(function(e) {
             e.preventDefault();
             $('#address-form').hide();
             $('#address-list').show();
         });
-
-        // --- ปุ่มแก้ไข (Edit) ---
         $('.edit-address').click(function(e) {
             e.preventDefault();
             var _this = $(this);
-
             $('#form-title').text('แก้ไขที่อยู่');
             $('#address-list').hide();
             $('#address-form').show();
-
-            // ใส่ข้อมูลพื้นฐาน
             $('#address_id').val(_this.data('id'));
             $('#name').val(_this.data('name'));
             $('#contact').val(_this.data('contact'));
             $('#address').val(_this.data('address'));
-
-            // เตรียมข้อมูลที่อยู่เดิม
             var targetProvince = _this.data('province');
             var targetAmphoe = _this.data('district');
             var targetTambon = _this.data('sub_district');
             var targetZip = _this.data('postal_code');
-
-            // เลือกค่าตามลำดับ
             setSelect2ByText('#province', targetProvince);
-
             setTimeout(function() {
                 setSelect2ByText('#amphure', targetAmphoe);
                 setTimeout(function() {
@@ -407,8 +431,6 @@ if (isset($conn)) {
                 }, 500);
             }, 500);
         });
-
-        // Submit Form
         $('#address-form').submit(function(e) {
             e.preventDefault();
             start_loader();
@@ -435,8 +457,6 @@ if (isset($conn)) {
                 }
             });
         });
-
-        // ลบที่อยู่
         $('.delete-address').click(function(e) {
             e.preventDefault();
             var id = $(this).data('id');
@@ -465,8 +485,6 @@ if (isset($conn)) {
                 }
             });
         });
-
-        // ตั้งเป็นที่อยู่หลัก
         $('.set-primary').click(function(e) {
             e.preventDefault();
             var id = $(this).data('id');

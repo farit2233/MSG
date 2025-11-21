@@ -18,3 +18,52 @@
         border-radius: 30px;
         overflow: hidden;
     }
+
+        #address_option {
+        border: none;
+        background: transparent;
+        padding: 10px 15px;
+        font-size: 16px;
+    }
+
+    #address_option:focus {
+        outline: none;
+        text-decoration: underline !important;
+    }
+
+    .border-msg {
+        border-color: #f57421 !important;
+        border-width: 2px;
+        border-style: solid;
+        box-shadow: none !important;
+        border-radius: 13px;
+    }
+
+    /* --- แก้ไขจุดที่ 1: เพิ่ม :not(.page-link) เพื่อไม่ให้กระทบปุ่ม Pagination --- */
+    .card-address a:not(.page-link) {
+        color: black;
+        text-decoration: none;
+    }
+
+    /* --- แก้ไขจุดที่ 2: ป้องกันไม่ให้ line-height เปลี่ยนตอน Hover สำหรับปุ่ม Pagination --- */
+    .card-address a:not(.page-link):hover {
+        text-decoration: underline;
+        line-height: normal;
+    }
+
+    .card-address {
+        border-radius: 13px;
+    }
+
+    /* เพิ่มเติม: บังคับให้ Pagination ในหน้านี้หน้าตาเหมือนหน้าอื่น (เผื่อมี Style อื่นกวน) */
+    .card-address .pagination .page-link {
+        line-height: 1.25;
+        /* ค่ามาตรฐาน Bootstrap */
+        text-decoration: none;
+    }
+
+    .card-address .pagination .page-link:hover {
+        line-height: 1.25 !important;
+        /* บังคับไม่ให้ขยาย */
+        text-decoration: none !important;
+    }

@@ -15,28 +15,19 @@ $offset = ($page - 1) * $limit;
 
 function formatDateThai($date)
 {
-    // ถ้าวันที่ว่างหรือไม่ถูกต้อง
-    if (empty($date)) {
-        return 'ข้อมูลวันที่ไม่ถูกต้อง';
-    }
-
-    // แปลงวันที่เป็น timestamp
+    if (empty($date)) return 'ข้อมูลวันที่ไม่ถูกต้อง';
     $timestamp = strtotime($date);
-    if ($timestamp === false) {
-        return 'ข้อมูลวันที่ไม่ถูกต้อง';
-    }
-
-    // ดึงข้อมูลวัน เดือน ปี (พ.ศ.) และเวลา
+    if ($timestamp === false) return 'ข้อมูลวันที่ไม่ถูกต้อง';
     $day = date("j", $timestamp);
     $month = date("n", $timestamp);
-    $year = date("Y", $timestamp); // ปี (พ.ศ.)
-    $hour = date("H", $timestamp); // ชั่วโมง (00-23)
-    $minute = date("i", $timestamp); // นาที (00-59)
-
-    // ส่งคืนวันที่ในรูปแบบไทย
+    $year = date("Y", $timestamp);
+    $hour = date("H", $timestamp);
+    $minute = date("i", $timestamp);
     return "{$day}/{$month}/{$year} เวลา {$hour}:{$minute}";
 }
 ?>
+
+
 <section class="py-5 profile-page">
     <div class="container">
         <div class="row">
@@ -102,7 +93,6 @@ function formatDateThai($date)
                                 case 'returned':
                                     $where .= " AND (payment_status = 5 OR delivery_status = 8 OR payment_status = 6 OR delivery_status = 9)";
                                     break;
-                                    // 'all' doesn't need condition
                             }
 
                             $count_qry = $conn->query("SELECT COUNT(id) as total_orders FROM `order_list` WHERE {$where}");
@@ -150,24 +140,18 @@ function formatDateThai($date)
                                                     <i class="fa fa-eye me-1"></i> ดูรายละเอียด
                                                 </button>
 
-                                                <?php
-                                                if ($payment_status < 2 && $delivery_status < 3) :
-                                                ?>
+                                                <?php if ($payment_status < 2 && $delivery_status < 3) : ?>
                                                     <button class="btn btn-order-cancel btn-danger cancel-order" data-id="<?= $row['id'] ?>">
                                                         <i class="fa fa-times"></i> ยกเลิกคำสั่งซื้อ
                                                     </button>
                                                 <?php endif; ?>
 
-                                                <?php
-                                                if ($payment_status == 2 || $delivery_status == 4) :
-                                                ?>
+                                                <?php if ($payment_status == 2 || $delivery_status == 4) : ?>
                                                     <button class="btn btn-order-cancel btn-danger return-order" data-id="<?= $row['id'] ?>">
                                                         <i class="fa fa-times"></i> ขอคืนเงิน/คืนสินค้า
                                                     </button>
                                                 <?php endif; ?>
-
                                             </div>
-
                                         </div>
                                         <div class="d-flex flex-wrap gap-3">
                                             <div><strong>ยอดรวม:</strong> <?= format_num($row['total_amount'], 2) ?> บาท</div>
@@ -182,16 +166,11 @@ function formatDateThai($date)
                                     <p>ช็อปเลย!</p>
                                 </div>
                             <?php endif; ?>
+
                             <?php
                             if ($total_pages > 1):
                                 $query_params = $_GET;
-
-                                // --- กำหนดค่า ---
-                                // จำนวนหน้าที่แสดงผลคงที่ (ช่วง đầu)
-                                // เราจะแสดง 1 2 3 4 5 ... เมื่อ $page < 5
                                 $num_fixed_pages = 5;
-                                // จำนวนหน้าข้างเคียง (สำหรับสถานะกลาง)
-                                // (P-2), (P-1), [P], (P+1), (P+2)
                                 $adjacents = 2;
                             ?>
                                 <div class="d-flex justify-content-center mt-4">
@@ -203,10 +182,6 @@ function formatDateThai($date)
                                             </li>
 
                                             <?php
-                                            // --- Logic การแสดงผลตัวเลขหน้า ---
-
-                                            // 1. กรณีที่จำนวนหน้ารวมน้อย (น้อยกว่า 5+1)
-                                            // (เช่น 1 2 3 4 5 6) -> ไม่ต้องใช้ ...
                                             if ($total_pages <= ($num_fixed_pages + 1)) {
                                                 for ($i = 1; $i <= $total_pages; $i++) {
                                                     $query_params['page'] = $i;
@@ -214,35 +189,20 @@ function formatDateThai($date)
                                                     echo '<a class="page-link" href="?' . http_build_query($query_params) . '">' . $i . '</a>';
                                                     echo '</li>';
                                                 }
-                                            }
-
-                                            // 2. สถานะเริ่มต้น (เมื่ออยู่หน้า 1, 2, 3, 4)
-                                            // (1 2 3 [4] 5 ... 10)
-                                            // (แก้ไขจาก <= เป็น <)
-                                            elseif ($page < $num_fixed_pages) {
-                                                // แสดง 1-5
+                                            } elseif ($page < $num_fixed_pages) {
                                                 for ($i = 1; $i <= $num_fixed_pages; $i++) {
                                                     $query_params['page'] = $i;
                                                     echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
                                                     echo '<a class="page-link" href="?' . http_build_query($query_params) . '">' . $i . '</a>';
                                                     echo '</li>';
                                                 }
-                                                // แสดง ...
                                                 echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                                                // แสดงหน้าสุดท้าย
                                                 $query_params['page'] = $total_pages;
                                                 echo '<li class="page-item"><a class="page-link" href="?' . http_build_query($query_params) . '">' . $total_pages . '</a></li>';
-                                            }
-
-                                            // 3. สถานะท้าย (เมื่ออยู่ใกล้หน้าสุดท้าย)
-                                            // (1 ... 6 [7] 8 9 10)
-                                            elseif ($page >= ($total_pages - ($num_fixed_pages - 2))) {
-                                                // แสดง 1
+                                            } elseif ($page >= ($total_pages - ($num_fixed_pages - 2))) {
                                                 $query_params['page'] = 1;
                                                 echo '<li class="page-item"><a class="page-link" href="?' . http_build_query($query_params) . '">1</a></li>';
-                                                // แสดง ...
                                                 echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                                                // แสดง 5 หน้าสุดท้าย
                                                 $start = $total_pages - ($num_fixed_pages - 1);
                                                 for ($i = $start; $i <= $total_pages; $i++) {
                                                     $query_params['page'] = $i;
@@ -250,19 +210,10 @@ function formatDateThai($date)
                                                     echo '<a class="page-link" href="?' . http_build_query($query_params) . '">' . $i . '</a>';
                                                     echo '</li>';
                                                 }
-                                            }
-
-                                            // 4. สถานะกลาง (เลื่อนไปเรื่อยๆ)
-                                            // (1 ... 3 4 [5] 6 7 ... 10)
-                                            // (จะทำงานตั้งแต่ $page = 5 เป็นต้นไป)
-                                            else {
-                                                // แสดง 1
+                                            } else {
                                                 $query_params['page'] = 1;
                                                 echo '<li class="page-item"><a class="page-link" href="?' . http_build_query($query_params) . '">1</a></li>';
-                                                // แสดง ...
                                                 echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-
-                                                // แสดงหน้าต่าง (เช่น 3 4 5 6 7)
                                                 $start = $page - $adjacents;
                                                 $end = $page + $adjacents;
                                                 for ($i = $start; $i <= $end; $i++) {
@@ -271,10 +222,7 @@ function formatDateThai($date)
                                                     echo '<a class="page-link" href="?' . http_build_query($query_params) . '">' . $i . '</a>';
                                                     echo '</li>';
                                                 }
-
-                                                // แสดง ...
                                                 echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                                                // แสดงหน้าสุดท้าย
                                                 $query_params['page'] = $total_pages;
                                                 echo '<li class="page-item"><a class="page-link" href="?' . http_build_query($query_params) . '">' . $total_pages . '</a></li>';
                                             }
@@ -303,13 +251,11 @@ function formatDateThai($date)
             uni_modal_order("รายละเอียดคำสั่งซื้อ", "user/orders/view_order.php?id=" + orderId, 'modal-lg');
         });
 
-        // --- ส่วนที่แก้ไขโดยใช้ SweetAlert2 ---
+        // --- Script SweetAlert2 เหมือนเดิม ---
         $(".cancel-order").click(function() {
             let orderId = $(this).data("id");
             const $this = $(this);
             const originalHtml = $this.html();
-
-            // 1. เปลี่ยนจาก confirm() มาใช้ Swal.fire()
             Swal.fire({
                 title: 'ยืนยันการยกเลิกคำสั่งซื้อ',
                 html: "คุณต้องการ <b>ยกเลิกคำสั่งซื้อ</b> นี้ใช่หรือไม่?",
@@ -321,12 +267,9 @@ function formatDateThai($date)
                 cancelButtonText: 'ไม่',
                 reverseButtons: true
             }).then((result) => {
-                // ตรวจสอบว่าผู้ใช้กดปุ่ม "ยืนยัน" (ใช่, ยกเลิกเลย)
                 if (result.isConfirmed) {
-                    // เปลี่ยนสถานะปุ่มเป็นกำลังโหลด
                     $this.prop('disabled', true);
                     $this.html('<i class="fa fa-spinner fa-spin"></i> กำลังดำเนินการ...');
-
                     $.ajax({
                         url: "classes/Master.php?f=cancel_order",
                         method: "POST",
@@ -335,34 +278,29 @@ function formatDateThai($date)
                         },
                         success: function(resp) {
                             if (resp == 1) {
-                                // 2. เปลี่ยน alert() สำเร็จเป็น Swal.fire()
                                 Swal.fire({
                                     title: 'สำเร็จ!',
                                     html: '<b>ยกเลิกคำสั่งซื้อ</b> เรียบร้อย',
                                     icon: 'success'
                                 }).then(() => {
-                                    location.reload(); // รีโหลดหน้าหลังจากกด OK
+                                    location.reload();
                                 });
                             } else {
-                                // 3. เปลี่ยน alert() ข้อผิดพลาดเป็น Swal.fire()
                                 Swal.fire({
                                     title: 'เกิดข้อผิดพลาด',
                                     text: resp,
                                     icon: 'error'
                                 });
-                                // คืนค่าปุ่ม
                                 $this.prop('disabled', false);
                                 $this.html(originalHtml);
                             }
                         },
                         error: function() {
-                            // 4. เปลี่ยน alert() ข้อผิดพลาด Network เป็น Swal.fire()
                             Swal.fire({
                                 title: 'เกิดข้อผิดพลาด',
                                 text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
                                 icon: 'error'
                             });
-                            // คืนค่าปุ่ม
                             $this.prop('disabled', false);
                             $this.html(originalHtml);
                         }
@@ -374,8 +312,6 @@ function formatDateThai($date)
             let orderId = $(this).data("id");
             const $this = $(this);
             const originalHtml = $this.html();
-
-            // 1. เปลี่ยนจาก confirm() มาใช้ Swal.fire()
             Swal.fire({
                 title: 'ยืนยันคำขอ คืนเงิน/คืนสินค้า',
                 html: "คุณต้องการยืนยันคำขอ <b>คืนเงิน/คืนสินค้า</b> นี้ใช่หรือไม่?",
@@ -387,12 +323,9 @@ function formatDateThai($date)
                 cancelButtonText: 'ไม่',
                 reverseButtons: true
             }).then((result) => {
-                // ตรวจสอบว่าผู้ใช้กดปุ่ม "ยืนยัน" (ใช่, ยกเลิกเลย)
                 if (result.isConfirmed) {
-                    // เปลี่ยนสถานะปุ่มเป็นกำลังโหลด
                     $this.prop('disabled', true);
                     $this.html('<i class="fa fa-spinner fa-spin"></i> กำลังดำเนินการ...');
-
                     $.ajax({
                         url: "classes/Master.php?f=return_order",
                         method: "POST",
@@ -401,34 +334,29 @@ function formatDateThai($date)
                         },
                         success: function(resp) {
                             if (resp == 1) {
-                                // 2. เปลี่ยน alert() สำเร็จเป็น Swal.fire()
                                 Swal.fire({
                                     title: 'สำเร็จ!',
                                     html: 'ส่งคำขอ <b>คืนเงิน/คืนสินค้า</b> เรียบร้อย',
                                     icon: 'success'
                                 }).then(() => {
-                                    location.reload(); // รีโหลดหน้าหลังจากกด OK
+                                    location.reload();
                                 });
                             } else {
-                                // 3. เปลี่ยน alert() ข้อผิดพลาดเป็น Swal.fire()
                                 Swal.fire({
                                     title: 'เกิดข้อผิดพลาด',
                                     text: resp,
                                     icon: 'error'
                                 });
-                                // คืนค่าปุ่ม
                                 $this.prop('disabled', false);
                                 $this.html(originalHtml);
                             }
                         },
                         error: function() {
-                            // 4. เปลี่ยน alert() ข้อผิดพลาด Network เป็น Swal.fire()
                             Swal.fire({
                                 title: 'เกิดข้อผิดพลาด',
                                 text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
                                 icon: 'error'
                             });
-                            // คืนค่าปุ่ม
                             $this.prop('disabled', false);
                             $this.html(originalHtml);
                         }
