@@ -14,6 +14,15 @@ if ($_settings->userdata('id') != '') {
 } else {
     echo "<script>alert('You don\\'t have access for this page'); location.replace('./');</script>";
 }
+
+$province_option = "";
+if (isset($conn)) {
+    // ดึงข้อมูลจากตาราง provinces (จังหวัด)
+    $p_qry = $conn->query("SELECT * FROM provinces ORDER BY name_th ASC");
+    while ($row = $p_qry->fetch_assoc()) {
+        $province_option .= '<option value="' . $row['id'] . '">' . $row['name_th'] . '</option>';
+    }
+}
 ?>
 
 <style>
@@ -145,43 +154,67 @@ if ($_settings->userdata('id') != '') {
                                 </div>
                                 <input type="hidden" name="address_id" id="address_id">
                                 <input type="hidden" name="customer_id" value="<?= isset($id) ? $id : '' ?>">
+
                                 <div class="d-flex">
                                     <a href="#" class="ml-auto clickable-text-btn" id="cancel-edit">
                                         <i class="fa-solid fa-xmark"></i> กลับ
                                     </a>
                                 </div>
+
                                 <div class="row">
-                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name" class="control-label">ชื่อ นามสกุล <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="name" id="name" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="address" class="control-label">บ้านเลขที่, ถนน <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="address" id="address" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="district" class="control-label">อำเภอ/เขต <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="district" id="district" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="postal_code" class="control-label">รหัสไปรษณีย์ <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="postal_code" id="postal_code" maxlength="10" required>
+                                            <label for="name">ชื่อ - นามสกุล <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="name" id="name" placeholder="ชื่อ-นามสกุล ผู้รับ" required>
                                         </div>
                                     </div>
-                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name" class="control-label">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="contact" id="contact" required>
+                                            <label for="contact">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="contact" id="contact" placeholder="เบอร์โทรศัพท์ที่ติดต่อได้" required>
                                         </div>
+                                    </div>
 
+                                    <div class="col-12">
                                         <div class="form-group">
-                                            <label for="sub_district" class="control-label">ตำบล/แขวง <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="sub_district" id="sub_district" required>
+                                            <label for="address">บ้านเลขที่, อาคาร, ถนน <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="address" id="address" placeholder="บ้านเลขที่, หมู่, ซอย, ถนน" required>
                                         </div>
+                                    </div>
+
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="province" class="control-label">จังหวัด <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="province" id="province" required>
+                                            <label for="province">จังหวัด <span class="text-danger">*</span></label>
+                                            <select class="form-control select2" name="province_id" id="province" required>
+                                                <option value="" selected disabled>กรุณาเลือกจังหวัด</option>
+                                                <?php echo $province_option; ?>
+                                            </select>
+                                            <input type="hidden" name="province" id="province_name">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="district">อำเภอ / เขต <span class="text-danger">*</span></label>
+                                            <select class="form-control select2" name="district_id" id="amphure" required disabled>
+                                                <option value="" selected disabled>กรุณาเลือกอำเภอ / เขต</option>
+                                            </select>
+                                            <input type="hidden" name="district" id="district_name">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="sub_district">ตำบล / แขวง <span class="text-danger">*</span></label>
+                                            <select class="form-control select2" name="sub_district_id" id="district" required disabled>
+                                                <option value="" selected disabled>กรุณาเลือกตำบล / แขวง</option>
+                                            </select>
+                                            <input type="hidden" name="sub_district" id="sub_district_name">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="postal_code">รหัสไปรษณีย์ <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="postal_code" id="postal_code" readonly style="background-color: #e9ecef;">
                                         </div>
                                     </div>
                                 </div>
@@ -201,47 +234,140 @@ if ($_settings->userdata('id') != '') {
 
 <script>
     $(document).ready(function() {
-        const contactInput = document.getElementById('contact');
-        contactInput.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, ''); // ลบทุกตัวที่ไม่ใช่เลข
+        // ตั้งค่า Select2
+        $('.select2').select2({
+            theme: 'bootstrap4',
+            width: '100%'
         });
 
-        function resetAddressForm() {
+        // ฟังก์ชันช่วยค้นหา ID จากชื่อ (ใช้ตอน Edit)
+        function setSelect2ByText(selector, text) {
+            $(selector + ' option').each(function() {
+                if ($(this).text() == text) {
+                    $(selector).val($(this).val()).trigger('change');
+                    return false;
+                }
+            });
+        }
+
+        // ============================================
+        // 1. เลือกจังหวัด -> โหลด อำเภอ / เขต
+        // ============================================
+        $('#province').change(function() {
+            var id = $(this).val();
+            var name = $(this).find(':selected').text();
+            $('#province_name').val(name);
+
+            // แก้ไขข้อความ Reset ตรงนี้
+            $('#amphure').empty().append('<option value="" selected disabled>กำลังโหลด...</option>').prop('disabled', true);
+            $('#district').empty().append('<option value="" selected disabled>กรุณาเลือกตำบล / แขวง</option>').prop('disabled', true);
+            $('#postal_code').val('');
+
+            if (id) {
+                $.ajax({
+                    url: _base_url_ + '/inc/get_address_step.php',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        function: 'provinces'
+                    },
+                    success: function(data) {
+                        $('#amphure').html(data).prop('disabled', false);
+                    },
+                    error: function() {
+                        // Fallback กรณีเรียก base_url ไม่เจอ
+                        $.ajax({
+                            url: '/inc/get_address_step.php',
+                            method: 'POST',
+                            data: {
+                                id: id,
+                                function: 'provinces'
+                            },
+                            success: function(data) {
+                                $('#amphure').html(data).prop('disabled', false);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        // ============================================
+        // 2. เลือก อำเภอ / เขต -> โหลด ตำบล / แขวง
+        // ============================================
+        $('#amphure').change(function() {
+            var id = $(this).val();
+            var name = $(this).find(':selected').text();
+            $('#district_name').val(name);
+
+            // แก้ไขข้อความ Reset ตรงนี้
+            $('#district').empty().append('<option value="" selected disabled>กำลังโหลด...</option>').prop('disabled', true);
+            $('#postal_code').val('');
+
+            if (id) {
+                $.ajax({
+                    url: _base_url_ + '/inc/get_address_step.php',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        function: 'amphures'
+                    },
+                    success: function(data) {
+                        $('#district').html(data).prop('disabled', false);
+                    },
+                    error: function() {
+                        $.ajax({
+                            url: '/inc/get_address_step.php',
+                            method: 'POST',
+                            data: {
+                                id: id,
+                                function: 'amphures'
+                            },
+                            success: function(data) {
+                                $('#district').html(data).prop('disabled', false);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        // ============================================
+        // 3. เลือก ตำบล / แขวง -> ใส่รหัสไปรษณีย์
+        // ============================================
+        $('#district').change(function() {
+            var name = $(this).find(':selected').text();
+            var zip = $(this).find(':selected').data('zip');
+
+            $('#sub_district_name').val(name);
+            $('#postal_code').val(zip);
+        });
+
+        // ============================================
+        // จัดการปุ่มต่างๆ
+        // ============================================
+
+        $('#contact').on('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
+        function resetForm() {
             $('#address-form')[0].reset();
             $('#address_id').val('');
             $('#form-title').text('เพิ่มที่อยู่ใหม่');
+            $('#province').val('').trigger('change.select2');
+
+            // แก้ไขข้อความ Reset ตรงนี้
+            $('#amphure').html('<option value="" selected disabled>กรุณาเลือกอำเภอ / เขต</option>').prop('disabled', true);
+            $('#district').html('<option value="" selected disabled>กรุณาเลือกตำบล / แขวง</option>').prop('disabled', true);
         }
 
         $('#address_option').click(function(e) {
             e.preventDefault();
-            resetAddressForm();
+            resetForm();
             $('#address-list').hide();
             $('#address-form').show();
         });
-
-        // ================== START: การเปลี่ยนแปลงใน JavaScript ==================
-        $('.edit-address').click(function(e) {
-            e.preventDefault();
-            var _this = $(this); // อ้างอิงถึงปุ่ม 'แก้ไข' ที่ถูกคลิก
-
-            // 1. เปลี่ยนหัวข้อฟอร์ม
-            $('#form-title').text('แก้ไขที่อยู่');
-
-            // 2. ดึงข้อมูลจาก data attributes ของปุ่มมาใส่ในฟอร์ม
-            $('#address_id').val(_this.data('id'));
-            $('#name').val(_this.data('name'));
-            $('#contact').val(_this.data('contact'));
-            $('#address').val(_this.data('address'));
-            $('#sub_district').val(_this.data('sub_district'));
-            $('#district').val(_this.data('district'));
-            $('#province').val(_this.data('province'));
-            $('#postal_code').val(_this.data('postal_code'));
-
-            // 3. ซ่อนรายการที่อยู่และแสดงฟอร์ม
-            $('#address-list').hide();
-            $('#address-form').show();
-        });
-        // =================== END: การเปลี่ยนแปลงใน JavaScript ===================
 
         $('#cancel-edit').click(function(e) {
             e.preventDefault();
@@ -249,9 +375,42 @@ if ($_settings->userdata('id') != '') {
             $('#address-list').show();
         });
 
-        $('#address-form').submit(function(e) {
+        // --- ปุ่มแก้ไข (Edit) ---
+        $('.edit-address').click(function(e) {
             e.preventDefault();
             var _this = $(this);
+
+            $('#form-title').text('แก้ไขที่อยู่');
+            $('#address-list').hide();
+            $('#address-form').show();
+
+            // ใส่ข้อมูลพื้นฐาน
+            $('#address_id').val(_this.data('id'));
+            $('#name').val(_this.data('name'));
+            $('#contact').val(_this.data('contact'));
+            $('#address').val(_this.data('address'));
+
+            // เตรียมข้อมูลที่อยู่เดิม
+            var targetProvince = _this.data('province');
+            var targetAmphoe = _this.data('district');
+            var targetTambon = _this.data('sub_district');
+            var targetZip = _this.data('postal_code');
+
+            // เลือกค่าตามลำดับ
+            setSelect2ByText('#province', targetProvince);
+
+            setTimeout(function() {
+                setSelect2ByText('#amphure', targetAmphoe);
+                setTimeout(function() {
+                    setSelect2ByText('#district', targetTambon);
+                    $('#postal_code').val(targetZip);
+                }, 500);
+            }, 500);
+        });
+
+        // Submit Form
+        $('#address-form').submit(function(e) {
+            e.preventDefault();
             start_loader();
             $.ajax({
                 url: _base_url_ + "classes/Users.php?f=save_address",
@@ -261,129 +420,78 @@ if ($_settings->userdata('id') != '') {
                 processData: false,
                 method: 'POST',
                 dataType: 'json',
-                error: err => {
-                    console.log(err);
-                    alert("An error occurred");
-                    end_loader();
-                },
                 success: function(resp) {
                     if (resp.status == 'success') {
                         location.reload();
                     } else {
-                        alert(resp.msg || "An error occurred");
+                        alert(resp.msg || "เกิดข้อผิดพลาด");
                     }
+                    end_loader();
+                },
+                error: function(err) {
+                    console.log(err);
+                    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
                     end_loader();
                 }
             });
         });
 
-        $('.set-primary').click(function(e) {
+        // ลบที่อยู่
+        $('.delete-address').click(function(e) {
             e.preventDefault();
-            var _this = $(this);
-
-            // ถ้าเป็นที่อยู่หลักอยู่แล้ว จะไม่ให้คลิก
-            if (_this.hasClass('disabled')) return;
-
-            var address_id = _this.data('id');
-
-            // ใช้ SweetAlert เพื่อยืนยันก่อนตั้งเป็นที่อยู่หลัก
+            var id = $(this).data('id');
             Swal.fire({
-                title: 'ยืนยันการตั้งเป็นที่อยู่หลัก?',
-                text: "คุณต้องการตั้งที่อยู่นี้เป็นที่อยู่หลักหรือไม่?",
+                title: 'ยืนยันการลบ?',
+                text: "คุณต้องการลบที่อยู่นี้หรือไม่?",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#f57421',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก',
-                reverseButtons: true
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ลบเลย',
+                cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ถ้าผู้ใช้ยืนยัน ให้ส่งคำขอไปที่เซิร์ฟเวอร์
                     $.ajax({
-                        url: _base_url_ + "classes/Users.php?f=save_address",
+                        url: _base_url_ + "classes/Users.php?f=delete_address",
                         method: 'POST',
                         data: {
-                            address_id: address_id,
-                            is_primary: 1
+                            address_id: id
                         },
                         dataType: 'json',
                         success: function(resp) {
-                            if (resp.status == 'success') {
-                                location.reload(); // รีโหลดหน้าเมื่อสำเร็จ
-                            } else {
-                                Swal.fire(
-                                    'เกิดข้อผิดพลาด!',
-                                    resp.msg || 'เกิดข้อผิดพลาดในการตั้งที่อยู่หลัก.',
-                                    'error'
-                                );
-                            }
-                        },
-                        error: function(err) {
-                            console.log(err);
-                            Swal.fire(
-                                'เกิดข้อผิดพลาด!',
-                                'เกิดข้อผิดพลาดในการติดต่อกับเซิร์ฟเวอร์.',
-                                'error'
-                            );
+                            if (resp.status == 'success') location.reload();
+                            else Swal.fire('Error', resp.msg, 'error');
                         }
                     });
                 }
             });
         });
-        $('.delete-address').click(function(e) {
+
+        // ตั้งเป็นที่อยู่หลัก
+        $('.set-primary').click(function(e) {
             e.preventDefault();
-            var _this = $(this);
-
-            // ถ้าเป็นที่อยู่หลักอยู่แล้ว จะไม่ให้คลิก
-            if (_this.hasClass('disabled')) return;
-
-            var address_id = _this.data('id');
-
-            // ใช้ SweetAlert เพื่อยืนยันก่อนตั้งเป็นที่อยู่หลัก
+            var id = $(this).data('id');
             Swal.fire({
-                title: 'คุณแน่ใจหรือไม่?',
-                text: "คุณต้องการลบที่อยู่นี้หรือไม่?",
-                icon: 'warning',
+                title: 'ตั้งเป็นที่อยู่หลัก?',
+                icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'ยืนยันการลบ',
+                confirmButtonText: 'ตั้งเป็นที่อยู่หลัก',
                 cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#f57421',
+                cancelButtonColor: '6c757d',
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ถ้าผู้ใช้ยืนยัน ให้ส่งคำขอไปที่เซิร์ฟเวอร์
                     $.ajax({
-                        url: _base_url_ + "classes/Users.php?f=delete_address",
+                        url: _base_url_ + "classes/Users.php?f=save_address",
                         method: 'POST',
                         data: {
-                            address_id: address_id,
+                            address_id: id,
                             is_primary: 1
                         },
                         dataType: 'json',
                         success: function(resp) {
-                            if (resp.status == 'success') {
-                                location.reload(); // รีโหลดหน้าเมื่อสำเร็จ
-                            } else {
-                                Swal.fire(
-                                    'เกิดข้อผิดพลาด!',
-                                    resp.msg || 'เกิดข้อผิดพลาดในการลบที่อยู่.',
-                                    'error', {
-                                        confirmButtonText: 'ปิด'
-                                    }
-                                );
-                            }
-                        },
-                        error: function(err) {
-                            console.log(err);
-                            Swal.fire(
-                                'เกิดข้อผิดพลาด!',
-                                'เกิดข้อผิดพลาดในการติดต่อกับเซิร์ฟเวอร์.',
-                                'error', {
-                                    confirmButtonText: 'ปิด'
-                                }
-                            );
+                            if (resp.status == 'success') location.reload();
+                            else Swal.fire('Error', resp.msg, 'error');
                         }
                     });
                 }
