@@ -189,7 +189,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 
                     <form id="checkout-form-desktop" method="post" action="./?p=checkout">
                         <input type="hidden" name="selected_items" class="selected_items_input">
-                        <button type="submit" class="btn-checkout mt-3 btn btn-dark btn-block">ดำเนินการชำระเงิน</button>
+                        <button type="submit" class="btn-cart-checkout mt-3 btn btn-block">ดำเนินการชำระเงิน</button>
                     </form>
                 </div>
             </div>
@@ -205,7 +205,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
         </div>
         <form id="checkout-form-mobile" method="post" action="./?p=checkout" class="m-0">
             <input type="hidden" name="selected_items" class="selected_items_input">
-            <button type="submit" class="btn btn-primary rounded px-4 font-weight-bold" style="background-color: var(--primary-color); border:none;">
+            <button type="submit" class="btn btn-cart-checkout-m rounded px-4 font-weight-bold">
                 ชำระเงิน
             </button>
         </form>

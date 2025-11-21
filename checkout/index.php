@@ -514,7 +514,7 @@ if (!function_exists('format_price_custom')) {
                             <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
                             <input type="hidden" name="coupon_code_id" id="applied_coupon_id" value="0">
 
-                            <button type="submit" class="btn btn-primary btn-block btn-lg w-100 shadow-sm" style="background-color: #f57421; border-color: #f57421;" <?= !$is_address_complete ? 'disabled' : '' ?>>
+                            <button type="submit" class="btn btn-checkout btn-block btn-lg w-100 shadow-sm" style="background-color: #f57421; border-color: #f57421;" <?= !$is_address_complete ? 'disabled' : '' ?>>
                                 สั่งซื้อสินค้า
                             </button>
                         </form>
