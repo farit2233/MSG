@@ -1,0 +1,16 @@
+.address-index {
+    font-size: 13.5px ;
+    text-decoration: none; /* 1. เอาขีดเส้นใต้ลิงก์ออก */
+    color: inherit;        /* 2. ให้สีเหมือนตัวหนังสือพ่อแม่ (แก้ปัญหาสีน้ำเงิน) */
+}
+
+.address-index:hover {
+    color: black;
+    text-decoration: none; /* ย้ำว่าตอนเมาส์ชี้ก็ไม่ต้องมีขีดเส้นใต้ */
+}
+
+@media (max-width: 376px) {
+.address-index {
+    font-size: 12.5px !important;
+}
+}

@@ -91,12 +91,14 @@ $qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$c
                                                                 <?= !empty($row['address']) ? 'ที่อยู่ ' . htmlspecialchars($row['address']) . ',' : ', ไม่พบที่อยู่,' ?><br>
                                                                 <?= !empty($row['sub_district']) ? 'ต.' . htmlspecialchars($row['sub_district']) . ',' : '' ?>
                                                                 <?= !empty($row['district']) ? 'อ.' . htmlspecialchars($row['district']) . ',' : '' ?>
-                                                                <?= !empty($row['province']) ? 'จ.' . htmlspecialchars($row['province']) . ',' : '' ?>
+
+                                                                <?= !empty($row['province']) ? '<br>จ.' . htmlspecialchars($row['province']) . ',' : '' ?>
+
                                                                 <?= !empty($row['postal_code']) ? htmlspecialchars($row['postal_code']) : '' ?>
                                                             </p>
                                                         </div>
-                                                        <div class="ms-3 d-flex flex-column align-items-end">
-                                                            <a href="#" class="edit-address mb-1 text-sm clickable-text-btn"
+                                                        <div class="ms-3 d-flex flex-column address-index align-items-end">
+                                                            <p class="edit-address mb-1  clickable-text-btn"
                                                                 data-id="<?= $row['id'] ?>"
                                                                 data-name="<?= htmlspecialchars($row['name']) ?>"
                                                                 data-contact="<?= htmlspecialchars($row['contact']) ?>"
@@ -107,19 +109,19 @@ $qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$c
                                                                 data-postal_code="<?= htmlspecialchars($row['postal_code']) ?>"
                                                                 style="text-decoration: none;">
                                                                 <i class="fa-solid fa-pencil-alt"></i> แก้ไข
-                                                            </a>
+                                                            </p>
 
-                                                            <a href="#" class="set-primary mb-1 text-sm clickable-text-btn" data-id="<?= $row['id'] ?>"
+                                                            <p class="set-primary mb-1 address-index clickable-text-btn" data-id="<?= $row['id'] ?>"
                                                                 <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
                                                                 style="text-decoration: none;">
                                                                 <i class="<?= ($row['is_primary'] == 1) ? 'fa-solid' : 'fa-regular' ?> fa-star"></i> ที่อยู่หลัก
-                                                            </a>
+                                                            </p>
 
-                                                            <a href="#" class="delete-address mb-1 text-sm clickable-text-btn" data-id="<?= $row['id'] ?>"
+                                                            <p class="delete-address mb-1 address-index clickable-text-btn" data-id="<?= $row['id'] ?>"
                                                                 <?= ($row['is_primary'] == 1) ? 'style="pointer-events: none; color: #6c757d;"' : '' ?>
                                                                 style="text-decoration: none;">
                                                                 <i class="fa-solid fa-trash"></i> ลบ
-                                                            </a>
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -466,8 +468,10 @@ $qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$c
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
+                cancelButtonColor: '#ccc',
                 confirmButtonText: 'ลบเลย',
-                cancelButtonText: 'ยกเลิก'
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -491,11 +495,12 @@ $qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$c
             Swal.fire({
                 title: 'ตั้งเป็นที่อยู่หลัก?',
                 icon: 'question',
+                iconColor: '#0d6efd',
                 showCancelButton: true,
                 confirmButtonText: 'ตั้งเป็นที่อยู่หลัก',
                 cancelButtonText: 'ยกเลิก',
                 confirmButtonColor: '#f57421',
-                cancelButtonColor: '6c757d',
+                cancelButtonColor: '#ccc',
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {

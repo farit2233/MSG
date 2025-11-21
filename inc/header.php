@@ -51,6 +51,7 @@
 
   <!--Custom css-->
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/address_option.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/address_index.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/checkout.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/cart_list.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/fetch_product.css">
