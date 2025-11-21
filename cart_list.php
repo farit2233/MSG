@@ -27,7 +27,7 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
 
         <div class="cart-header-bar">
             <i class="fa fa-basket-shopping mr-2 cart-icon"></i>
-            <h3 class="d-inline mb-0 font-weight-bold">ตะกร้าของฉัน</h3>
+            <h3 class="d-inline mb-0">ตะกร้าของฉัน</h3>
         </div>
 
         <div class="row">
