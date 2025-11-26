@@ -45,7 +45,8 @@ require_once('sess_auth.php');
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/cropper.js/cropper.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="assets/css/promotion_products.css">
-
+  
+  <!-- Flat picker -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
