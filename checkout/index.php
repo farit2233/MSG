@@ -29,6 +29,7 @@ if (!empty($selected_items)) {
             p.discount_type,
             p.discount_value,
             p.discounted_price,
+            p.product_size,
             p.product_weight,
             p.image_path
         FROM cart_list c 
@@ -120,44 +121,83 @@ $total_weight = $total_weight ?? 0; // มีการคำนวณไว้�
 // เตรียม query เพื่อดึงค่าส่งตามน้ำหนัก
 // เราจะ join ตาราง shipping_methods กับ shipping_prices
 // และหาช่วงน้ำหนักที่ถูกต้อง
-$shipping_query_string = "
-    SELECT 
-        sm.id, 
-        sm.name, 
-        sm.description, 
-        sp.price as cost  -- ดึงราคาจากตาราง shipping_prices
-    FROM 
-        shipping_methods sm
-    LEFT JOIN 
-        shipping_prices sp ON sm.id = sp.shipping_methods_id
-    WHERE 
-        sm.status = 1 
-        AND sm.delete_flag = 0
-        AND ('{$total_weight}' >= sp.min_weight AND '{$total_weight}' <= sp.max_weight) -- เงื่อนไขสำคัญ
-    ORDER BY 
-        sm.id ASC
-";
+// ============================
+// [NEW] PHP: ระบบคำนวณค่าส่งอัตโนมัติ (Size-based & Total-based)
+// ============================
 
-$shipping_qry_all = $conn->query($shipping_query_string);
+// 1. ดึงการตั้งค่าระบบขนส่ง
+$sys_qry = $conn->query("SELECT * FROM shipping_system LIMIT 1");
+$shipping_system = $sys_qry->num_rows > 0 ? $sys_qry->fetch_assoc() : [
+    'N' => 40,
+    'L' => 60,
+    'XL' => 80,
+    'price_default' => 80,
+    'rules_size' => 1,
+    'rules_total' => 1
+];
 
-// หาค่า Default (ตัวแรกที่เจอ)
-$default_shipping_id = 0;
-$default_shipping_name = 'ยังไม่มีขนส่งสำหรับน้ำหนักนี้';
-$default_shipping_cost = 0.00;
-
-// ใช้ query เดิม แต่เพิ่ม LIMIT 1
-$default_shipping_qry = $conn->query($shipping_query_string . " LIMIT 1");
-
-if ($default_shipping_qry && $row = $default_shipping_qry->fetch_assoc()) {
-    $default_shipping_id = $row['id'];
-    $default_shipping_name = $row['name'];
-    $default_shipping_cost = floatval($row['cost']); // ค่าส่งตามน้ำหนัก
+// 2. ตรวจสอบขนาดสินค้าในตะกร้า (ต้องเพิ่ม p.product_size ใน query หลักก่อน ดูข้อ 2 ด้านล่าง)
+$has_size_xl = false;
+$has_size_l  = false;
+// (ตัวแปร $cart_items ถูกวนลูปเก็บไว้ด้านบนแล้ว เราจะวนเช็คอีกรอบ หรือแก้ใน loop แรกก็ได้ แนะนำ loop เช็คตรงนี้เพื่อความชัวร์)
+foreach ($cart_items as $item) {
+    // สมมติว่า field ใน database ชื่อ product_size
+    $size = isset($item['product_size']) ? strtoupper(trim($item['product_size'])) : 'N';
+    if ($size == 'XL') $has_size_xl = true;
+    if ($size == 'L')  $has_size_l  = true;
 }
 
-// Reset pointer เพื่อให้ loop ใน Modal ทำงานได้ปกติ
-if ($shipping_qry_all) {
-    $shipping_qry_all->data_seek(0);
+// 3. เริ่มคำนวณค่าส่งตามเงื่อนไข 3 ข้อ
+$calc_shipping_cost = 0;
+$shipping_rule_name = "";
+
+// กฏข้อ 1: กฎตามขนาดสินค้า (Size-based) -> ถ้ามี L หรือ XL
+if (($has_size_xl || $has_size_l) && $shipping_system['rules_size'] == 1) {
+    if ($has_size_xl) {
+        $calc_shipping_cost = $shipping_system['XL'];
+        $shipping_rule_name = "ค่าจัดส่ง (สินค้าขนาด XL)";
+    } else {
+        $calc_shipping_cost = $shipping_system['L'];
+        $shipping_rule_name = "ค่าจัดส่ง (สินค้าขนาด L)";
+    }
 }
+// กฏข้อ 2: กฎตามยอดรวม (Total-based) -> ถ้ามีแต่ Normal (ไม่มี L, XL)
+elseif (!$has_size_xl && !$has_size_l && $shipping_system['rules_total'] == 1) {
+    // ดึงเรทราคาตามยอดรวมจากตาราง shipping_total
+    // หาระหว่าง min_price และ max_price (หรือ max_price เป็น NULL คือมากกว่าขึ้นไป)
+    $total_qry = $conn->query("
+    SELECT * FROM shipping_total 
+    WHERE min_price <= '$cart_total' 
+    AND (max_price >= '$cart_total' OR max_price IS NULL)
+    ORDER BY min_price DESC LIMIT 1
+");
+
+    if ($total_qry->num_rows > 0) {
+        $rule = $total_qry->fetch_assoc();
+        if ($rule['free_shipping'] == 1) {
+            $calc_shipping_cost = 0;
+            $shipping_rule_name = "ค่าจัดส่ง (โปรส่งฟรีตามยอดซื้อ)";
+        } else {
+            $calc_shipping_cost = $rule['shipping_price'];
+            $shipping_rule_name = "ค่าจัดส่ง (ตามยอดซื้อ)";
+        }
+    } else {
+        // กรณีไม่เข้าช่วงราคาใดๆ เลย (อาจใช้ default)
+        $calc_shipping_cost = $shipping_system['price_default'];
+        $shipping_rule_name = "ค่าจัดส่งมาตรฐาน";
+    }
+}
+// กฏข้อ 3: ค่าส่งมาตรฐาน (Default) -> ถ้าไม่เข้าเงื่อนไขบน
+else {
+    $calc_shipping_cost = $shipping_system['price_default'];
+    $shipping_rule_name = "ค่าจัดส่งมาตรฐาน";
+}
+
+// กำหนดตัวแปรสำหรับนำไปใช้ต่อ (แทนที่ตัวแปรระบบเก่า)
+$default_shipping_cost = floatval($calc_shipping_cost);
+$default_shipping_name = $shipping_rule_name;
+$default_shipping_id   = 0; // ระบบใหม่ไม่มี ID ขนส่งแยกย่อย
+
 
 // ==========================================================
 // PHP: ส่วนคำนวณโปรโมชันทั้งหมด
@@ -174,12 +214,12 @@ foreach ($cart_items as $item) {
         FROM promotion_products pp
         JOIN promotions_list p ON pp.promotion_id = p.id
         WHERE pp.product_id = {$item['product_id']}
-          AND pp.status = 1
-          AND pp.delete_flag = 0
-          AND p.status = 1
-          AND p.delete_flag = 0
-          AND p.start_date <= NOW()
-          AND p.end_date >= NOW()
+        AND pp.status = 1
+        AND pp.delete_flag = 0
+        AND p.status = 1
+        AND p.delete_flag = 0
+        AND p.start_date <= NOW()
+        AND p.end_date >= NOW()
     ";
 
     $promo_result = $conn->query($promo_query);
@@ -254,13 +294,13 @@ $applied_coupon = null; // ตัวแปรเก็บข้อมูลค�
 // --- ตรวจสอบคูปองในตะกร้า ---
 foreach ($cart_items as $item) {
     $coupon_query = "SELECT c.id, c.coupon_code, c.name, c.type, c.discount_value, c.minimum_order 
-                     FROM coupon_code_list c 
-                     LEFT JOIN coupon_code_products cp ON c.id = cp.coupon_code_id
-                     WHERE c.status = 1 
-                     AND c.delete_flag = 0
-                     AND c.start_date <= NOW() 
-                     AND c.end_date >= NOW() 
-                     AND (c.all_products_status = 1 OR cp.product_id = {$item['product_id']})"; // ตรวจสอบว่าคูปองสามารถใช้กับสินค้านี้ได้
+                    FROM coupon_code_list c 
+                    LEFT JOIN coupon_code_products cp ON c.id = cp.coupon_code_id
+                    WHERE c.status = 1 
+                    AND c.delete_flag = 0
+                    AND c.start_date <= NOW() 
+                    AND c.end_date >= NOW() 
+                    AND (c.all_products_status = 1 OR cp.product_id = {$item['product_id']})"; // ตรวจสอบว่าคูปองสามารถใช้กับสินค้านี้ได้
 
     $coupon_result = $conn->query($coupon_query);
 
@@ -423,17 +463,16 @@ if (!function_exists('format_price_custom')) {
             <div class="checkout-card">
                 <div class="checkout-card-header">
                     <i class="fa-solid fa-truck-fast text-info"></i>
-                    <div class="checkout-card-title flex-grow-1">ตัวเลือกการจัดส่ง</div>
-                    <a href="javascript:void(0);" onclick="openShippingModal()" class="clickable-text-btn" style="font-size: 0.9rem;">เปลี่ยน</a>
+                    <div class="checkout-card-title flex-grow-1">ข้อมูลการจัดส่ง</div>
                 </div>
                 <div class="checkout-card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-1 font-weight-bold" id="shipping_methods_name_display"><?= $default_shipping_name ?></h6>
-                            <small class="text-muted">อิงตามน้ำหนักสินค้ารวม</small>
+                            <h6 class="mb-1 font-weight-bold"><?= $default_shipping_name ?></h6>
+                            <small class="text-muted">คำนวณอัตโนมัติจากเงื่อนไขสินค้า</small>
                         </div>
-                        <div class="font-weight-bold" id="shipping-cost-display-card">
-                            <span id="shipping-cost"><?= format_price_custom($default_shipping_cost, 2) ?> บาท</span>
+                        <div class="font-weight-bold">
+                            <span id="shipping-cost"><?= ($default_shipping_cost == 0) ? 'ฟรี' : format_price_custom($default_shipping_cost, 2) . ' บาท' ?></span>
                         </div>
                     </div>
                 </div>
@@ -529,54 +568,22 @@ if (!function_exists('format_price_custom')) {
             </div>
         </div>
     </div>
-    </div>
-
-    <div id="shippingModal" class="modal-backdrop-custom" style="display:none;">
-        <div class="shipping-modal-content">
-            <div class="shipping-modal-header">เลือกรูปแบบการจัดส่ง</div>
-            <div class="shipping-modal-body">
-                <?php if ($shipping_qry_all && $shipping_qry_all->num_rows > 0): ?>
-                    <?php while ($row = $shipping_qry_all->fetch_assoc()):
-                        $cost = floatval($row['cost']);
-                    ?>
-                        <div class="shipping-option"
-                            data-id="<?= $row['id'] ?>"
-                            data-name="<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>"
-                            data-cost="<?= $cost ?>"
-                            onclick="selectShipping(this)">
-
-                            <div class="d-flex justify-content-between align-items-center">
-                                <strong><?= $row['name'] ?></strong>
-                                <span class="font-weight-bold"><?= format_price_custom($cost, 2) ?> บาท</span>
-                            </div>
-                            <div class="desc text-muted small mt-1"><?= htmlspecialchars($row['description']) ?></div>
-                            <span class="checkmark">&#10003;</span>
-                        </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p class="text-center text-muted py-3">ไม่มีขนส่งที่รองรับน้ำหนักสินค้านี้</p>
-                <?php endif; ?>
-            </div>
-            <div class="shipping-modal-footer">
-                <button class="btn-cancel" onclick="closeShippingModal()">ยกเลิก</button>
-                <button class="btn-confirm" onclick="confirmShipping()">ยืนยัน</button>
-            </div>
-        </div>
-    </div>
 
 </section>
 <script>
+    var cartItems = <?= json_encode(array_values($cart_items)); ?>;
+    var cartTotal = parseFloat(<?= json_encode($cart_total) ?>) || 0;
+    var initialGrandTotal = <?= $grand_total; ?>; // ระวัง! ต้องคำนวณ grand_total ใน php ให้รวมค่าส่งใหม่ก่อนส่งมานะ
+
+    // [แก้ไข] รับค่าที่คำนวณจาก PHP มาตรงๆ เลย
+    var currentShippingCost = parseFloat(<?= $default_shipping_cost ?>);
+
     let appliedCoupon = {
         id: 0,
         amount: 0,
         type: null
     };
-    const cartTotal = parseFloat(<?= json_encode($cart_total) ?>) || 0;
     const appliedPromo = <?= json_encode($applied_promo) ?>;
-    const initialShippingCost = <?= $final_shipping_cost; ?>;
-
-    // --- ⬇️ 1. เพิ่มตัวแปรนี้เข้ามา ⬇️ ---
-    let currentShippingCost = initialShippingCost; // เริ่มต้นด้วยค่า default
 
     // ============================
     // JS: จัดการฟอร์มสั่งซื้อ
@@ -605,30 +612,6 @@ if (!function_exists('format_price_custom')) {
         });
     });
 
-    function openShippingModal() {
-        document.getElementById('shippingModal').style.display = 'flex';
-    }
-
-    function closeShippingModal() {
-        document.getElementById('shippingModal').style.display = 'none';
-    }
-
-    function confirmShipping() {
-        if (!selectedShipping) return;
-
-        document.getElementById('shipping_methods_id').value = selectedShipping.id;
-        document.getElementById('shipping_methods_name_display').innerText = selectedShipping.name;
-
-        // Update 2 จุด (ใน Card ซ้าย และ Summary ขวา)
-        document.getElementById('shipping-cost').innerText = formatPrice(selectedShipping.cost) + ' บาท';
-        document.getElementById('shipping-cost-summary').innerText = formatPrice(selectedShipping.cost); // Summary ขวา
-
-        currentShippingCost = selectedShipping.cost;
-        updateGrandTotal(selectedShipping.cost);
-        closeShippingModal();
-    }
-
-    let selectedShipping = null;
 
     function formatPrice(value) {
         if (isNaN(value)) return value;
@@ -671,6 +654,20 @@ if (!function_exists('format_price_custom')) {
         }
 
         const grandTotal = (cartTotal - promoDiscount - couponDiscount) + finalShippingCost;
+        let formattedTotal = grandTotal.toLocaleString('th-TH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        if (grandTotal % 1 === 0) formattedTotal = grandTotal.toLocaleString('th-TH', {
+            maximumFractionDigits: 0
+        });
+
+        document.getElementById('order-total-text').innerText = formattedTotal;
+        document.getElementById('order-vat-total').innerText = formattedTotal;
+
+        // Update Shipping Display ในส่วนสรุป (ขวามือ) ถ้ามีการเปลี่ยนแปลงจากคูปอง
+        let shipText = (finalShippingCost === 0) ? "ฟรี" : formatPrice(finalShippingCost) + " บาท";
+        document.getElementById('shipping-cost-summary').innerText = shipText;
 
         function updateOrderTotal(grandTotal) {
             let formattedTotal;
