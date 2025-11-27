@@ -333,7 +333,7 @@ $shipping_rates_json = json_encode($shipping_rates);
 								<label>ราคา <span class="text-danger">*</span></label>
 								<div class="input-group">
 									<div class="input-group-prepend">
-										<span class="input-group-text">บาท</span>
+										<span class="input-group-text">฿</span>
 									</div>
 									<input type="number" step="0.01" name="price" class="form-control" value="<?= isset($price) ? $price : '' ?>" required>
 								</div>
@@ -356,9 +356,9 @@ $shipping_rates_json = json_encode($shipping_rates);
 								<div class="input-group-prepend">
 									<span class="input-group-text bg-light border-right-0">ราคา</span>
 								</div>
-								<input type="number" step="0.01" name="price" id="price" class="form-control text-right border-left-0" value="<?= isset($price) ?>" required placeholder="0.00">
+								<input type="number" step="0.01" name="price" id="price" class="form-control text-right border-left-0" value="<?= isset($price) ? $price : '0.00' ?>" required placeholder="0.00">
 								<div class="input-group-append">
-									<span class="input-group-text bg-light">บาท</span>
+									<span class="input-group-text bg-light">฿</span>
 								</div>
 							</div>
 						</div>
@@ -386,7 +386,7 @@ $shipping_rates_json = json_encode($shipping_rates);
 									value="<?= isset($vat_price) ? ceil($vat_price) : '0' ?>"
 									readonly style="background-color: #e9ecef; cursor: not-allowed;">
 								<div class="input-group-append">
-									<span class="input-group-text bg-light">บาท</span>
+									<span class="input-group-text bg-light">฿</span>
 								</div>
 							</div>
 							<small class="form-text text-muted">
