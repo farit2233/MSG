@@ -313,7 +313,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
             $('.err-msg').remove();
             start_loader();
             $.ajax({
-                url: _base_url_ + "classes/Master.php?f=save_shipping_methods",
+                url: _base_url_ + "classes/Master.php?f=save_shipping_setting",
                 data: new FormData(this),
                 cache: false,
                 contentType: false,

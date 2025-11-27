@@ -62,9 +62,10 @@ while ($rt = $qry_total->fetch_assoc()) {
         font-size: 16px;
     }
 
+    /* แก้ไขสีปุ่ม Confirm ของ SweetAlert2 เป็นสีฟ้า */
     .swal2-confirm {
-        background-color: #28a745 !important;
-        border-color: #28a745 !important;
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
         color: white !important;
     }
 </style>
@@ -74,7 +75,7 @@ while ($rt = $qry_total->fetch_assoc()) {
         <div class="card-title">ตั้งค่าระบบจัดส่ง</div>
         <div class="card-tools">
             <a href="javascript:void(0)" id="reset_btn" class="btn btn-flat btn-dark">
-                <span class="fas fa-undo"></span> รีเซ็ตค่าเริ่มต้น (Factory Reset)
+                <span class="fas fa-undo"></span> รีเซ็ตค่าเริ่มต้น
             </a>
         </div>
     </div>
@@ -86,7 +87,7 @@ while ($rt = $qry_total->fetch_assoc()) {
 
             <div class="card card-outline card-dark rounded-0 mb-3">
                 <div class="card-header">
-                    <div class="card-title" style="font-size: 18px !important;">เปิด / ปิดระบบ</div>
+                    <div class="card-title" style="font-size: 18px !important;"><i class="fa-solid fa-gear"></i> เปิด / ปิดระบบ</div>
                 </div>
                 <div class="card-body">
                     <input type="hidden" name="rules_size" value="0">
@@ -129,7 +130,8 @@ while ($rt = $qry_total->fetch_assoc()) {
                             <div class="col-md-4">
                                 <div class="small text-muted mb-1">ใช้เมื่อไม่ตรงกับเงื่อนไขอื่น ๆ</div>
                                 <div class="input-group">
-                                    <input type="number" step="0.01" name="price_default" class="form-control" value="<?= isset($price_default) ? $price_default : 0 ?>" required>
+                                    <!-- แก้ไข: แปลงเป็น (float) เพื่อตัด .00 -->
+                                    <input type="number" step="0.01" name="price_default" class="form-control" value="<?= isset($price_default) ? (float)$price_default : 0 ?>" required>
                                     <div class="input-group-append">
                                         <span class="input-group-text">บาท</span>
                                     </div>
@@ -150,7 +152,8 @@ while ($rt = $qry_total->fetch_assoc()) {
                             <div class="col-md-4">
                                 <label>NORMAL (ปกติ)</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.01" name="N" class="form-control" value="<?= isset($N) ? $N : 0 ?>" required>
+                                    <!-- แก้ไข: แปลงเป็น (float) เพื่อตัด .00 -->
+                                    <input type="number" step="0.01" name="N" class="form-control" value="<?= isset($N) ? (float)$N : 0 ?>" required>
                                     <div class="input-group-append">
                                         <span class="input-group-text">บาท</span>
                                     </div>
@@ -159,7 +162,8 @@ while ($rt = $qry_total->fetch_assoc()) {
                             <div class="col-md-4">
                                 <label>L (ขนาดใหญ่)</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.01" name="L" class="form-control" value="<?= isset($L) ? $L : 0 ?>" required>
+                                    <!-- แก้ไข: แปลงเป็น (float) เพื่อตัด .00 -->
+                                    <input type="number" step="0.01" name="L" class="form-control" value="<?= isset($L) ? (float)$L : 0 ?>" required>
                                     <div class="input-group-append">
                                         <span class="input-group-text">บาท</span>
                                     </div>
@@ -168,7 +172,8 @@ while ($rt = $qry_total->fetch_assoc()) {
                             <div class="col-md-4">
                                 <label>XL (ขนาดพิเศษ)</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.01" name="XL" class="form-control" value="<?= isset($XL) ? $XL : 0 ?>" required>
+                                    <!-- แก้ไข: แปลงเป็น (float) เพื่อตัด .00 -->
+                                    <input type="number" step="0.01" name="XL" class="form-control" value="<?= isset($XL) ? (float)$XL : 0 ?>" required>
                                     <div class="input-group-append">
                                         <span class="input-group-text">บาท</span>
                                     </div>
@@ -202,24 +207,32 @@ while ($rt = $qry_total->fetch_assoc()) {
                             if (!empty($total_rules)):
                                 foreach ($total_rules as $rule):
                                     // คำนวณข้อความสำหรับแสดงผลตอนโหลดหน้าเว็บ
-                                    $min_show = number_format($rule['min_price'] * 1); // *1 เพื่อตัดทศนิยม 00 ออกถ้าไม่มีเศษ
+                                    $min_show = number_format($rule['min_price'] * 1);
                                     $max_show = ($rule['max_price'] > 0) ? number_format($rule['max_price'] * 1) : '∞';
+
+                                    // Logic แสดงข้อความ
                                     $ship_show = ($rule['shipping_price'] == 0) ? 'ฟรี' : number_format($rule['shipping_price'] * 1) . ' บาท';
                                     $desc_text = "ช่วง: {$min_show} - {$max_show} บาท → ค่าส่ง {$ship_show}";
+
+                                    // Logic Value: คูณ 1 หรือแปลง float เพื่อตัดทศนิยม
+                                    $val_min = $rule['min_price'] * 1;
+                                    $val_ship = ($rule['shipping_price'] > 0) ? ($rule['shipping_price'] * 1) : '';
+                                    $val_max = ($rule['max_price'] > 0) ? ($rule['max_price'] * 1) : '';
                             ?>
                                     <div class="price_total_row border rounded p-3 bg-light mb-3 position-relative">
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <label>ยอดขั้นต่ำ (บาท)</label>
-                                                <input type="number" step="0.01" name="min_price[]" class="form-control" value="<?= htmlspecialchars($rule['min_price']) ?>" required>
+                                                <!-- ใช้ $val_min ที่คูณ 1 แล้ว -->
+                                                <input type="number" step="0.01" name="min_price[]" class="form-control" value="<?= htmlspecialchars($val_min) ?>" required>
                                             </div>
                                             <div class="col-md-3">
                                                 <label>ยอดสูงสุด (บาท)</label>
-                                                <input type="number" step="0.01" name="max_price[]" class="form-control" value="<?= htmlspecialchars($rule['max_price']) ?>" placeholder="ไม่จำกัด">
+                                                <input type="number" step="0.01" name="max_price[]" class="form-control" value="<?= $val_max ?>" placeholder="ไม่จำกัด">
                                             </div>
                                             <div class="col-md-3">
                                                 <label>ค่าจัดส่ง (บาท)</label>
-                                                <input type="number" step="0.01" name="shipping_price[]" class="form-control" value="<?= htmlspecialchars($rule['shipping_price']) ?>" required>
+                                                <input type="number" step="0.01" name="shipping_price[]" class="form-control" value="<?= $val_ship ?>" placeholder="ส่งฟรี">
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="d-block text-light" style="user-select: none;">จัดการ</label>
@@ -239,6 +252,7 @@ while ($rt = $qry_total->fetch_assoc()) {
                                 <?php
                                 endforeach;
                             else:
+                                // กรณีไม่มีข้อมูลเลย ให้แสดงแถวแรกแบบว่าง
                                 ?>
                                 <div class="price_total_row border rounded p-3 bg-light mb-3 position-relative">
                                     <div class="row">
@@ -248,11 +262,11 @@ while ($rt = $qry_total->fetch_assoc()) {
                                         </div>
                                         <div class="col-md-3">
                                             <label>ยอดสูงสุด (บาท)</label>
-                                            <input type="number" step="0.01" name="max_price[]" class="form-control" value="" placeholder="เช่น 1000">
+                                            <input type="number" step="0.01" name="max_price[]" class="form-control" value="" placeholder="ไม่จำกัด">
                                         </div>
                                         <div class="col-md-3">
                                             <label>ค่าจัดส่ง (บาท)</label>
-                                            <input type="number" step="0.01" name="shipping_price[]" class="form-control" value="" placeholder="เช่น 50" required>
+                                            <input type="number" step="0.01" name="shipping_price[]" class="form-control" value="" placeholder="ส่งฟรี">
                                         </div>
                                         <div class="col-md-3">
                                             <label class="d-block text-light" style="user-select: none;">จัดการ</label>
@@ -321,17 +335,17 @@ while ($rt = $qry_total->fetch_assoc()) {
                     confirmButtonText: 'ยืนยัน <i class="fa fa-check"></i>',
                     reverseButtons: true
                 }).then((result) => {
-                    if (result.isConfirmed) window.location.href = './?page=shipping_setting';
+                    if (result.isConfirmed) window.location.href = '<?php echo base_url ?>admin';
                 });
             } else {
-                window.location.href = './?page=shipping_setting';
+                window.location.href = '<?php echo base_url ?>admin';
             }
         });
 
-        // --- ส่วนที่ 2: JavaScript UI กฎตามยอดรวม (Updated for shipping_total) ---
+        // --- ส่วนที่ 2: JavaScript UI กฎตามยอดรวม (Updated) ---
         const SQL_MAX_LIMIT = 99999999.99;
 
-        // Template สำหรับแถวใหม่ (เพิ่ม max attribute ใน input)
+        // Template สำหรับแถวใหม่ (ปรับปรุง shipping_price: เอา required ออก, ใส่ placeholder)
         const newRowTemplate = `
         <div class="price_total_row border rounded p-3 bg-light mb-3 position-relative">
             <div class="row">
@@ -341,11 +355,11 @@ while ($rt = $qry_total->fetch_assoc()) {
                 </div>
                 <div class="col-md-3">
                     <label>ยอดสูงสุด (บาท)</label>
-                    <input type="number" step="0.01" name="max_price[]" class="form-control" placeholder="ปล่อยว่าง = ไม่จำกัด" max="${SQL_MAX_LIMIT}">
+                    <input type="number" step="0.01" name="max_price[]" class="form-control" placeholder="ไม่จำกัด" max="${SQL_MAX_LIMIT}">
                 </div>
                 <div class="col-md-3">
                     <label>ค่าจัดส่ง (บาท)</label>
-                    <input type="number" step="0.01" name="shipping_price[]" class="form-control" placeholder="เช่น 50" required>
+                    <input type="number" step="0.01" name="shipping_price[]" class="form-control" placeholder="ส่งฟรี">
                 </div>
                 <div class="col-md-3">
                     <label class="d-block text-light" style="user-select: none;">จัดการ</label>
@@ -366,18 +380,13 @@ while ($rt = $qry_total->fetch_assoc()) {
         // ฟังก์ชันคำนวณข้อความสรุป และดักค่าเกิน SQL
         function updateRuleText(row) {
             let minVal = parseFloat(row.find('input[name="min_price[]"]').val()) || 0;
-            let maxInputObj = row.find('input[name="max_price[]"]'); // เอา Object input มา
+            let maxInputObj = row.find('input[name="max_price[]"]');
             let maxVal = parseFloat(maxInputObj.val());
-            let shipVal = parseFloat(row.find('input[name="shipping_price[]"]').val()) || 0;
 
             // --- Logic ดักค่าเกิน SQL ---
-            // ถ้าค่ามากกว่าขีดจำกัด SQL ให้เคลียร์ค่าทิ้ง (กลายเป็นว่าง = ไม่จำกัด)
             if (maxVal > SQL_MAX_LIMIT) {
-                maxInputObj.val(''); // เคลียร์ค่าใน input
-                maxVal = NaN; // เซ็ตให้เป็น NaN เพื่อเข้าเงื่อนไขด้านล่าง
-
-                // (Optional) อาจจะแจ้งเตือนผู้ใช้เล็กน้อย หรือปล่อยให้ Text ด้านล่างเปลี่ยนเป็น ∞ เองก็ได้
-                // alert_toast("เกินขีดจำกัดระบบ ปรับเป็นไม่จำกัด", 'warning'); 
+                maxInputObj.val('');
+                maxVal = NaN;
             }
 
             // แปลง max: ถ้าว่าง, 0 หรือ NaN ให้เป็น ∞
@@ -386,7 +395,11 @@ while ($rt = $qry_total->fetch_assoc()) {
                 maximumFractionDigits: 2
             });
 
-            // แปลงค่าส่ง: ถ้า 0 ให้เป็น "ฟรี"
+            // --- Logic ค่าส่ง (ใหม่) ---
+            // ถ้า input เป็นค่าว่าง หรือ 0 ให้ถือว่าเป็น "ฟรี"
+            let shipInputVal = row.find('input[name="shipping_price[]"]').val();
+            let shipVal = (shipInputVal === '' || isNaN(parseFloat(shipInputVal))) ? 0 : parseFloat(shipInputVal);
+
             let shipText = (shipVal === 0) ? 'ฟรี' : shipVal.toLocaleString(undefined, {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 2
@@ -417,33 +430,53 @@ while ($rt = $qry_total->fetch_assoc()) {
         $('#reset_btn').click(function() {
             Swal.fire({
                 title: 'คืนค่าเริ่มต้น?',
-                text: "ค่าทั้งหมดจะถูกเปลี่ยนเป็นค่าตั้งต้นของระบบ (40, 60, 80)",
+                text: "ค่าทั้งหมดจะถูกเปลี่ยนเป็นค่าตั้งต้นและบันทึกทันที", // แจ้ง User ว่าจะบันทึกทันที
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                cancelButtonText: '<i class="fa fa-times"></i> ยกเลิก',
+                confirmButtonText: 'ยืนยัน <i class="fa fa-check"></i>',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // 1. ตั้งค่า Switch
                     $('#rules_size').prop('checked', true);
                     $('#rules_total').prop('checked', true);
-
-                    // 2. ตั้งค่า Default
                     $('input[name="price_default"]').val(80.00);
-
-                    // 3. ตั้งค่าขนาดสินค้า
                     $('input[name="N"]').val(40.00);
                     $('input[name="L"]').val(60.00);
                     $('input[name="XL"]').val(80.00);
 
-                    // 4. ล้างค่ากฎตามยอดรวม
+                    // รีเซ็ตตารางกฎ (3 ข้อตามที่ขอ)
                     $('#price_total_group').empty();
-                    $('#price_total_group').append(newRowTemplate);
 
-                    alert_toast("รีเซ็ตค่าเรียบร้อย กรุณากดปุ่มบันทึก", 'warning');
-                    formChanged = true;
+                    const defaultRules = [{
+                            min: 0,
+                            max: 499,
+                            ship: 50
+                        },
+                        {
+                            min: 500,
+                            max: 999,
+                            ship: 20
+                        },
+                        {
+                            min: 1000,
+                            max: '',
+                            ship: ''
+                        }
+                    ];
+
+                    defaultRules.forEach(rule => {
+                        let newRow = $(newRowTemplate);
+                        newRow.find('input[name="min_price[]"]').val(rule.min);
+                        newRow.find('input[name="max_price[]"]').val(rule.max);
+                        newRow.find('input[name="shipping_price[]"]').val(rule.ship);
+                        updateRuleText(newRow);
+                        $('#price_total_group').append(newRow);
+                    });
+
+                    // --- สั่งบันทึกทันที (Auto Save) ---
+                    // สั่ง submit form โปรแกรมจะวิ่งไปที่ handler ด้านล่างและทำการ save ajax ให้เลย
+                    $('#shipping-form').submit();
                 }
             });
         });
@@ -455,8 +488,7 @@ while ($rt = $qry_total->fetch_assoc()) {
             $('.err-msg').remove();
             start_loader();
             $.ajax({
-                // *** อย่าลืมตรวจสอบ Backend ให้รองรับ min_price[], max_price[], shipping_price[] นะครับ ***
-                url: _base_url_ + "classes/Master.php?f=save_shipping_methods",
+                url: _base_url_ + "classes/Master.php?f=save_shipping_setting",
                 data: new FormData(this),
                 cache: false,
                 contentType: false,

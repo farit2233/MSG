@@ -2120,124 +2120,112 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
-	function save_shipping_methods()
+	function save_shipping_setting()
 	{
 		header('Content-Type: application/json; charset=utf-8');
 
+		// 1. ตรวจสอบสิทธิ์ (Auth Check)
 		if (!isset($_SESSION['userdata']) || $_SESSION['userdata']['type'] != 1) {
 			http_response_code(403);
 			echo json_encode(['status' => 'forbidden', 'message' => 'ไม่มีสิทธิ์ใช้งาน']);
 			exit;
 		}
 
-		$id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+		// 2. รับค่าจาก Form
+		$id = isset($_POST['id']) ? intval($_POST['id']) : 1;
+		$price_default = isset($_POST['price_default']) ? floatval($_POST['price_default']) : 0;
+		$N = isset($_POST['N']) ? floatval($_POST['N']) : 0;
+		$L = isset($_POST['L']) ? floatval($_POST['L']) : 0;
+		$XL = isset($_POST['XL']) ? floatval($_POST['XL']) : 0;
 
-		// --- [REMOVED] ---
-		// $provider_id = intval($_POST['provider_id'] ?? 0); 
-		// -----------------
-
-		$name = $this->conn->real_escape_string($_POST['display_name'] ?? '');
-		$description = $this->conn->real_escape_string($_POST['description'] ?? '');
-		$cost = floatval($_POST['cost'] ?? 0);
-		$cod_enabled = ($_POST['cod_enabled'] == '1') ? 1 : 0;
-		$status = ($_POST['status'] == '1') ? 1 : 0;
-
-		// --- [MODIFIED] ลบการตรวจสอบ provider_id ---
-		if (!$name) {
-			echo json_encode(['status' => 'failed', 'msg' => 'กรุณากรอกข้อมูลให้ครบ']);
-			exit;
-		}
-		// ------------------------------------
+		// รับค่า Checkbox
+		$rules_size = isset($_POST['rules_size']) ? intval($_POST['rules_size']) : 0;
+		$rules_total = isset($_POST['rules_total']) ? intval($_POST['rules_total']) : 0;
 
 		$this->conn->begin_transaction();
 		try {
-			// ส่วนนี้เหมือนเดิม: บันทึกข้อมูลหลักของ shipping_methods
-			if ($id > 0) {
-				// --- [MODIFIED] ลบ provider_id ออกจาก UPDATE ---
-				$sql = "UPDATE `shipping_methods` SET 
-                name = '{$name}', 
-                description = '{$description}',
-                cost = '{$cost}',
-                cod_enabled = '{$cod_enabled}',
-                status = '{$status}'
-                WHERE id = {$id}";
-				// ------------------------------------------
+			// ---------------------------------------------------------
+			// ส่วนที่ 1: จัดการตาราง `shipping_system` (ค่า Config หลัก)
+			// ---------------------------------------------------------
+
+			$check_qry = $this->conn->query("SELECT id FROM shipping_system WHERE id = {$id}");
+
+			if ($check_qry->num_rows > 0) {
+				// UPDATE
+				$stmt = $this->conn->prepare("UPDATE `shipping_system` SET 
+                    price_default = ?, 
+                    N = ?, 
+                    L = ?, 
+                    XL = ?, 
+                    rules_size = ?, 
+                    rules_total = ? 
+                    WHERE id = ?");
+				$stmt->bind_param("ddddiii", $price_default, $N, $L, $XL, $rules_size, $rules_total, $id);
 			} else {
-				// --- [MODIFIED] ลบ provider_id ออกจาก INSERT ---
-				$sql = "INSERT INTO `shipping_methods` 
-                (name, description, cost, cod_enabled, status)
-                VALUES 
-                ('{$name}', '{$description}', '{$cost}', '{$cod_enabled}', '{$status}')";
-				// ------------------------------------------
+				// INSERT
+				$stmt = $this->conn->prepare("INSERT INTO `shipping_system` 
+                    (price_default, N, L, XL, rules_size, rules_total, id) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)");
+				$stmt->bind_param("ddddiii", $price_default, $N, $L, $XL, $rules_size, $rules_total, $id);
 			}
 
-			if (!$this->conn->query($sql)) {
-				throw new Exception($this->conn->error);
+			if (!$stmt->execute()) {
+				throw new Exception("Error saving system settings: " . $stmt->error);
+			}
+			$stmt->close();
+
+			// ---------------------------------------------------------
+			// ส่วนที่ 2: จัดการตาราง `shipping_total` (กฎราคาตามยอดซื้อ)
+			// ---------------------------------------------------------
+
+			// ลบข้อมูลเก่าทั้งหมดก่อน
+			if (!$this->conn->query("DELETE FROM `shipping_total`")) {
+				throw new Exception("Error clearing old rules: " . $this->conn->error);
 			}
 
-			$shipping_methods_id = ($id > 0) ? $id : $this->conn->insert_id;
+			if (!empty($_POST['min_price']) && is_array($_POST['min_price'])) {
+				$min_arr = $_POST['min_price'];
+				$max_arr = $_POST['max_price'];
+				$price_arr = $_POST['shipping_price'];
 
-			// --- [START] แก้ไขส่วนการบันทึกราคาตามน้ำหนัก (UPSERT Logic) ---
-			// (ส่วนนี้ไม่จำเป็นต้องแก้ไข เพราะใช้ shipping_methods_id อยู่แล้ว)
+				$stmt_insert = $this->conn->prepare("INSERT INTO `shipping_total` 
+                    (min_price, max_price, shipping_price, free_shipping) 
+                    VALUES (?, ?, ?, ?)");
 
-			if ($id > 0) {
-				$this->conn->query("UPDATE `shipping_prices` SET status = 0 WHERE shipping_methods_id = {$shipping_methods_id}");
-			}
+				for ($i = 0; $i < count($min_arr); $i++) {
+					$min = floatval($min_arr[$i]);
+					$price = floatval($price_arr[$i]);
+					$max_val = $max_arr[$i];
 
-			$stmt_check = $this->conn->prepare("SELECT id FROM shipping_prices WHERE shipping_methods_id = ? AND min_weight = ? AND max_weight = ?");
-			$stmt_update = $this->conn->prepare("UPDATE shipping_prices SET price = ?, status = 1 WHERE id = ?");
-			$stmt_insert = $this->conn->prepare("INSERT INTO shipping_prices (shipping_methods_id, min_weight, max_weight, price, status)
-                                                 VALUES (?, ?, ?, ?, 1)");
-
-
-			if (!empty($_POST['weight_from']) && !empty($_POST['weight_to']) && !empty($_POST['price'])) {
-				$weight_from = $_POST['weight_from'];
-				$weight_to = $_POST['weight_to'];
-				$price = $_POST['price'];
-
-				for ($i = 0; $i < count($weight_from); $i++) {
-					$w_from = intval($weight_from[$i]);
-					$w_to = intval($weight_to[$i]);
-					$p = floatval($price[$i]);
-
-					if ($w_from >= $w_to) {
-						throw new Exception('น้ำหนักเริ่มต้นต้องน้อยกว่าน้ำหนักสูงสุด');
-					}
-					if ($p < 0) {
-						throw new Exception('ราคาต้องไม่ติดลบ');
-					}
-
-					$existing_id = null;
-					if ($id > 0) {
-						$stmt_check->bind_param('iii', $shipping_methods_id, $w_from, $w_to);
-						$stmt_check->execute();
-						$result = $stmt_check->get_result();
-						if ($result->num_rows > 0) {
-							$existing_id = $result->fetch_assoc()['id'];
-						}
-					}
-
-					if ($existing_id) {
-						$stmt_update->bind_param('di', $p, $existing_id);
-						if (!$stmt_update->execute()) {
-							throw new Exception('ไม่สามารถอัปเดตข้อมูลราคาจัดส่งเดิม: ' . $stmt_update->error);
-						}
+					// --- แก้ไขจุดที่ 1: จัดการ Max Price ---
+					// ถ้าเป็นค่าว่าง, NULL หรือ 0 ให้ถือว่าเป็น NULL (ไม่จำกัด)
+					if ($max_val === '' || $max_val === null || floatval($max_val) == 0) {
+						$max = null;
 					} else {
-						$stmt_insert->bind_param('iiid', $shipping_methods_id, $w_from, $w_to, $p);
-						if (!$stmt_insert->execute()) {
-							throw new Exception('ไม่สามารถบันทึกข้อมูลราคาจัดส่งใหม่: ' . $stmt_insert->error);
-						}
+						$max = floatval($max_val);
+					}
+
+					// --- แก้ไขจุดที่ 2: จัดการ Free Shipping ---
+					// ถ้าค่าส่งเป็น 0 ให้ free_shipping = 1 เสมอ
+					$free_shipping = ($price == 0) ? 1 : 0;
+
+					// --- แก้ไขจุดที่ 3: Validation (ดักราคา) ---
+					// ตรวจสอบเฉพาะกรณีที่ $max มีค่าเป็นตัวเลข (ไม่เป็น NULL)
+					// ถ้า $max เป็น NULL (ไม่จำกัด/ใส่ 0) จะข้ามเงื่อนไขนี้ไปเลย ทำให้ไม่ติด Error
+					if (!is_null($max) && $min >= $max) {
+						throw new Exception("ช่วงราคาไม่ถูกต้อง: ยอดขั้นต่ำ ($min) ต้องน้อยกว่ายอดสูงสุด ($max)");
+					}
+
+					$stmt_insert->bind_param("dddi", $min, $max, $price, $free_shipping);
+
+					if (!$stmt_insert->execute()) {
+						throw new Exception("Error inserting rule row {$i}: " . $stmt_insert->error);
 					}
 				}
+				$stmt_insert->close();
 			}
 
-			$stmt_check->close();
-			$stmt_update->close();
-			$stmt_insert->close();
-
-			// --- [END] แก้ลขส่วนการบันทึกราคาตามน้ำหนัก ---
-
-
+			// Commit Transaction
 			$this->conn->commit();
 			echo json_encode(['status' => 'success']);
 		} catch (Exception $e) {
@@ -3064,8 +3052,8 @@ switch ($action) {
 			echo $Master->log_promotion_usage($promotion_id, $customer_id, $oid, $promotion_discount, count($cart_data));
 		}
 		break;
-	case 'save_shipping_methods':
-		echo $Master->save_shipping_methods();
+	case 'save_shipping_setting':
+		echo $Master->save_shipping_setting();
 		break;
 	case 'delete_order':
 		echo $Master->delete_order();
