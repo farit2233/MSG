@@ -43,6 +43,21 @@ if (isset($id)) {
 		$gallery_images[] = $row;
 	}
 }
+
+$shipping_rates = [
+	'N' => 0,
+	'L' => 0,
+	'XL' => 0
+];
+$ship_q = $conn->query("SELECT * FROM shipping_system LIMIT 1");
+if ($ship_q && $ship_q->num_rows > 0) {
+	$ship_row = $ship_q->fetch_assoc();
+	$shipping_rates['N'] = floatval($ship_row['N']);
+	$shipping_rates['L'] = floatval($ship_row['L']);
+	$shipping_rates['XL'] = floatval($ship_row['XL']);
+}
+// แปลงเป็น JSON เพื่อส่งให้ JavaScript ใช้
+$shipping_rates_json = json_encode($shipping_rates);
 ?>
 <style>
 	#cimg {
@@ -114,6 +129,67 @@ if (isset($id)) {
 		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 	}
 
+	.swal2-confirm {
+		background-color: #28a745 !important;
+		/* สีเขียว */
+		border-color: #28a745 !important;
+		/* สีเขียว */
+		color: white !important;
+		/* สีตัวอักษรเป็นขาว */
+	}
+
+	.swal2-confirm:hover {
+		background-color: #218838 !important;
+		/* สีเขียวเข้ม */
+		border-color: #1e7e34 !important;
+		/* สีเขียวเข้ม */
+	}
+
+	/* 1. ปรับกล่องให้สูงเท่า Input ปกติของ Bootstrap (ประมาณ 38px) */
+	.select2-container .select2-selection--single {
+		height: calc(2.25rem + 2px) !important;
+		padding: 0.375rem 0.75rem;
+		/* ระยะขอบใน */
+		border: 1px solid #ced4da;
+		display: flex !important;
+		/* ใช้ Flexbox เพื่อจัดกึ่งกลาง */
+		align-items: center !important;
+		/* จัดกึ่งกลางแนวตั้ง */
+	}
+
+	/* 2. จัดตัวหนังสือข้างในให้อยู่ตรงกลางเป๊ะๆ */
+	.select2-container .select2-selection--single .select2-selection__rendered {
+		padding-left: 0 !important;
+		/* ลบ padding ซ้ายออกเพราะกล่องแม่มีแล้ว */
+		padding-right: 0 !important;
+		line-height: normal !important;
+		/* รีเซ็ต line-height */
+		margin-top: 0 !important;
+		/* ลบ margin ที่อาจจะดันขึ้น */
+		color: #495057;
+		/* สีตัวอักษรให้เหมือน Bootstrap */
+		width: 100%;
+		/* ให้กว้างเต็ม */
+	}
+
+	/* 3. จัดลูกศร (Arrow) ให้อยู่ตรงกลาง */
+	.select2-container--default .select2-selection--single .select2-selection__arrow {
+		height: 100% !important;
+		/* สูงเต็มกล่อง */
+		top: 0 !important;
+		right: 5px !important;
+		display: flex !important;
+		align-items: center !important;
+		/* จัดลูกศรให้อยู่กลางแนวตั้ง */
+		justify-content: center;
+	}
+
+	/* 4. ปรับขนาดของตัว Select2 ให้เต็มกรอบ 100% */
+	.select2-container {
+		width: 100% !important;
+		flex: 1 1 auto;
+	}
+
 	/* กำหนดสไตล์สำหรับจอมือถือ (ความกว้างน้อยกว่า 768px) */
 	@media screen and (max-width: 768px) {
 
@@ -172,22 +248,6 @@ if (isset($id)) {
 			border-bottom: 0;
 		}
 	}
-
-	.swal2-confirm {
-		background-color: #28a745 !important;
-		/* สีเขียว */
-		border-color: #28a745 !important;
-		/* สีเขียว */
-		color: white !important;
-		/* สีตัวอักษรเป็นขาว */
-	}
-
-	.swal2-confirm:hover {
-		background-color: #218838 !important;
-		/* สีเขียวเข้ม */
-		border-color: #1e7e34 !important;
-		/* สีเขียวเข้ม */
-	}
 </style>
 <div class="card card-outline card-orange rounded-0">
 	<div class="card-header">
@@ -243,11 +303,11 @@ if (isset($id)) {
 				</div>
 				<div class="card-body">
 					<div class="form-row">
-						<div class="form-group col-md-6">
+						<div class="form-group col-md-4">
 							<label>ชื่อสินค้า <span class="text-danger">*</span></label>
 							<input type="text" name="name" class="form-control" required value="<?= isset($name) ? $name : '' ?>">
 						</div>
-						<div class="form-group col-md-3">
+						<div class="form-group col-md-4">
 							<label>หมวดหมู่สินค้า <span class="text-danger">*</span></label>
 							<select name="category_id" class="form-control select2" required>
 								<option value="">-- เลือกหมวดหมู่ --</option>
@@ -257,7 +317,7 @@ if (isset($id)) {
 								<?php endwhile; ?>
 							</select>
 						</div>
-						<div class="form-group col-md-3">
+						<div class="form-group col-md-4">
 							<label>แบรนด์ / ยี่ห้อ</label>
 							<input type="text" name="brand" class="form-control" value="<?= isset($brand) ? $brand : '' ?>">
 						</div>
@@ -273,7 +333,7 @@ if (isset($id)) {
 								<label>ราคา <span class="text-danger">*</span></label>
 								<div class="input-group">
 									<div class="input-group-prepend">
-										<span class="input-group-text">฿</span>
+										<span class="input-group-text">บาท</span>
 									</div>
 									<input type="number" step="0.01" name="price" class="form-control" value="<?= isset($price) ? $price : '' ?>" required>
 								</div>
@@ -288,43 +348,50 @@ if (isset($id)) {
 					<div class="card-title">ราคาและภาษี</div>
 				</div>
 				<div class="card-body">
-					<div class="row">
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>ราคา (ไม่รวม VAT) <span class="text-danger">*</span></label>
-								<div class="input-group">
-									<div class="input-group-prepend">
-										<span class="input-group-text">฿</span>
-									</div>
-									<input type="number" step="0.01" name="price" class="form-control" value="<?= isset($price) ? $price : '0.00' ?>" required>
+					<label class="control-label">การกำหนดราคา (Price Settings)</label>
+					<div class="form-row">
+						<div class="form-group col-md-4">
+							<small class="text-muted">ราคา (ไม่รวม VAT) <span class="text-danger">*</span></small>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text bg-light border-right-0">ราคา</span>
+								</div>
+								<input type="number" step="0.01" name="price" id="price" class="form-control text-right border-left-0" value="<?= isset($price) ?>" required placeholder="0.00">
+								<div class="input-group-append">
+									<span class="input-group-text bg-light">บาท</span>
 								</div>
 							</div>
 						</div>
 
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>ภาษี VAT <span class="text-danger">*</span></label>
-								<div class="input-group">
-									<input type="number" step="1" max="100" name="vat_percent" class="form-control" value="<?= isset($vat_percent) ? $vat_percent : '7' ?>" required>
-									<div class="input-group-append">
-										<span class="input-group-text">%</span>
-									</div>
+						<div class="form-group col-md-4">
+							<small class="text-muted">ภาษี VAT (%) <span class="text-danger">*</span></small>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text bg-light border-right-0">VAT</span>
+								</div>
+								<input type="number" step="1" max="100" name="vat_percent" id="vat_percent" class="form-control text-right border-left-0" value="<?= isset($vat_percent) ? $vat_percent : '7' ?>" required>
+								<div class="input-group-append">
+									<span class="input-group-text bg-light">%</span>
 								</div>
 							</div>
 						</div>
 
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>ราคารวม VAT</label>
-								<div class="input-group">
-									<div class="input-group-prepend">
-										<span class="input-group-text">฿</span>
-									</div>
-									<input type="text" class="form-control" name="vat_price" id="vat_price"
-										value="<?= isset($vat_price) ? ceil($vat_price) : '0' ?>"
-										readonly style="background-color: #e9ecef;">
+						<div class="form-group col-md-4">
+							<small class="text-muted">ราคารวม VAT (Net Price)</small>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text bg-light border-right-0">รวม</span>
+								</div>
+								<input type="text" name="vat_price" id="vat_price" class="form-control text-right border-left-0"
+									value="<?= isset($vat_price) ? ceil($vat_price) : '0' ?>"
+									readonly style="background-color: #e9ecef; cursor: not-allowed;">
+								<div class="input-group-append">
+									<span class="input-group-text bg-light">บาท</span>
 								</div>
 							</div>
+							<small class="form-text text-muted">
+								<i class="fa fa-info-circle"></i> ราคารวม (VAT) จะคำนวณอัตโนมัติตามราคาสินค้ากับเปอร์เซ็นต์ที่กรอก
+							</small>
 						</div>
 					</div>
 				</div>
@@ -394,92 +461,92 @@ if (isset($id)) {
 					<div class="card-title">การจัดส่ง</div>
 				</div>
 				<div class="card-body">
-					<div class="form-row">
-						<div class="form-group col-md-6">
-							<label>น้ำหนัก (กรัม) <span class="text-danger">*</span></label>
-							<div class="input-group">
-								<input type="number" step="any" min="0" name="product_weight" class="form-control" value="<?= isset($product_weight) ? $product_weight : '' ?>" required>
-								<div class="input-group-append">
-									<span class="input-group-text">g</span>
+					<div class="form-group">
+						<label class="control-label">ข้อมูลสำหรับการจัดส่ง (ขนาดและน้ำหนัก)</label>
+						<div class="form-row">
+							<div class="form-group col-md-3">
+								<small class="text-muted">ความกว้าง (Width)</small>
+								<div class="input-group">
+									<input type="number" step="0.01" name="product_width" id="product_width" value="<?php echo isset($product_width) ? $product_width : ''; ?>" class="form-control" placeholder="0.00">
+									<div class="input-group-append">
+										<span class="input-group-text bg-light">ซม.</span>
+									</div>
 								</div>
 							</div>
-						</div>
-						<div class="form-group col-md-6">
-							<label>ขนาดพัสดุ (กว้าง x ยาว x สูง)</label>
-							<div class="form-row">
-								<div class="col"><input type="number" step="any" name="product_width" class="form-control" placeholder="กว้าง" value="<?= isset($product_width) ? $product_width : '' ?>"></div>
-								<div class="col"><input type="number" step="any" name="product_length" class="form-control" placeholder="ยาว" value="<?= isset($product_length) ? $product_length : '' ?>"></div>
-								<div class="input-group col">
-									<input type="number" step="any" name="product_height" class="form-control" placeholder="สูง" value="<?= isset($product_height) ? $product_height : '' ?>">
+
+							<div class="form-group col-md-3">
+								<small class="text-muted">ความยาว (Length)</small>
+								<div class="input-group">
+									<input type="number" step="0.01" name="product_length" id="product_length" value="<?php echo isset($product_length) ? $product_length : ''; ?>" class="form-control" placeholder="0.00">
 									<div class="input-group-append">
-										<span class="input-group-text">cm</span>
+										<span class="input-group-text bg-light">cm.</span>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group col-md-3">
+								<small class="text-muted">ความสูง (Height)</small>
+								<div class="input-group">
+									<input type="number" step="0.01" name="product_height" id="product_height" value="<?php echo isset($product_height) ? $product_height : ''; ?>" class="form-control" placeholder="0.00">
+									<div class="input-group-append">
+										<span class="input-group-text bg-light">cm.</span>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group col-md-3">
+								<small class="text-muted">น้ำหนัก (Weight)</small>
+								<div class="input-group">
+									<input type="number" step="0.01" name="product_weight" id="product_weight" value="<?php echo isset($product_weight) ? $product_weight : ''; ?>" class="form-control" placeholder="0.00">
+									<div class="input-group-append">
+										<span class="input-group-text bg-light">g</span>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-
 					<hr>
-					<h5>ราคาขนส่ง</h5>
-					<div class="table-responsive">
-						<table class="table table-bordered">
-							<thead class="thead-light">
-								<tr>
-									<th>ชื่อขนส่ง</th>
-									<th>ราคาขนส่งคงที่</th>
-									<th>ราคาขนส่งตามขนาด</th>
-								</tr>
-							</thead>
-							<tbody>
+					<div class="form-row">
+						<div class="form-group col-md-4">
+							<label for="product_size" class="control-label">เลือกขนาดสินค้า <span class="text-danger">*</span></label>
+							<select name="product_size" id="product_size" class="form-control select2" required>
+								<option value="">-- เลือกขนาด --</option>
 								<?php
-								// 1) เตรียมน้ำหนักจริง
-								$product_weight = isset($product_weight) ? (float)$product_weight : 0;
+								$current_size = isset($product_size) ? $product_size : '';
 
-								// 2) วนขนส่งทั้งหมด
-								$shippings = $conn->query("SELECT `id`, `name`,`cost` FROM `shipping_methods` WHERE delete_flag = 0 AND status = 1");
+								// สร้าง Array จับคู่: "ค่าที่จะส่งเข้า DB" => "คำที่จะโชว์หน้าเว็บ"
+								$size_options = [
+									'N'  => 'NORMAL',
+									'L'  => 'L',
+									'XL' => 'XL'
+								];
 
-								$matched_shipping_price_id = null; // จะเก็บ id ช่วงราคาที่ match จริง
-
-								while ($row = $shippings->fetch_assoc()):
-									$method_id = $row['id'];
-
-									// หา rate ตามช่วงน้ำหนัก
-									$qry = $conn->query("SELECT * FROM shipping_prices 
-									WHERE shipping_methods_id = {$method_id} 
-									AND min_weight <= {$product_weight} 
-									AND max_weight >= {$product_weight}
-									ORDER BY min_weight ASC LIMIT 1");
-
-									$matched_row = $qry && $qry->num_rows ? $qry->fetch_assoc() : null;
-
-									// ถ้าเจอช่วงแรก เอา id เก็บไว้
-									if ($matched_row && !$matched_shipping_price_id) {
-										$matched_shipping_price_id = $matched_row['id'];
-									}
-
+								foreach ($size_options as $db_val => $display_text):
 								?>
-									<tr data-method-id="<?= $row['id'] ?>">
+									<option value="<?= $db_val ?>" <?= ($current_size == $db_val) ? 'selected' : '' ?>>
+										<?= $display_text ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</div>
 
-										<td data-label="ชื่อขนส่ง">
-											<h6><?= $row['name'] ?></h6>
-										</td>
+						<div class="form-group col-md-4">
+							<label class="control-label">ราคาค่าส่ง (โดยประมาณ)</label>
 
-										<td data-label="ราคาขนส่งคงที่">
-											<input type="text" class="form-control" value="<?= number_format($row['cost'], 2) ?> บาท" readonly>
-										</td>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text bg-light border-right-0">ค่าส่ง</span>
+								</div>
+								<input type="text" id="shipping_cost_display" class="form-control bg-white border-left-0" readonly value="0">
+								<div class="input-group-append">
+									<span class="input-group-text bg-light">บาท</span>
+								</div>
+							</div>
 
-										<td data-label="ราคาขนส่งตามขนาด">
-											<input type="text" class="form-control dynamic-shipping"
-												value="<?= $matched_row ? "ช่วง {$matched_row['min_weight']}-{$matched_row['max_weight']} g | " . number_format($matched_row['price'], 2) . " บาท" : "น้ำหนักสินค้าสูงเกินขีดจำกัด" ?>"
-												readonly>
-											<div class="weight-error text-danger" style="display: none;"></div>
-										</td>
-
-									</tr>
-								<?php endwhile; ?>
-							</tbody>
-
-						</table>
+							<small class="form-text text-muted">
+								<i class="fa fa-info-circle"></i> ราคาจัดส่งจะคำนวณอัตโนมัติตามขนาดที่เลือก
+							</small>
+						</div>
 					</div>
 					<div class="form-check">
 						<input type="checkbox" name="slow_prepare" id="slow_prepare" class="form-check-input" <?= isset($slow_prepare) && $slow_prepare ? 'checked' : '' ?>>
@@ -508,8 +575,30 @@ if (isset($id)) {
 	</form>
 </div>
 
-
 <script>
+	//product size
+	const shippingRates = <?= $shipping_rates_json ?>;
+
+	// 2. ฟังก์ชันอัปเดตราคา
+	function updateShippingCost() {
+		const selectedSize = $('#product_size').val();
+		const costDisplay = $('#shipping_cost_display');
+
+		if (selectedSize && shippingRates[selectedSize] !== undefined) {
+			// แสดงราคาตามขนาดที่เลือก
+			costDisplay.val(shippingRates[selectedSize]);
+		} else {
+			// ถ้าไม่เลือก หรือค่าไม่ถูกต้อง
+			costDisplay.val(0);
+		}
+	}
+
+	// 3. ผูก Event เมื่อเปลี่ยนค่า Dropdown
+	$('#product_size').on('change', updateShippingCost);
+
+	// 4. เรียกทำงานครั้งแรกตอนโหลดหน้า (กรณีเป็นการแก้ไขสินค้า)
+	updateShippingCost();
+
 	// CHANGE 1: สร้าง Array เพื่อเก็บไฟล์ที่เลือกไว้จริงๆ
 	let galleryFiles = [];
 
@@ -607,68 +696,19 @@ if (isset($id)) {
 		$('#final-price-display').text(finalPrice + ' บาท'); // แสดงผล
 	}
 
-
-	function updateShippingPrices(weight) {
-		const tbody = $('table tbody');
-		let isWeightValid = true; // ตัวแปรเช็คว่าถูกต้องไหม
-
-		tbody.find('tr').each(function() {
-			const row = $(this);
-			const methodId = row.data('method-id');
-			let found = false;
-
-			// เช็คว่า weight ตรงกับช่วงขนส่งไหน
-			if (SHIPPING_PRICES[methodId]) {
-				for (const sp of SHIPPING_PRICES[methodId]) {
-					if (weight >= parseFloat(sp.min_weight) && weight <= parseFloat(sp.max_weight)) {
-						// แสดงราคาตามช่วง
-						row.find('.dynamic-shipping').val(`ช่วง ${sp.min_weight}-${sp.max_weight} g | ${parseFloat(sp.price).toFixed(2)} บาท`);
-
-						// ตั้งค่า shipping_price_id ที่ต้องการ
-						$('input[name="shipping_price_id"]').val(sp.id);
-						found = true;
-						break;
-					}
-				}
-			}
-
-			if (!found) {
-				row.find('.dynamic-shipping').val('น้ำหนักสินค้าสูงเกินขีดจำกัด');
-				isWeightValid = false; // ถ้าไม่เจอช่วงที่ match ก็ไม่ valid
-			}
-
-			// เพิ่มข้อความเตือนในทุกๆ ขนส่ง
-			if (weight > 25000) {
-				row.find('.weight-error').text('น้ำหนักสินค้าสูงเกินขีดจำกัด (25,000 กรัม)').show(); // ข้อความเตือน
-			} else {
-				row.find('.weight-error').hide(); // ซ่อนข้อความเตือนเมื่อถูกต้อง
-			}
-		});
-
-		// แสดงหรือปิดปุ่มบันทึก
-		if (weight > 25000) {
-			$('#save-btn').prop('disabled', true); // ปิดปุ่มเซฟ
-		} else {
-			$('#save-btn').prop('disabled', false); // เปิดปุ่มเซฟ
-		}
-	}
-
 	function calculateVatPrice() {
-		const price = parseFloat($('[name="price"]').val()) || 0;
-		const vatPercent = parseFloat($('[name="vat_percent"]').val()) || 0;
+		var price = parseFloat($('#price').val()) || 0;
+		var vat = parseFloat($('#vat_percent').val()) || 0;
 
-		// คำนวณราคารวม VAT
-		let totalPrice = price * (1 + (vatPercent / 100));
+		// สูตร: ราคา + (ราคา * (vat / 100))
+		var total = price + (price * (vat / 100));
 
-		// ปัดขึ้นเป็นจำนวนเต็ม
-		totalPrice = Math.ceil(totalPrice);
-
-		// อัปเดตค่าในช่อง input (ไม่มีทศนิยม)
-		$('#vat_price').val(totalPrice);
+		// ปัดเศษขึ้น (Ceil) และแสดงผล
+		$('#vat_price').val(Math.ceil(total));
 	}
 
-	// Event listener
-	$('[name="price"], [name="vat_percent"]').on('input', calculateVatPrice);
+	// สั่งให้ทำงานเมื่อมีการพิมพ์ในช่องราคา หรือ ช่อง VAT
+	$('#price, #vat_percent').on('input change', calculateVatPrice);
 
 	// เรียกตอนโหลด
 	calculateVatPrice();
@@ -750,10 +790,6 @@ if (isset($id)) {
 		$('[name="vat_price"], [name="discount_type"], [name="discount_value"]').on('input change', calculateFinalPrice);
 		calculateFinalPrice(); // เรียกครั้งแรกเลย
 
-		$('[name="product_weight"]').on('input', function() {
-			const weight = parseFloat($(this).val()) || 0;
-			updateShippingPrices(weight);
-		});
 		$('#product-form').submit(function(e) {
 			e.preventDefault(); // ป้องกันการ submit ปกติ
 
@@ -887,16 +923,4 @@ if (isset($id)) {
 		});
 
 	});
-</script>
-
-<?php
-// จัดรูปแบบ shipping_prices เป็น array แบบ group ตาม shipping_methods_id
-$shipping_prices_data = [];
-$shipping_q = $conn->query("SELECT * FROM shipping_prices");
-while ($row = $shipping_q->fetch_assoc()) {
-	$shipping_prices_data[$row['shipping_methods_id']][] = $row;
-}
-?>
-<script>
-	const SHIPPING_PRICES = <?= json_encode($shipping_prices_data) ?>;
 </script>

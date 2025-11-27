@@ -289,11 +289,13 @@ while ($rt = $qry_total->fetch_assoc()) {
                 </div>
 
             </div>
-            <div class="card-footer py-1 text-center">
-                <a class="btn btn-light btn-sm border btn-flat" href="javascript:void(0)" id="backBtn"><i class="fa fa-angle-left"></i> กลับ</a>
-                <a class="btn btn-secondary btn-sm border btn-flat" href="javascript:void(0)" id="cancelBtn"><i class="fa fa-times"></i> ยกเลิก</a>
-                <button class="btn btn-success btn-sm btn-flat" form="shipping-form"><i class="fa fa-save"></i> บันทึก</button>
-            </div>
+
+        </div>
+        <div class="card-footer py-1 text-center">
+            <a class="btn btn-light btn-sm border btn-flat" href="javascript:void(0)" id="backBtn"><i class="fa fa-angle-left"></i> กลับ</a>
+            <a class="btn btn-secondary btn-sm border btn-flat" href="javascript:void(0)" id="cancelBtn"><i class="fa fa-times"></i> ยกเลิก</a>
+            <button class="btn btn-success btn-sm btn-flat" form="shipping-form"><i class="fa fa-save"></i> บันทึก</button>
+        </div>
     </form>
 </section>
 
