@@ -118,9 +118,6 @@ if ($address) { // ตรวจสอบจาก $address โดยตรง
 // น้ำหนักรวมที่คำนวณไว้แล้ว
 $total_weight = $total_weight ?? 0; // มีการคำนวณไว้แล้วในส่วนบน
 
-// เตรียม query เพื่อดึงค่าส่งตามน้ำหนัก
-// เราจะ join ตาราง shipping_methods กับ shipping_prices
-// และหาช่วงน้ำหนักที่ถูกต้อง
 // ============================
 // [NEW] PHP: ระบบคำนวณค่าส่งอัตโนมัติ (Size-based & Total-based)
 // ============================
@@ -547,7 +544,6 @@ if (!function_exists('format_price_custom')) {
 
                         <form action="" id="order-form" class="mt-4">
                             <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
-                            <input type="hidden" name="shipping_methods_id" id="shipping_methods_id" value="<?= $default_shipping_id ?>">
                             <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                             <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
                             <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">

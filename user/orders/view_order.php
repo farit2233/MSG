@@ -1,6 +1,7 @@
 <?php
 require_once('../../config.php');
 if (isset($_GET['id']) && $_GET['id'] > 0) {
+    // ดึงข้อมูล Order (รวมถึง shipping_cost และ grand_total ที่เราบันทึกไว้แล้ว)
     $qry = $conn->query("SELECT * FROM `order_list` WHERE id = '{$_GET['id']}' AND customer_id = '{$_settings->userdata('id')}' ");
     if ($qry->num_rows > 0) {
         foreach ($qry->fetch_assoc() as $k => $v) {
@@ -13,37 +14,33 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     echo "<script>alert('You dont have access for this page'); location.replace('./?page=my_orders');</script>";
 }
 
-// ======================= START: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชันและคูปอง =======================
+// ======================= START: ข้อมูลโปรโมชันและคูปอง =======================
 $promotion_name = '';
-$promotion_type = ''; // <-- เพิ่มบรรทัดนี้
+$promotion_type = '';
 if (!empty($promotion_id)) {
-    // V แก้ SELECT ให้ดึง type มาด้วย V
     $promo_qry = $conn->query("SELECT name, type FROM `promotions_list` WHERE id = '{$promotion_id}'");
     if ($promo_qry->num_rows > 0) {
-        $promo_data = $promo_qry->fetch_assoc(); // <-- แก้ตรงนี้
-        $promotion_name = $promo_data['name'];   // <-- แก้ตรงนี้
-        $promotion_type = $promo_data['type'];   // <-- เพิ่มบรรทัดนี้
+        $promo_data = $promo_qry->fetch_assoc();
+        $promotion_name = $promo_data['name'];
+        $promotion_type = $promo_data['type'];
     } else {
         $promotion_name = "โปรโมชัน";
     }
 }
 
 $coupon_name = '';
-$coupon_type = ''; // <-- เพิ่มบรรทัดนี้
+$coupon_type = '';
 if (!empty($coupon_code_id)) {
-    // V แก้ SELECT ให้ดึง type มาด้วย V
     $coupon_qry = $conn->query("SELECT coupon_code, type FROM `coupon_code_list` WHERE id = '{$coupon_code_id}'");
     if ($coupon_qry->num_rows > 0) {
-        $coupon_data = $coupon_qry->fetch_assoc(); // <-- แก้ตรงนี้
-        $coupon_name = $coupon_data['coupon_code']; // <-- แก้ตรงนี้
-        $coupon_type = $coupon_data['type'];      // <-- เพิ่มบรรทัดนี้
+        $coupon_data = $coupon_qry->fetch_assoc();
+        $coupon_name = $coupon_data['coupon_code'];
+        $coupon_type = $coupon_data['type'];
     } else {
         $coupon_name = "คูปองส่วนลด";
     }
 }
-// ======================= END: ส่วนที่เพิ่มเข้ามาสำหรับดึงข้อมูลโปรโมชันและคูปอง =======================
-
-
+// ======================= END: ข้อมูลโปรโมชันและคูปอง =======================
 
 $shipping_providers = 'ไม่ระบุขนส่ง';
 if (!empty($provider_id)) {
@@ -54,49 +51,7 @@ if (!empty($provider_id)) {
     }
 }
 
-$shipping_methods_name = 'ไม่ระบุขนส่ง';
-if (!empty($shipping_methods_id)) {
-    $shipping_query = $conn->query("SELECT name FROM shipping_methods WHERE id = '{$shipping_methods_id}'");
-    if ($shipping_query->num_rows > 0) {
-        $shipping_methods_name = $shipping_query->fetch_assoc()['name'];
-    } else {
-        $shipping_methods_name = 'ไม่พบข้อมูลขนส่ง';
-    }
-}
-
-$total_weight = 0;
-if (isset($id)) {
-    $weight_qry = $conn->query("
-        SELECT
-            oi.quantity,
-            p.product_weight
-        FROM order_items oi
-        INNER JOIN product_list p ON oi.product_id = p.id
-        WHERE oi.order_id = '{$id}'
-    ");
-    while ($w = $weight_qry->fetch_assoc()) {
-        $total_weight += ($w['product_weight'] * $w['quantity']);
-    }
-}
-
-$shipping_cost = 0.00;
-if (!empty($shipping_prices_id)) {
-    $cost_qry = $conn->query("SELECT price FROM shipping_prices WHERE id = '{$shipping_prices_id}'");
-    if ($cost_qry && $cost_qry->num_rows > 0) {
-        $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
-    }
-} elseif (!empty($shipping_methods_id)) {
-    // Fallback
-    $cost_qry = $conn->query("
-        SELECT price FROM shipping_prices
-        WHERE shipping_methods_id = '{$shipping_methods_id}' AND {$total_weight} BETWEEN min_weight AND max_weight
-        LIMIT 1
-    ");
-    if ($cost_qry && $cost_qry->num_rows > 0) {
-        $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
-    }
-}
-
+// Helper Function
 if (!function_exists('format_price_custom')) {
     function format_price_custom($price)
     {
@@ -107,7 +62,6 @@ if (!function_exists('format_price_custom')) {
         return $formatted_price;
     }
 }
-
 ?>
 <div class="container-fluid">
     <div class="row mb-3">
@@ -123,16 +77,7 @@ if (!function_exists('format_price_custom')) {
             <div class="mb-3">
                 <label for="" class="control-label">ที่อยู่จัดส่ง:</label>
                 <div class="pl-4">
-                    <?= !empty($delivery_address) ?
-                        nl2br(htmlentities(
-                            str_replace(
-                                [" จ.", " จังหวัด"],
-                                ["\nจ.", "\nจังหวัด"],
-                                $delivery_address
-                            )
-                        ))
-                        : 'ไม่พบที่อยู่'
-                    ?>
+                    <?= !empty($delivery_address) ? nl2br(htmlentities(str_replace([" จ.", " จังหวัด"], ["\nจ.", "\nจังหวัด"], $delivery_address))) : 'ไม่พบที่อยู่' ?>
                 </div>
             </div>
         </div>
@@ -227,11 +172,12 @@ if (!function_exists('format_price_custom')) {
                     <br>
                     <?= htmlentities($shipping_providers) ?>
                     <br>
-                    <?= htmlentities($shipping_methods_name) ?>
-                    <br>
-                    น้ำหนักรวม: <?= number_format($total_weight, 0) ?> กรัม
-                    <br>
-                    ค่าส่ง: <?= number_format($shipping_cost, 2) ?> บาท
+                    ค่าส่ง:
+                    <?php if ($shipping_cost == 0): ?>
+                        <span class="text-success fw-bold">ส่งฟรี</span>
+                    <?php else: ?>
+                        <?= number_format($shipping_cost, 2) ?> บาท
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -275,7 +221,7 @@ if (!function_exists('format_price_custom')) {
                                 <small class="text-muted order-band"><?= $row['brand'] ?> | <?= $row['category'] ?></small>
                                 <div class="text-muted d-flex align-items-center gap-1 mt-1">
                                     <small class="text-muted order-band">
-                                        <?= format_num($row['quantity'], 0) ?> x</>
+                                        <?= format_num($row['quantity'], 0) ?> x
                                     </small>
                                     <?php if ($row['price'] < $row['product_price']): ?>
                                         <small class="text-muted ml-1 order-amount" style="text-decoration: line-through;">
@@ -299,7 +245,6 @@ if (!function_exists('format_price_custom')) {
                                 <i class="fa fa-basket-shopping me-1"></i> ซื้ออีกครั้ง
                             </a>
                         </div>
-
                     </div>
                 </div>
             <?php endwhile; ?>
@@ -317,36 +262,28 @@ if (!function_exists('format_price_custom')) {
 
                 <div class="d-flex justify-content-between order-total-detail ">
                     <span>ค่าจัดส่ง:</span>
-                    <span><?= isset($shipping_cost) ? format_price_custom($shipping_cost, 2) : '0.00' ?> บาท</span>
+                    <?php if (isset($shipping_cost) && $shipping_cost == 0): ?>
+                        <span class="text-success fw-bold">ส่งฟรี</span>
+                    <?php else: ?>
+                        <span><?= isset($shipping_cost) ? format_price_custom($shipping_cost, 2) : '0.00' ?> บาท</span>
+                    <?php endif; ?>
                 </div>
 
-                <?php
-                // V แก้ไขเงื่อนไข if ตรงนี้ V
-                if (!empty($promotion_name) && ((isset($promotion_discount) && $promotion_discount > 0) || $promotion_type == 'free_shipping')):
-                ?>
+                <?php if (!empty($promotion_name) && ((isset($promotion_discount) && $promotion_discount > 0) || $promotion_type == 'free_shipping')): ?>
                     <div class="d-flex justify-content-between text-danger order-total-detail ">
                         <span>โปรโมชัน (<?= htmlspecialchars($promotion_name) ?>):</span>
-
-                        <?php if ($promotion_type == 'free_shipping'): // <-- เพิ่ม if นี้ 
-                        ?>
+                        <?php if ($promotion_type == 'free_shipping'): ?>
                             <span>ส่งฟรี</span>
                         <?php else: ?>
                             <span>-<?= format_price_custom($promotion_discount, 2) ?> บาท</span>
                         <?php endif; ?>
-
-
                     </div>
                 <?php endif; ?>
 
-                <?php
-                // V แก้ไขเงื่อนไข if ตรงนี้ V
-                if (!empty($coupon_name) && ((isset($coupon_discount) && $coupon_discount > 0) || $coupon_type == 'free_shipping')):
-                ?>
+                <?php if (!empty($coupon_name) && ((isset($coupon_discount) && $coupon_discount > 0) || $coupon_type == 'free_shipping')): ?>
                     <div class="d-flex justify-content-between text-danger order-total-detail ">
                         <span>คูปอง (<?= htmlspecialchars($coupon_name) ?>):</span>
-
-                        <?php if ($coupon_type == 'free_shipping'): // <-- เพิ่ม if นี้ 
-                        ?>
+                        <?php if ($coupon_type == 'free_shipping'): ?>
                             <span>ส่งฟรี</span>
                         <?php else: ?>
                             <span>-<?= format_price_custom($coupon_discount, 2) ?> บาท</span>
@@ -354,15 +291,11 @@ if (!function_exists('format_price_custom')) {
                     </div>
                 <?php endif; ?>
 
-                <div class="d-flex justify-content-between order-total-detail ">
-                    <span>ยอดสั่งซื้อ<small> รวม VAT:</small></span>
-                    <span><?= isset($total_amount) ? format_price_custom($total_amount, 2) : '0.00' ?> บาท</span>
-                </div>
                 <hr style="margin: 1rem 0;">
 
                 <div class="d-flex justify-content-between order-total">
                     <h4><b>ยอดรวมทั้งสิ้น:</b></h4>
-                    <h4><b><?= isset($total_amount) ? format_price_custom($total_amount, 2) : '0.00' ?> บาท</b></h4>
+                    <h4><b><?= isset($grand_total) ? format_price_custom($grand_total, 2) : '0.00' ?> บาท</b></h4>
                 </div>
             </div>
         </div>
