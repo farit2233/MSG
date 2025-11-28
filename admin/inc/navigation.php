@@ -307,6 +307,14 @@
                   </p>
                 </a>
               </li>
+              <li class="nav-item dropdown">
+                <a href="./?page=bank_setting" class="nav-link nav-bank_setting">
+                  <i class="nav-icon fa-solid fa-credit-card"></i>
+                  <p>
+                    ตั้งค่าบัญชีธนาคาร
+                  </p>
+                </a>
+              </li>
               <?php if ($_settings->userdata('type') == 1): ?>
                 <li class="nav-header">Maintenance</li>
                 <li class="nav-item dropdown">

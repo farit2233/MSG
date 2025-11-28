@@ -2252,6 +2252,67 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
+	function save_bank()
+	{
+		// แตกตัวแปรจาก POST เพื่อเรียกใช้ง่ายๆ เช่น $id, $bank_number
+		extract($_POST);
+
+		$data = "";
+		foreach ($_POST as $k => $v) {
+			// เช็ค key ที่ไม่ต้องการนำไปเขียนลง Database
+			// 'id' = PK ไม่ต้อง update
+			// 'bank_provider_id' = เป็นตัวเลือก dropdown ไม่ได้เก็บในตาราง bank_system
+			if (!in_array($k, array('id', 'bank_provider_id'))) {
+				if (!empty($data)) $data .= ",";
+
+				// Escape String ป้องกัน SQL Injection
+				$v = $this->conn->real_escape_string($v);
+				$data .= " `{$k}`='{$v}' ";
+			}
+		}
+
+		// ตรวจสอบเลขบัญชีซ้ำ (Duplicate Check)
+		// เช็คว่ามี bank_number นี้อยู่แล้วหรือไม่ (ยกเว้นตัวเอง กรณีแก้ไข)
+		$check = $this->conn->query("SELECT * FROM `bank_system` where `bank_number` = '{$bank_number}' " . (!empty($id) ? " and id != {$id} " : "") . " ")->num_rows;
+
+		if ($this->capture_err())
+			return $this->capture_err();
+
+		if ($check > 0) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "มีเลขที่บัญชีนี้อยู่ในระบบแล้ว";
+			return json_encode($resp);
+			exit;
+		}
+
+		// บันทึกข้อมูล
+		if (empty($id)) {
+			// INSERT (เพิ่มใหม่)
+			$sql = "INSERT INTO `bank_system` set {$data} ";
+			$action_msg = " เพิ่มบัญชีธนาคารใหม่เรียบร้อย";
+		} else {
+			// UPDATE (แก้ไข)
+			$sql = "UPDATE `bank_system` set {$data} where id = '{$id}' ";
+			$action_msg = " อัปเดตข้อมูลบัญชีเรียบร้อย";
+		}
+
+		$save = $this->conn->query($sql);
+
+		if ($save) {
+			$resp['status'] = 'success';
+			$resp['msg'] = $action_msg;
+		} else {
+			$resp['status'] = 'failed';
+			$resp['err'] = $this->conn->error . "[{$sql}]";
+		}
+
+		// ส่ง Flash Message เมื่อสำเร็จ
+		if ($resp['status'] == 'success')
+			$this->settings->set_flashdata('success', $resp['msg']);
+
+		return json_encode($resp);
+	}
+
 	function migrate_guest_cart()
 	{
 		$data = json_decode(file_get_contents('php://input'), true);
@@ -3056,6 +3117,9 @@ switch ($action) {
 		break;
 	case 'save_shipping_setting':
 		echo $Master->save_shipping_setting();
+		break;
+	case 'save_bank':
+		echo $Master->save_bank();
 		break;
 	case 'delete_order':
 		echo $Master->delete_order();
