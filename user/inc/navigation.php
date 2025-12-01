@@ -108,6 +108,9 @@ if ($user_qry->num_rows > 0) {
         <a href="?p=user/address" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'address') ? 'active' : '' ?>">
             <i class="fa-solid fa-map-location-dot"></i> ที่อยู่ของฉัน
         </a>
+        <a href="?p=user/slip_payment" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'slip_payment') ? 'active' : '' ?>">
+            <i class="fa-solid fa-pen-to-square"></i> แจ้งยอดชำระเงิน
+        </a>
         <a href="?p=user/orders" class="list-group-item list-group-item-action <?php echo (isset($_GET['p']) && $_GET['p'] == 'orders') ? 'active' : '' ?>">
             <i class="fa fa-truck"></i> ประวัติการสั่งซื้อ
         </a>

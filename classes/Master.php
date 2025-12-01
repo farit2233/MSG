@@ -854,6 +854,7 @@ class Master extends DBConnection
 	function place_order()
 	{
 		extract($_POST);
+		$bank_system_id = isset($bank_id) && !empty($bank_id) ? "'{$bank_id}'" : "NULL";
 		$customer_id = $this->settings->userdata('id');
 		$pref = date("Ymd");
 		$code = sprintf("%'.05d", 1);
@@ -1086,10 +1087,12 @@ class Master extends DBConnection
 			$delivery_address = trim("{$customer_addresses['address']} ต.{$customer_addresses['sub_district']} อ.{$customer_addresses['district']} จ.{$customer_addresses['province']} {$customer_addresses['postal_code']}");
 
 			// --- บันทึกข้อมูล ---
+			// --- บันทึกข้อมูล ---
+			// [แก้ไข] เพิ่ม bank_system_id เข้าไปใน Query
 			$insert = $this->conn->query("INSERT INTO `order_list` 
-            (`code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `shipping_cost`, `grand_total`, `promotion_discount`, `coupon_discount`, `promotion_id`, `coupon_code_id`) 
-            VALUES 
-            ('{$code}', '{$customer_id}', '{$name}', '{$contact}', '{$delivery_address}', '{$total_amount_ex_vat}', '{$final_shipping_cost}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$applied_promo_id}, {$applied_coupon_id})");
+			(`code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `shipping_cost`, `grand_total`, `promotion_discount`, `coupon_discount`, `promotion_id`, `coupon_code_id`, `bank_system_id`) 
+			VALUES 
+			('{$code}', '{$customer_id}', '{$name}', '{$contact}', '{$delivery_address}', '{$total_amount_ex_vat}', '{$final_shipping_cost}', '{$grand_total}', '{$promotion_discount_amount}', '{$coupon_discount_amount}', {$applied_promo_id}, {$applied_coupon_id}, {$bank_system_id})");
 
 			if (!$insert) throw new Exception('ไม่สามารถสร้างคำสั่งซื้อได้: ' . $this->conn->error);
 			$oid = $this->conn->insert_id;
@@ -1474,7 +1477,7 @@ class Master extends DBConnection
 				$this->log_coupon_usage($coupon_code_id, $customer_id, $oid, $coupon_discount, count($cart_data));
 			}
 
-			$this->settings->set_flashdata('success', 'ชำระสินค้าสำเร็จ');
+			$this->settings->set_flashdata('success', 'สั่งซื้อสำเร็จ');
 			$resp = ['status' => 'success'];
 		} catch (Exception $e) {
 			$this->conn->query("ROLLBACK");

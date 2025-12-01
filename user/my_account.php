@@ -50,6 +50,18 @@
                         </a>
                     </div>
                     <div class="col-md-6 col-lg-4 mb-4">
+                        <a href="?p=user/slip_payment" class="list-group-item-action account-card <?php echo (isset($_GET['p']) && $_GET['p'] == 'slip_payment') ? 'active' : '' ?>">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">แจ้งยอดชำระเงิน <i class="fa-solid fa-map-location-dot"></i></h5>
+                                </div>
+                                <div class="card-footer">
+                                    <p class="card-text text-muted">จัดการ และเพิ่มที่อยู่ <br>สำหรับจัดส่ง</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4">
                         <a href="?p=user/orders" class="list-group-item-action account-card <?php echo (isset($_GET['p']) && $_GET['p'] == 'profile') ? 'active' : '' ?>">
                             <div class="card h-100">
                                 <div class="card-body">

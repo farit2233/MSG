@@ -364,6 +364,12 @@ if (!function_exists('format_price_custom')) {
         return $formatted_price;
     }
 }
+
+$banks_qry = $conn->query("SELECT * FROM bank_system WHERE is_active = 1 AND is_visible = 1");
+$banks_list = [];
+while ($row = $banks_qry->fetch_assoc()) {
+    $banks_list[] = $row;
+}
 ?>
 <script>
     // ส่งค่าจาก PHP มาให้ JavaScript
@@ -372,7 +378,122 @@ if (!function_exists('format_price_custom')) {
     var initialVatTotal = <?= $vat_total; ?>;
     var shippingCost = <?= $final_shipping_cost; ?>;
 </script>
+<style>
+    /* สไตล์สำหรับ Input ที่ทำหน้าตาเหมือน Dropdown */
+    .custom-select-trigger {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
 
+    .custom-select-trigger:hover {
+        border-color: #f57421;
+    }
+
+    /* สไตล์การ์ดธนาคารใน Modal */
+    .bank-option-card {
+        border: 2px solid #eee;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        height: 100%;
+        background: #fff;
+    }
+
+    .bank-option-card:hover {
+        border-color: #f57421;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .bank-option-card img {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        margin-bottom: 10px;
+    }
+
+    /* State เมื่อถูกเลือก (Active) */
+    .bank-option-card.selected {
+        border-color: #f57421;
+        opacity: 0.9;
+    }
+
+    /* ไอคอนติ๊กถูก (Checkmark) */
+    .bank-option-card.selected::after {
+        content: '\f00c';
+        /* FontAwesome Check Icon */
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #f57421;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ส่วนแสดงผลธนาคารที่เลือก (หน้าหลัก) */
+    /* ส่วนแสดงผลธนาคารที่เลือก (หน้าหลัก) */
+    #selected-bank-details {
+        background-color: #ffffff;
+        /* พื้นหลัง (ใส่สีขาว หรือสีอ่อนๆ ตามชอบได้เลยครับ) */
+        border: 1px solid #f57421;
+        /* <--- สีขอบส้มตามที่ต้องการ */
+        border-radius: 5px;
+        /* ลบเหลี่ยมมุมเล็กน้อย */
+        color: #333333;
+        /* สีตัวหนังสือ */
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+
+    #selected-bank-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin-right: 15px;
+        border: 2px solid #fff;
+    }
+
+    .btn-bank-confirm {
+        background-color: #f57421;
+        color: white;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-bank-confirm:hover,
+    .btn-bank-cancel:hover {
+        color: white;
+        filter: brightness(90%);
+    }
+
+    .btn-bank-cancel {
+        background-color: #dc3545;
+        color: white;
+        transition: all 0.2s ease-in-out;
+    }
+</style>
 <section class="py-5 container">
     <div class="checkout-header-bar d-flex align-items-center gap-2">
         <i class="fa-solid fa-square-check mr-2 text-success" style="font-size: 30px;"></i>
@@ -535,22 +656,53 @@ if (!function_exists('format_price_custom')) {
                             <span><span id="order-vat-total"><?= format_price_custom($cart_total, 2) ?></span> บาท</span>
                         </div>
 
-                        <hr>
 
                         <div class="summary-row total">
                             <span>ยอดรวมทั้งสิ้น</span>
                             <span><span id="order-total-text"><?= format_price_custom($cart_total + $default_shipping_cost, 2) ?></span> บาท</span>
                         </div>
+                    </div>
+                    <div class="checkout-card-header">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span class="checkout-card-title">ชำระเงิน</span>
+                    </div>
+                    <div class="checkout-card-body">
 
-                        <form action="" id="order-form" class="mt-4">
+                        <form action="" id="order-form" class="mt-2" enctype="multipart/form-data">
                             <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
                             <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                             <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
                             <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
                             <input type="hidden" name="coupon_code_id" id="applied_coupon_id" value="0">
 
+                            <div class="form-group mb-3">
+                                <label class="small text-muted mb-1">เลือกช่องทางการโอนเงิน</label>
+                                <div class="custom-select-trigger" id="bank-selector-btn">
+                                    <span id="selected-bank-text" class="text-muted">กรุณาเลือกบัญชีธนาคาร...</span>
+                                    <i class="fa-solid fa-chevron-down text-muted"></i>
+                                </div>
+                                <input type="hidden" name="bank_id" id="bank_id" required>
+                            </div>
+
+                            <div id="selected-bank-details" class="d-none mt-2">
+                                <div class="d-flex align-items-center">
+                                    <img id="selected-bank-img" src="">
+
+                                    <div style="line-height: 1.3;">
+                                        <h6 class="mb-1 font-weight-bold" id="selected-bank-name" style="font-size: 1rem;"></h6>
+
+                                        <div class="font-weight-bold mb-1" id="selected-bank-number" style="font-size: 1.1rem; letter-spacing: 0.5px;"></div>
+
+                                        <div class="small text-muted">
+                                            <i class="fa-solid fa-user mr-1"></i>
+                                            ชื่อบัญชี: <span id="selected-bank-company"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <button type="submit" class="btn btn-checkout btn-block btn-lg w-100 shadow-sm" style="background-color: #f57421; border-color: #f57421;" <?= !$is_address_complete ? 'disabled' : '' ?>>
-                                สั่งซื้อสินค้า
+                                แจ้งชำระเงินและสั่งซื้อ
                             </button>
                         </form>
 
@@ -564,7 +716,49 @@ if (!function_exists('format_price_custom')) {
             </div>
         </div>
     </div>
+    <div class="modal fade" id="bankSelectionModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-building-columns mr-2"></i>เลือกบัญชีธนาคาร</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div class="row">
+                        <?php if (!empty($banks_list)): ?>
+                            <?php foreach ($banks_list as $bank): ?>
+                                <div class="col-6 col-md-4 mb-3">
+                                    <div class="bank-option-card"
+                                        data-id="<?= $bank['id'] ?>"
+                                        data-name="<?= htmlspecialchars($bank['bank_name']) ?>"
+                                        data-number="<?= htmlspecialchars($bank['bank_number']) ?>"
+                                        data-company="<?= htmlspecialchars($bank['bank_company']) ?>"
+                                        data-img="<?= validate_image($bank['image_path']) ?>"
+                                        onclick="selectBankItem(this)">
 
+                                        <img src="<?= validate_image($bank['image_path']) ?>" alt="<?= $bank['bank_name'] ?>">
+                                        <h6 class="font-weight-bold mb-1" style="font-size: 0.9rem;"><?= $bank['bank_name'] ?></h6>
+                                        <div class="font-weight-bold"><?= $bank['bank_number'] ?></div>
+                                        <div class="small text-secondary mt-1 text-truncate px-2" title="<?= $bank['bank_company'] ?>">
+                                            <?= $bank['bank_company'] ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="col-12 text-center text-muted">ไม่พบข้อมูลบัญชีธนาคาร</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-bank-cancel" data-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-bank-confirm" onclick="confirmBankSelection()">ยืนยันการเลือก</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 <script>
     var cartItems = <?= json_encode(array_values($cart_items)); ?>;
@@ -584,13 +778,74 @@ if (!function_exists('format_price_custom')) {
     // ============================
     // JS: จัดการฟอร์มสั่งซื้อ
     // ============================
+    let tempSelectedBank = null;
+
+    // เปิด Modal เมื่อกดปุ่มเลือกธนาคาร
+    $('#bank-selector-btn').click(function() {
+        $('#bankSelectionModal').modal('show');
+    });
+
+    // ฟังก์ชันเมื่อกดเลือกธนาคารใน Modal
+    function selectBankItem(element) {
+        $('.bank-option-card').removeClass('selected');
+        $(element).addClass('selected');
+
+        tempSelectedBank = {
+            id: $(element).data('id'),
+            name: $(element).data('name'),
+            number: $(element).data('number'),
+            company: $(element).data('company'), // [ใหม่] รับค่า Company
+            img: $(element).data('img')
+        };
+    }
+
+    // ฟังก์ชันเมื่อกดยืนยันใน Modal
+    function confirmBankSelection() {
+        if (tempSelectedBank) {
+            // อัปเดต UI Dropdown
+            $('#selected-bank-text').html(tempSelectedBank.name);
+            $('#selected-bank-text').addClass('text-dark').removeClass('text-muted');
+
+            // อัปเดต Input Hidden
+            $('#bank_id').val(tempSelectedBank.id);
+
+            // แสดงรายละเอียดในกล่อง Alert
+            $('#selected-bank-details').removeClass('d-none');
+            $('#selected-bank-details').addClass('d-block fade show'); // เพิ่ม Animation เล็กน้อย
+
+            $('#selected-bank-name').text(tempSelectedBank.name);
+            $('#selected-bank-number').text(tempSelectedBank.number);
+            $('#selected-bank-company').text(tempSelectedBank.company); // [ใหม่] แสดงชื่อ Company
+            $('#selected-bank-img').attr('src', tempSelectedBank.img);
+
+            $('#bankSelectionModal').modal('hide');
+        } else {
+            alert_toast("กรุณาเลือกธนาคาร", "warning");
+        }
+    }
+
+
+    // [อัปเดต] ส่วนการ Submit Form ให้รองรับการส่งไฟล์ (Ajax Upload)
     $('#order-form').submit(function(e) {
         e.preventDefault();
+
+        // ตรวจสอบว่าเลือกธนาคารหรือยัง
+        if ($('#bank_id').val() == '') {
+            alert_toast("กรุณาเลือกช่องทางการโอนเงิน", "warning");
+            return;
+        }
+
         start_loader();
+
+        // ใช้ FormData เพื่อรองรับไฟล์ภาพ
+        var formData = new FormData(this);
+
         $.ajax({
             url: _base_url_ + 'classes/Master.php?f=place_order',
             method: 'POST',
-            data: $(this).serialize(),
+            data: formData,
+            contentType: false, // จำเป็นสำหรับ FormData
+            processData: false, // จำเป็นสำหรับ FormData
             dataType: 'json',
             error: err => {
                 console.log(err);
@@ -599,11 +854,27 @@ if (!function_exists('format_price_custom')) {
             },
             success: function(resp) {
                 if (resp.status == 'success') {
-                    location.replace('./');
+                    end_loader(); // 1. หยุดหมุน Loading ก่อน
+
+                    // 2. แสดง SweetAlert
+                    Swal.fire({
+                        icon: 'success', // ถ้าอยากได้เครื่องหมายตกใจสีเหลือง ให้เปลี่ยนคำว่า 'success' เป็น 'warning'
+                        title: 'ดำเนินการสั่งซื้อเรียบร้อย',
+                        html: '<small class="text-muted">เพื่อให้เจ้าหน้าที่ตรวจสอบความถูกต้อง และยืนยันคำสั่งซื้อของท่าน<br>กรุณาแจ้งยอดชำระที่ บัญชีของฉัน > แจ้งยอดชำระเงิน<br>ขอบคุณที่ใช้บริการ</small>',
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#f57421', // สีส้มตามธีมเว็บคุณ
+                        allowOutsideClick: false // บังคับให้กดปุ่มตกลงเท่านั้น
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // 3. พอกดตกลง ค่อยเปลี่ยนหน้า
+                            location.replace('./');
+                        }
+                    });
+
                 } else {
                     alert_toast(resp.msg || "เกิดข้อผิดพลาดตอนสั่งซื้อ", 'error');
+                    end_loader();
                 }
-                end_loader();
             }
         });
     });
