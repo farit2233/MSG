@@ -1872,6 +1872,149 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
+	function save_payment_slip()
+	{
+		global $conn;
+
+		// 1. ป้องกัน SQL Injection เบื้องต้น
+		foreach ($_POST as $k => $v) {
+			if (!is_array($_POST[$k]))
+				$_POST[$k] = addslashes($v);
+		}
+		extract($_POST); // แตกตัวแปรออกมาใช้งาน เช่น $order_code, $total_price
+
+		// 2. จัดการการอัปโหลดไฟล์ (img)
+		$slip_path = "";
+
+		if (isset($_FILES['img']['tmp_name']) && !empty($_FILES['img']['tmp_name'])) {
+			if (!is_dir(base_app . "uploads/slips")) {
+				mkdir(base_app . "uploads/slips", 0777, true);
+			}
+
+			$fname = strtotime(date('y-m-d H:i')) . '_' . $_FILES['img']['name'];
+			$move = move_uploaded_file($_FILES['img']['tmp_name'], base_app . 'uploads/slips/' . $fname);
+
+			if ($move) {
+				$slip_path = "uploads/slips/" . $fname;
+			} else {
+				$resp['status'] = 'failed';
+				$resp['msg'] = "ไม่สามารถอัปโหลดรูปภาพได้ กรุณาตรวจสอบสิทธิ์การเขียนไฟล์ (Permission)";
+				return json_encode($resp);
+			}
+		}
+
+		// 3. เตรียมคำสั่ง SQL Insert
+		$sql = "INSERT INTO `slip_payment` set 
+				`order_code` = '{$order_code}', 
+				`customer_name` = '{$customer_name}', 
+				`contact` = '{$contact}', 
+				`email` = '{$email}', 
+				`customer_bank` = '{$customer_bank}', 
+				`total_price` = '{$total_price}', 
+				`date_time` = '{$date_time}', 
+				`slip_path` = '{$slip_path}', 
+				`approve` = 0 
+			";
+
+		// 4. บันทึกลงฐานข้อมูล
+		$save = $conn->query($sql);
+
+		if ($save) {
+			// อัปเดตสถานะ order_list
+			$update_order = $conn->query("UPDATE `order_list` SET `payment_status` = 1 WHERE `code` = '{$order_code}'");
+
+			$resp['status'] = 'success';
+
+			// ==========================================
+			// 1. ส่งอีเมลหา Admin (PHPMailer)
+			// ==========================================
+			try {
+				$mail_admin = new PHPMailer(true);
+				$mail_admin->isSMTP();
+				$mail_admin->Host = 'smtp.gmail.com';
+				$mail_admin->Port = 465;
+				$mail_admin->SMTPAuth = true;
+				$mail_admin->Username = "faritre5566@gmail.com";
+				$mail_admin->Password = "bchljhaxoqflmbys";
+				$mail_admin->SMTPSecure = "ssl";
+				$mail_admin->CharSet = 'UTF-8';
+				$mail_admin->isHTML(true);
+				$mail_admin->Subject = "แจ้งเตือน: ลูกค้าแจ้งชำระเงินใหม่ (Order: {$order_code})";
+
+				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');
+				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
+				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+
+				$mail_admin->Body = "
+					<h3 style='color: #f57421;'>มีการแจ้งชำระเงินเข้ามาใหม่!</h3>
+					<p><strong>รหัสสั่งซื้อ:</strong> {$order_code}</p>
+					<p><strong>ชื่อลูกค้า:</strong> {$customer_name}</p>
+					<p><strong>ยอดโอน:</strong> " . number_format($total_price, 2) . " บาท</p>
+					<p><strong>ธนาคารที่โอนเข้า:</strong> {$customer_bank}</p>
+					<p><strong>วันเวลาที่โอน:</strong> {$date_time}</p>
+					<hr>
+					<p style='color: red; font-weight: bold;'>*** กรุณาเข้าสู่ระบบหลังบ้านเพื่อตรวจสอบสลิปและอนุมัติโดยด่วน ***</p>
+				";
+
+				$mail_admin->send();
+			} catch (Exception $e) {
+				// error_log("Mail Error: {$e->getMessage()}");
+			}
+
+			// ==========================================
+			// 2. ส่งแจ้งเตือนทาง Telegram (เรียกใช้ฟังก์ชันที่มีอยู่แล้ว)
+			// ==========================================
+			try {
+				// สร้างข้อความ HTML (เพราะฟังก์ชันเดิมใช้ parse_mode = HTML)
+				$telegramMsg = "<b>มีการแจ้งชำระเงินเข้ามาใหม่!</b>\n" .
+					"<b>Order:</b> {$order_code}\n" .
+					"<b>ลูกค้า:</b> {$customer_name}\n" .
+					"<b>ยอดโอน:</b> " . number_format($total_price, 2) . " บาท\n" .
+					"<b>เข้าธนาคาร:</b> {$customer_bank}\n" .
+					"<b>เวลา:</b> {$date_time}\n" .
+					"<i>โปรดตรวจสอบสลิปในระบบหลังบ้าน</i>";
+
+				// เรียกฟังก์ชันเดิมที่มีอยู่ใน Class Master
+				$this->sendTelegramNotificationSlip($telegramMsg);
+			} catch (Exception $e) {
+				// error_log("Telegram Error: {$e->getMessage()}");
+			}
+			// ==========================================
+
+		} else {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "เกิดข้อผิดพลาดในการบันทึกข้อมูล: " . $conn->error;
+			$resp['sql'] = $sql;
+		}
+
+		return json_encode($resp);
+	}
+
+	function sendTelegramNotificationSlip($message)
+	{
+		// ใช้ Token และ Chat ID เดิมของคุณ
+		$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";
+		$chat_id = "-4869854888";
+
+		$url = "https://api.telegram.org/bot$bot_token/sendMessage";
+		$data = [
+			'chat_id' => $chat_id,
+			'text' => $message,
+			'parse_mode' => 'HTML',
+		];
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$result = curl_exec($ch);
+		curl_close($ch);
+
+		return $result;
+	}
+
 	function update_order_status()
 	{
 		extract($_POST);
@@ -3129,6 +3272,9 @@ switch ($action) {
 		break;
 	case 'update_tracking_id':
 		echo $Master->update_tracking_id();
+		break;
+	case 'save_payment_slip':
+		echo $Master->save_payment_slip();
 		break;
 	case 'update_order_status':
 		echo $Master->update_order_status();

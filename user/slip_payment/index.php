@@ -3,19 +3,14 @@
 // ตรวจสอบการ Login
 if ($_settings->userdata('id') != '') {
     $qry = $conn->query("SELECT * FROM `customer_list` WHERE id = '{$_settings->userdata('id')}'");
-    if ($qry->num_rows > 0) {
-        foreach ($qry->fetch_array() as $k => $v) {
-            if (!is_numeric($k)) $$k = $v;
-        }
-    }
+    // Fetch logic...
 } else {
     echo "<script>alert('กรุณาเข้าสู่ระบบ'); location.replace('./');</script>";
 }
 
-// --- ดึงข้อมูลธนาคารจาก bank_system ---
+// --- 1. ดึงข้อมูลธนาคารร้านค้า ---
 $banks_list = [];
 if (isset($conn)) {
-    // เลือกเฉพาะที่ Active และ Visible
     $bank_qry = $conn->query("SELECT * FROM bank_system WHERE is_active = 1 AND is_visible = 1 ORDER BY bank_name ASC");
     if ($bank_qry) {
         while ($row = $bank_qry->fetch_assoc()) {
@@ -24,15 +19,70 @@ if (isset($conn)) {
     }
 }
 
-// รับค่า Order Code และ Total Price (ถ้ามี)
+// --- 2. ดึงรายการสั่งซื้อที่ "ยังไม่จ่าย" ของลูกค้าคนนี้ ---
+$orders_list = [];
+if (isset($conn)) {
+    $customer_id = $_settings->userdata('id');
+    $order_qry = $conn->query("SELECT * FROM `order_list` WHERE customer_id = '{$customer_id}' AND payment_status = 0 ORDER BY date_created DESC");
+    if ($order_qry) {
+        while ($row = $order_qry->fetch_assoc()) {
+            $orders_list[] = $row;
+        }
+    }
+}
+
+// รับค่า Order Code
 $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
-$total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
 ?>
 
 <style>
-    /* จัดแต่ง Input File (Browse ขวา) */
+    /* --- CSS สำหรับ Select2 (เพิ่มใหม่) --- */
+    /* --- CSS สำหรับ Select2 (ปรับแก้ให้กึ่งกลาง) --- */
+    .select2-container .select2-selection--single {
+        height: calc(1.5em + .75rem + 2px) !important;
+        /* ความสูงมาตรฐาน Bootstrap */
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+
+        /* เพิ่ม Flexbox เพื่อจัดกึ่งกลางแนวตั้ง */
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: normal !important;
+        /* ปล่อยให้ Flex จัดการความสูง */
+        padding-left: 0;
+        color: #495057;
+        width: 100%;
+        /* ให้ข้อความยาวเต็มพื้นที่ */
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        /* จัดลูกศรให้กลางด้วย */
+        height: 100% !important;
+        top: 0 !important;
+        right: 5px;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* ปรับสีตอน Focus */
+    .select2-container--default.select2-container--open .select2-selection--single {
+        border-color: #f57421;
+    }
+
+    /* จัดแต่ง Input File */
     .custom-file-label::after {
         content: "Browse";
+        text-transform: none !important;
+        font-weight: normal;
+    }
+
+    .custom-file-label {
+        font-weight: normal !important;
     }
 
     /* กล่อง Preview รูปสลิป */
@@ -48,13 +98,12 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
 
     #slip-preview {
         max-width: 100%;
-        max-height: 200px;
-        /* ปรับความสูงไม่ให้ใหญ่เกินไป */
+        max-height: 550px;
         border-radius: 5px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    /* Style สำหรับส่วนเลือกธนาคารให้สูงเท่า Input ปกติ */
+    /* Style สำหรับส่วนเลือกธนาคาร */
     .custom-select-trigger {
         border: 1px solid #ced4da;
         padding: .375rem .75rem;
@@ -65,7 +114,17 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
         justify-content: space-between;
         align-items: center;
         height: calc(1.5em + .75rem + 2px);
-        /* ความสูงมาตรฐาน Bootstrap input */
+    }
+
+    .btn-bank-slip {
+        background-color: #f57421;
+        color: white;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-bank-slip:hover {
+        color: white;
+        filter: brightness(90%);
     }
 
     /* Card ธนาคารใน Modal */
@@ -78,6 +137,7 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
         text-align: center;
         height: 100%;
         background: #fff;
+        position: relative;
     }
 
     .bank-option-card:hover {
@@ -89,24 +149,17 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
     .bank-option-card.selected {
         border-color: #f57421;
         background-color: #fff5ee;
-        position: relative;
     }
 
-    .bank-option-card.selected::after {
-        content: '\f00c';
-        font-family: "Font Awesome 5 Free";
-        font-weight: 900;
-        position: absolute;
-        top: 5px;
-        right: 8px;
-        color: #f57421;
+
+    .input-group-text {
+        background-color: #fff;
+        border-left: 0;
+        cursor: pointer;
     }
 
-    .bank-option-card img {
-        width: 50px;
-        height: 50px;
-        object-fit: contain;
-        margin-bottom: 10px;
+    .flatpickr-thai input {
+        border-right: 0;
     }
 </style>
 
@@ -128,16 +181,36 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
                         <form id="payment-form" method="post" enctype="multipart/form-data">
 
                             <div class="row">
-                                <div class="col-md-6" style="<?= empty($order_code_val) ? '' : 'display:none;' ?>">
+                                <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="order_code">รหัสรายการสั่งซื้อ (Order Code) <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="order_code" id="order_code" value="<?= $order_code_val ?>" required placeholder="เช่น ORD-12345">
+
+                                        <select class="form-control select2" name="order_code" id="order_code" required style="width: 100%;">
+                                            <option value="" disabled selected>-- ค้นหา หรือ เลือกรายการที่ชำระ --</option>
+                                            <?php if (!empty($orders_list)): ?>
+                                                <?php foreach ($orders_list as $order): ?>
+                                                    <?php
+                                                    $selected = ($order_code_val == $order['code']) ? 'selected' : '';
+                                                    $display_text = $order['code'] . ' (ยอด ' . number_format($order['grand_total'], 2) . ' บาท)';
+                                                    ?>
+                                                    <option value="<?= $order['code'] ?>"
+                                                        data-amount="<?= $order['grand_total'] ?>"
+                                                        data-name="<?= htmlspecialchars($order['name']) ?>"
+                                                        data-contact="<?= htmlspecialchars($order['contact']) ?>"
+                                                        <?= $selected ?>>
+                                                        <?= $display_text ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <option value="" disabled>ไม่พบรายการค้างชำระ</option>
+                                            <?php endif; ?>
+                                        </select>
                                     </div>
                                 </div>
-                                <div class="col-md-6" style="<?= empty($total_price_val) ? '' : 'display:none;' ?>">
+                                <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="total_price">ยอดโอน (บาท) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.01" class="form-control" name="total_price" id="total_price" value="<?= $total_price_val ?>" required placeholder="0.00">
+                                        <input type="number" step="0.01" class="form-control" name="total_price" id="total_price" value="" required placeholder="0.00">
                                     </div>
                                 </div>
                             </div>
@@ -146,15 +219,13 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="customer_name">ชื่อ / สกุล <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="customer_name" id="customer_name"
-                                            value="<?= isset($firstname) ? $firstname . ' ' . $lastname : '' ?>" required placeholder="ระบุชื่อ-นามสกุล">
+                                        <input type="text" class="form-control" name="customer_name" id="customer_name" value="" required placeholder="ระบุชื่อ-นามสกุล">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="contact">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="contact" id="contact"
-                                            value="<?= isset($contact) ? $contact : '' ?>" required placeholder="08xxxxxxxx">
+                                        <input type="text" class="form-control" name="contact" id="contact" value="" required placeholder="08xxxxxxxx">
                                     </div>
                                 </div>
                             </div>
@@ -162,9 +233,8 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="email">อีเมล <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control" name="email" id="email"
-                                            value="<?= isset($email) ? $email : '' ?>" required placeholder="email@example.com">
+                                        <label class="mb-1" for="email">อีเมล <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" name="email" id="email" value="" required placeholder="email@example.com">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -181,13 +251,13 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
 
                             <div class="row">
                                 <div class="col-12">
-                                    <div id="selected-bank-details" class="d-none mb-3 p-3 bg-light rounded border">
+                                    <div id="selected-bank-details" class="d-none mb-3 p-3 rounded border">
                                         <div class="d-flex align-items-center">
                                             <img id="selected-bank-img" src="" style="width: 50px; height: 50px; object-fit: contain; margin-right: 15px;">
                                             <div style="line-height: 1.3;">
                                                 <h6 class="mb-1 font-weight-bold" id="selected-bank-name"></h6>
-                                                <div class="font-weight-bold mb-1 text-primary" id="selected-bank-number"></div>
-                                                <div class="small text-muted"><i class="fa fa-user mr-1"></i> <span id="selected-bank-company"></span></div>
+                                                <div class="font-weight-bold mb-1 " id="selected-bank-number"></div>
+                                                <div class="small text-muted"></i> <span id="selected-bank-company"></span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -198,7 +268,14 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="date_time">วันที่ และเวลาที่โอน <span class="text-danger">*</span></label>
-                                        <input type="datetime-local" class="form-control" name="date_time" id="date_time" required>
+                                        <div class="input-group flatpickr-thai">
+                                            <input type="text" name="date_time" class="form-control" placeholder="เลือกวัน-เวลาที่โอน..." required data-input>
+                                            <div class="input-group-append">
+                                                <a class="input-group-text" title="เลือกวันที่" data-toggle>
+                                                    <i class="fa fa-calendar"></i>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -219,7 +296,7 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
 
                             <div class="row justify-content-center mt-4">
                                 <div class="col-md-6 col-12 text-center">
-                                    <button type="submit" class="btn btn-primary btn-block rounded-pill btn-lg shadow-sm" style="background-color: #f57421; border-color: #f57421;">
+                                    <button type="submit" class="btn btn-bank-slip btn-block rounded-pill btn-lg shadow-sm">
                                         ยืนยันชำระเงิน
                                     </button>
                                 </div>
@@ -258,8 +335,8 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
                                         data-img="<?= validate_image($bank['image_path']) ?>"
                                         onclick="selectBankItem(this)">
                                         <img src="<?= validate_image($bank['image_path']) ?>" alt="<?= $bank['bank_name'] ?>">
-                                        <h6 class="font-weight-bold mb-1" style="font-size: 0.9rem;"><?= $bank['bank_name'] ?></h6>
-                                        <div class="font-weight-bold" style="font-size: 0.85rem;"><?= $bank['bank_number'] ?></div>
+                                        <h6 class="font-weight-bold mb-1"><?= $bank['bank_name'] ?></h6>
+                                        <div class="font-weight-bold"><?= $bank['bank_number'] ?></div>
                                         <div class="small text-secondary mt-1 text-truncate px-2" title="<?= $bank['bank_company'] ?>"><?= $bank['bank_company'] ?></div>
                                     </div>
                                 </div>
@@ -271,7 +348,7 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-                    <button type="button" class="btn btn-primary" style="background-color: #f57421; border-color: #f57421;" onclick="confirmBankSelection()">ยืนยันการเลือก</button>
+                    <button type="button" class="btn btn-bank-slip" onclick="confirmBankSelection()">ยืนยันการเลือก</button>
                 </div>
             </div>
         </div>
@@ -280,6 +357,94 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
 
 <script>
     let tempSelectedBank = null;
+
+    $(document).ready(function() {
+
+        // 1. เริ่มต้น Select2
+        $('.select2').select2({
+            width: '100%',
+            placeholder: "-- ค้นหา หรือ เลือกรายการที่ชำระ --",
+            allowClear: true
+        });
+
+        // 2. เริ่มต้น Flatpickr (ปฏิทินไทย)
+        flatpickr(".flatpickr-thai", {
+            wrap: true,
+            enableTime: true,
+            time_24hr: true,
+            locale: "th",
+            altInput: true,
+            altFormat: "j F พ.ศ. Y (H:i น.)",
+            dateFormat: "Y-m-d H:i",
+        });
+
+        // 3. Auto Fill ข้อมูลเมื่อเลือก Order (ทำงานร่วมกับ Select2 ได้อัตโนมัติ)
+        $('#order_code').change(function() {
+            var selectedOption = $('option:selected', this);
+
+            var amount = selectedOption.attr('data-amount');
+            var name = selectedOption.attr('data-name');
+            var contact = selectedOption.attr('data-contact');
+
+            if (amount) $('#total_price').val(parseFloat(amount).toFixed(2));
+            if (name) $('#customer_name').val(name);
+            if (contact) $('#contact').val(contact);
+        });
+
+        // Trigger change กรณีมีค่า Default
+        if ($('#order_code').val() != "") {
+            $('#order_code').trigger('change');
+        }
+
+        // 4. Submit Form
+        $('#payment-form').submit(function(e) {
+            e.preventDefault();
+
+            if ($('#customer_bank').val() == '') {
+                alert("กรุณาเลือกบัญชีธนาคารที่โอนเงินเข้ามา");
+                $('#bankSelectionModal').modal('show');
+                return;
+            }
+
+            start_loader();
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: _base_url_ + "classes/Master.php?f=save_payment_slip",
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                dataType: 'json',
+                success: function(resp) {
+                    if (resp.status == 'success') {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'แจ้งชำระเงินสำเร็จ',
+                                text: 'เจ้าหน้าที่จะดำเนินการตรวจสอบข้อมูลของท่านโดยเร็ว',
+                                confirmButtonColor: '#f57421'
+                            }).then(() => {
+                                location.replace('./');
+                            });
+                        } else {
+                            alert("แจ้งชำระเงินเรียบร้อยแล้ว");
+                            location.replace('./');
+                        }
+                    } else {
+                        alert(resp.msg || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+                    }
+                    end_loader();
+                },
+                error: function(err) {
+                    console.log(err);
+                    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+                    end_loader();
+                }
+            });
+        });
+    });
 
     $('#bank-selector-btn').click(function() {
         $('#bankSelectionModal').modal('show');
@@ -326,54 +491,4 @@ $total_price_val = isset($_GET['amount']) ? $_GET['amount'] : '';
             reader.readAsDataURL(input.files[0]);
         }
     }
-
-    $(document).ready(function() {
-        $('#payment-form').submit(function(e) {
-            e.preventDefault();
-
-            if ($('#customer_bank').val() == '') {
-                alert("กรุณาเลือกบัญชีธนาคารที่โอนเงินเข้ามา");
-                return;
-            }
-
-            start_loader();
-            var formData = new FormData(this);
-            // ไม่ต้องรวม firstname/lastname แล้ว เพราะใช้ input name="customer_name" โดยตรง
-
-            $.ajax({
-                url: _base_url_ + "classes/Master.php?f=save_payment_slip",
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                method: 'POST',
-                dataType: 'json',
-                success: function(resp) {
-                    if (resp.status == 'success') {
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'แจ้งชำระเงินสำเร็จ',
-                                text: 'เจ้าหน้าที่จะดำเนินการตรวจสอบข้อมูลของท่านโดยเร็ว',
-                                confirmButtonColor: '#f57421'
-                            }).then(() => {
-                                location.replace('./');
-                            });
-                        } else {
-                            alert("แจ้งชำระเงินเรียบร้อยแล้ว");
-                            location.replace('./');
-                        }
-                    } else {
-                        alert(resp.msg || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-                    }
-                    end_loader();
-                },
-                error: function(err) {
-                    console.log(err);
-                    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-                    end_loader();
-                }
-            });
-        });
-    });
 </script>

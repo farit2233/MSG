@@ -305,6 +305,10 @@ while ($type_row = $type_qry->fetch_assoc()) {
                   <i class="fa fa-basket-shopping"></i>
                   <span>ตะกร้าของฉัน</span>
                 </a>
+                <a class="profile-menu_item" href="<?= base_url . '?p=user/slip_payment' ?>">
+                  <i class="fa-solid fa-receipt"></i>
+                  <span>แจ้งยอดชำระเงิน</span>
+                </a>
                 <a class="profile-menu_item" href="<?= base_url . '?p=user/orders' ?>">
                   <i class="fa fa-truck"></i>
                   <span>ประวัติการสั่งซื้อ</span>

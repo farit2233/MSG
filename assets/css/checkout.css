@@ -454,6 +454,120 @@
         border-radius: 4px;
         cursor: pointer;
     }
+        /* สไตล์สำหรับ Input ที่ทำหน้าตาเหมือน Dropdown */
+    .custom-select-trigger {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .custom-select-trigger:hover {
+        border-color: #f57421;
+    }
+
+    /* สไตล์การ์ดธนาคารใน Modal */
+    .bank-option-card {
+        border: 2px solid #eee;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        height: 100%;
+        background: #fff;
+    }
+
+    .bank-option-card:hover {
+        border-color: #f57421;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .bank-option-card img {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        margin-bottom: 10px;
+    }
+
+    /* State เมื่อถูกเลือก (Active) */
+    .bank-option-card.selected {
+        border-color: #f57421;
+        opacity: 0.9;
+    }
+
+    /* ไอคอนติ๊กถูก (Checkmark) */
+    .bank-option-card.selected::after {
+        content: '\f00c';
+        /* FontAwesome Check Icon */
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #f57421;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ส่วนแสดงผลธนาคารที่เลือก (หน้าหลัก) */
+    /* ส่วนแสดงผลธนาคารที่เลือก (หน้าหลัก) */
+    #selected-bank-details {
+        background-color: #ffffff;
+        /* พื้นหลัง (ใส่สีขาว หรือสีอ่อนๆ ตามชอบได้เลยครับ) */
+        border: 1px solid #f57421;
+        /* <--- สีขอบส้มตามที่ต้องการ */
+        border-radius: 5px;
+        /* ลบเหลี่ยมมุมเล็กน้อย */
+        color: #333333;
+        /* สีตัวหนังสือ */
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+
+    #selected-bank-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin-right: 15px;
+        border: 2px solid #fff;
+    }
+
+    .btn-bank-confirm {
+        background-color: #f57421;
+        color: white;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-bank-confirm:hover,
+    .btn-bank-cancel:hover {
+        color: white;
+        filter: brightness(90%);
+    }
+
+    .btn-bank-cancel {
+        background-color: #dc3545;
+        color: white;
+        transition: all 0.2s ease-in-out;
+    }
 
     /* Responsive */
     @media (max-width: 991px) {
