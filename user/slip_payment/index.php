@@ -171,10 +171,10 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
             </div>
 
             <div class="col-lg-9">
-                <div class="card shadow-sm">
+                <div class="py-4">
                     <div class="card-body">
                         <div class="profile-section-title-with-line mb-4">
-                            <h4>แจ้งชำระเงิน (Slip Payment)</h4>
+                            <h4>แจ้งยอดชำระเงิน</h4>
                             <p class="text-muted">กรอกข้อมูลให้ครบถ้วนเพื่อยืนยันการโอนเงิน</p>
                         </div>
 
@@ -313,48 +313,47 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="bankSelectionModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fa fa-building mr-2"></i>เลือกบัญชีธนาคาร</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body bg-light">
-                    <div class="row">
-                        <?php if (!empty($banks_list)): ?>
-                            <?php foreach ($banks_list as $bank): ?>
-                                <div class="col-6 col-md-4 mb-3">
-                                    <div class="bank-option-card"
-                                        data-id="<?= $bank['id'] ?>"
-                                        data-name="<?= htmlspecialchars($bank['bank_name']) ?>"
-                                        data-number="<?= htmlspecialchars($bank['bank_number']) ?>"
-                                        data-company="<?= htmlspecialchars($bank['bank_company']) ?>"
-                                        data-img="<?= validate_image($bank['image_path']) ?>"
-                                        onclick="selectBankItem(this)">
-                                        <img src="<?= validate_image($bank['image_path']) ?>" alt="<?= $bank['bank_name'] ?>">
-                                        <h6 class="font-weight-bold mb-1"><?= $bank['bank_name'] ?></h6>
-                                        <div class="font-weight-bold"><?= $bank['bank_number'] ?></div>
-                                        <div class="small text-secondary mt-1 text-truncate px-2" title="<?= $bank['bank_company'] ?>"><?= $bank['bank_company'] ?></div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="col-12 text-center text-muted py-3">ไม่พบข้อมูลบัญชีธนาคารในระบบ</div>
-                        <?php endif; ?>
+        <div class="modal fade" id="bankSelectionModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fa fa-building mr-2"></i>เลือกบัญชีธนาคาร</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-                    <button type="button" class="btn btn-bank-slip" onclick="confirmBankSelection()">ยืนยันการเลือก</button>
+                    <div class="modal-body bg-light">
+                        <div class="row">
+                            <?php if (!empty($banks_list)): ?>
+                                <?php foreach ($banks_list as $bank): ?>
+                                    <div class="col-6 col-md-4 mb-3">
+                                        <div class="bank-option-card"
+                                            data-id="<?= $bank['id'] ?>"
+                                            data-name="<?= htmlspecialchars($bank['bank_name']) ?>"
+                                            data-number="<?= htmlspecialchars($bank['bank_number']) ?>"
+                                            data-company="<?= htmlspecialchars($bank['bank_company']) ?>"
+                                            data-img="<?= validate_image($bank['image_path']) ?>"
+                                            onclick="selectBankItem(this)">
+                                            <img src="<?= validate_image($bank['image_path']) ?>" alt="<?= $bank['bank_name'] ?>">
+                                            <h6 class="font-weight-bold mb-1"><?= $bank['bank_name'] ?></h6>
+                                            <div class="font-weight-bold"><?= $bank['bank_number'] ?></div>
+                                            <div class="small text-secondary mt-1 text-truncate px-2" title="<?= $bank['bank_company'] ?>"><?= $bank['bank_company'] ?></div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="col-12 text-center text-muted py-3">ไม่พบข้อมูลบัญชีธนาคารในระบบ</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-bank-cancel" data-dismiss="modal">ยกเลิก</button>
+                        <button type="button" class="btn btn-bank-slip" onclick="confirmBankSelection()">ยืนยันการเลือก</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 </section>
 
 <script>
