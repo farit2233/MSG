@@ -422,6 +422,14 @@
 	.gallery-next-btn:hover {
 		background-color: rgba(0, 0, 0, 0.8);
 	}
+	.custom-category-gap {
+        margin-bottom: 6px; /* ปรับตัวเลขตรงนี้เพื่อให้ห่างมากหรือน้อยตามต้องการ */
+    }
+
+    /* (ตัวเลือกเสริม) ไม่ต้องเว้นระยะตัวสุดท้าย */
+    .custom-category-gap:last-child {
+        margin-bottom: 0;
+    }
 
 	@media    (max-width: 932px) {
 		.modal-dialog-image{

@@ -180,17 +180,17 @@ if (!function_exists('format_price_custom')) {
                         <div id="category-filter-group">
                             <?php
                             $categories_qry = $conn->query("
-                                SELECT id, `name`, `other` 
-                                FROM `category_list` 
-                                WHERE `status` = 1 AND `delete_flag` = 0 
-                                ORDER BY `other` ASC, `name` DESC
-                            ");
-                            $counter = 0; // นับจำนวนหมวดหมู่
-                            $max_categories = 10; // จำนวนหมวดหมู่ที่จะแสดงเริ่มต้น
+            SELECT id, `name`, `other` 
+            FROM `category_list` 
+            WHERE `status` = 1 AND `delete_flag` = 0 
+            ORDER BY `other` ASC, `name` DESC
+        ");
+                            $counter = 0;
+                            $max_categories = 10;
                             while ($cat = $categories_qry->fetch_assoc()):
                                 $counter++;
                             ?>
-                                <div class="form-check category-item <?= $counter > $max_categories ? 'd-none' : '' ?>">
+                                <div class="form-check category-item custom-category-gap <?= $counter > $max_categories ? 'd-none' : '' ?>">
                                     <input class="form-check-input category-filter" type="checkbox" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>" <?= ($current_cid == $cat['id']) ? 'checked' : '' ?>>
                                     <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
                                         <?= $cat['name'] ?>
@@ -201,7 +201,6 @@ if (!function_exists('format_price_custom')) {
                         <button class="btn btn-link w-100" id="toggle-categories">
                             <span id="toggle-text">แสดงผลเพิ่มเติม</span>
                         </button>
-
                     </div>
                     <hr>
                     <div class="card-body">
