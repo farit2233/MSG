@@ -149,7 +149,7 @@ $stat_arr = ['ยังไม่ชำระเงิน', 'รอตรวจ�
 
 								<td class="p-1 align-middle text-center"><?= $row['code'] ?></td>
 								<td class="p-1 align-middle"><?= $row['customer'] ?></td>
-								<td class="p-1 align-middle text-center"><?= format_num($row['total_amount'], 2) ?> ฿</td>
+								<td class="p-1 align-middle text-center"><?= format_num($row['grand_total'], 2) ?> ฿</td>
 								<td class="p-1 align-middle text-center"><?= formatDateThai($row['date_created']); ?></td>
 								<td class="p-1 align-middle text-center">
 									<?php

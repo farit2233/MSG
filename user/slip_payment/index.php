@@ -194,6 +194,7 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
                                                     $display_text = $order['code'] . ' (ยอด ' . number_format($order['grand_total'], 2) . ' บาท)';
                                                     ?>
                                                     <option value="<?= $order['code'] ?>"
+                                                        data-order-id="<?= $order['id'] ?>"
                                                         data-amount="<?= $order['grand_total'] ?>"
                                                         data-name="<?= htmlspecialchars($order['name']) ?>"
                                                         data-contact="<?= htmlspecialchars($order['contact']) ?>"
@@ -305,6 +306,7 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
                             <div class="text-center text-muted small mt-2">
                                 <i class="fa fa-shield-alt mr-1"></i> ข้อมูลปลอดภัยด้วยการเข้ารหัส SSL
                             </div>
+                            <input type="hidden" name="order_id" id="order_id">
 
                         </form>
                     </div>
@@ -385,11 +387,14 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
             var amount = selectedOption.attr('data-amount');
             var name = selectedOption.attr('data-name');
             var contact = selectedOption.attr('data-contact');
+            var order_id = selectedOption.attr('data-order-id'); // รับค่า order_id
 
             if (amount) $('#total_price').val(parseFloat(amount).toFixed(2));
             if (name) $('#customer_name').val(name);
             if (contact) $('#contact').val(contact);
+            if (order_id) $('#order_id').val(order_id); // ส่งค่า order_id ในฟอร์ม
         });
+
 
         // Trigger change กรณีมีค่า Default
         if ($('#order_code').val() != "") {

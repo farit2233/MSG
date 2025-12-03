@@ -1876,14 +1876,14 @@ class Master extends DBConnection
 	{
 		global $conn;
 
-		// 1. ป้องกัน SQL Injection เบื้องต้น
+		// 1. ป้องกัน SQL Injection
 		foreach ($_POST as $k => $v) {
 			if (!is_array($_POST[$k]))
 				$_POST[$k] = addslashes($v);
 		}
-		extract($_POST); // แตกตัวแปรออกมาใช้งาน เช่น $order_code, $total_price
+		extract($_POST); // แตกตัวแปรออกมาใช้งาน เช่น $order_code, $total_price, $order_id
 
-		// 2. จัดการการอัปโหลดไฟล์ (img)
+		// 2. อัปโหลดไฟล์ (img)
 		$slip_path = "";
 
 		if (isset($_FILES['img']['tmp_name']) && !empty($_FILES['img']['tmp_name'])) {
@@ -1903,25 +1903,26 @@ class Master extends DBConnection
 			}
 		}
 
-		// 3. เตรียมคำสั่ง SQL Insert
+		// 3. คำสั่ง SQL Insert พร้อมการบันทึก order_id
 		$sql = "INSERT INTO `slip_payment` set 
-				`order_code` = '{$order_code}', 
-				`customer_name` = '{$customer_name}', 
-				`contact` = '{$contact}', 
-				`email` = '{$email}', 
-				`customer_bank` = '{$customer_bank}', 
-				`total_price` = '{$total_price}', 
-				`date_time` = '{$date_time}', 
-				`slip_path` = '{$slip_path}', 
-				`approve` = 0 
-			";
+            `order_code` = '{$order_code}', 
+            `order_id` = '{$order_id}', 
+            `customer_name` = '{$customer_name}', 
+            `contact` = '{$contact}', 
+            `email` = '{$email}', 
+            `customer_bank` = '{$customer_bank}', 
+            `total_price` = '{$total_price}', 
+            `date_time` = '{$date_time}', 
+            `slip_path` = '{$slip_path}', 
+            `is_approve` = 0 
+        ";
 
 		// 4. บันทึกลงฐานข้อมูล
 		$save = $conn->query($sql);
 
 		if ($save) {
-			// อัปเดตสถานะ order_list
-			$update_order = $conn->query("UPDATE `order_list` SET `payment_status` = 1 WHERE `code` = '{$order_code}'");
+			// อัปเดตสถานะ order_list โดยใช้ order_id
+			$update_order = $conn->query("UPDATE `order_list` SET `payment_status` = 1 WHERE `id` = '{$order_id}'");
 
 			$resp['status'] = 'success';
 
@@ -2043,11 +2044,153 @@ class Master extends DBConnection
 		return json_encode($resp);
 	}
 
+	function update_slip_payment()
+	{
+		extract($_POST);
+
+		// ตรวจสอบว่า order_id ถูกส่งมาหรือไม่
+		if (empty($order_id)) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "ไม่พบรหัสการสั่งซื้อ"; // แสดงข้อความหากไม่มี order_id
+			return json_encode($resp);
+		}
+
+		// Step 2: Get the is_approve status from the slip_payment table
+		$is_approve = isset($_POST['is_approve']) ? (int)$_POST['is_approve'] : 0;
+
+		// Step 3: Update the is_approve status in the slip_payment table
+		$update_slip = $this->conn->query("UPDATE `slip_payment` 
+    SET `is_approve` = '{$is_approve}'
+    WHERE `order_id` = '{$order_id}'");
+
+		// Step 4: Check if update was successful
+		if ($update_slip) {
+			// Step 5: Set payment_status based on is_approve value
+			$payment_status = 0;
+			if ($is_approve == 1) {
+				$payment_status = 2; // Approved
+			} elseif ($is_approve == 2) {
+				$payment_status = 3; // Denied
+			}
+
+			// Step 6: Update the payment_status in the order_list table
+			$update_order = $this->conn->query("UPDATE `order_list`
+        SET `payment_status` = '{$payment_status}'
+        WHERE `id` = '{$order_id}'");
+
+			if ($update_order) {
+				// ส่งอีเมลแจ้งลูกค้า
+				$this->send_payment_status_email($order_id, $is_approve);
+				// ส่งอีเมลสถานะการอัปเดตคำสั่งซื้อ
+				$this->send_order_status_email($order_id, $payment_status, 1); // ส่งอีเมลแจ้งสถานะการชำระเงิน
+
+				// Success message
+				$resp['status'] = 'success';
+				$this->settings->set_flashdata('success', "อัปเดตสถานะการชำระเงินเรียบร้อยแล้ว");
+			} else {
+				// Error message for order_list update
+				$resp['status'] = 'failed';
+				$resp['msg'] = $this->conn->error;
+			}
+		} else {
+			// Error message for slip_payment update
+			$resp['status'] = 'failed';
+			$resp['msg'] = $this->conn->error;
+		}
+
+		return json_encode($resp);
+	}
+
+
+	function send_payment_status_email($order_id, $is_approve)
+	{
+		// ดึงข้อมูลลูกค้า (ชื่อจาก order_list, อีเมลจาก customer_list) โดยใช้ order_id
+		$order_qry = $this->conn->query("SELECT ol.name, ol.code, cl.email, ol.total_amount, ol.delivery_address FROM `order_list` ol 
+    JOIN `customer_list` cl ON ol.customer_id = cl.id 
+    WHERE ol.id = '{$order_id}' LIMIT 1");
+
+		if ($order_qry->num_rows > 0) {
+			$order_row = $order_qry->fetch_assoc();
+			$customer_name = $order_row['name'];  // ชื่อลูกค้าจาก order_list
+			$customer_email = $order_row['email'];  // อีเมลจาก customer_list
+			$order_code = $order_row['code'];  // รหัสคำสั่งซื้อจาก order_list
+			$total_amount = $order_row['total_amount']; // ยอดรวมจาก order_list
+			$delivery_address = $order_row['delivery_address']; // ที่อยู่จัดส่ง
+
+			// สร้างหัวข้อและเนื้อหาอีเมลตามสถานะการชำระเงิน
+			$subject = "";
+			$body = "";
+
+			if ($is_approve == 1) {
+				// ถ้าการชำระเงินได้รับการยืนยัน
+				$subject = "การชำระเงินของคุณได้รับการยืนยันแล้ว";
+				$body = "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto;'>
+                    <h2 style='text-align:center;'>การชำระเงินของคุณได้รับการยืนยันแล้ว</h2>
+                    <p>เรียน คุณ <strong>{$customer_name}</strong></p>
+                    <p><strong>รหัสคำสั่งซื้อ: </strong>{$order_code}</p>
+                    <p>การชำระเงินของคุณสำหรับคำสั่งซื้อ {$order_code} ได้รับการยืนยันแล้ว</p>
+                    <p>ยอดรวมการชำระเงิน: <strong>" . number_format($total_amount, 2) . " บาท</strong></p>
+                    <p>ที่อยู่จัดส่ง: <strong>{$delivery_address}</strong></p>
+                    <br>
+                    <p>ขอบคุณที่เลือกใช้บริการของเรา</p>
+					<hr>
+					<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+                </div>
+            ";
+			} elseif ($is_approve == 2) {
+				// ถ้าการชำระเงินถูกปฏิเสธ
+				$subject = "การชำระเงินของคุณถูกปฏิเสธ";
+				$body = "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto;'>
+                    <h2 style='text-align:center;'>การชำระเงินของคุณถูกปฏิเสธ</h2>
+                    <p>เรียน คุณ <strong>{$customer_name}</strong></p>
+                    <p><strong>รหัสคำสั่งซื้อ: </strong>{$order_code}</p>
+                    <p>การชำระเงินของคุณสำหรับคำสั่งซื้อ {$order_code} ถูกปฏิเสธ</p>
+                    <p>กรุณาตรวจสอบข้อมูลการชำระเงินและลองใหม่อีกครั้ง</p>
+					<br>
+                    <hr>
+                    <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+                </div>
+            ";
+			}
+
+			// ส่งอีเมล
+			$mail = new PHPMailer(true);
+			try {
+				// ตั้งค่า SMTP
+				$mail->isSMTP();
+				$mail->Host = 'smtp.gmail.com';
+				$mail->Port = 465;
+				$mail->SMTPAuth = true;
+				$mail->Username = "faritre5566@gmail.com"; // ใส่อีเมลของคุณ
+				$mail->Password = "bchljhaxoqflmbys"; // ใส่รหัสอีเมลของคุณ
+				$mail->SMTPSecure = "ssl";
+				$mail->CharSet = 'UTF-8';
+				$mail->isHTML(true);
+				$mail->Subject = $subject;
+
+				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->addAddress($customer_email, $customer_name);
+
+				// เนื้อหา
+				$mail->Body = $body;
+
+				// ส่งอีเมล
+				$mail->send();
+			} catch (Exception $e) {
+				// ถ้ามีข้อผิดพลาดในการส่งอีเมล
+				error_log("Mailer Error: {$mail->ErrorInfo}");
+			}
+		}
+	}
+
+
 
 	function send_order_status_email($order_id, $payment_status, $delivery_status)
 	{
 		// ดึงข้อมูลคำสั่งซื้อ
-		$qry = $this->conn->query("SELECT o.*, c.email, CONCAT(c.firstname, ' ', c.lastname) as customer_name 
+		$qry = $this->conn->query("SELECT o.*, c.email, name
         FROM order_list o 
         INNER JOIN customer_list c ON o.customer_id = c.id 
         WHERE o.id = {$order_id}");
@@ -2056,7 +2199,7 @@ class Master extends DBConnection
 			$order = $qry->fetch_assoc();
 			$order_code = $order['code'];
 			$customer_email = $order['email'];
-			$customer_name = $order['customer_name'];
+			$customer_name = $order['name'];
 
 			$payment_status_text_map = [
 				0 => 'ยังไม่ชำระเงิน',
@@ -2113,7 +2256,7 @@ class Master extends DBConnection
 						<p>สถานะการชำระเงิน: <strong>{$payment_text}</strong></p>
 						<p>สถานะการจัดส่ง: <strong>{$delivery_text}</strong></p>
 						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
-						<p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
+						<p>💵 ยอดรวม: " . number_format($order['grand_total'], 2) . " บาท</p>
 						<hr>
 						<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
 					</div>
@@ -2152,7 +2295,7 @@ class Master extends DBConnection
 						<p>สถานะการชำระเงิน: <strong>{$payment_text}</strong></p>
 						<p>สถานะการจัดส่ง: <strong>{$delivery_text}</strong></p>
 						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
-                 		<p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
+                 		<p>💵 ยอดรวม: " . number_format($order['grand_total'], 2) . " บาท</p>
 					</div>
 				";
 
@@ -2198,7 +2341,7 @@ class Master extends DBConnection
 			- สถานะการชำระเงิน: {$payment_text}
 			- สถานะการจัดส่ง: {$delivery_text}
 			- ที่อยู่จัดส่ง: {$order['delivery_address']}
-			- ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท
+			- ยอดรวม: " . number_format($order['grand_total'], 2) . " บาท
 			";
 			// ส่งข้อความ Telegram
 			sendTelegramNotificationUpdateOder($telegram_message);
@@ -3278,6 +3421,9 @@ switch ($action) {
 		break;
 	case 'update_order_status':
 		echo $Master->update_order_status();
+		break;
+	case 'update_slip_payment':
+		echo $Master->update_slip_payment();
 		break;
 	case 'save_inquiry':
 		echo $Master->save_inquiry();

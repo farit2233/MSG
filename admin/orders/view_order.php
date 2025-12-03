@@ -1,9 +1,8 @@
 <?php
-$gt = 0; // กำหนดค่าเริ่มต้นให้กับ $gt ที่นี่
+$gt = 0;
 
 // ดึงข้อมูลคำสั่งซื้อ
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    // ### MODIFIED QUERY: ไม่จำเป็นต้องระบุคอลัมน์ซ้ำซ้อน แค่ ol.* ก็พอ ###
     $qry = $conn->query("SELECT ol.* FROM `order_list` ol WHERE ol.id = '{$_GET['id']}' ");
     if ($qry->num_rows > 0) {
         foreach ($qry->fetch_assoc() as $k => $v) {
@@ -12,9 +11,11 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     }
 }
 
+// ป้องกัน error หากไม่มีค่า shipping_cost ให้เป็น 0 ไว้ก่อน
+$shipping_cost = isset($shipping_cost) ? $shipping_cost : 0;
+
 $promotion_name = '';
 if (!empty($promotion_id)) {
-    // คิวรีหาชื่อโปรโมชันจาก promotion_id ที่ได้มา
     $promo_qry = $conn->query("SELECT name FROM `promotions_list` WHERE id = '{$promotion_id}'");
     if ($promo_qry->num_rows > 0) {
         $promotion_name = $promo_qry->fetch_assoc()['name'];
@@ -25,8 +26,6 @@ if (!empty($promotion_id)) {
 
 $coupon_name = '';
 if (!empty($coupon_code_id)) {
-    // คิวรีหาชื่อ/โค้ดคูปองจาก coupon_code_id ที่ได้มา
-    // สมมติว่าตารางชื่อ coupon_code_list และคอลัมน์ที่เก็บโค้ดชื่อ code
     $coupon_qry = $conn->query("SELECT coupon_code FROM `coupon_code_list` WHERE id = '{$coupon_code_id}'");
     if ($coupon_qry->num_rows > 0) {
         $coupon_name = $coupon_qry->fetch_assoc()['coupon_code'];
@@ -35,28 +34,15 @@ if (!empty($coupon_code_id)) {
     }
 }
 
-// ข้อมูลขนส่ง
-
+// --- ข้อมูลขนส่ง ---
 $shipping_providers = 'ไม่ระบุขนส่ง';
-if (!empty($shipping_methods_id)) {
+if (isset($provider_id) && !empty($provider_id)) {
     $shipping_query = $conn->query("SELECT name FROM shipping_providers WHERE id = '{$provider_id}'");
     if ($shipping_query->num_rows > 0) {
         $shipping_data = $shipping_query->fetch_assoc();
         $shipping_providers = $shipping_data['name'];
     } else {
-        $shipping_providers = 'ไม่พบข้อมูลขนส่ง';
-    }
-}
-
-
-$shipping_methods_name = 'ไม่ระบุขนส่ง';
-if (!empty($shipping_methods_id)) {
-    $shipping_query = $conn->query("SELECT name, cost FROM shipping_methods WHERE id = '{$shipping_methods_id}'");
-    if ($shipping_query->num_rows > 0) {
-        $shipping_data = $shipping_query->fetch_assoc();
-        $shipping_methods_name = $shipping_data['name'];
-    } else {
-        $shipping_methods_name = 'ไม่พบข้อมูลขนส่ง';
+        $shipping_providers = 'ไม่พบข้อมูลขนส่ง (ID: ' . $provider_id . ')';
     }
 }
 
@@ -75,30 +61,24 @@ if (isset($id)) {
     }
 }
 
-$shipping_cost = 0.00;
-if (!empty($shipping_prices_id)) {
-    // ### MODIFIED: ดึงค่าจัดส่งจาก shipping_prices_id ที่บันทึกไว้ใน order_list โดยตรง ###
-    $cost_qry = $conn->query("SELECT price FROM shipping_prices WHERE id = '{$shipping_prices_id}'");
-    if ($cost_qry && $cost_qry->num_rows > 0) {
-        $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
-    }
-} elseif (!empty($shipping_methods_id)) {
-    // Fallbackเผื่อกรณีที่ไม่ได้บันทึก shipping_prices_id แต่มี methods_id
-    $cost_qry = $conn->query("
-        SELECT price FROM shipping_prices
-        WHERE shipping_methods_id = '{$shipping_methods_id}' AND {$total_weight} BETWEEN min_weight AND max_weight
-        LIMIT 1
-    ");
-    if ($cost_qry && $cost_qry->num_rows > 0) {
-        $shipping_cost = (float)$cost_qry->fetch_assoc()['price'];
-    }
-}
-
 // คำนวณยอดรวมสุดท้าย
-$grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amount จาก order_list โดยตรง
+$grand_total = isset($total_amount) ? $total_amount : 0;
 ?>
 
-
+<style>
+    .product-logo {
+        width: 90px;
+        /* ปรับความกว้างที่ต้องการ (เช่น 80px หรือ 100px) */
+        height: 90px;
+        /* ปรับความสูงให้เท่ากับความกว้าง */
+        object-fit: cover;
+        /* สำคัญ: ตัดส่วนเกินออกเพื่อไม่ให้ภาพบีบหรือยืดจนเสียสัดส่วน */
+        object-position: center;
+        /* จัดให้อยู่กึ่งกลางภาพ */
+        border-radius: 5px;
+        /* (ทางเลือก) ทำให้มุมมนเล็กน้อย */
+    }
+</style>
 <section class="card card-outline card-orange rounded-0">
     <div class="card-header">
         <div class="card-title">รายละเอียดคำสั่งซื้อ</div>
@@ -123,6 +103,9 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                         </button>
                         <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="update_tracking">
                             อัปเดตเลขขนส่ง
+                        </button>
+                        <button class="btn btn-info btn-sm bg-gradient-info rounded-0 mb-1" type="button" id="approve_slip">
+                            ยืนยันสลิปชำระเงิน
                         </button>
                     </div>
                 </div>
@@ -241,11 +224,9 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                             <br>
                                             <?= htmlentities($shipping_providers) ?>
                                             <br>
-                                            <?= htmlentities($shipping_methods_name) ?>
-                                            <br>
                                             น้ำหนักรวม: <?= number_format($total_weight, 0) ?> กรัม
                                             <br>
-                                            ค่าส่ง: <?= number_format($shipping_cost, 2) ?> บาท
+                                            ค่าส่ง: <?= ($shipping_cost == 0) ? '<span class="text-success">ส่งฟรี</span>' : number_format($shipping_cost, 2) . ' บาท' ?>
                                         </div>
                                     </div>
                                 </div>
@@ -255,9 +236,9 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                 <?php
                                 $gt = 0;
                                 if (isset($id)) {
-                                    $order_items = $conn->query("SELECT o.*, p.name as product, p.brand as brand, p.price, p.discounted_price, cc.name as category, p.image_path, COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) as `available` FROM `order_items` o inner join product_list p on o.product_id = p.id inner join category_list cc on p.category_id = cc.id where order_id = '{$id}' ");
+                                    $order_items = $conn->query("SELECT o.*, p.name as product, p.brand as brand, p.vat_price, p.discounted_price, cc.name as category, p.image_path, COALESCE((SELECT SUM(quantity) FROM `stock_list` where product_id = p.id ), 0) as `available` FROM `order_items` o inner join product_list p on o.product_id = p.id inner join category_list cc on p.category_id = cc.id where order_id = '{$id}' ");
                                     while ($row = $order_items->fetch_assoc()):
-                                        $price = $row['price'];
+                                        $price = $row['vat_price'];
                                         $discounted_price = $row['discounted_price'];
                                         $has_discount = isset($discounted_price) && $discounted_price > 0;
 
@@ -302,8 +283,25 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                             <div class="d-flex justify-content-end py-3">
                                 <div class="col-auto">
                                     <div class="text-right">
+                                        <?php
+                                        // --- ส่วนคำนวณยอดรวมใหม่ (New Calculation) ---
+                                        // เริ่มจาก ยอดรวมสินค้า + ค่าจัดส่ง
+                                        $cal_grand_total = $gt + $shipping_cost;
+
+                                        // หักส่วนลดโปรโมชั่น (ถ้ามี)
+                                        if (isset($promotion_discount) && $promotion_discount > 0) {
+                                            $cal_grand_total -= $promotion_discount;
+                                        }
+
+                                        // หักส่วนลดคูปอง (ถ้ามี)
+                                        if (isset($coupon_discount) && $coupon_discount > 0) {
+                                            $cal_grand_total -= $coupon_discount;
+                                        }
+                                        ?>
+
                                         <h5>ยอดรวมสินค้า: <?= format_num($gt, 2) ?> บาท</h5>
-                                        <h5>ค่าจัดส่ง: <?= number_format($shipping_cost, 2) ?> บาท</h5>
+
+                                        <h5>ค่าจัดส่ง: <?= ($shipping_cost == 0) ? '<span class="text-success">ส่งฟรี</span>' : number_format($shipping_cost, 2) . ' บาท' ?></h5>
 
                                         <?php if (!empty($promotion_name) && isset($promotion_discount) && $promotion_discount > 0): ?>
                                             <h5>
@@ -319,9 +317,9 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
                                             </h5>
                                         <?php endif; ?>
 
-                                        <h5>ยอดสั่งซื้อ <small> รวม VAT:</small> <?= format_num($grand_total, 2) ?> บาท</h5>
+                                        <h5>ยอดสั่งซื้อ <small> รวม VAT:</small> <?= format_num($cal_grand_total, 2) ?> บาท</h5>
                                         <hr>
-                                        <h4><b>รวมทั้งสิ้น : <?= format_num($grand_total, 2) ?> บาท</b></h4>
+                                        <h4><b>รวมทั้งสิ้น : <?= format_num($cal_grand_total, 2) ?> บาท</b></h4>
                                     </div>
                                 </div>
                             </div>
@@ -395,6 +393,9 @@ $grand_total = isset($total_amount) ? $total_amount : 0; // ใช้ total_amou
         })
         $('#update_tracking').click(function() {
             uni_modal_tracking("อัปเดตเลขขนส่ง <small>*บันทึกเพื่ออัปเดตสถานะเลขขนส่ง</small>", "orders/update_tracking.php?id=<?= isset($id) ? $id : '' ?>")
+        })
+        $('#approve_slip').click(function() {
+            uni_modal_slip("ยืนยันสลิปชำระเงิน <small>*ยืนยันเพื่ออัปเดตสถานะคำสั่งซื้อ</small>", "orders/approve_slip.php?id=<?= isset($id) ? $id : '' ?>")
         })
     })
 
