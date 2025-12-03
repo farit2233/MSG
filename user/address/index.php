@@ -37,10 +37,6 @@ $total_pages = ceil($total_rows / $limit);
 $qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$customer_id}' ORDER BY is_primary DESC, id DESC LIMIT {$limit} OFFSET {$offset}");
 ?>
 
-<style>
-
-</style>
-
 <section class="py-5 profile-page">
     <div class="container">
         <div class="row">
@@ -55,7 +51,7 @@ $qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$c
                             <div id="address-list">
                                 <div class="profile-section-title-with-line ">
                                     <h4>ที่อยู่ของฉัน</h4>
-                                    <p>จัดการ และเพิ่มที่อยู่สำหรับจัดส่ง</p>
+                                    <p class="text-muted">จัดการ และเพิ่มที่อยู่สำหรับจัดส่ง</p>
                                 </div>
                                 <div class="d-flex">
                                     <a href="#" class="ml-auto clickable-text-btn" id="address_option">

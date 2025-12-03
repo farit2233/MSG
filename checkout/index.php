@@ -365,7 +365,7 @@ if (!function_exists('format_price_custom')) {
     }
 }
 
-$banks_qry = $conn->query("SELECT * FROM bank_system WHERE is_active = 1 AND is_visible = 1");
+$banks_qry = $conn->query("SELECT * FROM bank_system WHERE is_active = 1 AND is_visible = 1 ORDER BY bank_name ASC");
 $banks_list = [];
 while ($row = $banks_qry->fetch_assoc()) {
     $banks_list[] = $row;
@@ -600,6 +600,7 @@ while ($row = $banks_qry->fetch_assoc()) {
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="bankSelectionModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">

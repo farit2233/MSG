@@ -19,12 +19,11 @@
         <div class="card-body">
             <div class="profile-section-title-with-line">
                 <h4>บัญชีของฉัน</h4>
-                <p>จัดการข้อมูลส่วนตัว ที่อยู่ และดูประวัติการสั่งซื้อของคุณ</p>
+                <p class="text-muted">จัดการข้อมูลส่วนตัว ที่อยู่ และดูประวัติการสั่งซื้อของคุณ</p>
             </div>
 
             <div class="row">
                 <div class="col-md-6 col-lg-4 mb-4">
-                    </a>
                     <a href="?p=user/profile" class="list-group-item-action account-card <?php echo (isset($_GET['p']) && $_GET['p'] == 'profile') ? 'active' : '' ?>">
                         <div class="card h-100">
                             <div class="card-body">

@@ -456,6 +456,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
         <nav class="nav flex-column pt-3">
           <?php if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2): ?>
             <a class="nav-link" href="<?= base_url . '?p=cart_list' ?>"> <i class="fa fa-basket-shopping"></i> ตะกร้าของฉัน</a>
+            <a class="nav-link" href="<?= base_url . '?p=user/slip_payment' ?>"><i class="fa-solid fa-receipt"></i> แจ้งยอดชำระเงิน</a>
             <a class="nav-link" href="<?= base_url . '?p=user/orders' ?>"><i class="fa fa-truck"></i> ประวัติการสั่งซื้อ</a>
             <div class="dropdown-divider"></div>
           <?php endif; ?>

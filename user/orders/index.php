@@ -42,7 +42,7 @@ function formatDateThai($date)
                             <div id="address-list">
                                 <div class="profile-section-title-with-line ">
                                     <h4>ประวัติการสั่งซื้อ</h4>
-                                    <p>ดูประวัติการสั่งซื้อ และสถานะสินค้า</p>
+                                    <p class="text-muted">ดูประวัติการสั่งซื้อ และสถานะสินค้า</p>
                                 </div>
                                 <div class="d-flex flex-wrap gap-2">
                                     <?php foreach ($filter_options as $key => $label): ?>

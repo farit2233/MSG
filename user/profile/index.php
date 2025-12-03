@@ -46,12 +46,11 @@ if ($_settings->userdata('id') != '') {
 
             <div class="col-lg-9">
                 <div class="py-4">
-
                     <div class="card-body">
                         <div class="container-fluid">
                             <div class="profile-section-title-with-line ">
                                 <h4>แก้ไขข้อมูลส่วนตัว</h4>
-                                <p>แก้ไขชื่อ, อีเมล, และเบอร์โทรศัพท์</p>
+                                <p class="text-muted">แก้ไขชื่อ, อีเมล, และเบอร์โทรศัพท์</p>
                             </div>
                             <form id="update-form" method="post">
                                 <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
