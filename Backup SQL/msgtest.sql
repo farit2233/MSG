@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Nov 28, 2025 at 04:00 AM
+-- Generation Time: Dec 03, 2025 at 07:13 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -24,6 +24,69 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `bank_providers`
+--
+
+CREATE TABLE `bank_providers` (
+  `id` int NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name_th` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_path` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `bank_providers`
+--
+
+INSERT INTO `bank_providers` (`id`, `name`, `name_th`, `image_path`, `is_active`) VALUES
+(1, 'Kasikorn Bank', 'ธนาคารกสิกรไทย', '/uploads/bank_providers/kbank.webp', 1),
+(2, 'Siam Commercial Bank', 'ธนาคารไทยพาณิชย์', '/uploads/bank_providers/scb.webp', 1),
+(3, 'Bangkok Bank', 'ธนาคารกรุงเทพ', '/uploads/bank_providers/bbl.webp', 1),
+(4, 'Krungthai Bank', 'ธนาคารกรุงไทย', '/uploads/bank_providers/ktb.webp', 1),
+(5, 'Bank of Ayudhya (Krungsri)', 'ธนาคารกรุงศรีอยุธยา', '/uploads/bank_providers/krungsri.webp', 1),
+(6, 'TMBThanachart Bank (TTB)', 'ธนาคารทหารไทยธนชาต (TTB)', '/uploads/bank_providers/ttb.webp', 1),
+(7, 'Government Savings Bank (GSB)', 'ธนาคารออมสิน', '/uploads/bank_providers/gsb.webp', 1),
+(8, 'Government Housing Bank (GHB)', 'ธนาคารอาคารสงเคราะห์', '/uploads/bank_providers/ghb.webp', 1),
+(9, 'Bank for Agriculture and Agricultural Cooperatives (BAAC)', 'ธ.ก.ส.', '/uploads/bank_providers/baac.webp', 1),
+(10, 'Kiatnakin Phatra Bank', 'ธนาคารเกียรตินาคินภัทร', '/uploads/bank_providers/kkp.webp', 1),
+(11, 'CIMB Thai Bank', 'ธนาคารซีไอเอ็มบี ไทย', '/uploads/bank_providers/cimb.webp', 1),
+(12, 'United Overseas Bank (UOB)', 'ธนาคารยูโอบี', '/uploads/bank_providers/uob.webp', 1),
+(13, 'Land and Houses Bank', NULL, '/uploads/bank_providers/lh.webp', 1),
+(14, 'TISCO Bank', 'ธนาคารทิสโก้', '/uploads/bank_providers/tisco.webp', 1),
+(15, 'ICBC (Thai)', 'ธนาคารไอซีบีซี (ไทย)', '/uploads/bank_providers/icbc.webp', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bank_system`
+--
+
+CREATE TABLE `bank_system` (
+  `id` int NOT NULL,
+  `bank_company` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `bank_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `image_path` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_visible` tinyint(1) DEFAULT '1',
+  `is_active` tinyint(1) DEFAULT '1',
+  `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `date_updated` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `bank_system`
+--
+
+INSERT INTO `bank_system` (`id`, `bank_company`, `bank_number`, `bank_name`, `image_path`, `is_visible`, `is_active`, `date_created`, `date_updated`) VALUES
+(2, 'testbank system', '012345689', 'ธ.ก.ส.', '/uploads/bank_providers/baac.webp', 1, 1, '2025-11-28 16:38:24', '2025-11-28 16:38:24'),
+(3, 'ทดสอบระบบ บัญชีธนาคาร', '9876543210', 'ธนาคารทหารไทยธนชาต (TTB)', '/uploads/bank_providers/ttb.webp', 1, 1, '2025-11-28 16:41:43', '2025-11-28 16:41:43'),
+(4, 'ฉันท์ชยา ภิญโญ', '846-0-313433', 'ธนาคารกรุงไทย', '/uploads/bank_providers/ktb.webp', 1, 1, '2025-12-01 13:54:34', '2025-12-01 13:54:34'),
+(5, 'ฉันท์ชยา ภิญโญ', '426-170238-4', 'ธนาคารไทยพาณิชย์', '/uploads/bank_providers/scb.webp', 1, 1, '2025-12-01 13:55:56', '2025-12-01 13:55:56');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `cart_list`
 --
 
@@ -39,10 +102,7 @@ CREATE TABLE `cart_list` (
 --
 
 INSERT INTO `cart_list` (`id`, `customer_id`, `product_id`, `quantity`) VALUES
-(11, 48, 39, 1),
-(91, 19, 64, 1),
-(109, 19, 60, 1),
-(110, 19, 63, 1);
+(11, 48, 39, 1);
 
 -- --------------------------------------------------------
 
@@ -242,8 +302,8 @@ CREATE TABLE `customer_addresses` (
 
 INSERT INTO `customer_addresses` (`id`, `customer_id`, `name`, `contact`, `address`, `sub_district`, `district`, `province`, `postal_code`, `is_primary`) VALUES
 (3, 19, 'นางสาวมลฑล ณ วิศัย', '082-888-9688', '21 ม.5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 0),
-(12, 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมืองตรัง', 'ตรัง', '92190', 1),
-(15, 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง', 'อย่างซิ่ง', 'แซงหมด', 'ไม่มีเลี้ยว', '88888', 0),
+(12, 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมืองตรัง', 'ตรัง', '92190', 0),
+(15, 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง', 'อย่างซิ่ง', 'แซงหมด', 'ไม่มีเลี้ยว', '88888', 1),
 (17, 48, 'ฉันท์ชยา ภิญโญ', '0828398430', '21 ม.5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 1),
 (18, 75, 'นายฉันท์ชยา ภิญโญ', '0828398430', '21 ม.5 ถ.เพชรเกษม', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 1),
 (19, 77, 'ฉันท์ชยา ภิญโญ', '0828398430', '21 ม.5 ถ.เพชรเกษม ', 'นาท่ามเหนือ', 'เมือง', 'ตรัง', '92190', 1),
@@ -289,7 +349,7 @@ INSERT INTO `customer_list` (`id`, `firstname`, `middlename`, `lastname`, `gende
 (14, 'นายหมาในดำใดดง', 'ณ', 'ป่ามะขาม', 'Male', '011-557-8686', 'wolf@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/14.png?v=1749117170', NULL, '2025-06-05 16:52:50', '2025-06-05 16:52:50'),
 (16, 'เอกไม', '', 'ไมค์ทองคำ', 'Male', '023-858-9988', 'user4@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', NULL, NULL, '2025-06-17 13:17:23', '2025-06-17 13:17:23'),
 (18, 'นายฉันท์ชยา', '', 'ภิญโญ', 'Male', '0828398430', 'faritre5566@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/18.png?v=1751264120', NULL, '2025-06-26 15:42:39', '2025-06-30 13:15:20'),
-(19, 'นางอัญมณี', 'ณ', 'คงสี', 'Female', '088-115-5458', 'faritre1@gmail.com', '$2y$10$z5qepHJmwvgbr4i7b883LuiQYWDHs.S8UltX3cz6zizItXOkVmbb6', 'uploads/customers/19.webp?v=1763718154', '2025-11-28 10:54:43', '2025-06-26 15:48:41', '2025-11-28 10:54:43'),
+(19, 'นางอัญมณี', 'ณ', 'คงสี', 'Female', '088-115-5458', 'faritre1@gmail.com', '$2y$10$z5qepHJmwvgbr4i7b883LuiQYWDHs.S8UltX3cz6zizItXOkVmbb6', 'uploads/customers/19.webp?v=1763718154', '2025-12-03 13:20:00', '2025-06-26 15:48:41', '2025-12-03 13:20:00'),
 (29, 'ปาล์ม', 'อมัจจ์', 'เดชสงคราม', 'Male', '0980624633', 'amat123450zx@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/customers/29.png?v=1757673364', NULL, '2025-09-12 17:36:04', '2025-09-12 17:40:36'),
 (30, 'Tipwadee', '', 'Pattana', 'Male', '0952713291', 'tipwadee5818@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', NULL, NULL, '2025-09-12 18:14:40', '2025-09-12 18:14:40'),
 (45, '1', '1', '1', 'Male', '01231456789', 'test1@gmail.com', '$2y$10$Wck6K95uN7w5SXA4qxnAz.QRI8rZQc7PjO28aODBB3lR9NpTbJKWW', 'uploads/customers/45.png?v=1758014169', NULL, '2025-09-16 16:16:09', '2025-09-16 16:16:09'),
@@ -1293,7 +1353,19 @@ INSERT INTO `order_items` (`order_id`, `product_id`, `promotion_id`, `coupon_cod
 (45, 70, 20, NULL, 27, 38.00),
 (46, 41, NULL, NULL, 2, 50.00),
 (46, 62, NULL, NULL, 1, 419.00),
-(47, 14, NULL, NULL, 1, 11298.00);
+(47, 14, NULL, NULL, 1, 11298.00),
+(48, 64, NULL, NULL, 22, 107.00),
+(49, 70, 20, NULL, 1, 38.00),
+(50, 70, 20, NULL, 1, 38.00),
+(51, 60, NULL, NULL, 1, 699.00),
+(52, 70, 20, NULL, 1, 38.00),
+(53, 63, NULL, NULL, 1, 189.00),
+(54, 64, NULL, NULL, 1, 107.00),
+(55, 70, 20, NULL, 1, 38.00),
+(56, 70, 20, NULL, 1, 38.00),
+(57, 70, 20, NULL, 10, 38.00),
+(58, 70, 20, NULL, 5, 38.00),
+(59, 68, 20, NULL, 3, 20.00);
 
 -- --------------------------------------------------------
 
@@ -1315,6 +1387,7 @@ CREATE TABLE `order_list` (
   `coupon_discount` decimal(10,2) NOT NULL DEFAULT '0.00',
   `tracking_id` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `provider_id` int DEFAULT NULL,
+  `bank_system_id` int DEFAULT NULL,
   `promotion_id` int DEFAULT NULL,
   `coupon_code_id` int DEFAULT NULL,
   `payment_status` tinyint(1) NOT NULL DEFAULT '0',
@@ -1329,20 +1402,32 @@ CREATE TABLE `order_list` (
 -- Dumping data for table `order_list`
 --
 
-INSERT INTO `order_list` (`id`, `code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `shipping_cost`, `grand_total`, `promotion_discount`, `coupon_discount`, `tracking_id`, `provider_id`, `promotion_id`, `coupon_code_id`, `payment_status`, `delivery_status`, `status`, `is_seen`, `date_created`, `date_updated`) VALUES
-(35, '2025112800001', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 40.00, 68.00, 0.00, 10.00, 0.00, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 09:40:10', '2025-11-28 09:41:08'),
-(36, '2025112800002', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 0.00, 1928.00, 0.00, 10.00, 0.00, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 09:41:35', '2025-11-28 10:39:58'),
-(37, '2025112800003', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 68.00, 40.00, 0.00, 10.00, 0.00, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 09:43:09', '2025-11-28 10:39:58'),
-(38, '2025112800004', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1890.00, 0.00, 0.00, 10.00, 0.00, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 09:43:33', '2025-11-28 10:39:58'),
-(39, '2025112800005', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1445.00, 0.00, 0.00, 0.00, 0.00, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 09:44:35', '2025-11-28 10:39:58'),
-(40, '2025112800006', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1445.00, 0.00, 0.00, 0.00, 0.00, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 09:53:00', '2025-11-28 10:39:58'),
-(41, '2025112800007', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1336.00, 0.00, 1445.00, 0.00, 0.00, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:25:28', '2025-11-28 10:39:58'),
-(42, '2025112800008', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1336.00, 0.00, 1445.00, 0.00, 0.00, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:31:09', '2025-11-28 10:39:58'),
-(43, '2025112800009', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1336.00, 80.00, 1525.00, 0.00, 0.00, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:34:37', '2025-11-28 10:39:58'),
-(44, '2025112800010', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 64.00, 60.00, 130.00, 0.00, 0.00, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:35:18', '2025-11-28 10:39:58'),
-(45, '2025112800011', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 945.00, 0.00, 1016.00, 10.00, 0.00, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 10:37:24', '2025-11-28 10:39:58'),
-(46, '2025112800012', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 483.00, 80.00, 599.00, 0.00, 0.00, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:39:40', '2025-11-28 10:39:58'),
-(47, '2025112800013', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 10558.18, 0.00, 11298.00, 0.00, 0.00, NULL, NULL, NULL, NULL, 0, 0, 0, 0, '2025-11-28 10:54:59', '2025-11-28 10:54:59');
+INSERT INTO `order_list` (`id`, `code`, `customer_id`, `name`, `contact`, `delivery_address`, `total_amount`, `shipping_cost`, `grand_total`, `promotion_discount`, `coupon_discount`, `tracking_id`, `provider_id`, `bank_system_id`, `promotion_id`, `coupon_code_id`, `payment_status`, `delivery_status`, `status`, `is_seen`, `date_created`, `date_updated`) VALUES
+(35, '2025112800001', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 40.00, 68.00, 0.00, 10.00, 0.00, NULL, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 09:40:10', '2025-11-28 09:41:08'),
+(36, '2025112800002', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 0.00, 1928.00, 0.00, 10.00, 0.00, NULL, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 09:41:35', '2025-11-28 10:39:58'),
+(37, '2025112800003', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 68.00, 40.00, 0.00, 10.00, 0.00, NULL, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 09:43:09', '2025-11-28 10:39:58'),
+(38, '2025112800004', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1890.00, 0.00, 0.00, 10.00, 0.00, NULL, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 09:43:33', '2025-11-28 10:39:58'),
+(39, '2025112800005', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1445.00, 0.00, 0.00, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 09:44:35', '2025-11-28 10:39:58'),
+(40, '2025112800006', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1445.00, 0.00, 0.00, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 09:53:00', '2025-11-28 10:39:58'),
+(41, '2025112800007', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1336.00, 0.00, 1445.00, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:25:28', '2025-11-28 10:39:58'),
+(42, '2025112800008', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1336.00, 0.00, 1445.00, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:31:09', '2025-11-28 10:39:58'),
+(43, '2025112800009', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 1336.00, 80.00, 1525.00, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:34:37', '2025-11-28 10:39:58'),
+(44, '2025112800010', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 64.00, 60.00, 130.00, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:35:18', '2025-11-28 10:39:58'),
+(45, '2025112800011', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 945.00, 0.00, 1016.00, 10.00, 0.00, NULL, NULL, NULL, 20, NULL, 0, 0, 0, 1, '2025-11-28 10:37:24', '2025-11-28 10:39:58'),
+(46, '2025112800012', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 483.00, 80.00, 599.00, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:39:40', '2025-11-28 10:39:58'),
+(47, '2025112800013', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 10558.18, 0.00, 11298.00, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 1, '2025-11-28 10:54:59', '2025-11-28 13:36:44'),
+(48, '2025120100001', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 2200.00, 0.00, 2354.00, 0.00, 0.00, NULL, NULL, 4, NULL, NULL, 0, 0, 0, 1, '2025-12-01 14:45:09', '2025-12-01 14:52:58'),
+(49, '2025120100002', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 35.00, 40.00, 68.00, 10.00, 0.00, NULL, NULL, 4, 20, NULL, 0, 0, 0, 1, '2025-12-01 14:52:33', '2025-12-01 14:52:58'),
+(50, '2025120100003', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 35.00, 40.00, 68.00, 10.00, 0.00, NULL, NULL, 4, 20, NULL, 0, 0, 0, 1, '2025-12-01 14:59:08', '2025-12-01 15:05:06'),
+(51, '2025120100004', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 653.04, 20.00, 719.00, 0.00, 0.00, NULL, NULL, 4, NULL, NULL, 0, 0, 0, 1, '2025-12-01 15:01:27', '2025-12-01 15:05:06'),
+(52, '2025120100005', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 35.00, 40.00, 68.00, 10.00, 0.00, NULL, NULL, 4, 20, NULL, 1, 0, 0, 1, '2025-12-01 15:02:31', '2025-12-02 14:01:02'),
+(53, '2025120100006', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 176.00, 40.00, 229.00, 0.00, 0.00, NULL, NULL, 4, NULL, NULL, 2, 0, 0, 1, '2025-12-01 15:04:01', '2025-12-03 10:44:23'),
+(54, '2025120100007', 19, 'นายฉันท์ชยา ภิญโญ', '082-223-9898', '21 หมู่ 5 ถ.เพชรเกษม ต.นาท่ามเหนือ อ.เมืองตรัง จ.ตรัง 92190', 100.00, 40.00, 147.00, 0.00, 0.00, NULL, NULL, 4, NULL, NULL, 1, 0, 0, 1, '2025-12-01 15:05:27', '2025-12-02 13:26:14'),
+(55, '2025120200001', 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง ต.อย่างซิ่ง อ.แซงหมด จ.ไม่มีเลี้ยว 88888', 35.00, 40.00, 68.00, 10.00, 0.00, NULL, NULL, 4, 20, NULL, 1, 0, 0, 1, '2025-12-02 11:15:08', '2025-12-02 13:47:02'),
+(56, '2025120200002', 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง ต.อย่างซิ่ง อ.แซงหมด จ.ไม่มีเลี้ยว 88888', 35.00, 40.00, 68.00, 10.00, 0.00, 'TH202512300001', 3, 4, 20, NULL, 1, 0, 0, 1, '2025-12-02 13:30:24', '2025-12-03 11:39:02'),
+(57, '2025120300001', 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง ต.อย่างซิ่ง อ.แซงหมด จ.ไม่มีเลี้ยว 88888', 350.00, 40.00, 410.00, 10.00, 0.00, NULL, NULL, 4, 20, NULL, 1, 0, 0, 0, '2025-12-03 11:41:23', '2025-12-03 13:16:09'),
+(58, '2025120300002', 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง ต.อย่างซิ่ง อ.แซงหมด จ.ไม่มีเลี้ยว 88888', 175.00, 40.00, 220.00, 10.00, 0.00, NULL, NULL, 4, 20, NULL, 1, 0, 0, 0, '2025-12-03 13:16:33', '2025-12-03 13:17:05'),
+(59, '2025120300003', 19, 'นางอัญมณี คงสี', '089-456-654', '77/88 ถ.ทางตรง ต.อย่างซิ่ง อ.แซงหมด จ.ไม่มีเลี้ยว 88888', 54.00, 40.00, 90.00, 10.00, 0.00, NULL, NULL, 4, 20, NULL, 3, 0, 0, 0, '2025-12-03 13:20:11', '2025-12-03 14:11:31');
 
 -- --------------------------------------------------------
 
@@ -1840,7 +1925,15 @@ INSERT INTO `promotion_usage_logs` (`id`, `promotion_id`, `customer_id`, `order_
 (10, 20, 19, 36, 10.00, 1, '2025-11-28 02:41:35'),
 (11, 20, 19, 37, 10.00, 1, '2025-11-28 02:43:09'),
 (12, 20, 19, 38, 10.00, 1, '2025-11-28 02:43:33'),
-(13, 20, 19, 45, 10.00, 1, '2025-11-28 03:37:24');
+(13, 20, 19, 45, 10.00, 1, '2025-11-28 03:37:24'),
+(14, 20, 19, 49, 10.00, 1, '2025-12-01 07:52:33'),
+(15, 20, 19, 50, 10.00, 1, '2025-12-01 07:59:08'),
+(16, 20, 19, 52, 10.00, 1, '2025-12-01 08:02:31'),
+(17, 20, 19, 55, 10.00, 1, '2025-12-02 04:15:08'),
+(18, 20, 19, 56, 10.00, 1, '2025-12-02 06:30:24'),
+(19, 20, 19, 57, 10.00, 1, '2025-12-03 04:41:23'),
+(20, 20, 19, 58, 10.00, 1, '2025-12-03 06:16:33'),
+(21, 20, 19, 59, 10.00, 1, '2025-12-03 06:20:11');
 
 -- --------------------------------------------------------
 
@@ -2019,6 +2112,42 @@ INSERT INTO `shipping_total` (`id`, `min_price`, `max_price`, `shipping_price`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `slip_payment`
+--
+
+CREATE TABLE `slip_payment` (
+  `id` int NOT NULL,
+  `order_id` int DEFAULT NULL,
+  `order_code` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `customer_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `contact` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `customer_bank` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `date_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `slip_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `is_approve` tinyint(1) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `slip_payment`
+--
+
+INSERT INTO `slip_payment` (`id`, `order_id`, `order_code`, `customer_name`, `contact`, `email`, `customer_bank`, `total_price`, `date_time`, `slip_path`, `is_approve`) VALUES
+(1, NULL, '2025120100007', 'นายฉันท์ชยา ภิญโญ', '0828398430', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 147.00, '2025-12-02 12:00:00', 'uploads/slips/1764648120_566530082_2709637776041562_1356560260550491339_n.jpg', 0),
+(2, NULL, '2025120200002', 'นางอัญมณี คงสี', '089-456-654', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 68.00, '2025-12-02 12:00:00', 'uploads/slips/1764657060_566530082_2709637776041562_1356560260550491339_n.jpg', 1),
+(3, NULL, '2025120200001', 'นางอัญมณี คงสี', '089-456-654', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 68.00, '2025-12-02 12:00:00', 'uploads/slips/1764658020_566530082_2709637776041562_1356560260550491339_n.jpg', 0),
+(4, NULL, '2025120200001', 'นางอัญมณี คงสี', '089-456-654', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 68.00, '2025-12-02 12:00:00', 'uploads/slips/1764658080_566530082_2709637776041562_1356560260550491339_n.jpg', 0),
+(5, NULL, '2025120200001', 'นางอัญมณี คงสี', '089-456-654', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 68.00, '2025-12-02 12:00:00', 'uploads/slips/1764658140_566530082_2709637776041562_1356560260550491339_n.jpg', 0),
+(6, NULL, '2025120100006', 'นายฉันท์ชยา ภิญโญ', '082-223-9898', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 229.00, '2025-12-02 12:00:00', 'uploads/slips/1764658740_566530082_2709637776041562_1356560260550491339_n.jpg', 1),
+(7, NULL, '2025120100005', 'นายฉันท์ชยา ภิญโญ', '082-223-9898', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 68.00, '2025-12-02 12:00:00', 'uploads/slips/1764658860_566530082_2709637776041562_1356560260550491339_n.jpg', 1),
+(8, 57, '2025120300001', 'นางอัญมณี คงสี', '089-456-654', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 410.00, '2025-12-03 13:15:00', 'uploads/slips/1764742560_images (2).jpg', 0),
+(9, 58, '2025120300002', 'นางอัญมณี คงสี', '089-456-654', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 220.00, '2025-12-03 13:16:00', 'uploads/slips/1764742620_580528595_1366481585277803_7755131983566639349_n.jpg', 0),
+(10, 59, '2025120300003', 'นางอัญมณี คงสี', '089-456-654', 'faritre1@gmail.com', 'ธนาคารกรุงไทย', 90.00, '2025-12-03 12:00:00', 'uploads/slips/1764742860_images (2).jpg', 2);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `stock_list`
 --
 
@@ -2104,7 +2233,19 @@ INSERT INTO `stock_out` (`id`, `order_id`, `stock_id`, `quantity`, `date_created
 (67, 45, 38, 27, '2025-11-28 10:37:24'),
 (68, 46, 2, 2, '2025-11-28 10:39:40'),
 (69, 46, 12, 1, '2025-11-28 10:39:40'),
-(70, 47, 4, 1, '2025-11-28 10:54:59');
+(70, 47, 4, 1, '2025-11-28 10:54:59'),
+(71, 48, 29, 22, '2025-12-01 14:45:09'),
+(72, 49, 38, 1, '2025-12-01 14:52:33'),
+(73, 50, 38, 1, '2025-12-01 14:59:08'),
+(74, 51, 11, 1, '2025-12-01 15:01:27'),
+(75, 52, 38, 1, '2025-12-01 15:02:31'),
+(76, 53, 16, 1, '2025-12-01 15:04:01'),
+(77, 54, 29, 1, '2025-12-01 15:05:27'),
+(78, 55, 38, 1, '2025-12-02 11:15:08'),
+(79, 56, 38, 1, '2025-12-02 13:30:24'),
+(80, 57, 38, 10, '2025-12-03 11:41:23'),
+(81, 58, 38, 5, '2025-12-03 13:16:33'),
+(82, 59, 35, 3, '2025-12-03 13:20:11');
 
 -- --------------------------------------------------------
 
@@ -9661,7 +9802,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `firstname`, `middlename`, `lastname`, `username`, `password`, `avatar`, `last_login`, `type`, `date_added`, `date_updated`) VALUES
-(1, 'Admin', '4', 'Administrator', 'admin', '$2y$10$3AGnyajq0J3ui0/DIlsMd.7mk3napfyKKnxug8UL38Abz3lWociq2', 'uploads/avatars/1.webp?v=1762913575', '2025-11-28 10:55:57', 1, '2021-01-20 14:02:37', '2025-11-28 10:55:57'),
+(1, 'Admin', '4', 'Administrator', 'admin', '$2y$10$3AGnyajq0J3ui0/DIlsMd.7mk3napfyKKnxug8UL38Abz3lWociq2', 'uploads/avatars/1.webp?v=1762913575', '2025-12-03 13:21:20', 1, '2021-01-20 14:02:37', '2025-12-03 13:21:20'),
 (8, 'Claire', '', 'Blake', 'cblake', 'cd74fae0a3adf459f73bbf187607ccea', 'uploads/avatars/8.png?v=1675047323', NULL, 2, '2023-01-30 10:55:23', '2023-01-30 10:55:23'),
 (9, 'Staff', '', 'Staff', 'staff1', '81dc9bdb52d04dc20036dbd8313ed055', 'uploads/avatars/9.png?v=1757391282', NULL, 2, '2025-05-19 16:21:57', '2025-09-17 11:56:43'),
 (10, 'Staffฟๆ', '', '2', 'staff2', '$2y$10$dkGh3arZQPGctYHUAmJ.VOSEd2BzAoUL6EKLIx3REijCBeQhEWWp2', 'uploads/avatars/10.png', '2025-09-17 13:18:30', 2, '2025-09-09 11:39:26', '2025-09-17 13:18:30'),
@@ -9675,6 +9816,18 @@ INSERT INTO `users` (`id`, `firstname`, `middlename`, `lastname`, `username`, `p
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `bank_providers`
+--
+ALTER TABLE `bank_providers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `bank_system`
+--
+ALTER TABLE `bank_system`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `cart_list`
@@ -9751,7 +9904,8 @@ ALTER TABLE `order_list`
   ADD KEY `customer_id` (`customer_id`),
   ADD KEY `fk_promotions_list` (`promotion_id`),
   ADD KEY `fk_coupon_code_list` (`coupon_code_id`),
-  ADD KEY `fk_shipping_provider` (`provider_id`);
+  ADD KEY `fk_shipping_provider` (`provider_id`),
+  ADD KEY `fk_order_bank_system` (`bank_system_id`);
 
 --
 -- Indexes for table `password_resets`
@@ -9848,6 +10002,12 @@ ALTER TABLE `shipping_total`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `slip_payment`
+--
+ALTER TABLE `slip_payment`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `stock_list`
 --
 ALTER TABLE `stock_list`
@@ -9885,10 +10045,22 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `bank_providers`
+--
+ALTER TABLE `bank_providers`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `bank_system`
+--
+ALTER TABLE `bank_system`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `cart_list`
 --
 ALTER TABLE `cart_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
 
 --
 -- AUTO_INCREMENT for table `category_list`
@@ -9930,7 +10102,7 @@ ALTER TABLE `customer_list`
 -- AUTO_INCREMENT for table `order_list`
 --
 ALTER TABLE `order_list`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT for table `password_resets`
@@ -9978,7 +10150,7 @@ ALTER TABLE `promotion_products`
 -- AUTO_INCREMENT for table `promotion_usage_logs`
 --
 ALTER TABLE `promotion_usage_logs`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `shipping_providers`
@@ -9999,6 +10171,12 @@ ALTER TABLE `shipping_total`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
+-- AUTO_INCREMENT for table `slip_payment`
+--
+ALTER TABLE `slip_payment`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
 -- AUTO_INCREMENT for table `stock_list`
 --
 ALTER TABLE `stock_list`
@@ -10008,7 +10186,7 @@ ALTER TABLE `stock_list`
 -- AUTO_INCREMENT for table `stock_out`
 --
 ALTER TABLE `stock_out`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `system_info`
@@ -10075,6 +10253,7 @@ ALTER TABLE `order_items`
 ALTER TABLE `order_list`
   ADD CONSTRAINT `fk_coupon_code_list` FOREIGN KEY (`coupon_code_id`) REFERENCES `coupon_code_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_customer_list` FOREIGN KEY (`customer_id`) REFERENCES `customer_list` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_order_bank_system` FOREIGN KEY (`bank_system_id`) REFERENCES `bank_system` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_promotions_list` FOREIGN KEY (`promotion_id`) REFERENCES `promotions_list` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_shipping_provider` FOREIGN KEY (`provider_id`) REFERENCES `shipping_providers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
