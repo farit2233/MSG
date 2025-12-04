@@ -427,6 +427,11 @@
         color: #f57421;
         align-items: flex-end;
     }
+    .price-total{
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #f57421;
+    }
 
     .sticky-sidebar {
         position: sticky;

@@ -553,12 +553,16 @@ while ($row = $banks_qry->fetch_assoc()) {
                     </div>
                     <div class="checkout-card-body">
 
-                        <form action="" id="order-form" class="mt-2" enctype="multipart/form-data">
+                        <form action="./?p=checkout/payment" method="POST" id="checkout-form" class="mt-2">
+
                             <input type="hidden" name="selected_items" value="<?= htmlspecialchars($_POST['selected_items']) ?>">
                             <input type="hidden" name="delivery_address" value="<?= htmlentities($full_address) ?>">
                             <input type="hidden" id="total_weight" value="<?= $total_weight ?>">
                             <input type="hidden" name="promotion_id" value="<?= ($is_discount_applied && isset($applied_promo['id'])) ? $applied_promo['id'] : '0' ?>">
                             <input type="hidden" name="coupon_code_id" id="applied_coupon_id" value="0">
+
+                            <input type="hidden" name="shipping_cost" id="hidden_shipping_cost" value="<?= $default_shipping_cost ?>">
+                            <input type="hidden" name="final_total" id="hidden_final_total" value="<?= $grand_total ?>">
 
                             <div class="form-group mb-3">
                                 <label class="small text-muted mb-1">เลือกช่องทางการโอนเงิน</label>
@@ -586,7 +590,7 @@ while ($row = $banks_qry->fetch_assoc()) {
                             </div>
 
                             <button type="submit" class="btn btn-checkout btn-block btn-lg w-100 shadow-sm" style="background-color: #f57421; border-color: #f57421;" <?= !$is_address_complete ? 'disabled' : '' ?>>
-                                แจ้งชำระเงินและสั่งซื้อ
+                                ไปหน้าแจ้งชำระเงิน <i class="fa-solid fa-arrow-right ml-2"></i>
                             </button>
                         </form>
 
@@ -711,7 +715,7 @@ while ($row = $banks_qry->fetch_assoc()) {
 
 
     // [อัปเดต] ส่วนการ Submit Form ให้รองรับการส่งไฟล์ (Ajax Upload)
-    $('#order-form').submit(function(e) {
+    /*$('#order-form').submit(function(e) {
         e.preventDefault();
 
         // ตรวจสอบว่าเลือกธนาคารหรือยัง
@@ -762,6 +766,28 @@ while ($row = $banks_qry->fetch_assoc()) {
                 }
             }
         });
+    });*/
+    $('#checkout-form').submit(function(e) {
+
+        // 1. ตรวจสอบที่อยู่ (ใช้ตัวแปร PHP $is_address_complete)
+        <?php if (!$is_address_complete): ?>
+            e.preventDefault();
+            alert_toast("กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน", "warning");
+            return false;
+        <?php endif; ?>
+
+        // 2. ตรวจสอบว่าเลือกธนาคารหรือยัง
+        if ($('#bank_id').val() == '') {
+            e.preventDefault();
+            alert_toast("กรุณาเลือกช่องทางการโอนเงิน", "warning");
+            $('html, body').animate({
+                scrollTop: $("#bank-selector-btn").offset().top - 100
+            }, 500);
+            return false;
+        }
+
+        // 3. ถ้าข้อมูลครบถ้วน ไม่ต้องมี e.preventDefault() 
+        // ปล่อยให้ Form ทำการ POST ข้อมูลไปที่ ./?p=payment ได้เลย
     });
 
 
@@ -817,9 +843,14 @@ while ($row = $banks_qry->fetch_assoc()) {
         document.getElementById('order-total-text').innerText = formattedTotal;
         document.getElementById('order-vat-total').innerText = formattedTotal;
 
-        // Update Shipping Display ในส่วนสรุป (ขวามือ) ถ้ามีการเปลี่ยนแปลงจากคูปอง
+        // Update Shipping Display ในส่วนสรุป
         let shipText = (finalShippingCost === 0) ? "ฟรี" : formatPrice(finalShippingCost) + " บาท";
         document.getElementById('shipping-cost-summary').innerText = shipText;
+
+        // --- [เพิ่มส่วนนี้] อัปเดตค่าลง Input Hidden เพื่อส่งไปหน้า Payment ---
+        // ต้องเอาทศนิยมออก (ถ้ามี) หรือแปลงเป็นตัวเลขเพียวๆ เพื่อส่งไป PHP
+        $('#hidden_shipping_cost').val(finalShippingCost);
+        $('#hidden_final_total').val(grandTotal);
 
         function updateOrderTotal(grandTotal) {
             let formattedTotal;
