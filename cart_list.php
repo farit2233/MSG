@@ -179,9 +179,6 @@ if ($_settings->userdata('id') != '' && $_settings->userdata('login_type') == 2)
                         <span>ส่วนลดสินค้า</span>
                         <span>-<span id="summary-discount-total">0.00</span> บาท</span>
                     </div>
-
-                    <hr>
-
                     <div class="summary-row total d-flex justify-content-between font-weight-bold" style="font-size: 1.2rem;">
                         <span>ยอดสุทธิ</span>
                         <span><span id="selected-total-desktop">0.00</span> บาท</span>
