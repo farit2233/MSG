@@ -93,7 +93,7 @@ if (!function_exists('format_price_custom')) {
                                 // --- ส่วนที่เพิ่มใหม่ (START) ---
                                 // เพิ่มปุ่มแจ้งชำระเงิน พร้อมส่งตัวแปร order_code ไปด้วย
                                 echo '<a href="./?p=user/slip_payment&order_code=' . $code . '">
-                                    <i class="fa-solid fa-receipt"></i> คลิกที่นี่เพื่อ แจ้งยอดชำระเงิน
+                                    <i class="fa-solid fa-receipt"></i> คลิกที่นี่ เพื่อแจ้งยอดชำระเงิน
                                 </a>';
                                 // --- ส่วนที่เพิ่มใหม่ (END) ---
                                 break;
