@@ -352,6 +352,7 @@ if ($is_coupon_applicable) {
 }
 
 $grand_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_shipping_cost;
+// $vat_total ไม่ได้ใช้แล้วในส่วนแสดงผล แต่เก็บไว้คำนวณหลังบ้านได้
 $vat_total = ($cart_total - $coupon_discount - $promotion_discount) + $final_shipping_cost;
 
 if (!function_exists('format_price_custom')) {
@@ -375,7 +376,7 @@ while ($row = $banks_qry->fetch_assoc()) {
     // ส่งค่าจาก PHP มาให้ JavaScript
     var cartItems = <?= json_encode(array_values($cart_items)); ?>;
     var initialGrandTotal = <?= $grand_total; ?>;
-    var initialVatTotal = <?= $vat_total; ?>;
+    // initialVatTotal ลบออกได้เลยเพราะไม่ใช้แล้ว
     var shippingCost = <?= $final_shipping_cost; ?>;
 </script>
 
@@ -403,9 +404,9 @@ while ($row = $banks_qry->fetch_assoc()) {
                     <?php else: ?>
                         <h6 class="font-weight-bold mb-1">
                             <?= !empty($address['name']) ? htmlentities($address['name']) : '' ?>
-                            <span class="text-muted font-weight-normal ml-2"><?= !empty($address['contact']) ? htmlentities($address['contact']) : '' ?></span>
+                            <span class="font-weight-normal ml-2"><?= !empty($address['contact']) ? htmlentities($address['contact']) : '' ?></span>
                         </h6>
-                        <p class="text-muted mb-0" style="line-height: 1.6;">
+                        <p class=" mb-0" style="line-height: 1.6;">
                             <?php
                             // ใช้ Logic ตัดคำจังหวัดขึ้นบรรทัดใหม่ตามที่คุณต้องการ
                             if (!empty($address)) {
@@ -502,48 +503,43 @@ while ($row = $banks_qry->fetch_assoc()) {
                             <small id="discount_type" class="text-success d-block"></small>
                         </div>
 
-                        <div class="summary-row">
-                            <span>ยอดรวมสินค้า (<?= number_format($total_items_count) ?> ชิ้น)</span>
+                        <div class="check-out-summary-row">
+                            <span>ยอดรวมสินค้า <small class="text-muted">รวม VAT</small>(<?= number_format($total_items_count) ?> ชิ้น)</span>
                             <span><?= format_price_custom($total_full_price, 2) ?> บาท</span>
                         </div>
 
                         <?php if ($total_discount > 0.01): ?>
-                            <div class="summary-row text-danger">
+                            <div class="check-out-summary-row text-danger">
                                 <span>ส่วนลดสินค้า</span>
                                 <span>-<?= format_price_custom($total_discount, 2) ?> บาท</span>
                             </div>
                         <?php endif; ?>
 
-                        <div class="summary-row">
+                        <div class="check-out-summary-row">
                             <span>ค่าจัดส่ง</span>
                             <span id="shipping-cost-summary"><?= format_price_custom($default_shipping_cost, 2) ?> บาท</span>
                         </div>
 
                         <?php if ($is_promo_applicable && $is_discount_applied): ?>
-                            <div class="summary-row text-danger">
+                            <div class="check-out-summary-row text-danger">
                                 <span>โปรโมชัน (<?= htmlspecialchars($applied_promo['name']) ?>)</span>
                                 <span>
                                     <?php
                                     if ($applied_promo['type'] == 'free_shipping') echo "ส่งฟรี";
                                     else echo "- " . format_price_custom($promotion_discount, 2);
                                     ?>
+                                    บาท
                                 </span>
                             </div>
                         <?php endif; ?>
 
-                        <div class="summary-row text-danger" id="coupon-row" style="display:none;">
+                        <div class="check-out-summary-row text-danger" id="coupon-row" style="display:none;">
                             <span>ส่วนลดคูปอง</span>
                             <span id="discount_value"></span>
                         </div>
 
-                        <div class="summary-row">
-                            <span>ราคารวม <small class="text-muted">รวม VAT</small></span>
-                            <span><span id="order-vat-total"><?= format_price_custom($cart_total, 2) ?></span> บาท</span>
-                        </div>
-
-
-                        <div class="summary-row total">
-                            <span>ยอดรวมทั้งสิ้น</span>
+                        <div class="check-out-summary-row total">
+                            <span>ยอดสุทธิ</span>
                             <span><span id="order-total-text"><?= format_price_custom($cart_total + $default_shipping_cost, 2) ?></span> บาท</span>
                         </div>
                     </div>
@@ -714,59 +710,6 @@ while ($row = $banks_qry->fetch_assoc()) {
     }
 
 
-    // [อัปเดต] ส่วนการ Submit Form ให้รองรับการส่งไฟล์ (Ajax Upload)
-    /*$('#order-form').submit(function(e) {
-        e.preventDefault();
-
-        // ตรวจสอบว่าเลือกธนาคารหรือยัง
-        if ($('#bank_id').val() == '') {
-            alert_toast("กรุณาเลือกช่องทางการโอนเงิน", "warning");
-            return;
-        }
-
-        start_loader();
-
-        // ใช้ FormData เพื่อรองรับไฟล์ภาพ
-        var formData = new FormData(this);
-
-        $.ajax({
-            url: _base_url_ + 'classes/Master.php?f=place_order',
-            method: 'POST',
-            data: formData,
-            contentType: false, // จำเป็นสำหรับ FormData
-            processData: false, // จำเป็นสำหรับ FormData
-            dataType: 'json',
-            error: err => {
-                console.log(err);
-                alert_toast("An error occurred", "error");
-                end_loader();
-            },
-            success: function(resp) {
-                if (resp.status == 'success') {
-                    end_loader(); // 1. หยุดหมุน Loading ก่อน
-
-                    // 2. แสดง SweetAlert
-                    Swal.fire({
-                        icon: 'success', // ถ้าอยากได้เครื่องหมายตกใจสีเหลือง ให้เปลี่ยนคำว่า 'success' เป็น 'warning'
-                        title: 'ดำเนินการสั่งซื้อเรียบร้อย',
-                        html: '<small class="text-muted">เพื่อให้เจ้าหน้าที่ตรวจสอบความถูกต้อง และยืนยันคำสั่งซื้อของท่าน<br>กรุณาแจ้งยอดชำระที่ บัญชีของฉัน > แจ้งยอดชำระเงิน<br>ขอบคุณที่ใช้บริการ</small>',
-                        confirmButtonText: 'ตกลง',
-                        confirmButtonColor: '#f57421', // สีส้มตามธีมเว็บคุณ
-                        allowOutsideClick: false // บังคับให้กดปุ่มตกลงเท่านั้น
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // 3. พอกดตกลง ค่อยเปลี่ยนหน้า
-                            location.replace('./');
-                        }
-                    });
-
-                } else {
-                    alert_toast(resp.msg || "เกิดข้อผิดพลาดตอนสั่งซื้อ", 'error');
-                    end_loader();
-                }
-            }
-        });
-    });*/
     $('#checkout-form').submit(function(e) {
 
         // 1. ตรวจสอบที่อยู่ (ใช้ตัวแปร PHP $is_address_complete)
@@ -841,7 +784,7 @@ while ($row = $banks_qry->fetch_assoc()) {
         });
 
         document.getElementById('order-total-text').innerText = formattedTotal;
-        document.getElementById('order-vat-total').innerText = formattedTotal;
+        // [REMOVED] document.getElementById('order-vat-total').innerText = formattedTotal;  <-- ลบบรรทัดนี้ออก
 
         // Update Shipping Display ในส่วนสรุป
         let shipText = (finalShippingCost === 0) ? "ฟรี" : formatPrice(finalShippingCost) + " บาท";
@@ -865,7 +808,7 @@ while ($row = $banks_qry->fetch_assoc()) {
                 });
             }
             document.getElementById('order-total-text').innerText = formattedTotal;
-            document.getElementById('order-vat-total').innerText = formattedTotal;
+            // [REMOVED] document.getElementById('order-vat-total').innerText = formattedTotal; <-- ลบบรรทัดนี้ออก
         }
         updateOrderTotal(grandTotal);
     }
@@ -929,9 +872,9 @@ while ($row = $banks_qry->fetch_assoc()) {
                         coupon_row.show(); // แสดงแถวคูปอง
 
                         if (resp.type === 'free_shipping') {
-                            discount_val_el.html('<strong class="text-success">ส่งฟรี</strong>');
+                            discount_val_el.html('<span class="text-danger">ส่งฟรี</span>');
                         } else {
-                            discount_val_el.html('<strong class="text-danger">- ' + formatPrice(resp.discount_amount) + ' บาท</strong>');
+                            discount_val_el.html('<span class="text-danger">- ' + formatPrice(resp.discount_amount) + ' บาท</span>');
                         }
                         error_el.text('');
                         alert_toast("ใช้คูปองสำเร็จ!", "success");

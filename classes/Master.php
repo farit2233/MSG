@@ -1478,7 +1478,12 @@ class Master extends DBConnection
 			}
 
 			$this->settings->set_flashdata('success', 'สั่งซื้อสำเร็จ');
-			$resp = ['status' => 'success'];
+			// ส่ง id และ code กลับไปด้วย เพื่อให้หน้า Frontend รับไป redirect ต่อได้
+			$resp = [
+				'status' => 'success',
+				'id' => $oid,          // ส่ง order_id กลับไป
+				'code' => $code        // ส่ง order_code กลับไป (เผื่อใช้)
+			];
 		} catch (Exception $e) {
 			$this->conn->query("ROLLBACK");
 			$resp = ['status' => 'failed', 'msg' => $e->getMessage()];

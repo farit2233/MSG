@@ -410,15 +410,15 @@
     }
 
     /* กล่องสรุปยอด (Right Sidebar) */
-    .summary-row {
+    .check-out-summary-row {
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
-        font-size: 0.95rem;
-        color: #666;
+        font-size: 16px;
+        color: #888;
     }
 
-    .summary-row.total {
+    .check-out-summary-row.total {
         margin-top: 15px;
         padding-top: 15px;
         border-top: 1px dashed #ddd;

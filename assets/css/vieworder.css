@@ -1,3 +1,17 @@
+    .text-status span{
+        font-size: 14px !important;
+    }
+    .text-status a {
+        font-size: 14px !important; /* หรือ 14px ตามต้องการ */
+        color: black !important;
+        padding: 2px 10px;
+        text-decoration: none; /* ปกติไม่มีเส้นใต้ */
+    }
+
+    /* เมื่อเอาเมาส์ชี้ (Hover) ให้มีเส้นใต้ */
+    .text-status a:hover {
+        text-decoration: underline;
+    }
     .product-link {
         color: inherit !important;
     }

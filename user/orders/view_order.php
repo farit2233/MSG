@@ -84,12 +84,18 @@ if (!function_exists('format_price_custom')) {
         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
             <div class="mb-3">
                 <label for="" class="control-label">สถานะการชำระเงิน:</label>
-                <div class="pl-4">
+                <div class="pl-4 text-status">
                     <?php
                     if (isset($payment_status)) {
                         switch ((int)$payment_status) {
                             case 0:
                                 echo '<span class="badge bg-secondary">ยังไม่ชำระเงิน</span>';
+                                // --- ส่วนที่เพิ่มใหม่ (START) ---
+                                // เพิ่มปุ่มแจ้งชำระเงิน พร้อมส่งตัวแปร order_code ไปด้วย
+                                echo '<a href="./?p=user/slip_payment&order_code=' . $code . '">
+                                    <i class="fa-solid fa-receipt"></i> คลิกที่นี่เพื่อ แจ้งยอดชำระเงิน
+                                </a>';
+                                // --- ส่วนที่เพิ่มใหม่ (END) ---
                                 break;
                             case 1:
                                 echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
@@ -119,7 +125,7 @@ if (!function_exists('format_price_custom')) {
             </div>
             <div class="mb-3">
                 <label for="" class="control-label">สถานะการจัดส่ง:</label>
-                <div class="pl-4">
+                <div class="pl-4 text-status">
                     <?php
                     if (isset($delivery_status)) {
                         switch ((int)$delivery_status) {
@@ -174,7 +180,7 @@ if (!function_exists('format_price_custom')) {
                     <br>
                     ค่าส่ง:
                     <?php if ($shipping_cost == 0): ?>
-                        <span class="text-success fw-bold">ส่งฟรี</span>
+                        <span class="fw-bold">ส่งฟรี</span>
                     <?php else: ?>
                         <?= number_format($shipping_cost, 2) ?> บาท
                     <?php endif; ?>
@@ -263,7 +269,7 @@ if (!function_exists('format_price_custom')) {
                 <div class="d-flex justify-content-between order-total-detail ">
                     <span>ค่าจัดส่ง:</span>
                     <?php if (isset($shipping_cost) && $shipping_cost == 0): ?>
-                        <span class="text-success fw-bold">ส่งฟรี</span>
+                        <span class="fw-bold">ส่งฟรี</span>
                     <?php else: ?>
                         <span><?= isset($shipping_cost) ? format_price_custom($shipping_cost, 2) : '0.00' ?> บาท</span>
                     <?php endif; ?>

@@ -190,7 +190,16 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
                                             <?php if (!empty($orders_list)): ?>
                                                 <?php foreach ($orders_list as $order): ?>
                                                     <?php
-                                                    $selected = ($order_code_val == $order['code']) ? 'selected' : '';
+                                                    // --- แก้ไขเงื่อนไขตรงนี้ ---
+                                                    $selected = '';
+                                                    // เทียบ ID (ถ้ามีส่งมา) หรือเทียบ Code (ถ้ามีส่งมา)
+                                                    if (($order_id_val != '' && $order_id_val == $order['id']) ||
+                                                        ($order_code_val != '' && $order_code_val == $order['code'])
+                                                    ) {
+                                                        $selected = 'selected';
+                                                    }
+                                                    // ------------------------
+
                                                     $display_text = $order['code'] . ' (ยอด ' . number_format($order['grand_total'], 2) . ' บาท)';
                                                     ?>
                                                     <option value="<?= $order['code'] ?>"
@@ -219,7 +228,7 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="customer_name">ชื่อ / สกุล <span class="text-danger">*</span></label>
+                                        <label for="customer_name">ชื่อ - สกุล <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="customer_name" id="customer_name" value="" required placeholder="ระบุชื่อ-นามสกุล">
                                     </div>
                                 </div>
@@ -360,7 +369,31 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
     let tempSelectedBank = null;
 
     $(document).ready(function() {
+        // รอ 0.5 วินาที ให้หน้าเว็บโหลดส่วนอื่นเสร็จก่อน
+        setTimeout(function() {
+            // 1. ดึงค่า order_id จาก URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order_id');
 
+            if (orderId) {
+                console.log("Auto-selecting Order ID:", orderId);
+
+                // 2. ค้นหาตัวเลือกใน Dropdown ที่มี data-order-id ตรงกัน
+                // หมายเหตุ: ต้องแน่ใจว่าใน <option> คุณใส่ data-order-id="<?= $order['id'] ?>" ไว้แล้ว
+                let targetOption = $('#order_code').find('option[data-order-id="' + orderId + '"]');
+
+                // ถ้าหาไม่เจอ ลองหาจาก value (เผื่อกรณี value เป็น id)
+                if (targetOption.length === 0) {
+                    targetOption = $('#order_code').find('option[value="' + orderId + '"]');
+                }
+
+                if (targetOption.length > 0) {
+                    // 3. สั่งให้เลือกค่า และกระตุ้นเหตุการณ์ change
+                    let valToSelect = targetOption.val();
+                    $('#order_code').val(valToSelect).trigger('change');
+                }
+            }
+        }, 500); // หน่วงเวลา 500ms
         // 1. เริ่มต้น Select2
         $('.select2').select2({
             width: '100%',
