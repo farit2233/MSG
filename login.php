@@ -3,124 +3,14 @@
 <html lang="en">
 <?php require_once('inc/header.php'); ?>
 
-<body class="hold-transition login-page">
+
+
+<body class="hold-transition body-login">
+    <?php require_once('inc/topbarnav.php'); ?>
     <script>
         start_loader();
     </script>
-    <style>
-        html,
-        body {
-            height: 100%;
-            /* กำหนดความสูงเต็มหน้าจอ */
-            margin: 0;
-            /* ลบค่า margin ของทั้ง html และ body */
-            padding: 0;
-            /* ลบค่า padding */
-        }
-
-        body {
-            background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
-            background-size: cover;
-            /* ปรับขนาดภาพให้ครอบคลุมทั้งหน้าจอ */
-            background-repeat: no-repeat;
-            /* ไม่ให้ภาพพื้นหลังซ้ำกัน */
-            background-position: center center;
-            /* ตั้งภาพให้อยู่กลางหน้าจอ */
-            background-attachment: fixed;
-            /* ทำให้ภาพพื้นหลังไม่เลื่อนตามการ scroll */
-            min-height: 100vh;
-            /* ให้ความสูงของ body เท่ากับความสูงของหน้าจอ */
-            width: 100%;
-            /* ความกว้างเต็มหน้าจอ */
-        }
-
-        #page-title {
-            font-size: 32px;
-            /* ขนาดฟอนต์ที่ใหญ่ขึ้น */
-            font-weight: 700;
-            /* เน้นความหนาของฟอนต์ */
-            color: white;
-            /* ตัวหนังสือสีขาว */
-            -webkit-text-stroke: 1px #f57421;
-            /* ขอบตัวหนังสือสีส้ม */
-            text-transform: uppercase;
-            /* ตัวพิมพ์ใหญ่ทั้งหมด */
-            letter-spacing: 1px;
-            /* การเพิ่มระยะห่างระหว่างตัวอักษร */
-            text-align: center;
-            /* จัดตำแหน่งข้อความให้อยู่กลาง */
-            margin: 20px 0;
-            /* กำหนดระยะห่างบนและล่าง */
-            transition: all 0.3s ease;
-            /* เอฟเฟกต์สำหรับการเคลื่อนไหว */
-        }
-
-        #page-title:hover {
-            color: #f57421;
-            -webkit-text-stroke: 1px #f57421;
-        }
-
-        .login-cart-header-bar {
-            padding-top: 16px;
-            padding-bottom: 4px;
-            padding-left: 16px;
-            padding-right: 16px;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-login {
-            background: none;
-            color: #f57421;
-            border: 2px solid #f57421;
-            padding: 10px 10px;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            width: 100%;
-        }
-
-        .btn-login:hover {
-            background-color: #f57421;
-            color: white;
-            display: inline-block;
-        }
-
-        .card-login {
-            border-radius: 16px;
-            /* หรือ 10px, 20px แล้วแต่ต้องการ */
-        }
-
-        .padding-top {
-            margin-top: 0px;
-            padding-top: 2rem;
-        }
-
-        /* CSS สำหรับ Logo */
-        .logo {
-            max-width: 100px;
-            /* กำหนดขนาดความกว้างสูงสุด */
-            height: auto;
-            /* ให้ความสูงปรับตามอัตราส่วน */
-            display: block;
-            /* ใช้เพื่อให้โลโก้เป็นบล็อก */
-            margin: 0 auto;
-            /* จัดตำแหน่งให้อยู่กลาง */
-        }
-
-        /* สำหรับภาพโลโก้ในกรณีที่ต้องการใช้แบบเต็มหน้าจอ */
-        .logo.full-width {
-            max-width: 100%;
-            height: auto;
-        }
-
-        @media (max-width: 767.98px) {
-            .btn-login {
-                width: 100%;
-            }
-        }
-    </style>
-    <div class="container d-flex justify-content-center align-items-center">
+    <div class="container d-flex justify-content-center align-items-center pb-5">
         <div class="col-lg-5 col-md-7 col-sm-10 col-12">
             <div class="card card-login card-navy my-3 shadow">
                 <div class="card-body bg-color rounded-0 px-3">
@@ -217,6 +107,7 @@
             })
         });
     </script>
+    <?php require_once('inc/footer_login.php'); ?>
 </body>
 
 </html>

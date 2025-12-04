@@ -1,6 +1,7 @@
   /* --- General Styles (No changes needed) --- */
+
   .register {
-    padding-top: 0px !important;
+    padding-top: 50px !important;
     background-size: cover;
     background-repeat: no-repeat;
     overflow-x: hidden;

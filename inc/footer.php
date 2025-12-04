@@ -303,7 +303,7 @@
           </div>
 
           <!-- บริการลูกค้า -->
-          <div class="col-md-3 mb-4">
+          <div class="col-6 col-md-3 mb-4">
             <h6>ประเภทสินค้า</h6>
             <ul class="list-unstyled">
               <?php
@@ -342,7 +342,7 @@
           </div>
 
           <!-- นโยบายและข้อกำหนด -->
-          <div class="col-md-3 mb-4">
+          <div class="col-6 col-md-3 mb-4">
             <h6>เกี่ยวกับเรา</h6>
             <ul class="list-unstyled">
               <li><a href="./" class="text-white">หน้าแรก</a></li>

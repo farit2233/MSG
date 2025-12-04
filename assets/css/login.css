@@ -1,0 +1,110 @@
+    .body-login {
+        /* ใช้ min-height: 100vh เพื่อการันตีว่าความสูงจะยืดเต็มหน้าจอเสมอ ไม่ว่าเนื้อหาจะน้อยแค่ไหน */
+        min-height: 100vh !important; 
+        
+        /* กำหนดความสูงเต็มหน้าจอ */
+        padding-top: 100px !important;
+        
+        /* เพิ่ม Flexbox เพื่อช่วยจัดระเบียบ (เผื่อไว้) */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; 
+    }
+
+    /*body {
+        /*background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
+        background-size: cover; 
+    background-color: white !important;
+        ปรับขนาดภาพให้ครอบคลุมทั้งหน้าจอ
+        background-repeat: no-repeat;
+            ไม่ให้ภาพพื้นหลังซ้ำกัน 
+    background-position: center center;
+    ตั้งภาพให้อยู่กลางหน้าจอ 
+    background-attachment: fixed;
+        ทำให้ภาพพื้นหลังไม่เลื่อนตามการ scroll 
+    min-height: 100vh;
+    ให้ความสูงของ body เท่ากับความสูงของหน้าจอ 
+    width: 100%;
+        ความกว้างเต็มหน้าจอ 
+    }*/
+
+    #page-title {
+        font-size: 32px;
+        /* ขนาดฟอนต์ที่ใหญ่ขึ้น */
+        font-weight: 700;
+        /* เน้นความหนาของฟอนต์ */
+        color: white;
+        /* ตัวหนังสือสีขาว */
+        -webkit-text-stroke: 1px #f57421;
+        /* ขอบตัวหนังสือสีส้ม */
+        text-transform: uppercase;
+        /* ตัวพิมพ์ใหญ่ทั้งหมด */
+        letter-spacing: 1px;
+        /* การเพิ่มระยะห่างระหว่างตัวอักษร */
+        text-align: center;
+        /* จัดตำแหน่งข้อความให้อยู่กลาง */
+        margin: 20px 0;
+        /* กำหนดระยะห่างบนและล่าง */
+        transition: all 0.3s ease;
+        /* เอฟเฟกต์สำหรับการเคลื่อนไหว */
+    }
+
+    /*#page-title:hover {
+        color: #f57421;
+        -webkit-text-stroke: 1px #f57421;
+    }*/
+
+    .login-cart-header-bar {
+        padding-top: 16px;
+        padding-bottom: 4px;
+        padding-left: 16px;
+        padding-right: 16px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-login {
+        background: none;
+        color: #f57421;
+        border: 2px solid #f57421;
+        padding: 10px 10px;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .btn-login:hover {
+        background-color: #f57421;
+        color: white;
+        display: inline-block;
+    }
+
+    .card-login {
+        border-radius: 16px;
+        /* หรือ 10px, 20px แล้วแต่ต้องการ */
+    }
+
+    /* CSS สำหรับ Logo */
+    .logo-login {
+        max-width: 100px;
+        /* กำหนดขนาดความกว้างสูงสุด */
+        height: auto;
+        /* ให้ความสูงปรับตามอัตราส่วน */
+        display: block;
+        /* ใช้เพื่อให้โลโก้เป็นบล็อก */
+        margin: 0 auto;
+        /* จัดตำแหน่งให้อยู่กลาง */
+    }
+
+    /* สำหรับภาพโลโก้ในกรณีที่ต้องการใช้แบบเต็มหน้าจอ */
+    .logo-login.full-width {
+        max-width: 100%;
+        height: auto;
+    }
+
+    @media (max-width: 767.98px) {
+        .btn-login {
+            width: 100%;
+        }
+    }

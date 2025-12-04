@@ -180,11 +180,11 @@ if (!function_exists('format_price_custom')) {
                         <div id="category-filter-group">
                             <?php
                             $categories_qry = $conn->query("
-            SELECT id, `name`, `other` 
-            FROM `category_list` 
-            WHERE `status` = 1 AND `delete_flag` = 0 
-            ORDER BY `other` ASC, `name` DESC
-        ");
+                                SELECT id, `name`, `other` 
+                                FROM `category_list` 
+                                WHERE `status` = 1 AND `delete_flag` = 0 
+                                ORDER BY `other` ASC, `name` DESC
+                            ");
                             $counter = 0;
                             $max_categories = 10;
                             while ($cat = $categories_qry->fetch_assoc()):

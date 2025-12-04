@@ -64,6 +64,46 @@
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 255, 255, 0.3);
 }
 /* --- สไตล์ภายใน Mega Menu (เหมือนเดิมทุกประการ) --- */
+/* กำหนดคลาสใหม่สำหรับคอลัมน์ */
+/* กำหนดให้ container เป็น grid */
+.custom-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  
+  /* 1. ทำให้แคบลง (ปรับตัวเลข px ตามความกว้างที่ต้องการ) */
+  max-width: 1110px; 
+  margin-left: auto;
+  margin-right: auto;
+
+  /* 2. ทำให้สั้นลง โดยลดช่องว่างระหว่าง Grid */
+  gap: 5px; /* ลดจาก 10px */
+  
+  justify-items: center;
+}
+
+/* Media Queries (คงเดิม แต่คุณอาจจะปรับ Breakpoint ได้ถ้าต้องการ) */
+@media (max-width: 992px) {
+  .custom-row { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .custom-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 576px) {
+  .custom-row { grid-template-columns: 1fr; }
+}
+
+/* กำหนดสไตล์สำหรับคอลัมน์ */
+.custom-col {
+   width: 100%;
+   padding: 0 1px;
+   
+   /* 3. ทำให้สั้นลงอีก โดยลบ margin ด้านล่างออก 
+      (เพราะ Grid gap จัดการระยะห่างให้แล้ว) */
+   margin-bottom: 0; 
+}
+
 
 /* ========================================================= */
 /* ==   [โค้ดแก้ไข] ทำให้ Mega Menu มี Scrollbar (สมบูรณ์) == */

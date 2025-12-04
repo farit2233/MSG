@@ -7,12 +7,13 @@
   start_loader()
 </script>
 <style>
-  .register {
+  /*.register {
     background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
-  }
+  }*/
 </style>
 
 <body class="register">
+  <?php require_once('inc/topbarnav.php'); ?>
   <section class="pb-5">
     <div class="container">
       <div class="row mt-n4 justify-content-center align-items-center flex-column">
@@ -366,6 +367,7 @@
       });
     });
   </script>
+  <?php require_once('inc/footer_login.php'); ?>
 </body>
 
 </html>

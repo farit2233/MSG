@@ -76,16 +76,16 @@ while ($type_row = $type_qry->fetch_assoc()) {
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-
+        <a class="nav-link text-white fos" href="./?p=home">หน้าแรก</a>
         <li class="nav-item nav-item-hoverable">
           <a class="nav-link text-white fos" href="#">ใหม่และโดดเด่น</a>
           <div class="mega-menu-content">
             <div class="mega-box">
               <div class="content">
-                <div class="row">
+                <div class="custom-row">
                   <?php foreach ($promotion_structure as $pid => $type_data): ?>
                     <?php if (!empty($type_data['categories'])): ?>
-                      <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                      <div class="custom-col">
                         <ul>
                           <div onclick="return false;" class="text-decoration-none">
                             <h5 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h5>
@@ -113,10 +113,10 @@ while ($type_row = $type_qry->fetch_assoc()) {
           <div class="mega-menu-content">
             <div class="mega-box">
               <div class="content">
-                <div class="row">
+                <div class="custom-row">
                   <?php foreach ($product_structure as $tid => $type_data): ?>
                     <?php if (!empty($type_data['categories'])): ?>
-                      <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                      <div class="custom-col">
                         <ul>
                           <a href="<?= base_url . "?p=products&tid={$tid}" ?>" class="text-decoration-none">
                             <h5 class="list-header"><?= htmlspecialchars($type_data['name']) ?></h5>

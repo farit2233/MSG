@@ -46,10 +46,8 @@
   <link rel="stylesheet" href="<?php echo base_url ?>plugins/cropper.js/cropper.min.css">
   <!-- Flat picker -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+  <!--Boostrap Icon-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
 
 
@@ -62,12 +60,15 @@
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/cart_list.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/fetch_product.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/footer.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/forgotpassword.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/home.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/login.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/navbar.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/order.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/product.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/promotions.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/register.css">
+  <link rel="stylesheet" href="<?php echo base_url ?>assets/css/reset_password.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/search.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/user.css">
   <link rel="stylesheet" href="<?php echo base_url ?>assets/css/vieworder.css">
@@ -135,6 +136,10 @@
   <script src="<?php echo base_url ?>assets/js/scripts.js"></script>
   <!-- cropper.js -->
   <script src="<?php echo base_url ?>plugins/cropper.js/cropper.min.js"></script>
+  <!-- Flat Picker-->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
   <style>
     html {
       overflow-y: scroll;

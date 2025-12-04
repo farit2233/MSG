@@ -3,92 +3,13 @@
 <html lang="en">
 <?php require_once('inc/header.php'); ?>
 
-<body class="hold-transition login-page">
+<body class="hold-transition body-login">
+    <?php require_once('inc/topbarnav.php'); ?>
     <script>
         start_loader();
     </script>
-    <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
 
-        body {
-            background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-attachment: fixed;
-            min-height: 100vh;
-            width: 100%;
-        }
-
-        #page-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: white;
-            -webkit-text-stroke: 1px #f57421;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-            margin: 20px 0;
-            transition: all 0.3s ease;
-        }
-
-        #page-title:hover {
-            color: #f57421;
-            -webkit-text-stroke: 1px #f57421;
-        }
-
-        .fgpw-cart-header-bar {
-            padding-top: 16px;
-            padding-bottom: 4px;
-            padding-left: 16px;
-            padding-right: 16px;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-login {
-            background: none;
-            color: #f57421;
-            border: 2px solid #f57421;
-            padding: 10px 10px;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            width: 100%;
-        }
-
-        .btn-login:hover {
-            background-color: #f57421;
-            color: white;
-            display: inline-block;
-        }
-
-        .card-password {
-            border-radius: 16px;
-        }
-
-        .icon-success {
-            color: #28a745;
-            /* สีเขียวสำหรับติ๊กถูก */
-            font-size: 60px;
-            /* ขนาดไอคอนใหญ่ */
-            margin-bottom: 20px;
-            /* เว้นระยะห่างจากข้อความ */
-        }
-
-        .head-reset-password {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-        }
-    </style>
-
-    <div class="container d-flex justify-content-center align-items-center">
+    <div class="container d-flex justify-content-center align-items-center pb-5">
         <div class="col-lg-5 col-md-7 col-sm-10 col-12">
             <div class="card card-password card-navy my-3 shadow">
                 <div class="card-body bg-color rounded-0 px-3">
@@ -169,6 +90,7 @@
             });
         });
     </script>
+    <?php require_once('inc/footer_login.php'); ?>
 </body>
 
 </html>
