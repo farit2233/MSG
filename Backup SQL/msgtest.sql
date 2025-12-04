@@ -1440,7 +1440,7 @@ CREATE TABLE `password_resets` (
   `customer_id` int NOT NULL,
   `token` varchar(255) NOT NULL,
   `expires_at` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `password_resets`
