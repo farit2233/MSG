@@ -71,7 +71,7 @@ while ($type_row = $type_qry->fetch_assoc()) {
   <div class="container container-wide px-0 px-lg-0">
 
     <a class="navbar-brand" href="./">
-      <img src="<?php echo validate_image($_settings->info('logo')) ?>" width="80" height="80" class="d-inline-block align-top" alt="" loading="lazy">
+      <img src="<?php echo validate_image($_settings->info('logo')) ?>" width="80" height="80" class="d-inline-block align-top rounded-circle" style="object-fit: cover;" alt="" loading="lazy">
     </a>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
