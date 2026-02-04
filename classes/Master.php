@@ -1886,10 +1886,11 @@ class Master extends DBConnection
 			if (!is_array($_POST[$k]))
 				$_POST[$k] = addslashes($v);
 		}
-		extract($_POST); // แตกตัวแปรออกมาใช้งาน เช่น $order_code, $total_price, $order_id
+		extract($_POST);
 
 		// 2. อัปโหลดไฟล์ (img)
 		$slip_path = "";
+		$physical_path = ""; // ตัวแปรเก็บ path จริงเพื่อส่ง Telegram
 
 		if (isset($_FILES['img']['tmp_name']) && !empty($_FILES['img']['tmp_name'])) {
 			if (!is_dir(base_app . "uploads/slips")) {
@@ -1897,43 +1898,39 @@ class Master extends DBConnection
 			}
 
 			$fname = strtotime(date('y-m-d H:i')) . '_' . $_FILES['img']['name'];
-			$move = move_uploaded_file($_FILES['img']['tmp_name'], base_app . 'uploads/slips/' . $fname);
+			$physical_path = base_app . 'uploads/slips/' . $fname; // เก็บ Path เต็ม
+			$move = move_uploaded_file($_FILES['img']['tmp_name'], $physical_path);
 
 			if ($move) {
 				$slip_path = "uploads/slips/" . $fname;
 			} else {
 				$resp['status'] = 'failed';
-				$resp['msg'] = "ไม่สามารถอัปโหลดรูปภาพได้ กรุณาตรวจสอบสิทธิ์การเขียนไฟล์ (Permission)";
+				$resp['msg'] = "ไม่สามารถอัปโหลดรูปภาพได้";
 				return json_encode($resp);
 			}
 		}
 
-		// 3. คำสั่ง SQL Insert พร้อมการบันทึก order_id
+		// 3. คำสั่ง SQL Insert
 		$sql = "INSERT INTO `slip_payment` set 
-            `order_code` = '{$order_code}', 
-            `order_id` = '{$order_id}', 
-            `customer_name` = '{$customer_name}', 
-            `contact` = '{$contact}', 
-            `email` = '{$email}', 
-            `customer_bank` = '{$customer_bank}', 
-            `total_price` = '{$total_price}', 
-            `date_time` = '{$date_time}', 
-            `slip_path` = '{$slip_path}', 
-            `is_approve` = 0 
-        ";
+			`order_code` = '{$order_code}', 
+			`order_id` = '{$order_id}', 
+			`customer_name` = '{$customer_name}', 
+			`contact` = '{$contact}', 
+			`email` = '{$email}', 
+			`customer_bank` = '{$customer_bank}', 
+			`total_price` = '{$total_price}', 
+			`date_time` = '{$date_time}', 
+			`slip_path` = '{$slip_path}', 
+			`is_approve` = 0 
+		";
 
-		// 4. บันทึกลงฐานข้อมูล
 		$save = $conn->query($sql);
 
 		if ($save) {
-			// อัปเดตสถานะ order_list โดยใช้ order_id
-			$update_order = $conn->query("UPDATE `order_list` SET `payment_status` = 1 WHERE `id` = '{$order_id}'");
-
+			$conn->query("UPDATE `order_list` SET `payment_status` = 1 WHERE `id` = '{$order_id}'");
 			$resp['status'] = 'success';
 
-			// ==========================================
-			// 1. ส่งอีเมลหา Admin (PHPMailer)
-			// ==========================================
+			// --- ส่วนส่ง Email (คงเดิม) ---
 			try {
 				$mail_admin = new PHPMailer(true);
 				$mail_admin->isSMTP();
@@ -1946,75 +1943,73 @@ class Master extends DBConnection
 				$mail_admin->CharSet = 'UTF-8';
 				$mail_admin->isHTML(true);
 				$mail_admin->Subject = "แจ้งเตือน: ลูกค้าแจ้งชำระเงินใหม่ (Order: {$order_code})";
-
 				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
 				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');
 				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
 				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
-
-				$mail_admin->Body = "
-					<h3 style='color: #f57421;'>มีการแจ้งชำระเงินเข้ามาใหม่!</h3>
-					<p><strong>รหัสสั่งซื้อ:</strong> {$order_code}</p>
-					<p><strong>ชื่อลูกค้า:</strong> {$customer_name}</p>
-					<p><strong>ยอดโอน:</strong> " . number_format($total_price, 2) . " บาท</p>
-					<p><strong>ธนาคารที่โอนเข้า:</strong> {$customer_bank}</p>
-					<p><strong>วันเวลาที่โอน:</strong> {$date_time}</p>
-					<hr>
-					<p style='color: red; font-weight: bold;'>*** กรุณาเข้าสู่ระบบหลังบ้านเพื่อตรวจสอบสลิปและอนุมัติโดยด่วน ***</p>
-				";
-
+				$mail_admin->Body = "<h3 style='color: #f57421;'>มีการแจ้งชำระเงินเข้ามาใหม่!</h3><p><strong>รหัสสั่งซื้อ:</strong> {$order_code}</p><p><strong>ยอดโอน:</strong> " . number_format($total_price, 2) . " บาท</p><hr><p style='color: red; font-weight: bold;'>*** กรุณาเข้าสู่ระบบหลังบ้านเพื่อตรวจสอบสลิป ***</p>";
 				$mail_admin->send();
 			} catch (Exception $e) {
-				// error_log("Mail Error: {$e->getMessage()}");
 			}
 
-			// ==========================================
-			// 2. ส่งแจ้งเตือนทาง Telegram (เรียกใช้ฟังก์ชันที่มีอยู่แล้ว)
-			// ==========================================
+			// --- ส่วนส่ง Telegram (เรียกใช้ฟังก์ชันที่แยกไว้) ---
 			try {
-				// สร้างข้อความ HTML (เพราะฟังก์ชันเดิมใช้ parse_mode = HTML)
 				$telegramMsg = "<b>มีการแจ้งชำระเงินเข้ามาใหม่!</b>\n" .
 					"<b>Order:</b> {$order_code}\n" .
 					"<b>ลูกค้า:</b> {$customer_name}\n" .
 					"<b>ยอดโอน:</b> " . number_format($total_price, 2) . " บาท\n" .
 					"<b>เข้าธนาคาร:</b> {$customer_bank}\n" .
 					"<b>เวลา:</b> {$date_time}\n" .
-					"<i>โปรดตรวจสอบสลิปในระบบหลังบ้าน</i>";
+					"<i>(หลักฐานสลิปตามรูปภาพ)</i>";
 
-				// เรียกฟังก์ชันเดิมที่มีอยู่ใน Class Master
-				$this->sendTelegramNotificationSlip($telegramMsg);
+				// ส่งทั้งข้อความและ Path รูปภาพไปที่ฟังก์ชัน
+				$this->sendTelegramNotificationSlip($telegramMsg, $physical_path);
 			} catch (Exception $e) {
-				// error_log("Telegram Error: {$e->getMessage()}");
 			}
-			// ==========================================
-
 		} else {
 			$resp['status'] = 'failed';
-			$resp['msg'] = "เกิดข้อผิดพลาดในการบันทึกข้อมูล: " . $conn->error;
-			$resp['sql'] = $sql;
+			$resp['msg'] = "เกิดข้อผิดพลาด: " . $conn->error;
 		}
 
 		return json_encode($resp);
 	}
 
-	function sendTelegramNotificationSlip($message)
+	function sendTelegramNotificationSlip($message, $image_path = null)
 	{
 		// ใช้ Token และ Chat ID เดิมของคุณ
 		$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";
 		$chat_id = "-4869854888";
 
-		$url = "https://api.telegram.org/bot$bot_token/sendMessage";
-		$data = [
-			'chat_id' => $chat_id,
-			'text' => $message,
-			'parse_mode' => 'HTML',
-		];
+		// ตรวจสอบว่ามีรูปภาพส่งมาไหม และไฟล์มีอยู่จริงไหม
+		if ($image_path && file_exists($image_path)) {
+			// --- กรณีมีรูปภาพ (ใช้ sendPhoto) ---
+			$url = "https://api.telegram.org/bot$bot_token/sendPhoto";
+			$cfile = new CURLFile(realpath($image_path));
+
+			$data = [
+				'chat_id' => $chat_id,
+				'photo'   => $cfile,
+				'caption' => $message,
+				'parse_mode' => 'HTML'
+			];
+		} else {
+			// --- กรณีไม่มีรูปภาพ (ใช้ sendMessage แบบเดิม) ---
+			$url = "https://api.telegram.org/bot$bot_token/sendMessage";
+			$data = [
+				'chat_id' => $chat_id,
+				'text'    => $message,
+				'parse_mode' => 'HTML'
+			];
+		}
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		// ปิดการตรวจสอบ SSL ชั่วคราว (แก้ปัญหาบน Localhost บางเครื่อง)
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
 		$result = curl_exec($ch);
 		curl_close($ch);
 
@@ -2604,6 +2599,21 @@ class Master extends DBConnection
 		if ($resp['status'] == 'success')
 			$this->settings->set_flashdata('success', $resp['msg']);
 
+		return json_encode($resp);
+	}
+
+	function delete_bank_system()
+	{
+		extract($_POST);
+		// ลบข้อมูลจากตาราง bank_system
+		$del = $this->conn->query("DELETE FROM `bank_system` where id = '{$id}'");
+		if ($del) {
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success', "ลบบัญชีธนาคารเรียบร้อยแล้ว");
+		} else {
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
 		return json_encode($resp);
 	}
 
@@ -3414,6 +3424,9 @@ switch ($action) {
 		break;
 	case 'save_bank':
 		echo $Master->save_bank();
+		break;
+	case 'delete_bank_system':
+		echo $Master->delete_bank_system();
 		break;
 	case 'delete_order':
 		echo $Master->delete_order();
