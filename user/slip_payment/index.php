@@ -443,6 +443,13 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
                 return;
             }
 
+            if ($('input[name="date_time"]').val() == '') {
+                alert("กรุณาระบุวัน-เวลาที่โอนเงิน");
+                // เลื่อนหน้าจอไปหาช่องวันที่ และ Focus
+                $('input[name="date_time"]').focus();
+                return; // หยุดการทำงาน ไม่ให้ส่งข้อมูลไป Server
+            }
+
             start_loader();
             var formData = new FormData(this);
 
