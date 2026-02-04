@@ -74,7 +74,7 @@
                       <div class="form-group">
                         <label for="contact" class="control-label">เบอร์โทร <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" required name="contact" id="contact"
-                          maxlength="15"
+                          maxlength="10"
                           pattern="\d{10,}"
                           title="กรุณาใส่ตัวเลขอย่างน้อย 10 ตัว">
                       </div>

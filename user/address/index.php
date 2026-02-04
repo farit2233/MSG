@@ -234,7 +234,7 @@ $qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$c
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="contact">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="contact" id="contact" placeholder="เบอร์โทรศัพท์ที่ติดต่อได้" required>
+                                            <input type="text" class="form-control" name="contact" id="contact" placeholder="เบอร์โทรศัพท์ที่ติดต่อได้" maxlength="10" required>
                                         </div>
                                     </div>
 
