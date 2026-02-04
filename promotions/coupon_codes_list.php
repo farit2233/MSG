@@ -269,28 +269,38 @@ $breadcrumb_item_2_html = '<li class="breadcrumb-item active" aria-current="page
 
 <script>
     $(function() {
+        // --- ส่วนจัดการ Modal เงื่อนไข (คงเดิม) ---
         $(document).on('click', '#coupon_code_conditions', function() {
             var coupon_id = $(this).data('coupon-id');
             uni_modal_conditions("เงื่อนไขการใช้งาน ", "promotions/coupon_code_conditions.php?id=" + coupon_id);
         });
     });
+
     document.addEventListener("DOMContentLoaded", function() {
+        // ค้นหาปุ่มคัดลอกทั้งหมดที่มี id ขึ้นต้นด้วย copy-button-
         const copyButtons = document.querySelectorAll('a[id^="copy-button-"]');
+
         copyButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const couponCode = this.getAttribute('data-code');
-                const tooltip = this.closest('.copy-tooltip').querySelector('.tooltip-text');
-                const textArea = document.createElement('textarea');
-                textArea.value = couponCode;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                tooltip.classList.add('show');
-                setTimeout(() => {
-                    tooltip.classList.remove('show');
-                }, 1500);
+
+                // --- ใช้วิธีใหม่ (Clipboard API) + alert_toast ---
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(couponCode)
+                        .then(() => {
+                            // สำเร็จ: แจ้งเตือนมุมขวาบน (สีเขียว)
+                            alert_toast("คัดลอกคูปอง " + couponCode + " แล้ว", 'success');
+                        })
+                        .catch(err => {
+                            // พลาด: แจ้งเตือนมุมขวาบน (สีแดง)
+                            console.error('Copy failed: ', err);
+                            alert_toast("ไม่สามารถคัดลอกได้", 'error');
+                        });
+                } else {
+                    // Browser ไม่รองรับ หรือไม่ใช่ HTTPS
+                    alert_toast("Browser ของคุณไม่รองรับการคัดลอกอัตโนมัติ", 'error');
+                }
             });
         });
     });

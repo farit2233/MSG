@@ -197,7 +197,7 @@ if (!function_exists('format_price_custom')) {
                     <div class="checkout-card-body d-flex flex-column align-items-center pt-4">
                         <?php if (!empty($bank_info)): ?>
                             <div class="d-flex align-items-center justify-content-center mb-4">
-                                <img src="<?= validate_image($bank_info['image_path']) ?>" class="bank-logo-compact mr-3 shadow-sm">
+                                <img src="<?= validate_image($bank_info['image_path']) ?>" class="bank-logo-compact mr-3">
                                 <div class="text-left">
                                     <h5 class="font-weight-bold mb-0 text-dark"><?= $bank_info['bank_name'] ?></h5>
                                     <small class="text-muted"><?= $bank_info['bank_company'] ?></small>
@@ -311,16 +311,35 @@ if (!function_exists('format_price_custom')) {
 </div>
 
 <script>
+    // ==========================================
+    // ฟังก์ชันคัดลอกแบบใหม่ (Modern Clipboard API)
+    // เงื่อนไข: ต้องรันบน HTTPS หรือ Localhost เท่านั้น
+    // ==========================================
     function copyToClipboard(element) {
-        var $temp = $("<input>");
-        $("body").append($temp);
+        // 1. ดึงข้อความจาก Element และลบเครื่องหมายขีด (-) ออก
         var textToCopy = $(element).text().replace(/-/g, '').trim();
-        $temp.val(textToCopy).select();
-        document.execCommand("copy");
-        $temp.remove();
-        alert_toast("คัดลอกเลขบัญชีแล้ว", 'success');
+
+        // 2. ตรวจสอบว่า Browser รองรับ API นี้หรือไม่
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    // --- กรณีสำเร็จ ---
+                    alert_toast("คัดลอกเลขบัญชีแล้ว", 'success');
+                })
+                .catch(err => {
+                    // --- กรณีเกิดข้อผิดพลาด ---
+                    console.error('เกิดข้อผิดพลาดในการคัดลอก: ', err);
+                    alert_toast("ไม่สามารถคัดลอกได้", 'error');
+                });
+        } else {
+            // กรณี Browser เก่ามากๆ ที่ไม่รู้จัก API นี้
+            alert_toast("Browser ของคุณไม่รองรับการคัดลอกอัตโนมัติ", 'error');
+        }
     }
 
+    // ==========================================
+    // ส่วนจัดการการ Submit Form (เหมือนเดิม)
+    // ==========================================
     $('#place-order-form').submit(function(e) {
         e.preventDefault();
         Swal.fire({
@@ -339,6 +358,7 @@ if (!function_exists('format_price_custom')) {
                 var originalText = btn.html();
                 btn.attr('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> กำลังบันทึก...');
                 start_loader();
+
                 $.ajax({
                     url: _base_url_ + 'classes/Master.php?f=place_order',
                     data: new FormData($('#place-order-form')[0]),
@@ -367,7 +387,6 @@ if (!function_exists('format_price_custom')) {
                                 if (resp.id) {
                                     window.location.href = "./?p=user/slip_payment&order_id=" + resp.id;
                                 } else {
-                                    // กันเหนียว ถ้าไม่มี id ให้ไปหน้าปกติ
                                     window.location.href = "./?p=user/slip_payment";
                                 }
                             });
