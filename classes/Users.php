@@ -377,6 +377,18 @@
 				return json_encode($resp);
 			}
 
+			// --- [ส่วนที่เพิ่มใหม่] เริ่มต้น ---
+			// ตรวจสอบ: ถ้าเป็นการเพิ่มใหม่ (ไม่มี address_id) และลูกค้าคนนี้ยังไม่เคยมีข้อมูลในตาราง customer_addresses
+			if (empty($address_id)) {
+				$check_existing = $this->conn->query("SELECT id FROM `customer_addresses` WHERE customer_id = '{$customer_id}'")->num_rows;
+				if ($check_existing == 0) {
+					// บังคับให้เป็นที่อยู่หลักทันที
+					$is_primary = 1;
+					$_POST['is_primary'] = 1; // อัปเดตตัวแปร $_POST ด้วย เพื่อให้ลูปด้านล่างนำไปใช้
+				}
+			}
+			// --- [ส่วนที่เพิ่มใหม่] สิ้นสุด ---
+
 			// Fields allowed to be saved
 			$fields = [
 				'name',
