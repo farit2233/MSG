@@ -102,7 +102,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="" class="control-label">แสดงให้ลูกค้าเห็น (Visible)</label>
+                                <label for="" class="control-label">แสดงให้ลูกค้าเห็น</label>
                                 <div class="custom-control custom-switch">
                                     <input type="hidden" name="is_visible" value="0"> <input type="checkbox" class="custom-control-input" id="is_visible" name="is_visible" value="1" <?= (isset($is_visible) && $is_visible == 1) || !isset($id) ? 'checked' : '' ?>>
                                     <label class="custom-control-label" for="is_visible">เปิด / ปิด การแสดงผลบนหน้าเว็บ</label>
@@ -112,7 +112,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="" class="control-label">สถานะการใช้งาน (Active)</label>
+                                <label for="" class="control-label">สถานะการใช้งาน</label>
                                 <div class="custom-control custom-switch">
                                     <input type="hidden" name="is_active" value="0"> <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" value="1" <?= (isset($is_active) && $is_active == 1) || !isset($id) ? 'checked' : '' ?>>
                                     <label class="custom-control-label" for="is_active">เปิด / ปิด การใช้งานระบบ</label>
