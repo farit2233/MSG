@@ -160,86 +160,86 @@ class SystemSettings extends DBConnection
 			// วนลูปตามลำดับที่ JavaScript (stagedFiles) ส่งมา
 			foreach ($_FILES['banners']['tmp_name'] as $k => $v) {
 				if (!empty($_FILES['banners']['tmp_name'][$k])) {
-					$accept = ['image/jpeg', 'image/png', 'image/gif'];
-					$type = $_FILES['banners']['type'][$k];
 
-					if (!in_array($type, $accept)) {
-						$err = "Image file type is invalid (ไฟล์: " . $_FILES['banners']['name'][$k] . ")";
-						continue; // ข้ามไฟล์นี้ไปทำไฟล์อื่น
+					// 1. อ่านข้อมูลไฟล์จริง (เช็คไส้ใน ไม่สนนามสกุล)
+					$imgInfo = getimagesize($_FILES['banners']['tmp_name'][$k]);
+					$uploadfile = null;
+
+					if ($imgInfo) {
+						// 2. สร้าง Object รูปภาพตามชนิดไฟล์จริง
+						switch ($imgInfo[2]) {
+							case IMAGETYPE_JPEG:
+								$uploadfile = imagecreatefromjpeg($_FILES['banners']['tmp_name'][$k]);
+								break;
+							case IMAGETYPE_PNG:
+								$uploadfile = imagecreatefrompng($_FILES['banners']['tmp_name'][$k]);
+								break;
+							case IMAGETYPE_GIF:
+								$uploadfile = imagecreatefromgif($_FILES['banners']['tmp_name'][$k]);
+								break;
+						}
 					}
 
-					$uploadfile = null;
-					if ($type == 'image/jpeg')
-						$uploadfile = imagecreatefromjpeg($_FILES['banners']['tmp_name'][$k]);
-					elseif ($type == 'image/png')
-						$uploadfile = imagecreatefrompng($_FILES['banners']['tmp_name'][$k]);
-					elseif ($type == 'image/gif')
-						$uploadfile = imagecreatefromgif($_FILES['banners']['tmp_name'][$k]);
-
+					// ถ้าไฟล์เสีย หรือไม่ใช่รูปภาพที่รองรับ
 					if (!$uploadfile) {
 						$err = "Image is invalid (ไฟล์: " . $_FILES['banners']['name'][$k] . ")";
-						continue; // ข้ามไฟล์นี้
+						continue; // ข้ามไฟล์นี้ไป
 					}
 
-					list($width, $height) = getimagesize($_FILES['banners']['tmp_name'][$k]);
+					// ได้ขนาดภาพต้นฉบับ
+					$width = $imgInfo[0];
+					$height = $imgInfo[1];
 
-					// สร้าง canvas ปลายทาง
+					// 3. เตรียม Canvas ปลายทาง (ตามขนาดที่กำหนดไว้ 1920x600)
 					$temp = imagecreatetruecolor($target_width, $target_height);
+
+					// จัดการพื้นหลังโปร่งใส
 					imagealphablending($temp, false);
 					imagesavealpha($temp, true);
-					$transparent = imagecolorallocatealpha($temp, 255, 255, 255, 127); // สีโปร่งใส
+					$transparent = imagecolorallocatealpha($temp, 255, 255, 255, 127);
 					imagefilledrectangle($temp, 0, 0, $target_width, $target_height, $transparent);
 
-					// --- ตรรกะการปรับขนาดแบบ "Contain" (ไม่ยืดภาพ) ---
+					// 4. คำนวณสัดส่วนแบบ Contain (เห็นภาพครบ ไม่โดนตัด)
 					$target_ratio = $target_width / $target_height;
 					$source_ratio = $width / $height;
+
 					if ($source_ratio > $target_ratio) {
+						// ภาพกว้างกว่า: ปรับความกว้างให้พอดี ความสูงจะลดลง
 						$new_width = $target_width;
 						$new_height = (int)($target_width / $source_ratio);
 					} else {
+						// ภาพสูงกว่า: ปรับความสูงให้พอดี ความกว้างจะลดลง
 						$new_height = $target_height;
 						$new_width = (int)($target_height * $source_ratio);
 					}
+
+					// หาจุดวางภาพให้อยู่กึ่งกลาง
 					$dest_x = (int)(($target_width - $new_width) / 2);
 					$dest_y = (int)(($target_height - $new_height) / 2);
+
+					// วาดภาพลงบน Canvas
 					imagecopyresampled($temp, $uploadfile, $dest_x, $dest_y, 0, 0, $new_width, $new_height, $width, $height);
-					// --- จบตรรกะ "Contain" ---
 
-
-					// --- [START] โค้ดแก้ไขการตั้งชื่อไฟล์เพื่อเรียงลำดับ ---
-
-					// 1. สร้าง Prefix ที่เรียงลำดับได้ (เช่น "1678886400_123456")
-					//    ใช้ microtime() เพื่อให้ได้ค่าที่ไม่ซ้ำกัน
+					// 5. ตั้งชื่อไฟล์ใหม่ (ใช้เวลา + ชื่อเดิมที่ปลอดภัย)
 					$prefix = str_replace('.', '_', microtime(true));
-
-					// 2. เอาชื่อไฟล์เดิม (ทำให้ปลอดภัย)
 					$original_name = $_FILES['banners']['name'][$k];
-					$base_name = pathinfo($original_name, PATHINFO_FILENAME); // เอาแค่ชื่อไฟล์
-
-					// ทำให้ชื่อไฟล์ปลอดภัย (ลบอักขระพิเศษ)
+					$base_name = pathinfo($original_name, PATHINFO_FILENAME);
 					$safe_base_name = preg_replace("/[^a-zA-Z0-9_\-\.]/", "", $base_name);
-					if (empty($safe_base_name)) $safe_base_name = 'file'; // กันชื่อไฟล์ว่าง
+					if (empty($safe_base_name)) $safe_base_name = 'file';
 
-					// 3. สร้างชื่อไฟล์ใหม่โดยมี Prefix นำหน้า
-					//    ผลลัพธ์: "1678886400_123456_original_name.webp"
 					$new_name = $prefix . '_' . $safe_base_name . '.webp';
 					$spath = base_app . $banner_path . $new_name;
 
-					// 4. บันทึกเป็น WebP
+					// 6. บันทึกไฟล์ลงเครื่อง (เป็น WebP)
 					if (!imagewebp($temp, $spath, 85)) {
 						$err = "ไม่สามารถบันทึกไฟล์ WebP ได้ (ไฟล์: " . $new_name . ")";
 					}
 
-					// 5. ลบโค้ด while loop ที่เช็คชื่อซ้ำ (ไม่จำเป็นแล้ว เพราะ prefix ไม่ซ้ำ)
-
-					// --- [END] โค้ดแก้ไข ---
-
-					// คืนหน่วยความจำ
+					// 7. ล้างเมมโมรี่
 					imagedestroy($temp);
 					imagedestroy($uploadfile);
 
-					// 6. [สำคัญมาก] หน่วงเวลา 1 มิลลิวินาที (1000 ไมโครวินาที)
-					// เพื่อการันตีว่า microtime() ลูปถัดไปจะไม่ซ้ำกันแน่นอน 100%
+					// หน่วงเวลาเล็กน้อยเพื่อให้ชื่อไฟล์ไม่ซ้ำกันแน่นอน
 					usleep(1000);
 				}
 			}
