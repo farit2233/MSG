@@ -644,7 +644,7 @@
 		{
 			// *** Best Practice: ควรย้ายข้อมูลเหล่านี้ไปไว้ในไฟล์ config.php ***
 			$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk"; // ใช้ Bot Token ของคุณ
-			$chat_id   = "-4869854888";                                   // ใช้ Chat ID ของแอดมินหรือกลุ่ม
+			$chat_id   = "-5188145441";                                   // ใช้ Chat ID ของแอดมินหรือกลุ่ม
 
 			$url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
 			$data = [

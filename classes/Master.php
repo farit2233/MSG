@@ -1392,7 +1392,7 @@ class Master extends DBConnection
 			function sendTelegramNotification($message)
 			{
 				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
-				$chat_id = "-4869854888";      // ใช้ Chat ID ของแอดมินหรือ Group
+				$chat_id = "-5188145441";      // ใช้ Chat ID ของแอดมินหรือ Group
 
 				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
 
@@ -1613,7 +1613,7 @@ class Master extends DBConnection
 	function sendTelegramNotificationCancelOrder($message)
 	{
 		$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk"; // ใช้ Bot Token ของคุณ
-		$chat_id = "-4869854888"; // ใช้ Chat ID ของแอดมินหรือ Group
+		$chat_id = "-5188145441"; // ใช้ Chat ID ของแอดมินหรือ Group
 
 		$url = "https://api.telegram.org/bot$bot_token/sendMessage";
 
@@ -1753,7 +1753,7 @@ class Master extends DBConnection
 			function sendTelegramNotificationReturnOrder($message)
 			{
 				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
-				$chat_id = "-4869854888";      // ใช้ Chat ID ของแอดมินหรือ Group
+				$chat_id = "-5188145441";      // ใช้ Chat ID ของแอดมินหรือ Group
 
 				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
 
@@ -1978,7 +1978,7 @@ class Master extends DBConnection
 	{
 		// ใช้ Token และ Chat ID เดิมของคุณ
 		$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";
-		$chat_id = "-4869854888";
+		$chat_id = "-5188145441";
 
 		// ตรวจสอบว่ามีรูปภาพส่งมาไหม และไฟล์มีอยู่จริงไหม
 		if ($image_path && file_exists($image_path)) {
@@ -2309,7 +2309,7 @@ class Master extends DBConnection
 			function sendTelegramNotificationUpdateOder($message)
 			{
 				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
-				$chat_id = "-4869854888";      // ใช้ Chat ID ของแอดมินหรือ Group
+				$chat_id = "-5188145441";      // ใช้ Chat ID ของแอดมินหรือ Group
 
 				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
 
