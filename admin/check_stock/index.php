@@ -5,6 +5,8 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once(__DIR__ . '/../../config.php');
+
 // หากใช้ Composer, ให้ include autoload
 require_once(__DIR__ . '../../../vendor/autoload.php'); // แก้ไข path ตามที่อยู่จริงของ vendor/autoload.php
 
@@ -12,25 +14,8 @@ require_once(__DIR__ . '../../../vendor/autoload.php'); // แก้ไข path 
 // --- CONFIGURATION - กรุณาตั้งค่าทั้งหมดในส่วนนี้ ---
 // -----------------------------------------------------------------
 
-// 1. การตั้งค่าฐานข้อมูล (Database)
-define('DB_HOST', 'localhost');      // เช่น localhost
-define('DB_USER', 'root');           // user ของฐานข้อมูล
-define('DB_PASS', '');               // รหัสผ่าน
-define('DB_NAME', 'msgtest');        // ชื่อฐานข้อมูล
-
 // 2. การตั้งค่าสต็อก (Stock)
 define('LOW_STOCK_THRESHOLD', 10); // เกณฑ์สต็อกใกล้หมด (ตามตัวอย่างคือ 10)
-
-// 3. การตั้งค่าอีเมล (Email) - ใช้ PHPMailer (SMTP)
-define('SMTP_HOST', 'smtp.gmail.com');          // Gmail SMTP
-define('SMTP_USER', 'faritre5566@gmail.com');    // อีเมลผู้ส่ง
-define('SMTP_PASS', 'bchljhaxoqflmbys');        // รหัสผ่าน App Password
-define('SMTP_PORT', 465);                       // Port 465 (SSL)
-define('FROM_NAME', 'MSG.com');                 // ชื่อผู้ส่ง
-
-// 4. การตั้งค่า Telegram
-define('TELEGRAM_BOT_TOKEN', '8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk'); // Token ของ Bot
-define('TELEGRAM_CHAT_ID', '-4869854888');      // Chat ID ของ Admin หรือกลุ่ม
 
 // -----------------------------------------------------------------
 // --- END CONFIGURATION ---
@@ -55,9 +40,17 @@ function send_email_notification($subject, $html_body, $plain_text_body) // <-- 
         $mail->setFrom(SMTP_USER, FROM_NAME);
 
         // เพิ่มอีเมล Admin ทั้ง 3 อีเมล
-        $mail->addAddress('faritre5566@gmail.com', 'Admin');
-        $mail->addAddress('faritre1@gmail.com', 'Admin');
-        $mail->addAddress('faritre4@gmail.com', 'Admin');
+        if (defined('ADMIN_EMAILS')) {
+            $admin_list = json_decode(ADMIN_EMAILS, true);
+            if (is_array($admin_list)) {
+                foreach ($admin_list as $email) {
+                    $mail->addAddress($email, 'Admin');
+                }
+            }
+        } else {
+            // Fallback: ถ้าหา list ไม่เจอ ให้ส่งเข้าเมลตัวเองทดสอบ
+            $mail->addAddress(SMTP_USER, 'Admin');
+        }
 
         // Content
         $mail->isHTML(true); // <-- IMPORTANT
@@ -72,26 +65,54 @@ function send_email_notification($subject, $html_body, $plain_text_body) // <-- 
     }
 }
 
-// ฟังก์ชันส่ง Telegram (ไม่เปลี่ยนแปลง)
+// ฟังก์ชันส่ง Telegram (แก้ไขแล้ว)
 function send_telegram_notification($message)
 {
     $botToken = TELEGRAM_BOT_TOKEN;
     $chatId = TELEGRAM_CHAT_ID;
 
-    // ใช้ urlencode เพื่อป้องกันข้อผิดพลาดจากอักขระพิเศษ
-    $message = urlencode($message);
-    $url = "https://api.telegram.org/bot{$botToken}/sendMessage?chat_id={$chatId}&text={$message}&parse_mode=Markdown"; // หรือ HTML
+    // 1. URL ไม่ต้องยัดไส้ parameter ยาวๆ ใส่แค่ endpoint พอ
+    $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
-    // ใช้ file_get_contents เพื่อความง่าย (ต้องเปิด allow_url_fopen ใน php.ini)
-    $response = @file_get_contents($url);
+    // 2. สร้างตัวแปร $data (ที่ของเดิมหายไป)
+    // การส่งแบบ Array ดีกว่า เพราะไม่ต้อง urlencode เอง curl จัดการให้หมด
+    $data = [
+        'chat_id' => $chatId,
+        'text' => $message,
+        'parse_mode' => 'HTML' // แนะนำ HTML จัดการง่ายกว่า Markdown
+    ];
 
-    if ($response === FALSE) {
-        echo "[ERROR] Failed to send Telegram message. (Check allow_url_fopen in php.ini or network)\n";
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data); // เอา $data ยัดใส่ตรงนี้
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    // เพิ่ม Timeout กันค้าง (สำคัญมาก)
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+    $response = curl_exec($ch);
+
+    // เช็ค Error ของ Curl โดยตรงด้วย
+    if (curl_errno($ch)) {
+        echo "[ERROR] Curl error: " . curl_error($ch) . "\n";
+    }
+
+    curl_close($ch);
+
+    // เช็คผลลัพธ์จาก Telegram
+    if ($response) {
+        $result = json_decode($response, true);
+        if (isset($result['ok']) && $result['ok']) {
+            echo "[SUCCESS] Telegram message sent.\n";
+        } else {
+            echo "[ERROR] Telegram API Error: " . ($result['description'] ?? 'Unknown error') . "\n";
+        }
     } else {
-        echo "[SUCCESS] Telegram message sent.\n";
+        echo "[ERROR] No response from Telegram.\n";
     }
 }
-
 // -----------------------------------------------------------------
 // --- MAIN SCRIPT ---
 // -----------------------------------------------------------------
@@ -99,7 +120,7 @@ function send_telegram_notification($message)
 echo "Connecting to database...\n";
 
 // 1. เชื่อมต่อฐานข้อมูล
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 if ($conn->connect_error) {
     die("[ERROR] Connection failed: " . $conn->connect_error . "\n");
 }

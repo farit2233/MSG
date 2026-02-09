@@ -601,16 +601,17 @@
 			try {
 				// *** Best Practice: ควรย้ายข้อมูลเหล่านี้ไปไว้ในไฟล์ config.php ***
 				$mail->isSMTP();
-				$mail->Host       = 'smtp.gmail.com';
-				$mail->Port       = 465;
+
+				$mail->Host       = SMTP_HOST;
 				$mail->SMTPAuth   = true;
-				$mail->Username   = "faritre5566@gmail.com"; // ใช้อีเมลของคุณ
-				$mail->Password   = "bchljhaxoqflmbys";      // ใช้รหัสผ่านสำหรับแอป (App Password)
-				$mail->SMTPSecure = "ssl";
+				$mail->Username   = SMTP_USER;
+				$mail->Password   = SMTP_PASS;
+				$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // "ssl"
+				$mail->Port       = SMTP_PORT;
 				$mail->CharSet    = 'UTF-8';
 
 				// Sender
-				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->setFrom(SMTP_USER, FROM_NAME);
 
 				// Recipients
 				foreach ($recipients as $email => $name) {
@@ -643,8 +644,8 @@
 		public function send_telegram_message(string $message): bool
 		{
 			// *** Best Practice: ควรย้ายข้อมูลเหล่านี้ไปไว้ในไฟล์ config.php ***
-			$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk"; // ใช้ Bot Token ของคุณ
-			$chat_id   = "-5188145441";                                   // ใช้ Chat ID ของแอดมินหรือกลุ่ม
+			$bot_token = TELEGRAM_BOT_TOKEN; // ใช้ Bot Token ของคุณ
+			$chat_id = TELEGRAM_CHAT_ID;                                   // ใช้ Chat ID ของแอดมินหรือกลุ่ม
 
 			$url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
 			$data = [

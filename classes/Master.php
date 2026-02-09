@@ -1082,11 +1082,12 @@ class Master extends DBConnection
 			$customer_addresses = $this->conn->query("SELECT * FROM customer_addresses WHERE customer_id = '{$customer_id}' AND is_primary = 1")->fetch_assoc();
 			if (!$customer_addresses) throw new Exception('ไม่พบที่อยู่หลักของลูกค้า');
 
+			$customer_email = $customer['email'];
+			$customer_name = $customer['firstname'] . ' ' . $customer['lastname'];
 			$name = trim("{$customer_addresses['name']}");
 			$contact = trim("{$customer_addresses['contact']}");
 			$delivery_address = trim("{$customer_addresses['address']} ต.{$customer_addresses['sub_district']} อ.{$customer_addresses['district']} จ.{$customer_addresses['province']} {$customer_addresses['postal_code']}");
 
-			// --- บันทึกข้อมูล ---
 			// --- บันทึกข้อมูล ---
 			// [แก้ไข] เพิ่ม bank_system_id เข้าไปใน Query
 			$insert = $this->conn->query("INSERT INTO `order_list` 
@@ -1157,32 +1158,28 @@ class Master extends DBConnection
 			try {
 				//SMTP Setting
 				$mail->isSMTP();
-				//$mail->Host = 'localhost';
-				//$mail->Port = 1025;
-				//$mail->SMTPAuth = false;
 
+				$mail->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail->SMTPAuth   = true;
+				$mail->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail->CharSet    = 'UTF-8';
 
-				$mail->Host = 'smtp.gmail.com';
-				$mail->Port = 465;
-				$mail->SMTPAuth = true;
-				$mail->Username = "faritre5566@gmail.com";
-				$mail->Password = "bchljhaxoqflmbys";
-				$mail->SMTPSecure = "ssl";
-
-				$mail->CharSet = 'UTF-8';
 				//Email Setting
 				$mail->isHTML(true);
 				$mail->Subject = "📦 ยืนยันคำสั่งซื้อ #$code";
 
-				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->setFrom(SMTP_USER, FROM_NAME);
 				$mail->addAddress($customer_email, $customer_name);
+				$contact_email = SMTP_USER;
 				$body = "
 						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
 							<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
 							<p>เรียนคุณ <strong>{$customer_name}</strong></p>
 							<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
 							<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
-							<p><strong>ขนส่ง:</strong> {$shipping_methods_name}</p>
 							<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
 								<thead style='background:#16542b; color:white;'>
 									<tr>
@@ -1259,7 +1256,7 @@ class Master extends DBConnection
 								</tbody>
 							</table>
 							<p style='margin-top:20px;'>📦 จัดส่งไปที่ <br><div style='background:#f9f9f9; padding:10px; border:1px dashed #ccc;'>{$name}, {$contact}, {$delivery_address}</div></p>
-							<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+							<p>หากคุณมีคำถามเพิ่มเติม กรุณาติดต่อที่ <a href='mailto:{$contact_email}'>{$contact_email}</a></p>
 						</div>";
 				$mail->Body = $body;
 				$mail->send();
@@ -1272,22 +1269,32 @@ class Master extends DBConnection
 			try {
 				// SMTP Setting
 				$mail_admin->isSMTP();
-				$mail_admin->Host = 'smtp.gmail.com';
-				$mail_admin->Port = 465;
-				$mail_admin->SMTPAuth = true;
-				$mail_admin->Username = "faritre5566@gmail.com";  // ใช้อีเมลของคุณ
-				$mail_admin->Password = "bchljhaxoqflmbys";  // รหัสผ่าน SMTP
-				$mail_admin->SMTPSecure = "ssl";
 
-				$mail_admin->CharSet = 'UTF-8';
+				$mail_admin->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail_admin->SMTPAuth   = true;
+				$mail_admin->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail_admin->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail_admin->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail_admin->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail_admin->CharSet    = 'UTF-8';
+
 				$mail_admin->isHTML(true);
 				$mail_admin->Subject = "📦 คำสั่งซื้อใหม่จากลูกค้า #$code";
 
 				// ตั้งค่าอีเมลผู้ส่งและผู้รับ
-				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
-				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
-				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
-				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+				$mail_admin->setFrom(SMTP_USER, FROM_NAME);
+				if (defined('ADMIN_EMAILS')) {
+					$admins = json_decode(ADMIN_EMAILS, true);
+					if (is_array($admins)) {
+						foreach ($admins as $admin_email) {
+							$mail_admin->addAddress($admin_email, 'Admin');
+						}
+					}
+				} else {
+					// กรณีไม่มี Config ให้ส่งเข้าเมลร้านตัวเองเป็นค่าเริ่มต้น
+					$mail_admin->addAddress(SMTP_USER, 'Admin');
+				}
+
 
 				// สร้างเนื้อหาของอีเมล
 				$admin_body = "
@@ -1298,7 +1305,6 @@ class Master extends DBConnection
 					<p><stron>เบอร์โทร:</strong> $contact</p>
 					<p><strong>ที่อยู่จัดส่ง:</strong>{$name}, {$contact}, {$delivery_address}</p>
 					<p><strong>ยอดรวม:</strong> " . number_format($grand_total, 2) . " บาท</p>
-					<p><strong>ขนส่ง:</strong> $shipping_methods_name</p>
 					<h3>รายการสินค้า</h3>
 					<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
 						<thead style='background:#16542b; color:white;'>
@@ -1391,8 +1397,8 @@ class Master extends DBConnection
 			// ฟังก์ชันส่ง Telegram
 			function sendTelegramNotification($message)
 			{
-				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
-				$chat_id = "-5188145441";      // ใช้ Chat ID ของแอดมินหรือ Group
+				$bot_token = TELEGRAM_BOT_TOKEN;  // ใช้ Bot Token ของคุณ
+				$chat_id = TELEGRAM_CHAT_ID;     // ใช้ Chat ID ของแอดมินหรือ Group
 
 				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
 
@@ -1424,7 +1430,6 @@ class Master extends DBConnection
 			- ที่อยู่จัดส่ง: $name, $contact,
 			  $delivery_address
 			- ยอดรวม: " . number_format($grand_total, 2) . " บาท
-			- ขนส่ง: $shipping_methods_name
 			
 			รายละเอียดสินค้า:";
 			// รายการสินค้า
@@ -1528,17 +1533,22 @@ class Master extends DBConnection
 			try {
 				//SMTP Setting
 				$mail->isSMTP();
-				$mail->Host = 'smtp.gmail.com';
-				$mail->Port = 465;
-				$mail->SMTPAuth = true;
-				$mail->Username = "faritre5566@gmail.com";
-				$mail->Password = "bchljhaxoqflmbys";
-				$mail->SMTPSecure = "ssl";
-				$mail->CharSet = 'UTF-8';
+
+				$mail->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail->SMTPAuth   = true;
+				$mail->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail->CharSet    = 'UTF-8';
+
 				$mail->isHTML(true);
 				$mail->Subject = "คำสั่งซื้อกำลังดำเนินการยกเลิก #{$order_code}";
-				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+
+				$mail->setFrom(SMTP_USER, FROM_NAME);
+
 				$mail->addAddress($order['email'], $customer_name);
+				$contact_email = SMTP_USER;
 				$body = "
                     <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
                         <h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังดำเนินการยกเลิก</h2>
@@ -1547,7 +1557,7 @@ class Master extends DBConnection
                         <p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
                         <p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
                         <hr>
-                        <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+                        <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:{$contact_email}'>{$contact_email}</a></p>
                     </div>
                 ";
 				$mail->Body = $body;
@@ -1560,19 +1570,29 @@ class Master extends DBConnection
 			$mail_admin = new PHPMailer(true);
 			try {
 				$mail_admin->isSMTP();
-				$mail_admin->Host = 'smtp.gmail.com';
-				$mail_admin->Port = 465;
-				$mail_admin->SMTPAuth = true;
-				$mail_admin->Username = "faritre5566@gmail.com";
-				$mail_admin->Password = "bchljhaxoqflmbys";
-				$mail_admin->SMTPSecure = "ssl";
-				$mail_admin->CharSet = 'UTF-8';
+
+				$mail_admin->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail_admin->SMTPAuth   = true;
+				$mail_admin->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail_admin->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail_admin->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail_admin->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail_admin->CharSet    = 'UTF-8';
+
 				$mail_admin->isHTML(true);
 				$mail_admin->Subject = "ลูกค้าได้ทำการยกเลิกคำสั่งซื้อหมายเลข #{$order_code}";
-				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
-				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');
-				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
-				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+				$mail_admin->setFrom(SMTP_USER, FROM_NAME);
+				if (defined('ADMIN_EMAILS')) {
+					$admins = json_decode(ADMIN_EMAILS, true);
+					if (is_array($admins)) {
+						foreach ($admins as $admin_email) {
+							$mail_admin->addAddress($admin_email, 'Admin');
+						}
+					}
+				} else {
+					// กรณีไม่มี Config ให้ส่งเข้าเมลร้านตัวเองเป็นค่าเริ่มต้น
+					$mail_admin->addAddress(SMTP_USER, 'Admin');
+				}
 
 				// ✨✨ แก้ไขตรงนี้: เปลี่ยน {$contact} เป็น {$order['contact']} ✨✨
 				$admin_body = "
@@ -1612,8 +1632,8 @@ class Master extends DBConnection
 	// (ฟังก์ชันนี้ควรจะอยู่นอก cancel_order แต่ยังอยู่ใน Class Master)
 	function sendTelegramNotificationCancelOrder($message)
 	{
-		$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk"; // ใช้ Bot Token ของคุณ
-		$chat_id = "-5188145441"; // ใช้ Chat ID ของแอดมินหรือ Group
+		$bot_token = TELEGRAM_BOT_TOKEN; // ใช้ Bot Token ของคุณ
+		$chat_id = TELEGRAM_CHAT_ID; // ใช้ Chat ID ของแอดมินหรือ Group
 
 		$url = "https://api.telegram.org/bot$bot_token/sendMessage";
 
@@ -1672,26 +1692,21 @@ class Master extends DBConnection
 			try {
 				//SMTP Setting
 				$mail->isSMTP();
-				//$mail->Host = 'localhost';
-				//$mail->Port = 1025;
-				//$mail->SMTPAuth = false;
 
+				$mail->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail->SMTPAuth   = true;
+				$mail->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail->CharSet    = 'UTF-8';
 
-				$mail->Host = 'smtp.gmail.com';
-				$mail->Port = 465;
-				$mail->SMTPAuth = true;
-				$mail->Username = "faritre5566@gmail.com";
-				$mail->Password = "bchljhaxoqflmbys";
-				$mail->SMTPSecure = "ssl";
-
-				$mail->CharSet = 'UTF-8';
-				//Email Setting
 				$mail->isHTML(true);
 				$mail->Subject = "คำสั่งซื้อกำลังดำเนินการขอ คืนเงิน/คืนสินค้า #{$order_code}";
 
-				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->setFrom(SMTP_USER, FROM_NAME);
 				$mail->addAddress($order['email'], $customer_name);
-
+				$contact_email = SMTP_USER;
 				$body = "
 					<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
 						<h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังดำเนินการขอ คืนเงิน/คืนสินค้า</h2>
@@ -1700,7 +1715,7 @@ class Master extends DBConnection
 						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
 						<p>💵 ยอดรวม: " . number_format($order['total_amount'], 2) . " บาท</p>
 						<hr>
-						<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+						<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:{$contact_email}'>{$contact_email}</a></p>
 					</div>
 				";
 
@@ -1715,20 +1730,28 @@ class Master extends DBConnection
 			$mail_admin = new PHPMailer(true);
 			try {
 				$mail_admin->isSMTP();
-				$mail_admin->Host = 'smtp.gmail.com';
-				$mail_admin->Port = 465;
-				$mail_admin->SMTPAuth = true;
-				$mail_admin->Username = "faritre5566@gmail.com";
-				$mail_admin->Password = "bchljhaxoqflmbys";
-				$mail_admin->SMTPSecure = "ssl";
-				$mail_admin->CharSet = 'UTF-8';
+				$mail_admin->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail_admin->SMTPAuth   = true;
+				$mail_admin->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail_admin->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail_admin->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail_admin->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail_admin->CharSet    = 'UTF-8';
 				$mail_admin->isHTML(true);
 				$mail_admin->Subject = "ลูกค้าได้ทำการขอ คืนเงิน/คืนสินค้า #{$order_code}";
 
-				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
-				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
-				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
-				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+				$mail_admin->setFrom(SMTP_USER, FROM_NAME);
+				if (defined('ADMIN_EMAILS')) {
+					$admins = json_decode(ADMIN_EMAILS, true);
+					if (is_array($admins)) {
+						foreach ($admins as $admin_email) {
+							$mail_admin->addAddress($admin_email, 'Admin');
+						}
+					}
+				} else {
+					// กรณีไม่มี Config ให้ส่งเข้าเมลร้านตัวเองเป็นค่าเริ่มต้น
+					$mail_admin->addAddress(SMTP_USER, 'Admin');
+				}
 				$admin_body = "
 					<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin:auto;'>
 						<h2 style='color: #c0392b; text-align:center;'>คำสั่งซื้อกำลังรอดำเนินการ คืนเงิน/คืนสินค้า</h2>
@@ -1752,8 +1775,8 @@ class Master extends DBConnection
 			// ฟังก์ชันส่ง Telegram
 			function sendTelegramNotificationReturnOrder($message)
 			{
-				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
-				$chat_id = "-5188145441";      // ใช้ Chat ID ของแอดมินหรือ Group
+				$bot_token = TELEGRAM_BOT_TOKEN;  // ใช้ Bot Token ของคุณ
+				$chat_id = TELEGRAM_CHAT_ID;     // ใช้ Chat ID ของแอดมินหรือ Group
 
 				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
 
@@ -1934,19 +1957,31 @@ class Master extends DBConnection
 			try {
 				$mail_admin = new PHPMailer(true);
 				$mail_admin->isSMTP();
-				$mail_admin->Host = 'smtp.gmail.com';
-				$mail_admin->Port = 465;
-				$mail_admin->SMTPAuth = true;
-				$mail_admin->Username = "faritre5566@gmail.com";
-				$mail_admin->Password = "bchljhaxoqflmbys";
-				$mail_admin->SMTPSecure = "ssl";
-				$mail_admin->CharSet = 'UTF-8';
+
+				$mail_admin->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail_admin->SMTPAuth   = true;
+				$mail_admin->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail_admin->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail_admin->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail_admin->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail_admin->CharSet    = 'UTF-8';
+
 				$mail_admin->isHTML(true);
 				$mail_admin->Subject = "แจ้งเตือน: ลูกค้าแจ้งชำระเงินใหม่ (Order: {$order_code})";
-				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
-				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');
-				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
-				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+
+				$mail_admin->setFrom(SMTP_USER, FROM_NAME);
+				if (defined('ADMIN_EMAILS')) {
+					$admins = json_decode(ADMIN_EMAILS, true);
+					if (is_array($admins)) {
+						foreach ($admins as $admin_email) {
+							$mail_admin->addAddress($admin_email, 'Admin');
+						}
+					}
+				} else {
+					// กรณีไม่มี Config ให้ส่งเข้าเมลร้านตัวเองเป็นค่าเริ่มต้น
+					$mail_admin->addAddress(SMTP_USER, 'Admin');
+				}
+
 				$mail_admin->Body = "<h3 style='color: #f57421;'>มีการแจ้งชำระเงินเข้ามาใหม่!</h3><p><strong>รหัสสั่งซื้อ:</strong> {$order_code}</p><p><strong>ยอดโอน:</strong> " . number_format($total_price, 2) . " บาท</p><hr><p style='color: red; font-weight: bold;'>*** กรุณาเข้าสู่ระบบหลังบ้านเพื่อตรวจสอบสลิป ***</p>";
 				$mail_admin->send();
 			} catch (Exception $e) {
@@ -1977,8 +2012,8 @@ class Master extends DBConnection
 	function sendTelegramNotificationSlip($message, $image_path = null)
 	{
 		// ใช้ Token และ Chat ID เดิมของคุณ
-		$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";
-		$chat_id = "-5188145441";
+		$bot_token = TELEGRAM_BOT_TOKEN;
+		$chat_id = TELEGRAM_CHAT_ID;
 
 		// ตรวจสอบว่ามีรูปภาพส่งมาไหม และไฟล์มีอยู่จริงไหม
 		if ($image_path && file_exists($image_path)) {
@@ -2117,6 +2152,8 @@ class Master extends DBConnection
 			$total_amount = $order_row['total_amount']; // ยอดรวมจาก order_list
 			$delivery_address = $order_row['delivery_address']; // ที่อยู่จัดส่ง
 
+			$contact_email = SMTP_USER;
+
 			// สร้างหัวข้อและเนื้อหาอีเมลตามสถานะการชำระเงิน
 			$subject = "";
 			$body = "";
@@ -2135,7 +2172,7 @@ class Master extends DBConnection
                     <br>
                     <p>ขอบคุณที่เลือกใช้บริการของเรา</p>
 					<hr>
-					<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+					<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:{$contact_email}'>{$contact_email}</a></p>
                 </div>
             ";
 			} elseif ($is_approve == 2) {
@@ -2150,7 +2187,7 @@ class Master extends DBConnection
                     <p>กรุณาตรวจสอบข้อมูลการชำระเงินและลองใหม่อีกครั้ง</p>
 					<br>
                     <hr>
-                    <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+                   <p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:{$contact_email}'>{$contact_email}</a></p>
                 </div>
             ";
 			}
@@ -2160,19 +2197,21 @@ class Master extends DBConnection
 			try {
 				// ตั้งค่า SMTP
 				$mail->isSMTP();
-				$mail->Host = 'smtp.gmail.com';
-				$mail->Port = 465;
-				$mail->SMTPAuth = true;
-				$mail->Username = "faritre5566@gmail.com"; // ใส่อีเมลของคุณ
-				$mail->Password = "bchljhaxoqflmbys"; // ใส่รหัสอีเมลของคุณ
-				$mail->SMTPSecure = "ssl";
-				$mail->CharSet = 'UTF-8';
+
+				$mail->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail->SMTPAuth   = true;
+				$mail->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail->CharSet    = 'UTF-8';
+
 				$mail->isHTML(true);
 				$mail->Subject = $subject;
 
-				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->setFrom(SMTP_USER, FROM_NAME);
 				$mail->addAddress($customer_email, $customer_name);
-
+				$contact_email = SMTP_USER;
 				// เนื้อหา
 				$mail->Body = $body;
 
@@ -2233,19 +2272,21 @@ class Master extends DBConnection
 			$mail = new PHPMailer(true);
 			try {
 				$mail->isSMTP();
-				$mail->Host = 'smtp.gmail.com';
-				$mail->Port = 465;
-				$mail->SMTPAuth = true;
-				$mail->Username = "faritre5566@gmail.com"; // ใส่อีเมลของคุณ
-				$mail->Password = "bchljhaxoqflmbys"; // ใส่รหัสอีเมลของคุณ
-				$mail->SMTPSecure = "ssl";
-				$mail->CharSet = 'UTF-8';
+
+				$mail->Host       = SMTP_HOST;
+				$mail->SMTPAuth   = true;
+				$mail->Username   = SMTP_USER;
+				$mail->Password   = SMTP_PASS;
+				$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // "ssl"
+				$mail->Port       = SMTP_PORT;
+				$mail->CharSet    = 'UTF-8';
+
 				$mail->isHTML(true);
 				$mail->Subject = "สถานะคำสั่งซื้อ #{$order_code}";
 
-				$mail->setFrom('faritre5566@gmail.com', 'MSG.com');
+				$mail->setFrom(SMTP_USER, FROM_NAME);
 				$mail->addAddress($customer_email, $customer_name);
-
+				$contact_email = SMTP_USER;
 				// สร้างเนื้อหาอีเมล
 				$body = "
 					<div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto;'>
@@ -2258,7 +2299,7 @@ class Master extends DBConnection
 						<p>📦 ที่อยู่จัดส่ง: {$order['delivery_address']}</p>
 						<p>💵 ยอดรวม: " . number_format($order['grand_total'], 2) . " บาท</p>
 						<hr>
-						<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:faritre5566@gmail.com'>faritre5566@gmail.com</a></p>
+						<p style='font-size:13px; color:#555;'>หากมีข้อสงสัย กรุณาติดต่อ <a href='mailto:{$contact_email}'>{$contact_email}</a></p>
 					</div>
            		";
 
@@ -2272,20 +2313,29 @@ class Master extends DBConnection
 			$mail_admin = new PHPMailer(true);
 			try {
 				$mail_admin->isSMTP();
-				$mail_admin->Host = 'smtp.gmail.com';
-				$mail_admin->Port = 465;
-				$mail_admin->SMTPAuth = true;
-				$mail_admin->Username = "faritre5566@gmail.com";
-				$mail_admin->Password = "bchljhaxoqflmbys";
-				$mail_admin->SMTPSecure = "ssl";
-				$mail_admin->CharSet = 'UTF-8';
+				$mail_admin->Host       = SMTP_HOST;      // ใช้ค่า Constant
+				$mail_admin->SMTPAuth   = true;
+				$mail_admin->Username   = SMTP_USER;      // ใช้ค่า Constant
+				$mail_admin->Password   = SMTP_PASS;      // ใช้ค่า Constant
+				$mail_admin->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+				$mail_admin->Port       = SMTP_PORT;      // ใช้ค่า Constant
+				$mail_admin->CharSet    = 'UTF-8';
 				$mail_admin->isHTML(true);
 				$mail_admin->Subject = "อัปเดตสถานะคำสั่งซื้อ #{$order_code}";
 
-				$mail_admin->setFrom('faritre5566@gmail.com', 'MSG.com');
-				$mail_admin->addAddress('faritre5566@gmail.com', 'Admin');  // อีเมลแอดมิน
-				$mail_admin->addAddress('faritre1@gmail.com', 'Admin');
-				$mail_admin->addAddress('faritre4@gmail.com', 'Admin');
+				$mail_admin->setFrom(SMTP_USER, FROM_NAME);
+				if (defined('ADMIN_EMAILS')) {
+					$admins = json_decode(ADMIN_EMAILS, true);
+					if (is_array($admins)) {
+						foreach ($admins as $admin_email) {
+							$mail_admin->addAddress($admin_email, 'Admin');
+						}
+					}
+				} else {
+					// กรณีไม่มี Config ให้ส่งเข้าเมลร้านตัวเองเป็นค่าเริ่มต้น
+					$mail_admin->addAddress(SMTP_USER, 'Admin');
+				}
+
 				$admin_body = "
 					<div style='font-family: Arial, sans-serif; max-width: 600px; margin:auto;'>
 						<h2 style='text-align:center;'>อัปเดตสถานะคำสั่งซื้อ #{$order_code}</h2>
@@ -2308,8 +2358,8 @@ class Master extends DBConnection
 
 			function sendTelegramNotificationUpdateOder($message)
 			{
-				$bot_token = "8060343667:AAEK7rfDeBszjWOFkITO-wC7_YhMmQuILDk";  // ใช้ Bot Token ของคุณ
-				$chat_id = "-5188145441";      // ใช้ Chat ID ของแอดมินหรือ Group
+				$bot_token = TELEGRAM_BOT_TOKEN;  // ใช้ Bot Token ของคุณ
+				$chat_id = TELEGRAM_CHAT_ID;     // ใช้ Chat ID ของแอดมินหรือ Group
 
 				$url = "https://api.telegram.org/bot$bot_token/sendMessage";
 
