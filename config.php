@@ -7,6 +7,27 @@ session_start();
 require_once('initialize.php');
 require_once('classes/DBConnection.php');
 require_once('classes/SystemSettings.php');
+
+if (file_exists(__DIR__ . '/email_config.php')) {
+    require_once(__DIR__ . '/email_config.php');
+} else {
+    // กัน Error กรณีไม่มีไฟล์ (กำหนดค่าว่างไว้)
+    if (!defined('SMTP_HOST')) define('SMTP_HOST', '');
+    if (!defined('SMTP_USER')) define('SMTP_USER', '');
+    if (!defined('SMTP_PASS')) define('SMTP_PASS', '');
+    if (!defined('SMTP_PORT')) define('SMTP_PORT', 465);
+    if (!defined('FROM_NAME')) define('FROM_NAME', 'System');
+    if (!defined('ADMIN_EMAILS')) define('ADMIN_EMAILS', '[]');
+}
+
+if (file_exists(__DIR__ . '/telegram_config.php')) {
+    require_once(__DIR__ . '/telegram_config.php');
+} else {
+    // กรณีหาไม่เจอ (กัน Error)
+    if (!defined('TELEGRAM_BOT_TOKEN')) define('TELEGRAM_BOT_TOKEN', '');
+    if (!defined('TELEGRAM_CHAT_ID')) define('TELEGRAM_CHAT_ID', '');
+}
+
 $db = new DBConnection;
 $conn = $db->conn;
 function redirect($url = '')
