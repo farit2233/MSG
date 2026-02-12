@@ -260,6 +260,30 @@ class SystemSettings extends DBConnection
 		}
 		return json_encode($resp);
 	}
+
+	// --- ฟังก์ชันลบรูปปก ---
+	function delete_cover()
+	{
+		$cover = $this->info('cover');
+		// ตัด parameter (?v=...) ออกเพื่อให้ได้พาทไฟล์ที่แท้จริง
+		$real_path = explode('?', $cover)[0];
+
+		// ลบไฟล์ออกจากเซิร์ฟเวอร์
+		if (!empty($real_path) && is_file(base_app . $real_path)) {
+			unlink(base_app . $real_path);
+		}
+
+		// ลบข้อมูลออกจากฐานข้อมูล
+		$qry = $this->conn->query("UPDATE system_info set meta_value = '' where meta_field = 'cover' ");
+
+		if ($qry) {
+			// ล้าง session เพื่อให้รูปหายไปทันทีเมื่อรีเฟรชหน้า
+			if (isset($_SESSION['system_info']['cover'])) unset($_SESSION['system_info']['cover']);
+			return json_encode(['status' => 'success']);
+		}
+		return json_encode(['status' => 'failed']);
+	}
+
 	function set_userdata($field = '', $value = '')
 	{
 		if (!empty($field) && !empty($value)) {
@@ -335,6 +359,9 @@ $sysset = new SystemSettings();
 switch ($action) {
 	case 'update_settings_info':
 		echo $sysset->update_settings_info();
+		break;
+	case 'delete_cover':
+		echo $sysset->delete_cover();
 		break;
 	default:
 		// echo $sysset->index();

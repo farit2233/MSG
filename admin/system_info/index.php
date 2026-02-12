@@ -171,8 +171,22 @@
 							<label class="custom-file-label text-size-input" for="customFile2">เลือกไฟล์ </label>
 						</div>
 					</div>
+
 					<div class="form-group d-flex justify-content-center">
-						<img src="<?php echo validate_image($_settings->info('cover')) ?>" alt="" id="cimg2" class="img-fluid img-thumbnail">
+						<div style="position: relative; display: inline-block;">
+
+							<img src="<?php echo validate_image($_settings->info('cover')) ?>" alt="" id="cimg2" class="img-fluid img-thumbnail" style="width: auto !important; max-width: 100%; height: 50vh; object-fit: contain;">
+
+							<?php
+							$cover_path = $_settings->info('cover');
+							if (!empty($cover_path)):
+							?>
+								<button class="btn btn-sm btn-danger" type="button" id="rem_cover" title="ลบปกเว็บไซต์นี้"
+									style="position: absolute; top: 5px; right: 5px; background-color: rgba(220, 53, 69, 0.9); border: none; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; padding: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+									<i class="fa fa-trash" style="font-size: 14px;"></i>
+								</button>
+							<?php endif; ?>
+						</div>
 					</div>
 					<div class="form-group">
 						<label for="" class="control-label head-label">ภาพสไลด์หน้าเว็บ <small>1920x600px</small></label>
@@ -333,6 +347,30 @@
 		$(input).val('');
 	}
 
+	function delete_cover_action() { // หรือชื่อฟังก์ชัน JS ที่คุณตั้งไว้
+		start_loader();
+		$.ajax({
+			// แก้ไขชื่อให้ตรงกันตรงนี้ครับ (?f=delete_cover)
+			url: _base_url_ + 'classes/SystemSettings.php?f=delete_cover',
+			method: 'POST',
+			dataType: 'json',
+			error: err => {
+				console.log(err);
+				alert_toast("เกิดข้อผิดพลาดในการลบรูปภาพ", 'error');
+				end_loader();
+			},
+			success: function(resp) {
+				if (resp.status == 'success') {
+					alert_toast("ลบรูปปกเรียบร้อยแล้ว", 'success');
+					setTimeout(() => location.reload(), 1000);
+				} else {
+					alert_toast("ไม่สามารถลบรูปปกได้", 'error');
+					end_loader();
+				}
+			}
+		});
+	}
+
 	function delete_img($path) {
 		start_loader()
 
@@ -408,6 +446,9 @@
 		$('.rem_img').click(function() {
 			_conf("Are sure to delete this image permanently?", 'delete_img', ["'" + $(this).attr('data-path') + "'"])
 		})
+		$('#rem_cover').click(function() {
+			_conf("คุณต้องการลบรูปปกเว็บไซต์นี้ใช่หรือไม่?", 'delete_cover_action');
+		});
 		$('.summernote').summernote({
 			height: 400,
 			fontSizes: [
