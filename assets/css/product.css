@@ -24,7 +24,7 @@
 	}
 
 	.price-n {
-		color: #f57421;
+		color: #ef3624;
 		font-size: 40px;
 		font-weight: bold !important;
 	}
@@ -51,16 +51,16 @@
 
 	.addcart-plus {
 		background: none;
-		color: #f57421;
-		border: 2px solid #f57421;
+		color: #ef3624;
+		border: 2px solid #ef3624;
 		padding: 5px 15px;
 		margin-right: 1rem;
 	}
 
 	.addcart {
 		background: none;
-		color: #f57421;
-		border: 2px solid #f57421;
+		color: #ef3624;
+		border: 2px solid #ef3624;
 		padding: 10px 50px;
 	}
 
@@ -77,9 +77,9 @@
 		text-overflow: ellipsis;
 		font-size: 14px;
 
-		background: #f57421;
+		background: #ef3624;
 		color: white;
-		border: 2px solid #f57421;
+		border: 2px solid #ef3624;
 		padding: 10px 20px;
 		margin-top: 0.5rem;
 		margin-bottom: 0.5rem;
@@ -90,7 +90,7 @@
 
 	.addcart:hover,
 	.addcart-plus:hover {
-		background-color: #f57421;
+		background-color: #ef3624;
 		color: white;
 		display: inline-block;
 	}
@@ -174,7 +174,7 @@
 
 	.banner-price {
 		font-size: 20px;
-		color: #f57421;
+		color: #ef3624;
 	}
 
 	.modal-content {
@@ -266,9 +266,9 @@
 		text-overflow: ellipsis;
 		font-size: 14px;
 
-		background: #f57421;
+		background: #ef3624;
 		color: white;
-		border: 2px solid #f57421;
+		border: 2px solid #ef3624;
 		padding: 10px 20px;
 		margin-top: 0.5rem;
 		margin-bottom: 0.5rem;

@@ -48,7 +48,7 @@
         /* เพิ่ม transition เวลา hover */
         object-fit: cover;
         border-radius: 100%;
-        border: 3px solid #f57421;
+        border: 3px solid #ef3624;
         padding: 4px;
     }
 

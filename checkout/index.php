@@ -585,7 +585,7 @@ while ($row = $banks_qry->fetch_assoc()) {
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-checkout btn-block btn-lg w-100 shadow-sm" style="background-color: #f57421; border-color: #f57421;" <?= !$is_address_complete ? 'disabled' : '' ?>>
+                            <button type="submit" class="btn btn-checkout btn-block btn-lg w-100 shadow-sm" style="background-color: #ef3624; border-color: #ef3624;" <?= !$is_address_complete ? 'disabled' : '' ?>>
                                 ไปหน้าแจ้งชำระเงิน <i class="fa-solid fa-arrow-right ml-2"></i>
                             </button>
                         </form>

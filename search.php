@@ -30,7 +30,7 @@ if (isset($_GET['search'])) {
     }
 
     .price-inputs .form-control:focus {
-        border-color: #f57421;
+        border-color: #ef3624;
         box-shadow: 0 0 0 0.2rem rgba(238, 77, 45, 0.25);
     }
 
@@ -39,7 +39,7 @@ if (isset($_GET['search'])) {
     }
 
     .btn-filter {
-        background-color: #f57421;
+        background-color: #ef3624;
         color: #fff;
         border: 1px solid #ee4d2d;
         border-radius: 2px;

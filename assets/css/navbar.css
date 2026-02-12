@@ -174,7 +174,7 @@
 
 /* --- 2. สไตล์เมื่อเมาส์ชี้ (Hover State) --- */
 .nav-item-hoverable .mega-menu-content ul li a:hover {
-  color: #f57421 !important;   
+  color: #ef3624 !important;   
   background-color: #f5f5f5;  
   opacity: 1;                   
 }
@@ -196,7 +196,7 @@
 }
 
 .searchcolor {
-    color: #f57421;
+    color: #ef3624;
 }
 
 .searchcolor:hover {
@@ -205,12 +205,12 @@
 
 .button1 {
     background-color: none;
-    border: 2px solid #f57421;
+    border: 2px solid #ef3624;
     border-radius: 13px;
 }
 
 .button1:hover {
-    background-color: #f57421;
+    background-color: #ef3624;
     color: white;
 }
 
@@ -551,7 +551,7 @@
     font-size: 14px;
     display: flex !important;
     align-items: center !important;
-    background: linear-gradient(135deg, #16542b 0%, #2f6828 40%, #3f7b25 60%, #f57421 95%);
+    background: linear-gradient(135deg, #17b286 0%, #17b286 40%, #17b286 60%, #ef3624 95%);
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     position: fixed;
@@ -602,7 +602,7 @@
 }
 
 .navbar-msg {
-    background: linear-gradient(135deg, #16542b 0%, #2f6828 40%, #3f7b25 60%, #f57421 95%);
+    background: linear-gradient(135deg, #17b286 0%, #17b286 40%, #17b286 60%, #ef3624 95%);
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     position: fixed;
@@ -658,7 +658,7 @@
     height: 100%;
     border: none;
     background: transparent;
-    color: #f57421;
+    color: #ef3624;
     font-size: 16px;
     cursor: pointer;
     display: flex;
@@ -682,14 +682,14 @@
 }
 
 .bg-foot-msg {
-    background: #16542b !important;
+    background: #17b286 !important;
 }
 
 .cart-badge {
     position: absolute;
     top: -5px;
     right: -10px;
-    background-color: #f57421;
+    background-color: #ef3624;
     color: white;
     font-size: 0.7rem;
     padding: 2px 6px;
@@ -804,7 +804,7 @@ body.body-no-scroll {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #e9ecef;
-    background: linear-gradient(135deg, #16542b 0%, #2f6828 100%);
+    background: linear-gradient(135deg, #17b286 0%, #17b286 100%);
     color: white;
 }
 
@@ -851,7 +851,7 @@ body.body-no-scroll {
 .sidebar-body .nav-link i {
     width: 20px;
     text-align: center;
-    color: #f57421;
+    color: #ef3624;
 }
 
 .sidebar-body .nav-link:hover {
@@ -879,7 +879,7 @@ body.body-no-scroll {
 .search-input-minimal {
     color: black;
     border: none;
-    border-bottom: 2px solid #f57421;
+    border-bottom: 2px solid #ef3624;
     border-radius: 0;
     padding: 0.5rem 0.5rem 0.5rem 35px;
     font-size: 14px;
@@ -908,7 +908,7 @@ body.body-no-scroll {
     height: 60px;
     border: none;
     background: transparent;
-    color: #f57421;
+    color: #ef3624;
     font-size: 20px;
     cursor: pointer;
     display: flex;
@@ -925,7 +925,7 @@ body.body-no-scroll {
 
 .search-input-minimal:focus {
     color: black !important;
-    border-bottom: 2px solid #f57421;
+    border-bottom: 2px solid #ef3624;
     outline: none !important;
     box-shadow: none !important;
 }

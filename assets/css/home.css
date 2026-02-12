@@ -104,14 +104,14 @@ body {
 .btn-product {
     font-size: 18px;
     color: white;
-    background-color: #f57421;
+    background-color: #ef3624;
     padding: 10px 40px;
     transition: all 0.2s ease-in-out;
 }
 
 .banner-price {
     font-size: 20px;
-    color: #f57421;
+    color: #ef3624;
 }
 
 .badge-sm {

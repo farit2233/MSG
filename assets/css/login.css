@@ -35,7 +35,7 @@
         /* เน้นความหนาของฟอนต์ */
         color: white;
         /* ตัวหนังสือสีขาว */
-        -webkit-text-stroke: 1px #f57421;
+        -webkit-text-stroke: 1px #ef3624;
         /* ขอบตัวหนังสือสีส้ม */
         text-transform: uppercase;
         /* ตัวพิมพ์ใหญ่ทั้งหมด */
@@ -50,8 +50,8 @@
     }
 
     /*#page-title:hover {
-        color: #f57421;
-        -webkit-text-stroke: 1px #f57421;
+        color: #ef3624;
+        -webkit-text-stroke: 1px #ef3624;
     }*/
 
     .login-cart-header-bar {
@@ -66,8 +66,8 @@
 
     .btn-login {
         background: none;
-        color: #f57421;
-        border: 2px solid #f57421;
+        color: #ef3624;
+        border: 2px solid #ef3624;
         padding: 10px 10px;
         margin-top: 1rem;
         margin-bottom: 1rem;
@@ -75,7 +75,7 @@
     }
 
     .btn-login:hover {
-        background-color: #f57421;
+        background-color: #ef3624;
         color: white;
         display: inline-block;
     }

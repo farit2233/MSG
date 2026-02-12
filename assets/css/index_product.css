@@ -75,7 +75,7 @@
 
     .banner-price {
         font-size: 20px;
-        color: #f57421;
+        color: #ef3624;
     }
 
     /* สำหรับป้ายสินค้าหมด */
@@ -133,7 +133,7 @@
         z-index: 10;
     }
     .btn-filter {
-        background-color: #f57421;
+        background-color: #ef3624;
         color: #fff;
         border: 1px solid #ee4d2d;
         border-radius: 2px;

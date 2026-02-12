@@ -119,7 +119,7 @@ $delivery_status_map = [
   }
 
   .icon-color {
-    color: #f57421;
+    color: #ef3624;
   }
 </style>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -288,16 +288,16 @@ $delivery_status_map = [
           datasets: [{
             label: 'ยอดขาย (บาท)',
             data: <?php echo $sales_chart_data_json; ?>,
-            backgroundColor: 'rgba(245, 116, 33,0.1)',
-            borderColor: 'rgba(245, 116, 33)',
+            backgroundColor: 'rgba(239, 54, 36,0.1)',
+            borderColor: '#ef3624',
             borderWidth: 2,
             tension: 0.4,
             fill: true,
-            pointBackgroundColor: 'rgba(245, 116, 33,1)',
+            pointBackgroundColor: '#ef3624',
             pointBorderColor: '#fff',
             pointHoverRadius: 6,
             pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgba(245, 116, 33,1)'
+            pointHoverBorderColor: '#ef3624'
           }]
         },
         options: {

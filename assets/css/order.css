@@ -1,6 +1,6 @@
     /* Header bar */
     .cart-header-bar {
-        border-left: 4px solid #ff6600;
+        border-left: 4px solid #ef3624;
         padding: 16px 20px;
         border-radius: 12px;
         margin-bottom: 24px;
@@ -8,7 +8,7 @@
     }
 
     .order-card {
-        border-left: 5px solid #ff6600;
+        border-left: 5px solid #ef3624;
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         margin-bottom: 1.5rem;
@@ -52,31 +52,31 @@
 
     .order-filter-link:hover {
         text-decoration: underline;
-        color: #f57421;
+        color: #ef3624;
     }
 
     .order-filter-link.active {
         font-weight: bold;
-        color: #f57421;
+        color: #ef3624;
         text-decoration: underline;
     }
 
     .btn-search-orders {
         background-color: none;
-        border: 2px solid #f57421;
+        border: 2px solid #ef3624;
         border-radius: 13px;
-        color: #f57421;
+        color: #ef3624;
         font-size: 14px;
     }
 
     .btn-search-orders:hover {
-        background-color: #f57421;
+        background-color: #ef3624;
         color: white;
     }
 
     .btn-orders {
         font-size: 12px !important;
-        background-color: #f57421;
+        background-color: #ef3624;
         border-radius: 13px;
         color: white;
         transition: all 0.2s ease-in-out;

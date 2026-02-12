@@ -495,7 +495,7 @@ $qry = $conn->query("SELECT * FROM `customer_addresses` WHERE customer_id = '{$c
                 showCancelButton: true,
                 confirmButtonText: 'ตั้งเป็นที่อยู่หลัก',
                 cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#f57421',
+                confirmButtonColor: '#ef3624',
                 cancelButtonColor: '#ccc',
                 reverseButtons: true
             }).then((result) => {

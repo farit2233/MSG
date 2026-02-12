@@ -11,7 +11,7 @@
     }
 
     .checkout-header-bar {
-        border-left: 4px solid #ff6600;
+        border-left: 4px solid #ef3624;
         padding: 16px 20px;
         border-radius: 12px;
         margin-bottom: 24px;
@@ -21,15 +21,15 @@
 
     .addcart {
         background: none;
-        color: #f57421;
-        border: 2px solid #f57421;
+        color: #ef3624;
+        border: 2px solid #ef3624;
         padding: 10px 50px;
         margin-top: 1rem;
         margin-bottom: 1rem;
     }
 
     .addcart:hover {
-        background-color: #f57421;
+        background-color: #ef3624;
         color: white;
         display: inline-block;
     }
@@ -93,7 +93,7 @@
     }
 
     .address-option.selected {
-        border: 2px solid #f57421;
+        border: 2px solid #ef3624;
         background-color: #fff5f0;
     }
 
@@ -101,7 +101,7 @@
         position: absolute;
         right: 15px;
         top: 15px;
-        color: #f57421;
+        color: #ef3624;
         display: none;
     }
 
@@ -161,7 +161,7 @@
     }
 
     .shipping-option.selected {
-        border: 2px solid #f57421;
+        border: 2px solid #ef3624;
         background-color: #fff5f0;
     }
 
@@ -169,7 +169,7 @@
         position: absolute;
         right: 15px;
         top: 15px;
-        color: #f57421;
+        color: #ef3624;
         display: none;
     }
 
@@ -186,7 +186,7 @@
     }
 
     .btn-checkout{
-        background-color: #f57421;
+        background-color: #ef3624;
         color: white;
         transition: all 0.2s ease-in-out;
     }
@@ -203,7 +203,7 @@
     }
 
     .btn-confirm {
-        background: #f57421;
+        background: #ef3624;
         border: none;
         padding: 8px 20px;
         border-radius: 6px;
@@ -261,9 +261,9 @@
     }
      .input-code button{
         font-size: 14px !important;
-        background: #f57421;
+        background: #ef3624;
 		color: white;
-		border: 2px solid #f57421;
+		border: 2px solid #ef3624;
         padding: 8px 12px;
         transition: all 0.2s ease-in-out;
     }
@@ -305,7 +305,7 @@
 
     .checkout-payment{
         border: 1px solid #eaeaea;
-        border-top: 4px solid #f57421;
+        border-top: 4px solid #ef3624;
         background: #fff;
         border-radius: 8px;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -424,13 +424,13 @@
         border-top: 1px dashed #ddd;
         font-size: 1.2rem;
         font-weight: 700;
-        color: #f57421;
+        color: #ef3624;
         align-items: flex-end;
     }
     .price-total{
         font-size: 1.2rem;
         font-weight: 700;
-        color: #f57421;
+        color: #ef3624;
     }
 
     .sticky-sidebar {
@@ -477,7 +477,7 @@
     }
 
     .custom-select-trigger:hover {
-        border-color: #f57421;
+        border-color: #ef3624;
     }
 
     /* สไตล์การ์ดธนาคารใน Modal */
@@ -494,7 +494,7 @@
     }
 
     .bank-option-card:hover {
-        border-color: #f57421;
+        border-color: #ef3624;
         transform: translateY(-2px);
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -508,7 +508,7 @@
 
     /* State เมื่อถูกเลือก (Active) */
     .bank-option-card.selected {
-        border-color: #f57421;
+        border-color: #ef3624;
         opacity: 0.9;
     }
 
@@ -521,7 +521,7 @@
         position: absolute;
         top: 10px;
         right: 10px;
-        background: #f57421;
+        background: #ef3624;
         color: white;
         width: 25px;
         height: 25px;
@@ -538,7 +538,7 @@
     #selected-bank-details {
         background-color: #ffffff;
         /* พื้นหลัง (ใส่สีขาว หรือสีอ่อนๆ ตามชอบได้เลยครับ) */
-        border: 1px solid #f57421;
+        border: 1px solid #ef3624;
         /* <--- สีขอบส้มตามที่ต้องการ */
         border-radius: 5px;
         /* ลบเหลี่ยมมุมเล็กน้อย */
@@ -557,7 +557,7 @@
     }
 
     .btn-bank-confirm {
-        background-color: #f57421;
+        background-color: #ef3624;
         color: white;
         transition: all 0.2s ease-in-out;
     }

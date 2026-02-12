@@ -23,7 +23,7 @@
 
     .btn-orders {
         font-size: 14px;
-        background-color: #f57421;
+        background-color: #ef3624;
         border-radius: 13px;
         color: white;
         transition: all 0.2s ease-in-out;
@@ -80,7 +80,7 @@
 
         .btn-orders {
             font-size: 12px;
-            background-color: #f57421;
+            background-color: #ef3624;
             border-radius: 13px;
             color: white;
             transition: all 0.2s ease-in-out;

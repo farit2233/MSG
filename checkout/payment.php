@@ -347,7 +347,7 @@ if (!function_exists('format_price_custom')) {
             text: "คุณได้ทำการโอนเงินเรียบร้อยแล้วใช่หรือไม่?",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#f57421',
+            confirmButtonColor: '#ef3624',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'ใช่, โอนแล้ว',
             cancelButtonText: 'ตรวจสอบก่อน',
@@ -381,7 +381,7 @@ if (!function_exists('format_price_custom')) {
                                 title: 'ดำเนินการสั่งซื้อเรียบร้อย',
                                 html: '<small class="text-muted">เพื่อให้เจ้าหน้าที่ตรวจสอบความถูกต้อง และยืนยันคำสั่งซื้อของท่าน<br>ระบบจะนำท่านไปยังหน้าแจ้งยอดชำระเงิน<br>ขอบคุณที่ใช้บริการ</small>',
                                 confirmButtonText: 'ตกลง',
-                                confirmButtonColor: '#f57421',
+                                confirmButtonColor: '#ef3624',
                                 allowOutsideClick: false
                             }).then((result) => {
                                 if (resp.id) {

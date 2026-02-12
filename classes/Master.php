@@ -1176,12 +1176,12 @@ class Master extends DBConnection
 				$contact_email = SMTP_USER;
 				$body = "
 						<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
-							<h2 style='color: #16542b; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
+							<h2 style='color: #17b286; text-align:center;'>🧾 ยืนยันคำสั่งซื้อ</h2>
 							<p>เรียนคุณ <strong>{$customer_name}</strong></p>
 							<p>ขอบคุณสำหรับการสั่งซื้อกับร้านของเรา</p>
 							<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
 							<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
-								<thead style='background:#16542b; color:white;'>
+								<thead style='background:#17b286; color:white;'>
 									<tr>
 										<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
 										<th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
@@ -1299,7 +1299,7 @@ class Master extends DBConnection
 				// สร้างเนื้อหาของอีเมล
 				$admin_body = "
 				<div  style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
-					<h2 style='color: #16542b; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
+					<h2 style='color: #17b286; text-align:center;'>🧾 คำสั่งซื้อใหม่</h2>
 					<p><strong>รหัสคำสั่งซื้อ:</strong> $code</p>
 					<p><strong>ชื่อผู้ใช้:</strong> $customer_name</p>
 					<p><stron>เบอร์โทร:</strong> $contact</p>
@@ -1307,7 +1307,7 @@ class Master extends DBConnection
 					<p><strong>ยอดรวม:</strong> " . number_format($grand_total, 2) . " บาท</p>
 					<h3>รายการสินค้า</h3>
 					<table style='width:100%; border-collapse: collapse; margin-top:10px;'>
-						<thead style='background:#16542b; color:white;'>
+						<thead style='background:#17b286; color:white;'>
 							<tr>
 								<th style='padding:8px; border:1px solid #ddd;'>สินค้า</th>
 								<th style='padding:8px; border:1px solid #ddd;'>จำนวน</th>
@@ -1982,7 +1982,7 @@ class Master extends DBConnection
 					$mail_admin->addAddress(SMTP_USER, 'Admin');
 				}
 
-				$mail_admin->Body = "<h3 style='color: #f57421;'>มีการแจ้งชำระเงินเข้ามาใหม่!</h3><p><strong>รหัสสั่งซื้อ:</strong> {$order_code}</p><p><strong>ยอดโอน:</strong> " . number_format($total_price, 2) . " บาท</p><hr><p style='color: red; font-weight: bold;'>*** กรุณาเข้าสู่ระบบหลังบ้านเพื่อตรวจสอบสลิป ***</p>";
+				$mail_admin->Body = "<h3 style='color: #ef3624;'>มีการแจ้งชำระเงินเข้ามาใหม่!</h3><p><strong>รหัสสั่งซื้อ:</strong> {$order_code}</p><p><strong>ยอดโอน:</strong> " . number_format($total_price, 2) . " บาท</p><hr><p style='color: red; font-weight: bold;'>*** กรุณาเข้าสู่ระบบหลังบ้านเพื่อตรวจสอบสลิป ***</p>";
 				$mail_admin->send();
 			} catch (Exception $e) {
 			}

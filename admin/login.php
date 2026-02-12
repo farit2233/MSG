@@ -42,8 +42,8 @@
 
     .btn-login {
       background: none;
-      color: #f57421;
-      border: 2px solid #f57421;
+      color: #ef3624;
+      border: 2px solid #ef3624;
       padding: 10px 10px;
       margin-top: 1rem;
       margin-bottom: 1rem;
@@ -51,7 +51,7 @@
     }
 
     .btn-login:hover {
-      background-color: #f57421;
+      background-color: #ef3624;
       color: white;
       display: inline-block;
     }

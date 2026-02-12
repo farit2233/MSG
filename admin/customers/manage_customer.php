@@ -40,7 +40,7 @@ if (isset($_GET['id'])) {
 
 	.profile-section-title-with-line h3 {
 		position: relative;
-		border-bottom: 2px solid #f57421 !important;
+		border-bottom: 2px solid #ef3624 !important;
 		padding-bottom: 0.5rem;
 		margin-bottom: 1rem;
 	}
@@ -50,7 +50,7 @@ if (isset($_GET['id'])) {
 	}
 
 	.profile-cart-header-bar {
-		border-left: 4px solid #ff6600;
+		border-left: 4px solid #ef3624;
 		padding: 16px 20px;
 		border-radius: 12px;
 		margin-bottom: 24px;
@@ -69,19 +69,19 @@ if (isset($_GET['id'])) {
 		width: 10em;
 		object-fit: cover;
 		border-radius: 100%;
-		border: 3px solid #f57421;
+		border: 3px solid #ef3624;
 		padding: 4px;
 	}
 
 	.custom-file-input:focus~.custom-file-label {
-		border-color: #f57421;
+		border-color: #ef3624;
 		box-shadow: 0 0 0 0.2rem rgba(245, 116, 33, 0.25);
 	}
 
 	.btn-update {
 		background: none;
-		color: #f57421;
-		border: 2px solid #f57421;
+		color: #ef3624;
+		border: 2px solid #ef3624;
 		padding: 10px 10px;
 		margin-top: 1rem;
 		margin-bottom: 1rem;
@@ -89,7 +89,7 @@ if (isset($_GET['id'])) {
 	}
 
 	.btn-update:hover {
-		background-color: #f57421;
+		background-color: #ef3624;
 		color: white;
 	}
 
@@ -142,8 +142,8 @@ if (isset($_GET['id'])) {
 	}
 
 	#crop_button {
-		background-color: #f57421;
-		border-color: #f57421;
+		background-color: #ef3624;
+		border-color: #ef3624;
 	}
 
 	.zoom-controls {
@@ -164,11 +164,11 @@ if (isset($_GET['id'])) {
 	}
 
 	input[type=range].form-control-range::-webkit-slider-thumb {
-		background: #f57421;
+		background: #ef3624;
 	}
 
 	input[type=range].form-control-range::-moz-range-thumb {
-		background: #f57421;
+		background: #ef3624;
 	}
 
 	#newpassword {

@@ -71,7 +71,7 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
 
     /* ปรับสีตอน Focus */
     .select2-container--default.select2-container--open .select2-selection--single {
-        border-color: #f57421;
+        border-color: #ef3624;
     }
 
     /* จัดแต่ง Input File */
@@ -117,7 +117,7 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
     }
 
     .btn-bank-slip {
-        background-color: #f57421;
+        background-color: #ef3624;
         color: white;
         transition: all 0.2s ease-in-out;
     }
@@ -141,13 +141,13 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
     }
 
     .bank-option-card:hover {
-        border-color: #f57421;
+        border-color: #ef3624;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         transform: translateY(-2px);
     }
 
     .bank-option-card.selected {
-        border-color: #f57421;
+        border-color: #ef3624;
         background-color: #fff5ee;
     }
 
@@ -468,7 +468,7 @@ $order_code_val = isset($_GET['order_code']) ? $_GET['order_code'] : '';
                                 icon: 'success',
                                 title: 'แจ้งชำระเงินสำเร็จ',
                                 text: 'เจ้าหน้าที่จะดำเนินการตรวจสอบข้อมูลของท่านโดยเร็ว',
-                                confirmButtonColor: '#f57421'
+                                confirmButtonColor: '#ef3624'
                             }).then(() => {
                                 location.replace('./');
                             });

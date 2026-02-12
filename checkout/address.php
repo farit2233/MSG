@@ -85,7 +85,7 @@ if (isset($conn)) {
     }
 
     .address-option.selected {
-        border: 2px solid #f57421;
+        border: 2px solid #ef3624;
         background-color: #fff5f0;
     }
 
@@ -93,7 +93,7 @@ if (isset($conn)) {
         position: absolute;
         right: 15px;
         top: 15px;
-        color: #f57421;
+        color: #ef3624;
         display: none;
     }
 
